@@ -1,0 +1,41 @@
+name: cive70058
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+
+  # Core scientific stack (conda-forge has fast wheels for osx-arm64)
+  - numpy>=1.24
+  - pandas>=2.0
+  - scipy>=1.10
+  - matplotlib>=3.7
+
+  # Notebooks
+  - jupyterlab>=4.0
+  - ipywidgets>=8.0
+
+  # Sampling / sensitivity / uncertainty (used from Week 5 onward)
+  - salib>=1.4
+
+  # Code quality
+  - ruff
+  - black
+
+  # Bayesian / MCMC stack (Week 8+; uncomment when needed)
+  # - emcee>=3.1
+  # - pymc>=5.0
+  # - arviz>=0.16
+
+  # wntr internally does `from pkg_resources import resource_filename`.
+  # setuptools >= 81 removed the bundled pkg_resources subpackage, so we MUST
+  # pin setuptools < 81 until upstream wntr migrates to importlib.resources.
+  # See: https://setuptools.pypa.io/en/latest/history.html (81.0.0 release notes)
+  - setuptools<81
+
+  # WNTR is not on conda-forge -> install from PyPI via pip.
+  # The PyPI wheel ships the EPANET binary for macOS arm64 / x86_64 / Linux / Windows.
+  - pip
+  - pip:
+      - wntr>=1.1
+      - pyDOE2>=1.3
