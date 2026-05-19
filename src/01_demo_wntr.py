@@ -162,15 +162,23 @@ def build_model(inp_file: Path) -> wntr.network.WaterNetworkModel:
     wn.options.reaction.bulk_order = 1.0
     wn.options.reaction.wall_order = 1.0
 
-    # Chlorine source: assume the reservoir water enters at 1.0 mg/L.
+    # Chlorine source: reservoir water enters at 1.0 mg/L.
+    # IMPORTANT: WNTR stores `initial_quality` in SI units (kg/m^3) when
+    # set via the Python API; .inp values are auto-converted on load.
+    # 1.0 mg/L  ==  0.001 kg/m^3.
     for res_name in wn.reservoir_name_list:
-        wn.get_node(res_name).initial_quality = 1.0
+        wn.get_node(res_name).initial_quality = 0.001  # 1.0 mg/L
 
     # Junction nodes start clean; chlorine arrives as the network fills.
     for j_name in wn.junction_name_list:
         wn.get_node(j_name).initial_quality = 0.0
 
     return wn
+
+
+# WNTR returns simulation results in SI (kg/m^3).  Convert to mg/L for
+# every downstream plot, print and CSV so that figure labels match reality.
+KGM3_TO_MGL = 1000.0
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +268,7 @@ def main() -> None:
     print("[run]   Simulation finished.")
 
     pressure = results.node["pressure"][wn.junction_name_list]
-    chlorine = results.node["quality"][wn.junction_name_list]
+    chlorine = results.node["quality"][wn.junction_name_list] * KGM3_TO_MGL  # -> mg/L
 
     # Sanity checks: pressures should be positive at junctions for Net1.
     n_neg = (pressure < 0).sum().sum()

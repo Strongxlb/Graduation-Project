@@ -74,6 +74,9 @@ results/*.h5
 *.out
 *.tmp
 en2.log
+# EPANET / WNTR working copy of the .inp file written to repo root
+# during EpanetSimulator.run_sim() — not a real artefact.
+/temp.inp
 
 # ------------------------------------------------------------
 # Thesis / LaTeX build artefacts
