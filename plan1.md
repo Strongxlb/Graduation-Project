@@ -140,7 +140,7 @@
    - **B. EPANET/WNTR 工具与方法学**：WNTR 官方论文、EPANET 2.2 manual、若干典型案例
    - **C. 水质模型校准**：参数估计、目标函数、敏感性分析
    - **D. 测量不确定性**：DPD / colorimetric error、在线传感器精度规格、采样设计
-   - **E. 不确定性感知校准**：Monte Carlo、贝叶斯、GLUE、概率风险评估
+   - **E. 不确定性感知校准**：Monte Carlo、贝叶斯、概率风险评估
 2. 每条记录最少包含：作者 + 年份 + 标题 + DOI/链接 + 一行「为什么收录」。
 3. 优先用 Imperial Library / Google Scholar；导出 BibTeX 存入 `thesis/refs.bib`。
 4. 不需要本周读完，本周目标是**清单成型**，本周末挑出 3 篇必读、Week 2 精读。
