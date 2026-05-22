@@ -107,6 +107,16 @@ $$p(Q,F,B_x,B_y|\tilde X,\tilde Y) \propto p(\tilde Y|Q,\tilde X,F,B_y)\,p(Q)\,p
 
 **与 E3/E4**：literature 中 E3 Vrugt GLUE、E4 Huang Bayesian WDS — E1 提供 **total error / input uncertainty** 哲学基础。
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **Introduction — 研究定位**：写「水文 BATEA 已证明 **忽略 forcing 误差会偏置参数**；供水管网中 analog 为 **忽略 DPD 误差与 demand/源氯 uncertainty**」。
+2. **Methodology 结构**：借鉴 **分层误差模型** — latent true concentration / true source chlorine + 观测层（D2）+ 参数层（$k_b,k_w$）。
+3. **vs 最小二乘**：French Broad NSE 0.76→0.95 — 用作 **motivating figure 思路**：展示「固定观测 + 只调参数」vs「联合误差模型」的预测带差异。
+4. **Posterior predictive check**：E1 强调 **检查 forcing 与 response 双拟合** — 你应在 Results 报告 **后验预测是否覆盖观测**。
+5. **与 C2 分工**：C2 = **参数** MCS；E1 = **输入数据** Bayesian — thesis Method 写清 **两层 uncertainty 都纳入**。
+6. **模型误差诚实讨论**：Potomac 无雪模块时 BATEA 仍不能替代结构错误 — 对应 EPANET **一阶 decay 简化**（A2）时的 caution。
+7. **Contribution 句式**：「extend deterministic calibration (C1) and parameter MCS (C2) with **total error analysis** inspired by Kavetski et al. (2006)」。
+
 ---
 
 ## 7. 批判性阅读

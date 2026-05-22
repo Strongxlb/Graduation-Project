@@ -90,6 +90,16 @@
 | **F1 UK 法规** | 本国合规仍靠 SI 2016；F2 为国际卫生框架 |
 | **待下载** | GDWQ 2022 合订本 PDF — 补 **0.2 mg/L residual 原文** |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **Discussion — 双阈值叙事**：**健康 GV = 5 mg/L**（本文） vs **operational residual ≈ 0.2 mg/L**（项目工作阈值）— 写清「校准目标为 **微生物屏障** ，非毒性上限」。
+2. **D 类方法引用**：比色法 MDL **~0.02 mg/L** — 与 D2 Hach ±0.02 互证，写入 observation model 下限。
+3. **Introduction 典型浓度**：消毒水 **0.2–1 mg/L** 常见 — 说明 Net1 demo 浓度量级 **合理**，但 **0.2 不是本文件的 formal guideline**。
+4. **待补引用**：管网 **≥0.2 mg/L** 的 operational 句 — **必须** 另引 GDWQ §8 或 **F1 UK SI 2016**；本文件 **不能单独** 支撑 0.2。
+5. **Results 解读**：若预测区间上界远低于 5 mg/L — Discussion 写「远低于 WHO 健康限，关注 **是否低于 0.2** 即可」。
+6. **Poster 一句话**：「Regulatory focus: maintain free Cl **≥0.2 mg/L** (operational); WHO health limit **5 mg/L** (not binding for distribution residual).」
+7. **Limitation**：本 PDF 为 **2003 背景文件** — 引用 WHO 时注明版本，并计划更新 GDWQ 2022 合订本。
+
 ---
 
 ## 7. 批判性阅读

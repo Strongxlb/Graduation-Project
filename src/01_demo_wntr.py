@@ -15,9 +15,8 @@ Run from the repository root:
 
     python src/01_demo_wntr.py
 
-Outputs go to figures/week1_demo/. A small CSV with the chlorine timeseries
-is also written to results/week1_demo/ so we can inspect numbers without
-re-running the simulation.
+Outputs (figures + CSVs) go to results/week1_demo/ so we can inspect numbers
+without re-running the simulation.
 """
 
 from __future__ import annotations
@@ -63,11 +62,9 @@ import wntr                       # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = REPO_ROOT / "models"
-FIG_DIR = REPO_ROOT / "figures" / "week1_demo"
-RES_DIR = REPO_ROOT / "results" / "week1_demo"
+OUT_DIR = REPO_ROOT / "results" / "week1_demo"
 
-FIG_DIR.mkdir(parents=True, exist_ok=True)
-RES_DIR.mkdir(parents=True, exist_ok=True)
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -185,6 +182,29 @@ KGM3_TO_MGL = 1000.0
 # Plotting helpers
 # ---------------------------------------------------------------------------
 
+def annotate_node_ids(ax: plt.Axes,
+                      wn: wntr.network.WaterNetworkModel,
+                      *,
+                      fontsize: int = 9) -> None:
+    """Label each network node with its EPANET ID (junctions 10–32, tank 2, etc.)."""
+    for name in wn.node_name_list:
+        node = wn.get_node(name)
+        x, y = node.coordinates
+        ax.annotate(
+            name,
+            (x, y),
+            textcoords="offset points",
+            xytext=(5, 5),
+            fontsize=fontsize,
+            fontweight="bold",
+            color="0.1",
+            ha="left",
+            va="bottom",
+            zorder=10,
+            clip_on=False,
+        )
+
+
 def plot_network(wn: wntr.network.WaterNetworkModel) -> None:
     fig, ax = plt.subplots(figsize=(7, 6))
     wntr.graphics.plot_network(
@@ -193,22 +213,26 @@ def plot_network(wn: wntr.network.WaterNetworkModel) -> None:
         node_size=40,
         title="Net1 - elevation (m)",
         ax=ax,
+        show_plot=False,
     )
-    fig.savefig(FIG_DIR / "01_network.png", dpi=150, bbox_inches="tight")
+    annotate_node_ids(ax, wn)
+    fig.savefig(OUT_DIR / "01_network.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
 def plot_pressure(results: wntr.sim.results.SimulationResults,
                   wn: wntr.network.WaterNetworkModel) -> None:
     pressure = results.node["pressure"][wn.junction_name_list]
+    hours = pressure.index / 3600.0
     fig, ax = plt.subplots(figsize=(8, 4))
-    pressure.plot(ax=ax, legend=False, alpha=0.7)
-    ax.set_xlabel("Time (s)")
+    for node in wn.junction_name_list:
+        ax.plot(hours, pressure[node], alpha=0.7)
+    ax.set_xlabel("Time (hours)")
     ax.set_ylabel("Pressure (m)")
     ax.set_title("Junction pressures over 24 h")
     ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(FIG_DIR / "02_pressure_timeseries.png", dpi=150)
+    fig.savefig(OUT_DIR / "02_pressure_timeseries.png", dpi=150)
     plt.close(fig)
 
 
@@ -226,7 +250,7 @@ def plot_chlorine_timeseries(chlorine: pd.DataFrame,
     ax.legend(loc="best", fontsize=8)
     ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(FIG_DIR / "03_chlorine_timeseries.png", dpi=150)
+    fig.savefig(OUT_DIR / "03_chlorine_timeseries.png", dpi=150)
     plt.close(fig)
 
 
@@ -243,8 +267,10 @@ def plot_chlorine_spatial(wn: wntr.network.WaterNetworkModel,
         node_colorbar_label="Cl (mg/L)",
         title=f"Chlorine spatial distribution at t = {final_t/3600:.0f} h",
         ax=ax,
+        show_plot=False,
     )
-    fig.savefig(FIG_DIR / "04_chlorine_spatial.png", dpi=150, bbox_inches="tight")
+    annotate_node_ids(ax, wn)
+    fig.savefig(OUT_DIR / "04_chlorine_spatial.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -282,11 +308,10 @@ def main() -> None:
     plot_pressure(results, wn)
     plot_chlorine_timeseries(chlorine, sample_nodes)
     plot_chlorine_spatial(wn, chlorine)
-    print(f"[out]   Figures written to {FIG_DIR}")
+    print(f"[out]   Outputs written to {OUT_DIR}")
 
-    chlorine.to_csv(RES_DIR / "chlorine_junctions.csv")
-    pressure.to_csv(RES_DIR / "pressure_junctions.csv")
-    print(f"[out]   CSVs written to {RES_DIR}")
+    chlorine.to_csv(OUT_DIR / "chlorine_junctions.csv")
+    pressure.to_csv(OUT_DIR / "pressure_junctions.csv")
 
 
 if __name__ == "__main__":

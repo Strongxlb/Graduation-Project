@@ -90,7 +90,7 @@
 具体动作：
 
 1. 在 codes 仓库根目录创建以下空目录（按 README §9.2）：
-   - `background/`、`data/`、`models/`、`src/`、`results/`、`figures/`、`thesis/`、`meetings/`
+   - `background/`、`data/`、`models/`、`src/`、`results/`、`thesis/`、`meetings/`
    - 每个目录下建一个 `.gitkeep` 空文件，保证 Git 能追踪空目录。
 2. 写 `.gitignore`，至少屏蔽：
    - Python：`__pycache__/`、`*.pyc`、`.venv/`、`.ipynb_checkpoints/`
@@ -124,7 +124,7 @@
 2. 加载 WNTR 自带的 `Net1.inp` 或 `Net3.inp`（不需要先找真实管网）。
 3. 跑一次水力仿真，打印节点压力、管段流量；确认结果合理（无负压、无奇怪值）。
 4. 跑一次水质仿真：把 source node 设为 chlorine source，给一个 bulk decay 系数（如 -0.5 /day），输出某节点的 chlorine 时间序列。
-5. 把时间序列 + 网络拓扑图保存到 `figures/week1_demo/`。
+5. 把时间序列 + 网络拓扑图保存到 `results/week1_demo/`。
 6. commit 信息：`feat: minimal WNTR hydraulic + chlorine demo on Net1`。
 
 > 这一步只是"打通管线"，不要纠结参数是否真实，下周才开始动模型。
@@ -172,7 +172,7 @@
 1. 把 Week 1 所有产出 commit 到 GitHub，至少包含：
    - 目录骨架 + `.gitignore`
    - `requirements.txt`
-   - `src/01_demo_wntr.py` + `figures/week1_demo/*`
+   - `src/01_demo_wntr.py` + `results/week1_demo/*`
    - `background/literature.md`
    - `meetings/open_questions.md`
    - `plan1.md`（本文件）

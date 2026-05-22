@@ -125,6 +125,16 @@
 | **EPANET/WNTR** | 与 `01_demo_wntr.py` 同一工具链；NET2A 可作第二 benchmark |
 | **0.2 mg/L 阈值** | 本文未用监管阈值，但讨论「小幅浓度变化可检测污染」— 与 operational residual 监测逻辑相关 |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **T5 MCS 先验**：$k_b$、$k_w$、糙率、需求 **CV=0.1** — Methodology 写「文献支持的参数扰动幅度」（Pasha & Lansey 2010）。
+2. **Discussion — identifiability**：直接引用 — 正常工况下 **多组参数拟合同一余氯** → 解释为何仅 deterministic RMSE 不够，需要 posterior / 预测区间。
+3. **参数重要性排序**：稳态下 **wall decay 影响常最大** — Results 报告 sensitivity 时优先展示 $k_w$。
+4. **第二 benchmark**：EPANET 手册 **NET2A**（35 管）与 Net1 并列 — 可复现 Fig. 3 boxplot 风格的 **节点浓度分布图**。
+5. **非稳态 caveat**：流型变化（泵/箱）时输出 std **非加性** — 若你做 extended period 校准，Discussion 必须讨论 **operating condition**。
+6. **与 C1 对照写进论文**：C1 给 **点估计**；C2 说明点估计 **不唯一但输出仍窄** → 动机是加 **测量误差层**（D2）而非只加参数噪声。
+7. **离源距离**：输出不确定性随 **水龄/离源距离** 增大 — 你的 `<0.2` mg/L 空间图可预期末端节点 **预测带更宽**。
+
 ---
 
 ## 9. 批判性阅读

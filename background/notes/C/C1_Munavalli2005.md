@@ -134,6 +134,16 @@ Rossman et al. (1994) 手工校准 $k_{w,1}$ 范围 **0.15–0.45 m/d**；本文
 | **与 C2 对照** | C1 点估计；C2 说明同一参数多解时 MCS 输出仍窄 — 需 **Bayesian / 多参数联合**（E 类） |
 | **动态扩展** | 本文 dynamic state 对应本项目 extended period 校准需求 |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **T4 baseline 实现**：在 WNTR 上实现 **加权最小二乘** $J=\sum w_j(C_{obs}-C_{sim})^2$，用 `scipy.optimize.least_squares` 或 Gauss–Newton；C1 是 Plan A **确定性校准的 direct template**。
+2. **文献数值对照**：Brushy Plain 自动得 $k_{w,1}=0.3654$ m/d，落在 Rossman (1994) 手工 **0.15–0.45** m/d — baseline 结果应与此 **同量级**。
+3. **权重 $w_j$**：结合 D2，设 $w_j=1/\sigma^2$，$\sigma=0.02$ mg/L — Methodology 写「C1 目标函数 + D2 误差权重」。
+4. **测点设计（M1 报告）**：引用「测点数量、位置影响参数估计」— 合成数据实验可故意 **减少节点** 展示 identifiability 下降。
+5. **Extended period**：校准用 **55 h+ 动态水力**（与 demo 24 h 对比）— Week 3–4 扩展仿真时长时可引用 C1。
+6. **Global vs zoned**：Example 1 按 **管径分区** $k_w$ — 若 Net1 材质信息不足，至少做 global vs 2-zone sensitivity。
+7. **Discussion 局限**：C1 未建模 DPD 误差 → 自然过渡到 **T5 不确定性感知**（C2 + E1 + D2）。
+
 ---
 
 ## 9. 批判性阅读

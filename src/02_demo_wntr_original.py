@@ -14,11 +14,10 @@ Demo-1 (`01_demo_wntr.py`) deviated from Net1.inp in exactly two places:
 This script:
     (a) loads Net1.inp untouched (no quality overrides),
     (b) re-runs the same 24 h simulation,
-    (c) writes parallel outputs to figures/week1_original/ and
-        results/week1_original/,
+    (c) writes parallel outputs to results/week1_original/,
     (d) reads results from results/week1_demo/ (the modified version) and
-        produces side-by-side comparison plots and a summary table under
-        figures/week1_compare/ and results/week1_compare/.
+        produces side-by-side comparison plots and summary tables under
+        results/week1_compare/.
 
 Run from the repo root:
     python src/02_demo_wntr_original.py
@@ -54,13 +53,11 @@ import wntr                      # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = REPO_ROOT / "models"
-FIG_ORIG = REPO_ROOT / "figures" / "week1_original"
-RES_ORIG = REPO_ROOT / "results" / "week1_original"
-FIG_CMP = REPO_ROOT / "figures" / "week1_compare"
-RES_CMP = REPO_ROOT / "results" / "week1_compare"
+OUT_ORIG = REPO_ROOT / "results" / "week1_original"
+OUT_CMP = REPO_ROOT / "results" / "week1_compare"
 RES_MOD = REPO_ROOT / "results" / "week1_demo"
 
-for d in (FIG_ORIG, RES_ORIG, FIG_CMP, RES_CMP, MODELS_DIR):
+for d in (OUT_ORIG, OUT_CMP, MODELS_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 # WNTR stores / returns concentrations in SI (kg/m^3). The .inp uses mg/L.
@@ -145,24 +142,50 @@ def run_original(inp_file: Path) -> tuple[pd.DataFrame, pd.DataFrame,
 # Standalone plots for the ORIGINAL run (mirror of 01_demo_wntr.py outputs)
 # ---------------------------------------------------------------------------
 
+def annotate_node_ids(ax: plt.Axes,
+                      wn: wntr.network.WaterNetworkModel,
+                      *,
+                      fontsize: int = 9) -> None:
+    """Label each network node with its EPANET ID (junctions 10–32, tank 2, etc.)."""
+    for name in wn.node_name_list:
+        node = wn.get_node(name)
+        x, y = node.coordinates
+        ax.annotate(
+            name,
+            (x, y),
+            textcoords="offset points",
+            xytext=(5, 5),
+            fontsize=fontsize,
+            fontweight="bold",
+            color="0.1",
+            ha="left",
+            va="bottom",
+            zorder=10,
+            clip_on=False,
+        )
+
+
 def plot_original_outputs(wn: wntr.network.WaterNetworkModel,
                           pressure: pd.DataFrame,
                           chlorine: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(7, 6))
     wntr.graphics.plot_network(
         wn, node_attribute="elevation", node_size=40,
-        title="Net1 - elevation (m)", ax=ax,
+        title="Net1 - elevation (m)", ax=ax, show_plot=False,
     )
-    fig.savefig(FIG_ORIG / "01_network.png", dpi=150, bbox_inches="tight")
+    annotate_node_ids(ax, wn)
+    fig.savefig(OUT_ORIG / "01_network.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 4))
-    pressure.plot(ax=ax, legend=False, alpha=0.7)
-    ax.set(xlabel="Time (s)", ylabel="Pressure (m)",
+    hours = pressure.index / 3600.0
+    for node in wn.junction_name_list:
+        ax.plot(hours, pressure[node], alpha=0.7)
+    ax.set(xlabel="Time (hours)", ylabel="Pressure (m)",
            title="Junction pressures over 24 h (original .inp)")
     ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(FIG_ORIG / "02_pressure_timeseries.png", dpi=150)
+    fig.savefig(OUT_ORIG / "02_pressure_timeseries.png", dpi=150)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 4))
@@ -176,7 +199,7 @@ def plot_original_outputs(wn: wntr.network.WaterNetworkModel,
     ax.legend(loc="best", fontsize=8, ncol=2)
     ax.grid(alpha=0.3)
     fig.tight_layout()
-    fig.savefig(FIG_ORIG / "03_chlorine_timeseries.png", dpi=150)
+    fig.savefig(OUT_ORIG / "03_chlorine_timeseries.png", dpi=150)
     plt.close(fig)
 
     final_t = chlorine.index[-1]
@@ -185,14 +208,15 @@ def plot_original_outputs(wn: wntr.network.WaterNetworkModel,
         wn, node_attribute=chlorine.loc[final_t].to_dict(),
         node_size=60, node_colorbar_label="Cl (mg/L)",
         title=f"Chlorine at t={final_t/3600:.0f} h — ORIGINAL .inp",
-        ax=ax,
+        ax=ax, show_plot=False,
     )
-    fig.savefig(FIG_ORIG / "04_chlorine_spatial.png",
+    annotate_node_ids(ax, wn)
+    fig.savefig(OUT_ORIG / "04_chlorine_spatial.png",
                 dpi=150, bbox_inches="tight")
     plt.close(fig)
 
-    chlorine.to_csv(RES_ORIG / "chlorine_junctions.csv")
-    pressure.to_csv(RES_ORIG / "pressure_junctions.csv")
+    chlorine.to_csv(OUT_ORIG / "chlorine_junctions.csv")
+    pressure.to_csv(OUT_ORIG / "pressure_junctions.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -234,7 +258,7 @@ def make_comparison(chlorine_orig: pd.DataFrame,
     fig.suptitle("Chlorine at 9 junctions — ORIGINAL vs MODIFIED",
                  fontsize=11, y=1.02)
     fig.tight_layout()
-    fig.savefig(FIG_CMP / "chlorine_timeseries_side_by_side.png",
+    fig.savefig(OUT_CMP / "chlorine_timeseries_side_by_side.png",
                 dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -244,21 +268,22 @@ def make_comparison(chlorine_orig: pd.DataFrame,
     vmin = 0.0
     vmax = max(max(final_o.values()), max(final_m.values()), 1.0)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6), constrained_layout=True)
     wntr.graphics.plot_network(
         wn, node_attribute=final_o, node_size=70,
         node_colorbar_label="Cl (mg/L)",
         title="ORIGINAL .inp at t = 24 h", ax=axes[0],
-        node_range=[vmin, vmax],
+        node_range=[vmin, vmax], show_plot=False,
     )
+    annotate_node_ids(axes[0], wn)
     wntr.graphics.plot_network(
         wn, node_attribute=final_m, node_size=70,
         node_colorbar_label="Cl (mg/L)",
         title="MODIFIED demo 1 at t = 24 h", ax=axes[1],
-        node_range=[vmin, vmax],
+        node_range=[vmin, vmax], show_plot=False,
     )
-    fig.tight_layout()
-    fig.savefig(FIG_CMP / "spatial_at_24h.png", dpi=150, bbox_inches="tight")
+    annotate_node_ids(axes[1], wn)
+    fig.savefig(OUT_CMP / "spatial_at_24h.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
     # --- Numerical summary table ---
@@ -280,7 +305,7 @@ def make_comparison(chlorine_orig: pd.DataFrame,
             "abs_diff_mean":     co.mean() - cm.mean(),
         })
     df = pd.DataFrame(rows).set_index("node")
-    df.to_csv(RES_CMP / "summary_per_node.csv", float_format="%.4f")
+    df.to_csv(OUT_CMP / "summary_per_node.csv", float_format="%.4f")
 
     print("\n[cmp]   Per-junction summary (mg/L; below_0.2 in %):")
     print(df.round(3).to_string())
@@ -297,7 +322,7 @@ def make_comparison(chlorine_orig: pd.DataFrame,
     }, index=["original", "modified"])
     print("\n[cmp]   Overall network summary:")
     print(overall.round(3).to_string())
-    overall.to_csv(RES_CMP / "summary_overall.csv", float_format="%.4f")
+    overall.to_csv(OUT_CMP / "summary_overall.csv", float_format="%.4f")
 
 
 # ---------------------------------------------------------------------------
@@ -316,13 +341,11 @@ def main() -> None:
           f"{int((pressure < 0).sum().sum())}")
 
     plot_original_outputs(wn, pressure, chlorine)
-    print(f"[orig]  Figures written to {FIG_ORIG}")
-    print(f"[orig]  CSVs    written to {RES_ORIG}\n")
+    print(f"[orig]  Outputs written to {OUT_ORIG}\n")
 
     print("[cmp]   Building original vs modified comparison ...")
     make_comparison(chlorine, wn)
-    print(f"\n[cmp]   Figures written to {FIG_CMP}")
-    print(f"[cmp]   CSVs    written to {RES_CMP}")
+    print(f"\n[cmp]   Outputs written to {OUT_CMP}")
 
 
 if __name__ == "__main__":

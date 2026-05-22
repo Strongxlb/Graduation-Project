@@ -219,6 +219,16 @@ $$k_w = 0.26 - 0.73\,C_0 \quad (99\%\ \mathrm{显著})$$
 | **结果解释.md** | 原始版开 wall、修改版关 wall 的差异可与 **wall 占比** 定性对照 |
 | **vs A3** | 同组 Severn Trent；bulk (A3) + wall (A4) 拼完整 $k=k_b+k_w$ |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **T2 对照实验**：`02_demo_wntr_original.py`（开 wall）vs `01_demo_wntr.py`（关 wall）— Results 引用本文 **CI 高 $k_w$、PVC 低 $k_w$** 解释两版 Net1 浓度差。
+2. **T4 分区校准**：勿用单一 global `wall_coeff` 拟合混合管材网 — Methodology 写 **按 CI / PVC 分组** 或至少 sensitivity 对比 global vs zoned。
+3. **单位陷阱**：本文 $k_w$ 为 **h⁻¹**；EPANET/WNTR `wall_coeff` 为 **m/day（US）** — 论文中必须给 **换算表或复现验证**，不可直接填 0.67。
+4. **Methodology — in situ 思路**：demand monitor（$C_0$、$C$、旅行时间）估 $k_w=k-k_b$ — 即使无 Leicester 数据，合成场景可 **模仿该实验设计**。
+5. **T5 不确定性**：旅行时间 ±5–15%、氯 ±0.01 mg/L 时 $k_w$ 不确定 — Discussion 引用为 **wall 参数后验应宽** 的文献依据。
+6. **低浓度敏感**：PVC 段 $C_0$–$k_w$ 关系 — 解释管网末端接近 **0.2 mg/L** 时 wall 校准更不稳定。
+7. **Discussion 简化假设**：生物膜贡献有限 — 可写「首版模型不对 biofilm 单独加项」，与 EPANET 一阶 wall 一致。
+
 ---
 
 ## 9. 可借鉴 / 可批判

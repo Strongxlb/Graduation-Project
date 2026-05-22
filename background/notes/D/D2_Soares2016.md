@@ -108,6 +108,16 @@
 | **浊度协变量** | 若现场有浊度数据，可加入 **heteroscedastic** 噪声模型 `[推断]` |
 | **非 UK 数据** | 巴西热带管网；Imperial UK 现场需 D3/D4 补充 |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **T5 似然函数**：观测模型 $C_{obs} \sim \mathcal{N}(C_{true}, \sigma^2)$，**$\sigma = 0.02$ mg/L**（Hach 规格）— Methodology 直接写入参数表。
+2. **系统偏差项**：视觉 disk **高于** 数字仪；粉剂 **高于** 片剂 — 合成数据或 Bayesian 中可加 **method-specific bias**（如 +5% / +15%）。
+3. **数值引用**：方法间均值差 **10.5%–47.3%**；单样本四方法 CV **8.1%–26.1%** — Discussion 解释「校准 RMSE<0.05 仍可能 **掩盖方法偏差**」。
+4. **低浓度区**：样本 0.54–2.0 mg/L；在 **0.2 mg/L 附近** 相对误差更大 — 支持对 `<0.2` 概率分析用 **更宽** 观测噪声。
+5. **浊度协变量**：数字 DPD 与浊度显著相关 — 若有浊度数据，Methodology 可写 **heteroscedastic** $\sigma(turbidity)$。
+6. **法规对照**：巴西 **0.2–2.0 mg/L** 与 WHO/UK 同量级 — Introduction 可辅助说明 **0.2 mg/L 国际常见**，但 UK 引 F1。
+7. **Limitation 句**：「D2 为巴西现场 DPD；UK amperometric 见 D3/D4」— 避免过度外推。
+
 ---
 
 ## 7. 批判性阅读

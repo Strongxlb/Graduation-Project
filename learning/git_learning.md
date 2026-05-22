@@ -188,7 +188,7 @@ Refs: #3
 |-------|---------|--------|
 | `src` | `src/` 下的脚本 | 改/加分析代码 |
 | `data` | `data/` 下的输入 | 改/加输入数据、网络模型 |
-| `results` | `results/`, `figures/` | 重新生成结果、改图 |
+| `results` | `results/` | 重新生成结果、改图 |
 | `thesis` | `thesis/` | 写论文 |
 | `meetings` | `meetings/` | 加/改会议记录 |
 | `background` | `background/` | 文献综述、背景资料 |

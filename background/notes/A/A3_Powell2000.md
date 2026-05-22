@@ -195,6 +195,16 @@ $$\boxed{k_b = q\,\frac{1}{C_0}\,(\mathrm{UV}-h)\,\exp\left[-\frac{E/R}{T+273}\r
 | **vs A2** | A2：机理推导 + 小样本；A3：**区域尺度经验回归** + 模型耐久性 |
 | **vs A4** | A3 bulk；A4 wall。Hallam 2002 引用本文 [2] 为同系列 |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **Background**：用 **207 次** 瓶试证明 $k_b$ 随 TOC、温度、$C_0$、再氯化变化 — 支撑 thesis「bulk 不是全局常数」。
+2. **T4 初值 / 先验**：Eq. (8)(9) 或 Table 3 系数可在校准时作 **$k_b(T, C_0)$ 的 deterministic 更新**；未测 TOC 时用区域经验式作 placeholder 并注明不确定度。
+3. **T5 Bayesian 先验宽度**：$k_b$ 跨 0.008–0.16 h⁻¹（Table 1–2）— MCS/Bayesian 中 bulk 先验 **不应过窄**，否则后验虚假精确。
+4. **归一化 15 °C**：跨季节比较或合成多场景时，先按本文方法 **归一化温度** 再比 $k_b$，避免把季节效应误归到 wall。
+5. **Discussion — 工艺变化**：GAC 前后斜率差、再氯化降 $k_b$ — 解释「同一 .inp 在运营调整后需 **重新校准**」。
+6. **与 A4 拼接**：Introduction 可写 Severn Trent 系列：**A3 bulk + A4 wall = 完整衰减**；你项目分别引用两层参数。
+7. **单位**：写 Methodology 时注明 EPANET `bulk_coeff` 为 **1/day**，本文 $k_b$ 为 **h⁻¹**，换算 ×24 并取负号。
+
 ---
 
 ## 9. 可借鉴 / 可批判

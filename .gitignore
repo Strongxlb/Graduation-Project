@@ -15,6 +15,7 @@ ENV/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.mplcache/
 
 # ------------------------------------------------------------
 # Jupyter / data science scratch
@@ -74,9 +75,8 @@ results/*.h5
 *.out
 *.tmp
 en2.log
-# EPANET / WNTR working copy of the .inp file written to repo root
-# during EpanetSimulator.run_sim() — not a real artefact.
-/temp.inp
+# EPANET / WNTR runtime trio written to repo root during run_sim()
+/temp.*
 
 # ------------------------------------------------------------
 # Thesis / LaTeX build artefacts

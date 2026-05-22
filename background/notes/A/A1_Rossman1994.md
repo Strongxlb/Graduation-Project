@@ -251,6 +251,16 @@ $$\mathrm{Re} = \frac{ud}{\nu}, \quad \mathrm{Sc} = \frac{\nu}{D}$$
 | **Methodology 章节** | 可直接引用 Eq 3 + DVEM 作为 EPANET 水质方程的来源 |
 | **Discussion** | 「水力刻画差的点 → 水质模型也差」这条观察可呼应「sensor placement / 采样设计影响 calibration 质量」 |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **Background / Methodology**：引用 Rossman 1994 作为 EPANET 水质模块来源；写清 **Eq. 3 + DVEM** 即 WNTR 中 `bulk_coeff` / `wall_coeff` 的物理含义。
+2. **T4 确定性 baseline**：复现「**瓶试定 $k_b$ + 现场扫 $k_w$**」两阶段流程；Brushy Plain 手工校准 $k_{w,1}=0.15\text{–}0.45$ m/d、RMS ≈ 0.17–0.19 mg/L 可作为你 baseline 的 **文献对照区间**。
+3. **T2 代码**：`src/01_demo_wntr.py` 中关 wall、bulk=−0.5/day 是在 **故意简化**；Discussion 可对照本文 Fig. 14 的 wall/bulk/tank **衰减贡献分解** 解释 Net1 修改前后差异。
+4. **T3 数据**：Cherry Hill / Trollhättan 53 h、181 对观测是经典 benchmark 规模 — 若用合成数据，样本量与时空覆盖应 **不低于** 此量级才有校准意义。
+5. **T5 研究 gap（Introduction / Discussion）**：原文把校准当 **确定性 + 手动 sweep**，无测量误差、无 $k_w$ 后验 — 可直接写「本项目在 Rossman 框架上加入 DPD 误差与 Bayesian/MCS」。
+6. **水力先行**：Fluoride conservative tracer **先校水力、再校水质** — Methodology 可照搬为 Week 3–4 工作流（即使 Net1 暂无 tracer，也应在 Discussion 说明局限）。
+7. **Poster / Results 图**：仿 Fig. 14 做「bulk vs wall vs 水箱」占比饼图或柱状图，解释 `<0.2` mg/L 节点比例变化。
+
 ---
 
 ## 9. 可借鉴 / 可批判之处

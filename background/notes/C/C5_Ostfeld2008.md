@@ -108,6 +108,16 @@ INP 下载：`http://www.exeter.ac.uk/cws/bwsn/` `[原文]`（现常用 BWSN1.in
 | **阈值参照** | $Z_3$ 用 **0.3 mg/L** 危害阈值 — 与项目 **0.2 mg/L** operational residual（F 类）不同用途 |
 | **C6 衔接** | Hermes 2025 在 Hanoi/Net1/CY-DBP 做氯浓度 PhML benchmark — 网络谱系延续 BWSN |
 
+### 可参考要点（写论文 / 做实验时可直接引用）
+
+1. **Introduction — 网络选型**：引用 C5 说明采用 **BWSN1 / Net1 / 公开 INP** 是社区标准做法，非随意选 toy network。
+2. **Scope 界定（Discussion）**：BWSN 研究 **污染检测传感器**，不是余氯校准 — 明确写「采样点优化 **不是** 本项目主线」，避免审稿人误解。
+3. **网络规模参照**：Network 1 = **126 nodes**；Network 2 = **12,523 nodes** — 说明 Net1 属于 **small benchmark**，外推大网需 caution。
+4. **阈值区分**：BWSN $Z_3$ 危害阈值 **0.3 mg/L** ≠ 本项目 operational **0.2 mg/L**（F 类）— 写 threshold 时必须 **分用途引用**。
+5. **C6 衔接句**：「余氯浓度 benchmark 见 Hermes et al. 2025（Net1）」— BWSN 提供 **拓扑来源**，C6 提供 **氯场景**。
+6. **EPANET 版本**：BWSN 用 **EPANET 2.00.10** — Methodology 注明 WNTR 后端版本与之兼容即可复现。
+7. **Limitation**：BWSN 网 **污染羽很小、流型简单** — Discussion 写真实 UK 多压力区网会更复杂。
+
 ---
 
 ## 8. 批判性阅读

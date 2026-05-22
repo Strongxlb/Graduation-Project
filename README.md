@@ -248,8 +248,7 @@ codes/
   data/                # 数据说明、清洗脚本、小型示例数据
   models/              # EPANET .inp 或模型配置
   src/                 # Python/WNTR 分析代码
-  results/             # 校准结果、表格、统计输出
-  figures/             # 论文和 poster 图表
+  results/             # 图表、表格、统计输出
   thesis/              # research paper 草稿和结构
   meetings/            # 每周会议纪要
 ```
@@ -263,7 +262,7 @@ codes/
 - background：论文、报告、文献笔记。
 - data：原始数据、处理后数据、数据说明。
 - code：与 GitHub 仓库对应的代码备份或链接。
-- results + figures：可直接进入论文的图表和结果。
+- results：可直接进入论文的图表、表格与结果。
 - thesis：论文草稿、导师反馈、版本记录。
 - weekly meetings：每周会纪要、问题清单、行动项。
 
