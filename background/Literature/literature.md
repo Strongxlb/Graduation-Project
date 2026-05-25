@@ -26,6 +26,7 @@
 | A3  | Powell et al. (2000). Factors which control bulk chlorine decay rates. *Water Research*                                                                                                   | 10.1016/S0043-1354(99)00297-9           | TOC、温度、初始浓度                               | P1  | ✓   | ✓   |     | 用于讨论 decay 与水质参数的相关性。精读笔记：`[../notes/A/A3_Powell2000.md](../notes/A/A3_Powell2000.md)`。                                                                                                      |
 | A4  | Hallam, West, Forster, Powell, Spencer (2002). The decay of chlorine associated with the pipe wall in water distribution systems. *Water Research*                                        | 10.1016/S0043-1354(02)00056-8           | wall coefficient、管材、现场/实验测定               | P1  | ✓   | ✓   |     | 给出现场与实验 wall demand 估计，用于支撑 wall decay 取值范围和管材差异。精读笔记：`[../notes/A/A4_Hallam2002.md](../notes/A/A4_Hallam2002.md)`。                                                                          |
 | A5  | Maleki, Ardila, Argaud, Pelletier, Rodriguez (2023). Full-scale determination of pipe wall and bulk chlorine degradation coefficients for different pipe categories. *Water Supply* (IWA) | 10.2166/ws.2023.020                     | full-scale、管材/管龄分类、kw 实测、Université Laval | P1  |     |     |     | A4 Hallam 2002 的 20 年后实证版：加拿大魁北克全尺度真实管网，按管材（grey-cast iron / ductile cast iron / PVC）与安装年代分类拟合 kw/kb；**安装年代**是 kw 的显著影响因素，老灰口铁管 wall 可吃掉 ~97% 余氯，新管 bulk 占比可达 ~35%。直接支撑本项目「分管材 / 分管龄 k_w」思路。 |
+| A6  | Vasconcelos, Rossman, Grayman, Boulos, Clark (1997). Kinetics of chlorine decay. *Journal AWWA* 89(7):54–65                                                                                | 10.1002/j.1551-8833.1997.tb08259.x      | bulk vs wall、first-order vs higher-order、bottle test  | P0  |     |     |     | **导师亲点 P0**：A1 Rossman 1994 的姐妹篇，系统比较 bulk vs wall 衰减并解释 first-order 为何成为 EPANET 默认（虽非唯一合理选择）。论文 Methodology 解释「为何选 first-order」时必引。 |
 
 
 ## B. EPANET / WNTR 工具与方法学
@@ -79,9 +80,11 @@
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------- | --- | --- | --- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | E1  | Kavetski, Kuczera, Franks (2006). Bayesian analysis of input uncertainty in hydrological modeling. *Water Resources Research*                                                                                                       | 10.1029/2005WR004368（理论）；已下载 Paper 2 Application：`10.1029/2005WR004376` | Bayesian / 输入不确定性                            | P0  | ✓   | ✓   |     | 对照 hydrology 领域怎么处理观测误差（BATEA）。精读笔记：`[../notes/E/E1_Kavetski2006.md](../notes/E/E1_Kavetski2006.md)`（基于 Paper 2）。                                                      |
 | E2  | Vrugt (2016). Markov chain Monte Carlo simulation using the DREAM software package. *Env. Modelling & Software*                                                                                                                     | 10.1016/j.envsoft.2015.08.013                                           | DREAM / MCMC                                 | P1  |     |     |     | 备用 MCMC 工具栈参考。                                                                                                                                                         |
-| E3  | Huang, McBean (2007). Using Bayesian statistics to estimate the coefficients of a two-component second-order chlorine bulk decay model for a water distribution system. *Water Research*                                            | 10.1016/j.watres.2006.10.027                                            | Bayesian、MCMC、chlorine decay                 | P0  |     |     |     | 直接将 Bayesian/MCMC 用于 chlorine decay 参数估计，是 Plan B 贝叶斯校准的核心对照文献。                                                                                                        |
+| E3  | Huang, McBean (2007). Using Bayesian statistics to estimate the coefficients of a two-component second-order chlorine bulk decay model for a water distribution system. *Water Research*                                            | 10.1016/j.watres.2006.10.027                                            | Bayesian、MCMC、chlorine decay                 | P0  | ✓   | ✓   |     | 直接将 Bayesian/MCMC 用于 chlorine decay 参数估计，是 Plan B 贝叶斯校准的核心对照文献。精读笔记：`[../notes/E/E3_HuangMcBean2007.md](../notes/E/E3_HuangMcBean2007.md)`。 |
 | E4  | Kang, Pasha, Lansey (2009). Approximate methods for uncertainty analysis of water distribution systems. *Urban Water Journal*                                                                                                       | 10.1080/15730620802566844                                               | Monte Carlo、LHS、FOSM、EPANET                  | P1  |     |     |     | 比较 MC、LHS 和 FOSM 对压力、水龄、余氯预测不确定性的效果，用于 Methodology 选择 MC baseline。                                                                                                     |
-| E5  | Sansone, Cozzolino, Padulano, Di Cristo, Del Giudice (2026). Detection of deteriorated areas in water distribution networks exploiting chlorine measurements in a Bayesian framework. *Engineering Proceedings* (CSDU-CSSI DAYS 25) | 10.3390/engproc2026135007                                               | Bayesian、MCMC、Metropolis–Hastings、kwall、管道老化 | P0  |     |     |     | 与 E3 Huang 2007 并列的**最新且最直接对手**：把 chlorine 测量喂进 MCMC（Metropolis–Hastings），反演每根管的 k_wall，并据此分类管道老化状态。**Gap（你要补的）**：该文用合成观测、未显式建模 DPD 测量误差，也未做参数可识别性 / 后验区间分析——本项目正是补这条。 |
+| E5  | Sansone, Cozzolino, Padulano, Di Cristo, Del Giudice (2026). Detection of deteriorated areas in water distribution networks exploiting chlorine measurements in a Bayesian framework. *Engineering Proceedings* (CSDU-CSSI DAYS 25) | 10.3390/engproc2026135007                                               | Bayesian、MCMC、Metropolis–Hastings、kwall、管道老化 | P0  | ✓   | ✓   |     | 与 E3 Huang 2007 并列的**最新且最直接对手**：把 chlorine 测量喂进 MCMC（Metropolis–Hastings），反演每根管的 k_wall，并据此分类管道老化状态。**Gap（你要补的）**：该文用合成观测、未显式建模 DPD 测量误差，也未做参数可识别性 / 后验区间分析——本项目正是补这条。精读笔记：`[../notes/E/E5_Sansone2026.md](../notes/E/E5_Sansone2026.md)`。 |
+| E6  | Beven, Binley (1992). The future of distributed models: model calibration and uncertainty prediction. *Hydrological Processes* 6(3):279–298                                                                                       | 10.1002/hyp.3360060305                                                  | GLUE、ensemble、likelihood weighting、distributed model | P0  |     |     |     | **导师亲点 P0**——"your robust fallback method"。GLUE（Generalised Likelihood Uncertainty Estimation）原始论文：用大量 Monte Carlo 抽样 + likelihood 加权，得到参数与预测的不确定性区间，不要求似然函数解析或先验严格。本项目 **Plan A** 路线（ensemble-based method）的直接理论依据；当 Bayesian MCMC 跑不通时的备份方案。 |
+| E7  | Gelman, Carlin, Stern, Dunson, Vehtari, Rubin (2013). *Bayesian Data Analysis*, 3rd ed. (book) Chapman & Hall / CRC                                                                                                                | 10.1201/b16018                                                          | Bayesian、hierarchical model、partial pooling、MCMC、textbook | P0  |     |     |     | **导师亲点 P0** 教材（"only need the relevant chapters"）：Ch 5 Hierarchical Models（partial pooling 概念 → 3 个 DMA 共享族先验） + Ch 11 Basics of MCMC（Plan B 的理论参考）。**不要通读**，只需以上两章即可。 |
 
 
 ## F. 监管与阈值（policy / regulation）
@@ -170,6 +173,19 @@
 
 ---
 
+## 入库核对日志（2026-05-25）
+
+> 下载并通读 **E3 Huang & McBean 2007** + **E5 Sansone 2026**，精读笔记入库。两篇 PDF 文件名与 literature.md 条目对应正确。
+
+
+| #   | 本地 PDF                                                                                                            | 精读笔记                                                                              |
+| --- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| E3  | ✓（`E-不确定性感知校准（Monte Carlo : Bayesian : GLUE）/E3-Huang, McBean (2007). Using Bayesian statistics...`）              | ✓（`[../notes/E/E3_HuangMcBean2007.md](../notes/E/E3_HuangMcBean2007.md)`）         |
+| E5  | ✓（`E-不确定性感知校准（Monte Carlo : Bayesian : GLUE）/E5-Sansone, Cozzolino, Padulano, Di Cristo, Del Giudice (2026)...`） | ✓（`[../notes/E/E5_Sansone2026.md](../notes/E/E5_Sansone2026.md)`）                 |
+
+
+---
+
 ## 验证日志（2026-05-25）
 
 > 新增 A5（Maleki 2023）与 E5（Sansone 2026）两条；通过 CrossRef API 验证。两篇均未下载、未阅读。
@@ -181,5 +197,21 @@
 | ----- | --- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
 | 新增 A5 | —   | —   | Maleki, Ardila, Argaud, Pelletier, Rodriguez（5 人，Université Laval / 加拿大魁北克）；2023-02-01 出版；*Water Supply* 23(2):657–670                           | CrossRef `10.2166/ws.2023.020`       |
 | 新增 E5 | —   | —   | Sansone, Cozzolino, Padulano, Di Cristo, Del Giudice（5 人，意大利团队）；**2026-04-29 出版**（Engineering Proceedings vol 135 art 7，CSDU-CSSI DAYS 25 会议论文集） | CrossRef `10.3390/engproc2026135007` |
+
+
+---
+
+## 验证日志（2026-05-25 · 导师邮件追加）
+
+> 收到导师 2026-05-25 邮件，明确推荐 8 篇阅读材料；其中 5 篇已在清单内（A1 / A3 / A4 / B1 / B2），新增 3 条（A6 / E6 / E7）。E6 是之前自清单删除的 Beven & Binley GLUE，导师亲自要求重新加入。
+>
+> 项目正式 scope 同步收窄：聚焦 Bristol Water Field Lab 的 3 个 DMA、10 个 chlorine monitors、first-order EPANET kinetics、ensemble-based uncertainty；明确排除 hydraulic calibration / MSX / operational optimisation。详见 `../../README.md` 与 `../../plan1.md`。
+
+
+| #     | 字段  | 原值  | 修正后                                                                                                                                              | 来源                                   |
+| ----- | --- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| 新增 A6 | —   | —   | Vasconcelos, Rossman, Grayman, Boulos, Clark（5 人）；1997-07 出版；*Journal AWWA* 89(7):54–65                                                          | CrossRef `10.1002/j.1551-8833.1997.tb08259.x` |
+| 新增 E6 | —   | —   | Beven, Binley（2 人）；1992-07 出版；*Hydrological Processes* 6(3):279–298（**自清单恢复**：之前因无 PDF 删除，现导师邮件明确要求重新加入）                                          | CrossRef `10.1002/hyp.3360060305`    |
+| 新增 E7 | —   | —   | Gelman, Carlin, Stern, Dunson, Vehtari, Rubin（6 人）；2013 出版；*Bayesian Data Analysis* 3rd ed.，Chapman & Hall / CRC（**教材**，仅需 Ch 5 + Ch 11）          | CrossRef `10.1201/b16018`            |
 
 
