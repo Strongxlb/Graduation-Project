@@ -77,6 +77,15 @@ results/*.h5
 en2.log
 # EPANET / WNTR runtime trio written to repo root during run_sim()
 /temp.*
+# Same trio written to learning/ when running the supervisor's starter notebook
+learning/temp.*
+
+# ------------------------------------------------------------
+# Literature PDFs
+# Keep PDFs locally for reading, but don't version-control them.
+# literature.md is the source of truth; PDFs are personal-use binaries.
+# ------------------------------------------------------------
+background/Literature/**/*.pdf
 
 # ------------------------------------------------------------
 # Thesis / LaTeX build artefacts
