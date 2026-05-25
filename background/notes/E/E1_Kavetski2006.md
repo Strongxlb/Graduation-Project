@@ -35,7 +35,7 @@
 
 ## 2. 中文摘要
 
-传统最小二乘（SLS）把 **观测 forcing（降水）当真值**，会在 forcing 有偏时 **扭曲参数**（Kavetski et al. 2002）。BATEA 引入 **潜变量** $F$ 将观测 forcing 映射为「真值」forcing，并联合估计 $\{Q, F, B_x, B_y\}$。French Broad：storm **multiplier** 高斯模型使 Nash–Sutcliffe 从 ~0.76 升至 **~0.95**，峰值拟合改善。Potomac：省略雪模块时 SLS 崩溃（NSE 0.30），BATEA 仍可达 0.80，但 **不能替代正确模型结构**。完整 VIC+雪模块时 SLS 与 BATEA 参数接近，但 BATEA 预测区间更紧（NSE 0.97）。
+传统最小二乘（SLS）把 **观测 forcing（降水）当真值**，会在 forcing 有偏时 **扭曲参数**（Kavetski et al. 2002）。BATEA 引入 **潜变量** F 将观测 forcing 映射为「真值」forcing，并联合估计 {Q, F, B_x, B_y}。French Broad：storm **multiplier** 高斯模型使 Nash–Sutcliffe 从 ~0.76 升至 **~0.95**，峰值拟合改善。Potomac：省略雪模块时 SLS 崩溃（NSE 0.30），BATEA 仍可达 0.80，但 **不能替代正确模型结构**。完整 VIC+雪模块时 SLS 与 BATEA 参数接近，但 BATEA 预测区间更紧（NSE 0.97）。
 
 ---
 
@@ -45,17 +45,17 @@
 
 **SLS**（固定 forcing）：
 
-$$p(Q|\tilde X,\tilde Y) \propto \exp\left(-\frac{1}{2\sigma_y^2}\sum(\tilde y_n - h_n(Q,\tilde X))^2\right)$$
+    p(Q | X̃, Ỹ) ∝ exp(-(1/(2·σ_y²)) · Σ (ỹ_n - h_n(Q, X̃))²)
 
 **BATEA**（联合 forcing / 参数 / 误差模型）：
 
-$$p(Q,F,B_x,B_y|\tilde X,\tilde Y) \propto p(\tilde Y|Q,\tilde X,F,B_y)\,p(Q)\,p(F|B_x)\,p(B_x)\,p(B_y)$$
+    p(Q, F, B_x, B_y | X̃, Ỹ) ∝ p(Ỹ | Q, X̃, F, B_y) · p(Q) · p(F | B_x) · p(B_x) · p(B_y)
 
-`[原文]` §2.3 — **关键**：$F$ 为 latent true forcing。
+`[原文]` §2.3 — **关键**：F 为 latent true forcing。
 
 ### 3.2 Storm multiplier 模型（本篇使用）
 
-每场 storm 降水乘子 $m_i \sim \mathcal{N}(\mu_m, \sigma_m^2)$，$\sigma_m^2$ 用 vague inverse-gamma 先验积分掉 `[原文]` §2.4。
+每场 storm 降水乘子 m_i ~ Normal(μ_m, σ_m²)，σ_m² 用 vague inverse-gamma 先验积分掉 `[原文]` §2.4。
 
 ---
 
@@ -66,9 +66,9 @@ $$p(Q,F,B_x,B_y|\tilde X,\tilde Y) \propto p(\tilde Y|Q,\tilde X,F,B_y)\,p(Q)\,p
 | 方法 | 校准期 NSE（约） | 要点 |
 | --- | --- | --- |
 | SLS | 0.76–0.74 | 峰值系统性偏低；预测区间不合理 |
-| **BATEA** | **~0.95** | 修正降水；$T_{melt}$ 等更合理 |
+| **BATEA** | **~0.95** | 修正降水；T_melt 等更合理 |
 
-300 d vs 600 d 数据：SLS 参数 **不稳定**（$k_b$ 触上界）；BATEA 后验更紧 `[原文]` §4.1–4.2。
+300 d vs 600 d 数据：SLS 参数 **不稳定**（k_b 触上界）；BATEA 后验更紧 `[原文]` §4.1–4.2。
 
 ### 4.2 Potomac（故意省略雪模块 = 模型误差）
 
@@ -96,12 +96,12 @@ $$p(Q,F,B_x,B_y|\tilde X,\tilde Y) \propto p(\tilde Y|Q,\tilde X,F,B_y)\,p(Q)\,p
 
 | 水文 BATEA | 余氯 WNTR 校准（类比） |
 | --- | --- |
-| 降水 $\tilde X$ | 水力 demand / 源氯浓度 / 水龄 forcing |
-| 流量 $\tilde Y$ | **节点 free Cl grab samples** |
+| 降水 X̃ | 水力 demand / 源氯浓度 / 水龄 forcing |
+| 流量 Ỹ | **节点 free Cl grab samples** |
 | Storm multiplier | 分区/时段 **bulk 或 wall 乘子** 或 **源氯 bias** `[推断]` |
-| Output noise $B_y$ | **DPD 观测误差** (D2: $\sigma\approx0.02$ + bias) |
+| Output noise B_y | **DPD 观测误差** (D2: σ ≈ 0.02 + bias) |
 | 模型结构误差 | EPANET 一阶 decay 简化 vs 真实二阶/wall 零阶 (A2/A4) |
-| SLS 固定 forcing | **仅调 $k_b,k_w$ 且把 Cl_obs 当无噪** — 本项目要避免 |
+| SLS 固定 forcing | **仅调 k_b, k_w 且把 Cl_obs 当无噪** — 本项目要避免 |
 
 **与 C2 关系**：C2 对 **参数** 做 MCS；E1 对 **输入数据** 做 Bayesian — 本项目 ideally **两者叠加** `[推断]`。
 
@@ -110,7 +110,7 @@ $$p(Q,F,B_x,B_y|\tilde X,\tilde Y) \propto p(\tilde Y|Q,\tilde X,F,B_y)\,p(Q)\,p
 ### 可参考要点（写论文 / 做实验时可直接引用）
 
 1. **Introduction — 研究定位**：写「水文 BATEA 已证明 **忽略 forcing 误差会偏置参数**；供水管网中 analog 为 **忽略 DPD 误差与 demand/源氯 uncertainty**」。
-2. **Methodology 结构**：借鉴 **分层误差模型** — latent true concentration / true source chlorine + 观测层（D2）+ 参数层（$k_b,k_w$）。
+2. **Methodology 结构**：借鉴 **分层误差模型** — latent true concentration / true source chlorine + 观测层（D2）+ 参数层（k_b, k_w）。
 3. **vs 最小二乘**：French Broad NSE 0.76→0.95 — 用作 **motivating figure 思路**：展示「固定观测 + 只调参数」vs「联合误差模型」的预测带差异。
 4. **Posterior predictive check**：E1 强调 **检查 forcing 与 response 双拟合** — 你应在 Results 报告 **后验预测是否覆盖观测**。
 5. **与 C2 分工**：C2 = **参数** MCS；E1 = **输入数据** Bayesian — thesis Method 写清 **两层 uncertainty 都纳入**。

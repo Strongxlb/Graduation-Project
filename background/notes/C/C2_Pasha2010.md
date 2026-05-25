@@ -48,7 +48,7 @@
 
 - **EPANET**（Rossman 2002）+ **EPANET Toolkit** 批跑 MCS `[原文]`  
 - 一阶 bulk + **global wall** decay；源/库浓度固定  
-- Example 1：**NET2A**（手册网）；$k_b=-0.3$ d⁻¹，$k_w=-0.3$ d⁻¹；源 1.0 mg/L，库 0.5 mg/L `[原文]` §Application  
+- Example 1：**NET2A**（手册网）；k_b = -0.3 d⁻¹，k_w = -0.3 d⁻¹；源 1.0 mg/L，库 0.5 mg/L `[原文]` §Application  
 - 节点 26 下游层流管截断，需求 lump 至 26 `[原文]`  
 
 ### 4.2 不确定性设定
@@ -56,9 +56,9 @@
 | 参数 | 分布 | CV |
 | --- | --- | --- |
 | bulk / wall decay | Normal | **0.1** |
-| 糙率 $C_{HW}$ | Truncated normal (80–140) | 0.1 |
+| 糙率 C_HW | Truncated normal (80–140) | 0.1 |
 | 管径 | Uniform ±12.7 mm | — |
-| 节点需求 | Normal（空间 $q_j^n$ + 时间 $q_{t,j}^f$） | 0.1 |
+| 节点需求 | Normal（空间 q_j^n + 时间 q_(t,j)^f） | 0.1 |
 | 参数相关性 | **假设不相关** | `[原文]` |
 
 每实验 **10,000** 次实现；decay 相关系数 PCC/RCC 对节点 12–27 报告 `[原文]` Table 2。
@@ -88,7 +88,7 @@
 
 `[原文]` 强调 **identifiability 困境**：
 
-> 合理范围的 wall decay 等参数可产生 **相似水质** → 现场余氯校准 **难以得到唯一 $k_w$**；对正常运营可接受，对 **极端工况/改运营** 风险大。
+> 合理范围的 wall decay 等参数可产生 **相似水质** → 现场余氯校准 **难以得到唯一 k_w**；对正常运营可接受，对 **极端工况/改运营** 风险大。
 
 建议：**tracer + 水质同步测试**；但需求不确定仍限制 wall 估计 robustness。
 
@@ -109,9 +109,9 @@
 
 | 符号 | 含义 |
 | --- | --- |
-| $k_b$, $k_w$ | global bulk / wall 一阶衰减系数 |
-| $q_j^n$, $q_{t,j}^f$ | 空间 / 时间随机需求因子 |
-| CV | coefficient of variation = $\sigma/\mu$ |
+| k_b, k_w | global bulk / wall 一阶衰减系数 |
+| q_j^n, q_(t,j)^f | 空间 / 时间随机需求因子 |
+| CV | coefficient of variation = σ/μ |
 
 ---
 
@@ -120,16 +120,16 @@
 | 环节 | 联系 |
 | --- | --- |
 | **C → E 桥接** | 本文是 literature 收录理由中的「确定性校准 ↔ 不确定性分析」桥梁 |
-| **先验范围** | CV=0.1 可作为 MCS/Bayesian 中 $k_b,k_w$ 先验宽度的 **文献参照** |
+| **先验范围** | CV=0.1 可作为 MCS/Bayesian 中 k_b, k_w 先验宽度的 **文献参照** |
 | **可识别性** | 支持 thesis 论点：仅 fit 余氯不足以唯一确定 wall + bulk → 需要 **观测误差模型 (D) + 贝叶斯 (E)** |
 | **EPANET/WNTR** | 与 `01_demo_wntr.py` 同一工具链；NET2A 可作第二 benchmark |
 | **0.2 mg/L 阈值** | 本文未用监管阈值，但讨论「小幅浓度变化可检测污染」— 与 operational residual 监测逻辑相关 |
 
 ### 可参考要点（写论文 / 做实验时可直接引用）
 
-1. **T5 MCS 先验**：$k_b$、$k_w$、糙率、需求 **CV=0.1** — Methodology 写「文献支持的参数扰动幅度」（Pasha & Lansey 2010）。
+1. **T5 MCS 先验**：k_b、k_w、糙率、需求 **CV=0.1** — Methodology 写「文献支持的参数扰动幅度」（Pasha & Lansey 2010）。
 2. **Discussion — identifiability**：直接引用 — 正常工况下 **多组参数拟合同一余氯** → 解释为何仅 deterministic RMSE 不够，需要 posterior / 预测区间。
-3. **参数重要性排序**：稳态下 **wall decay 影响常最大** — Results 报告 sensitivity 时优先展示 $k_w$。
+3. **参数重要性排序**：稳态下 **wall decay 影响常最大** — Results 报告 sensitivity 时优先展示 k_w。
 4. **第二 benchmark**：EPANET 手册 **NET2A**（35 管）与 Net1 并列 — 可复现 Fig. 3 boxplot 风格的 **节点浓度分布图**。
 5. **非稳态 caveat**：流型变化（泵/箱）时输出 std **非加性** — 若你做 extended period 校准，Discussion 必须讨论 **operating condition**。
 6. **与 C1 对照写进论文**：C1 给 **点估计**；C2 说明点估计 **不唯一但输出仍窄** → 动机是加 **测量误差层**（D2）而非只加参数噪声。
@@ -151,7 +151,7 @@
 ## 10. 待办
 
 - [ ] 在 WNTR 复现 NET2A + CV=0.1 单参数 wall MCS  
-- [ ] 对比 C1 点估计 $k_w$ 与 C2 后验 spread 是否覆盖  
+- [ ] 对比 C1 点估计 k_w 与 C2 后验 spread 是否覆盖  
 - [ ] 读 Pasha (2006) PhD  dissertation 获取更多网详情  
 
 ---

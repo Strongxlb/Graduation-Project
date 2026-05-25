@@ -58,20 +58,20 @@
 
 - **水力**：Niranjan Reddy (1994) 静态模型扩展为 **extended period simulation** `[原文]` §2.1.1  
 - **水质**：一维 advection-dominated；节点 **流量加权瞬时混合** `[原文]` Eq.(1)–(8)  
-- **反应形式**（7 种组合）：overall 一阶；bulk 一阶 + wall 一阶/零阶；bulk 二阶 + wall 一阶/零阶；含 limiting concentration $C_L$ 的两组分二阶 bulk 等 `[原文]` §2.1.2  
+- **反应形式**（7 种组合）：overall 一阶；bulk 一阶 + wall 一阶/零阶；bulk 二阶 + wall 一阶/零阶；含 limiting concentration C_L 的两组分二阶 bulk 等 `[原文]` §2.1.2  
 
-Wall 一阶项含 Rossman (2000) 的 **mass transfer coefficient** $k_f$。
+Wall 一阶项含 Rossman (2000) 的 **mass transfer coefficient** k_f。
 
 ### 4.2 反演 / 优化
 
 **目标函数**（加权最小二乘）：
 
-$$J = \sum_{j=1}^{N_m} w_j \left( C_{obs,j} - C_{sim,j}(\theta) \right)^2$$
+    J = Σⱼ₌₁..N_m  w_j · (C_obs,j - C_sim,j(θ))²
 
-`[原文]` §2.2 — $w_j$ 为测点权重；$\theta$ 为待估反应参数（global 或 zoned）。
+`[原文]` §2.2 — w_j 为测点权重；θ 为待估反应参数（global 或 zoned）。
 
 - **求解**：Gauss–Newton + **parameter perturbation** 求灵敏度 `[原文]` §2.2.2  
-- **输出**：参数点估计、95% 置信带、校准统计（RMS、$R^2$ 等）  
+- **输出**：参数点估计、95% 置信带、校准统计（RMS、R² 等）  
 
 ### 4.3 与 EPANET 关系
 
@@ -84,22 +84,22 @@ $$J = \sum_{j=1}^{N_m} w_j \left( C_{obs,j} - C_{sim,j}(\theta) \right)^2$$
 | 案例 | 网络 | 要点 | 来源 |
 | --- | --- | --- | --- |
 | 验证网 | Bangalore（Datta & Sridharan 1994） | 二阶 bulk + 分区 wall；合成数据反演收敛至真值 | `[原文]` §3.1 |
-| Example 1 | Brushy Plain（EPANET 例） | $C_{in}=1.15$ mg/L；$k_{b,1}=0.55$ d⁻¹；8 节点 55 h 观测 | `[原文]` §4.1 |
-| Example 2 | Fairfield zone 3 | 126 pipes, 111 nodes；石棉水泥大管径；$k_b=1.16$ d⁻¹；Rossman 提供数据 | `[原文]` §4.2 |
+| Example 1 | Brushy Plain（EPANET 例） | C_in = 1.15 mg/L；k_b,1 = 0.55 d⁻¹；8 节点 55 h 观测 | `[原文]` §4.1 |
+| Example 2 | Fairfield zone 3 | 126 pipes, 111 nodes；石棉水泥大管径；k_b = 1.16 d⁻¹；Rossman 提供数据 | `[原文]` §4.2 |
 
 **Example 1 关键结果** `[原文]` Table 4–5：
 
 | 参数 | 估计值 | 单位 |
 | --- | --- | --- |
-| $k_0$ (overall) | 2.5169 | d⁻¹ |
-| $k_{w,1}$ | **0.3654** | m/d |
-| $k_{w,0}$ | 201.61 | mg/m²/d |
+| k₀ (overall) | 2.5169 | d⁻¹ |
+| k_w,1 | **0.3654** | m/d |
+| k_w,0 | 201.61 | mg/m²/d |
 
-Rossman et al. (1994) 手工校准 $k_{w,1}$ 范围 **0.15–0.45 m/d**；本文自动估计 **0.3654 m/d** 落在区间内。RMS 约 **0.192 mg/L**（对应下界 0.15 m/d）。
+Rossman et al. (1994) 手工校准 k_w,1 范围 **0.15–0.45 m/d**；本文自动估计 **0.3654 m/d** 落在区间内。RMS 约 **0.192 mg/L**（对应下界 0.15 m/d）。
 
-**分区 wall**（按管径两组）：大管径组 $k_w \approx 0.33$ m/d，小管径 **0.50 m/d** — 小管 wall 贡献更大，与 Rossman et al. (1994) 一致 `[原文]` §4.1.2。
+**分区 wall**（按管径两组）：大管径组 k_w ≈ 0.33 m/d，小管径 **0.50 m/d** — 小管 wall 贡献更大，与 Rossman et al. (1994) 一致 `[原文]` §4.1.2。
 
-**Example 2**：overall $k_0=1.25$ d⁻¹，略高于 bulk 1.16 d⁻¹ → wall 贡献可忽略；分 wall 模型时 wall 参数 **negligibly small** `[原文]` §4.2。
+**Example 2**：overall k₀ = 1.25 d⁻¹，略高于 bulk 1.16 d⁻¹ → wall 贡献可忽略；分 wall 模型时 wall 参数 **negligibly small** `[原文]` §4.2。
 
 ---
 
@@ -116,11 +116,11 @@ Rossman et al. (1994) 手工校准 $k_{w,1}$ 范围 **0.15–0.45 m/d**；本文
 
 | 符号 | 含义 | 单位 |
 | --- | --- | --- |
-| $k_0$ | overall 一阶衰减 | d⁻¹ |
-| $k_{b,1}$, $k_{b,2}$ | bulk 一阶 / 二阶 | d⁻¹, L/mg·d |
-| $k_{w,1}$, $k_{w,0}$ | wall 一阶 / 零阶 | m/d, mg/m²/d |
-| $k_f$ | 传质系数 | m/d |
-| $C_L$ | 氯下限浓度 | mg/L |
+| k₀ | overall 一阶衰减 | d⁻¹ |
+| k_b,1, k_b,2 | bulk 一阶 / 二阶 | d⁻¹, L/mg·d |
+| k_w,1, k_w,0 | wall 一阶 / 零阶 | m/d, mg/m²/d |
+| k_f | 传质系数 | m/d |
+| C_L | 氯下限浓度 | mg/L |
 
 ---
 
@@ -129,19 +129,19 @@ Rossman et al. (1994) 手工校准 $k_{w,1}$ 范围 **0.15–0.45 m/d**；本文
 | 项目环节 | 可借鉴点 |
 | --- | --- |
 | **确定性校准 baseline** | WLS + Gauss–Newton 是 C 类「标准做法」参照；本项目可在 WNTR 上实现类似目标函数 |
-| **wall vs bulk 可识别性** | Example 1 显示 wall 主导时 $k_0 \gg k_b$；与 A1/A4 机理一致 |
+| **wall vs bulk 可识别性** | Example 1 显示 wall 主导时 k₀ ≫ k_b；与 A1/A4 机理一致 |
 | **测点设计** | 作者强调测点布局 — 对接 D 类测量误差 + 未来传感器位置讨论 |
 | **与 C2 对照** | C1 点估计；C2 说明同一参数多解时 MCS 输出仍窄 — 需 **Bayesian / 多参数联合**（E 类） |
 | **动态扩展** | 本文 dynamic state 对应本项目 extended period 校准需求 |
 
 ### 可参考要点（写论文 / 做实验时可直接引用）
 
-1. **T4 baseline 实现**：在 WNTR 上实现 **加权最小二乘** $J=\sum w_j(C_{obs}-C_{sim})^2$，用 `scipy.optimize.least_squares` 或 Gauss–Newton；C1 是 Plan A **确定性校准的 direct template**。
-2. **文献数值对照**：Brushy Plain 自动得 $k_{w,1}=0.3654$ m/d，落在 Rossman (1994) 手工 **0.15–0.45** m/d — baseline 结果应与此 **同量级**。
-3. **权重 $w_j$**：结合 D2，设 $w_j=1/\sigma^2$，$\sigma=0.02$ mg/L — Methodology 写「C1 目标函数 + D2 误差权重」。
+1. **T4 baseline 实现**：在 WNTR 上实现 **加权最小二乘** J = Σ w_j·(C_obs - C_sim)²，用 `scipy.optimize.least_squares` 或 Gauss–Newton；C1 是 Plan A **确定性校准的 direct template**。
+2. **文献数值对照**：Brushy Plain 自动得 k_w,1 = 0.3654 m/d，落在 Rossman (1994) 手工 **0.15–0.45** m/d — baseline 结果应与此 **同量级**。
+3. **权重 w_j**：结合 D2，设 w_j = 1/σ²，σ = 0.02 mg/L — Methodology 写「C1 目标函数 + D2 误差权重」。
 4. **测点设计（M1 报告）**：引用「测点数量、位置影响参数估计」— 合成数据实验可故意 **减少节点** 展示 identifiability 下降。
 5. **Extended period**：校准用 **55 h+ 动态水力**（与 demo 24 h 对比）— Week 3–4 扩展仿真时长时可引用 C1。
-6. **Global vs zoned**：Example 1 按 **管径分区** $k_w$ — 若 Net1 材质信息不足，至少做 global vs 2-zone sensitivity。
+6. **Global vs zoned**：Example 1 按 **管径分区** k_w — 若 Net1 材质信息不足，至少做 global vs 2-zone sensitivity。
 7. **Discussion 局限**：C1 未建模 DPD 误差 → 自然过渡到 **T5 不确定性感知**（C2 + E1 + D2）。
 
 ---
@@ -167,9 +167,9 @@ Rossman et al. (1994) 手工校准 $k_{w,1}$ 范围 **0.15–0.45 m/d**；本文
 
 ## 11. 思考题
 
-1. 若观测噪声 $\sigma=0.05$ mg/L，WLS 权重 $w_j=1/\sigma^2$ 应如何写入本项目 likelihood？  
-2. Example 2 wall 可忽略时，继续拟合 $k_w$ 是否 ill-posed？  
-3. Gauss–Newton 对非凸目标（多 zone $k_w$）会否陷入局部最优？  
+1. 若观测噪声 σ = 0.05 mg/L，WLS 权重 w_j = 1/σ² 应如何写入本项目 likelihood？  
+2. Example 2 wall 可忽略时，继续拟合 k_w 是否 ill-posed？  
+3. Gauss–Newton 对非凸目标（多 zone k_w）会否陷入局部最优？  
 
 ---
 
