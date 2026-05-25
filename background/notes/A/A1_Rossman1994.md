@@ -1,325 +1,590 @@
-# A1 — Rossman, Clark, Grayman (1994) 精读笔记
+# A1 — Rossman, Clark, Grayman (1994) 讲解笔记
 
-> 配套文件：[`../Literature/literature.md`](../Literature/literature.md) §A1、[`../../README.md`](../../README.md)、[`../../plan1.md`](../../plan1.md)
-> PDF 路径：[`../Literature/rossman-et-al-1994-modeling-chlorine-residuals-in-drinking-water-distribution-systems.pdf`](../Literature/rossman-et-al-1994-modeling-chlorine-residuals-in-drinking-water-distribution-systems.pdf)
+> 配套文件：`[../Literature/literature.md](../Literature/literature.md)` §A1、`[../../README.md](../../README.md)`、`[../../plan1.md](../../plan1.md)`
+> PDF 路径：`[../Literature/rossman-et-al-1994-modeling-chlorine-residuals-in-drinking-water-distribution-systems.pdf](../Literature/rossman-et-al-1994-modeling-chlorine-residuals-in-drinking-water-distribution-systems.pdf)`
 >
-> **来源标签**（更新于 2026-05-19，已通读 PDF 18 页正文）：
-> - `[原文]` 直接出自论文 PDF
-> - `[元数据]` 来自 CrossRef / OpenAlex
-> - `[推断]` 仍属推断（项目最终所剩极少）
-> - `[需补]` 仍需补充（清单见 §10）
+> **本文风格**：故事 + 直觉为主，公式只解释"为什么这么写"。
+> **怎么用这份笔记**：
 >
-> 之前未读 PDF 时大多数 `[推断]` 项都已对照原文核实并改为 `[原文]`；少数被修正之处（数值方法、测量方法等）在 §13「修正记录」中专门列出。
+> - **§1** 是论文原文 Abstract + 翻译 + **逐句讲解**（想从论文原文入手就读这一节）
+> - **§2** 是 TL;DR（想 60 秒看懂全文就读这一节）
+> - 想**顺着故事读完整套理解** → 从 §2 一直读到 §8
+> - 想**写论文/找数据** → §9（毕设联系）+ §11（公式/数字速查表）
 
 ---
 
-## 0. 元数据（已验证）
+## 1. 原文 Abstract + 翻译 + 讲解
 
-| 字段 | 内容 | 来源 |
-| --- | --- | --- |
-| Title | Modeling Chlorine Residuals in Drinking-Water Distribution Systems | CrossRef + PDF |
-| Authors | **Lewis A. Rossman**, Robert M. Clark, Walter M. Grayman | CrossRef + PDF |
-| Affiliation | US EPA Risk Reduction Engineering Lab, Cincinnati（第一、第二作者）；Grayman 为咨询工程师 | PDF 脚注 1–3 |
-| Journal | *Journal of Environmental Engineering* (ASCE) | CrossRef |
-| 提交 / 出版 | Submitted 1993-04-15；published Vol 120, No. 4, **1994-07/08** | PDF 脚注 |
-| 页码 | 803–820（**18 页**） | PDF |
-| DOI | `10.1061/(ASCE)0733-9372(1994)120:4(803)` | — |
-| Paper No. | 5922 | PDF |
-| 被引数 | **386 (CrossRef) / 494 (OpenAlex)**（截至 2026-04） | 两库 |
-| 优先级 | **P0**（literature.md §A1） | 本项目 |
-| 状态 | `read`（PDF 已通读） | — |
-
-**为什么是 P0**：第一作者 Rossman 就是 EPANET 的作者本人，本文是 **EPANET water quality module** 的奠基论文。文中明确提到该模型已集成进 "a computer program called EPANET" `[原文]` p.69。
-
----
-
-## 1. 原文 Abstract（英文，逐字）
+### 1.1 原文（PDF p.803）
 
 > A mass transfer-based model is developed for predicting chlorine decay in drinking-water distribution networks. The model considers first-order reactions of chlorine to occur both in the bulk flow and at the pipe wall. The overall rate of the wall reaction is a function of the rate of mass transfer of chlorine to the wall and is therefore dependent on pipe geometry and flow regime. The model can thus explain field observations that show higher chlorine decay rates associated with smaller pipe sizes and higher flow velocities. It has been incorporated into a computer program called EPANET that can perform dynamic water-quality simulations on complex pipe networks. The model is applied to chlorine measurements taken at nine locations over 53 h from a portion of the South Central Connecticut Regional Water Authority's service area. Good agreement with observed chlorine levels is obtained at locations where the hydraulics are well characterized. The model should prove to be a valuable tool for managing chlorine-disinfection practices in drinking-water distribution systems.
 
-> 来源：PDF p.803（与 OpenAlex 重建版本一致）。
+### 1.2 中文翻译（直译版，结构对齐原文）
+
+> 本文提出一个**基于质量传递**的模型，用于预测饮用水管网中余氯的衰减。该模型认为氯在**水体流动**和**管壁**两处同时发生一阶反应。管壁反应的总速率取决于氯向管壁的传质速率，因此依赖于**管道几何**与**流态**。这样一来，模型就能解释现场观察到的现象——**管径越小、流速越高，余氯衰减速率越快**。该模型已集成进一个名为 **EPANET** 的计算机程序，可对复杂管网执行动态水质模拟。本研究将模型应用于 South Central Connecticut Regional Water Authority（SCCRWA）部分服务区的余氯实测数据——9 个位置、53 小时连续观测。在**水力条件刻画清楚**的位置，模拟结果与实测氯浓度吻合良好。本模型应能成为饮用水管网中管理氯消毒实践的有效工具。
+
+### 1.3 逐句讲解（把每一句的"潜台词"挖出来）
+
+摘要短短 8 句，但每一句都在做某件具体的事——下面一句一句拆开看。
 
 ---
 
-## 2. 中文摘要（再表述）
+**第 1 句**
 
-`[原文]` 论文提出**以质量传递为基础**的余氯衰减模型，用于预测饮用水管网中的余氯浓度。模型把余氯衰减拆成两段一阶反应：
+> A mass transfer-based model is developed for predicting chlorine decay in drinking-water distribution networks.
+>
+> 我们做了一个**基于质量传递的**模型，用来预测饮用水管网中的余氯衰减。
 
-1. **bulk reaction**：发生在水体内的整体反应（与有机物等反应），速率系数 $k_b$；
-2. **wall reaction**：发生在管壁的反应（与管壁腐蚀产物、生物膜等反应），速率系数 $k_w$。
+**讲解**：
 
-**关键 insight**：wall reaction 的有效速率并非单纯由 $k_w$ 决定，而是受**水体→管壁的传质速率 $k_f$** 限制。$k_f$ 通过 Sherwood 数与 Reynolds 数关联，依赖**管径**和**流态**。这就解释了 1990 年代前的现场观察——**管径越小、流速越快，余氯衰减越快**。
-
-该模型已集成进 **EPANET** 软件，可对复杂管网做动态水质仿真。论文用 South Central Connecticut Regional Water Authority 的 **Cherry Hill/Brushy Plains** 服务区数据（9 个采样点、53 小时）做验证。
-
----
-
-## 3. 论文解决了什么问题
-
-`[原文]` PDF Introduction (p.803–804) 明确写出的「pre-1994 文献空白」：
-
-| 1994 年之前的状况 | 本论文解决的问题 |
-| --- | --- |
-| Clark et al. (1993) 已经证明余氯在不同位置/不同时刻**变化大**，但**没有解释机理** | 提出 mass-transfer-based 模型，给出可预测的物理框架 |
-| Wable et al. (1991) 发现**管内 decay rate 比同水样在 flask 内快若干倍** —— 说明管壁参与反应，但**没有定量模型** | 显式引入 wall reaction 项 $k_w$，并用 film resistance model 处理传质 |
-| Hunt & Kroon (1991) 用**每根管一个独立 $k_b$** 来拟合观测，发现"小管需要更大的 $k_b$" —— 但**用大量参数硬拟合**，缺机理 | 用 mass-transfer 框架自然解释「小管 decay 快」，**全网只需 1 个 $k_b$ + 1 个 $k_w$**（parsimony） |
-| Biswas et al. (1993) 在单根管 steady-state 给出 bulk + radial diffusion + wall reaction 模型，**但限于稳态、单管** | 推广到**非稳态、复杂管网、湍流 + 层流共存** |
-| 缺少能跑复杂管网动态水质仿真的通用工具 | 把模型 + DVEM 数值方法集成进 **EPANET** |
+- **"mass transfer-based"** 这个定语是整个摘要里最重要的词。它在说："**我们的模型和别人不一样的地方在于——我们显式把传质这件事建进去了**"。这是论文区别于 Hunt & Kroon（每根管一个 `k_b` 硬拟合）和早期 Wable 等人（只看 bulk）的核心标签。
+- **"chlorine decay"**（余氯衰减）是结果指标，不是机理。读者要明白：这套模型不预测细菌、不预测消毒副产物，只预测**氯本身的浓度变化**。
+- **"distribution networks"**（分配管网）——不是水厂内部、不是水源水，是**家庭水龙头之前**那段管子。这是论文的边界。
 
 ---
 
-## 4. 用了什么方法
+**第 2 句**
 
-### 4.1 模型框架 `[原文]` p.804（"MODEL DEVELOPMENT" 节）
+> The model considers first-order reactions of chlorine to occur both in the bulk flow and at the pipe wall.
+>
+> 该模型认为氯在水体流动中**和**管壁上**同时**发生一阶反应。
 
-假设：
+**讲解**：
 
-- 余氯沿管段**一阶**衰减
-- 反应同时发生在 **bulk flow** 和 **pipe wall**
-- 壁面反应受 **film resistance mass transfer** 限制
-- 忽略**轴向 dispersive flux**（典型工况下可忽略）
-- 忽略**壁面物质向 bulk 输送**这条机制（"demands significantly more information"）
-
-### 4.2 关键公式 `[原文]` p.804–805（Eq 1–10）
-
-**沿管段的一维守恒方程**（Eq 1）：
-
-$$\frac{\partial c}{\partial t} = -u\frac{\partial c}{\partial x} - k_b c - \frac{k_f}{r_h}(c - c_w)$$
-
-**壁面质量平衡**（假设壁面浓度准稳态，Eq 2）：
-
-$$k_f(c - c_w) = k_w c_w$$
-
-→ 解出 $c_w$ 代入 Eq 1，得到**简洁形式**（Eq 3）：
-
-$$\boxed{\frac{\partial c}{\partial t} = -u\frac{\partial c}{\partial x} - k_b c - \frac{k_w k_f}{r_h(k_w + k_f)}c}$$
-
-对网络第 $i$ 根管段（Eq 9–10）：
-
-$$\frac{\partial c_i}{\partial t} = -u_i\frac{\partial c_i}{\partial x_i} - K_i c_i, \quad K_i = k_b + \frac{k_w k_f}{r_{h,i}(k_w + k_f)}$$
-
-**关键无量纲数**（Eq 4–8）：
-
-$$k_f = \mathrm{Sh}\cdot \frac{D}{d}$$
-
-$$\mathrm{Sh} = \begin{cases} 0.023\,\mathrm{Re}^{0.83}\,\mathrm{Sc}^{0.333}, & \mathrm{Re} > 2{,}300 \\[4pt] 3.65 + \dfrac{0.0668\,(d/L)\,(\mathrm{Re}\,\mathrm{Sc})}{1 + 0.04[(d/L)(\mathrm{Re}\,\mathrm{Sc})]^{2/3}}, & \mathrm{Re} < 2{,}300 \end{cases}$$
-
-$$\mathrm{Re} = \frac{ud}{\nu}, \quad \mathrm{Sc} = \frac{\nu}{D}$$
-
-> 关于水力半径：PDF p.804 写 "$r_h$ = hydraulic radius of pipe (one half the pipe radius)"，即 $r_h = d/4$（满管圆管）。
-
-**节点边界条件**（Eq 11）：完全瞬时混合假设。
-**储水罐模型**（Eq 12–13）：完全混合、可变体积反应器。
-
-### 4.3 数值方法 — **DVEM（Discrete Volume Element Method）** `[原文]` p.808
-
-不是有限体积也不是 method of characteristics，而是 Rossman 等 1993 年在 *J. Water Resour. Plng. Mgmt.* 发表的 **DVEM**。要点：
-
-- 每个水力时段内，把每根管段按其体积、流速、最短传输时间分成若干 segment；
-- 每个 segment 当作一个完全混合反应器；
-- 每个 timestep 先做 segment 内反应，再向下游 segment 传输；
-- 接入 junction 时与从其他管来的水流瞬时混合；
-- 水力条件变化时重新分段。
-
-这套 DVEM 后来就成了 EPANET water quality engine 的核心算法。
-
-### 4.4 案例验证流程 `[原文]` p.809–814
-
-**两阶段校准**：
-
-1. **水力校准（用 fluoride 作 conservative tracer）**：
-   - 8/13 9:00 a.m. 关闭 Saltonstall 厂的 fluoride 投加
-   - 调整节点用水量 + 部分管段粗糙度系数，使模拟 fluoride 序列与实测一致
-   - 校准好坏在 Figs. 4–7（PDF p.810–812）展示
-2. **水质校准**：
-   - $k_b$ **独立**由 SCCRWA 实验室 beaker test 测得（不调）
-   - $k_w$ 在 0.15–0.45 m/day 范围内手动 sweep，**没有用 formal optimization**
-   - 与 8 个节点的实测 chlorine 对比
+- **"first-order"**（一阶）是一个**重要简化**：反应速率 ∝ 浓度本身。这意味着如果氯加倍，衰减速率也加倍。**它不是严格成立的**——A2 (Hua 1999) 等后续工作发现真实衰减更接近"快段+慢段"的双指数。但作为工程近似它够用。
+- **"both ... and"**——这是论文的"双段模型"主张。**bulk + wall** 这个二分法成为后续二十多年文献的标准结构（包括 EPANET 默认设置）。
+- 这一句**没提传质**——传质是下一句的主角，作者刻意把"反应分两处"和"壁反应受传质限制"拆成两步说。
 
 ---
 
-## 5. 测了什么、在哪测、测多久（已大幅修正）
+**第 3 句（核心 claim）**
 
-`[原文]` p.809–812
+> The overall rate of the wall reaction is a function of the rate of mass transfer of chlorine to the wall and is therefore dependent on pipe geometry and flow regime.
+>
+> 管壁反应的**总速率**取决于氯到管壁的传质速率，因此依赖于**管道几何**和**流态**。
 
-| 维度 | 内容 |
-| --- | --- |
-| 网络 | **Cherry Hill/Brushy Plains Service Area**, SCCRWA, 康涅狄格州 |
-| 服务区规模 | 5.2 km²（2 平方英里），几乎全为住宅区 |
-| 平均用水 | 20.2 L/s (0.46 mgd) |
-| 干管管径 | 20.3 cm (8 in) 与 30.5 cm (12 in) |
-| 水源 | Saltonstall 处理厂 |
-| 泵站 | Cherry Hill Pump Station，标称 61.3 L/s (1.4 mgd) |
-| 水塔 | Brushy Plains Tank，容积 3,800,000 L (1,000,000 gal) |
-| 泵控制 | 水位低于 17.1 m → 开；高于 19.8 m → 关 |
-| 采样日期 | **1991 年 8 月 13–15 日** |
-| 采样点 | 9 个：1 个泵站、1 个水塔、7 个消火栓 |
-| 采样频次 | 每条 1.5–2 h，整个 circuit 每 ~3 h 重复一轮 |
-| 观测时长 | **53 h** |
-| 总样本数 | **181 对**（chlorine + fluoride） |
-| 进水 chlorine | 维持 **1.1 mg/L** |
-| **测量方法（关键 update）** | **混合方法**：泵站 + 水塔用**连续电化学余氯分析仪**（Rosemount Model 4024 + free chlorine 特定膜电极 90243-116）；其余 7 个 hydrant 取 grab samples 用 **DPD 比色法**（Hach Model 46700-05） |
-| Fluoride 测量 | 水塔用 ion-selective electrode 连续监测；其他点用 SCCRWA 实验室离子电极 grab samples |
+**讲解**：
+
+- 这是整篇论文的**核心 claim**，也是"为什么这模型聪明"的关键。注意作者用的词是 **"overall rate"**——总速率，意指**反应速率 + 传质速率**串联后的等效速率（即 §4.4 的串联电阻类比）。
+- **"is therefore dependent on pipe geometry and flow regime"** 是个**因果链**：传质 → 管径/流速依赖。这一步推理是论文得以解释"小管/快流速 → 快衰减"现象的逻辑桥梁。
+- 这一句**没出现公式**，但它实际上描述的就是论文 Eq 3 里那个 `(k_w·k_f)/(k_w+k_f)` 项。
 
 ---
 
-## 6. 得出了什么结论
+**第 4 句（卖点 / 解释力）**
 
-`[原文]` p.815–818 (Analysis + Summary)
+> The model can thus explain field observations that show higher chlorine decay rates associated with smaller pipe sizes and higher flow velocities.
+>
+> 模型由此可以**解释**现场观察到的现象——管径越小、流速越高，氯衰减越快。
 
-### 6.1 校准结果（关键数字）
+**讲解**：
 
-- **$k_b = 0.55$ /day**（实验室 beaker test 独立测定）
-- **$k_w \in [0.15, 0.45]$ m/day**（网络拟合的合理区间）
-- **RMSE**：
-  - $k_w = 0.45$ m/day → **0.186 mg/L**
-  - $k_w = 0.15$ m/day → **0.211 mg/L**
-- 高 $k_w$ 平均误差小，但**对节点 11/19/25 的峰值匹配较差**——拟合存在权衡
-- **拟合好的节点**：3, 6, 11, 19, 25（这些节点水力学刻画清晰）
-- **拟合差的节点**：10, 28, 34（位于人口稀疏的死端，需水量估计困难，水力校准本身就差——参见 §4.4 Figs. 4–7）
-
-### 6.2 反应贡献分解 `[原文]` p.817 Fig 14
-
-| 损失来源 | $k_w = 0.45$ m/day | $k_w = 0.15$ m/day |
-| --- | --- | --- |
-| Pipe wall | **67%** | 48% |
-| Bulk flow | 12% | 19% |
-| Tank | 21% | 33% |
-
-→ **wall reaction 在这套管网里占主导**（不论 $k_w$ 取高还是低）。
-
-### 6.3 反应限制机制 `[原文]` p.816 Fig 13
-
-- $k_w = 0.15$ m/day：曲线随流速基本水平 → **wall rate limited**（反应是瓶颈，传质富余）
-- $k_w = 0.45$ m/day：曲线随流速明显上升 → **mass-transfer limited**（传质是瓶颈）
-
-### 6.4 工程结论
-
-- 在该系统，**改水塔操作（缩短水龄）作用有限**——因为 wall 占 67% 而 tank 只占 21%
-- **管道清洗 / 替换** 在这里更有效
-- 模型**强烈依赖于水力刻画的质量**：水力差的位置（死端）模型也差
-
-### 6.5 摘要式结论 `[原文]` p.815（"SUMMARY AND CONCLUSIONS"）
-
-1. 双段一阶 + mass transfer 模型能解释"小管/高速 → 高 decay"
-2. 仅需估计两类 rate constants：$k_b$, $k_w$
-3. SCCRWA 案例 53 h × 8 点验证，在水力清晰处吻合好
-4. **强调先要拿到准确的水力学信息**才能跑水质模型
-5. **承认局限**：单一 $k_w$ 用于全网未必合适，建议未来研究 $k_w$ 与管龄/管材/生物膜/腐蚀的关系
+- **"thus"**（由此/因此）紧扣第 3 句——作者在强调：**这不是经验拟合，这是物理推论**。这一句的份量在于 "explain"（解释）而不是 "fit"（拟合）。这是论文区别于 Hunt & Kroon 的关键卖点。
+- **"smaller pipe sizes and higher flow velocities"** 不是随便举例——这正是 1980 年代工程师反复观察、却给不出合理解释的两个现象。作者在这里实际上是在说："**你们二十年来困惑的问题，我们解决了**"。
+- 写论文时如果需要一句话总结这篇文章的**贡献**，这就是那一句。
 
 ---
 
-## 7. 关键公式 / 符号（论文 Appendix II Notation，完整版）
+**第 5 句（工程实现）**
 
-| 符号 | 含义 | 单位 |
-| --- | --- | --- |
-| $c$ | bulk flow 浓度 | M L⁻³ (mg/L) |
-| $c_w$ | wall 浓度 | M L⁻³ |
-| $D$ | molecular diffusivity | L² T⁻¹ |
-| $d$ | pipe diameter | L |
-| $K$ | overall decay constant | T⁻¹ |
-| $k_b$ | bulk decay rate constant | T⁻¹ |
-| $k_f$ | mass-transfer coefficient | L T⁻¹ |
-| $k_w$ | wall decay rate constant | **L T⁻¹**（注意单位！） |
-| $L$ | pipe length | L |
-| $M$ | 节点外部 mass inflow | M T⁻¹ |
-| $q$ | flow rate | L³ T⁻¹ |
-| $\mathrm{Re}$ | Reynolds number | 无量纲 |
-| $r_h$ | hydraulic radius (= d/4) | L |
-| $S$ | 节点外部 flow rate | L³ T⁻¹ |
-| $\mathrm{Sc}$ | Schmidt number | 无量纲 |
-| $\mathrm{Sh}$ | Sherwood number | 无量纲 |
-| $u$ | flow velocity | L T⁻¹ |
-| $V$ | tank volume | L³ |
-| $\nu$ | kinematic viscosity | L² T⁻¹ |
+> It has been incorporated into a computer program called EPANET that can perform dynamic water-quality simulations on complex pipe networks.
+>
+> 该模型已集成进一个叫 **EPANET** 的计算机程序，可以对复杂管网做动态水质仿真。
 
-> 来源：PDF Appendix II（p.820）。
+**讲解**：
+
+- 这是论文从"理论"跨到"工具"的桥梁。**注意时态——"has been incorporated"**（已经集成进去了）。这意味着这篇 1994 年的论文**写作时 EPANET 已经存在**。
+- **"dynamic"**（动态）和**"complex pipe networks"**（复杂管网）一起出现很关键：Biswas 1993 那篇也建了模型，但只能算**单根管 + 稳态**。Rossman 这一句在划界——"我们能处理整张管网 + 随时间变化"。
+- **对你毕设的直接含义**：你用 WNTR/EPANET 跑 demo 时，**水质引擎里跑的就是这篇论文的方程**。这不是历史文献，是你正在用的工具的源代码描述。
 
 ---
 
-## 8. 与本项目的关联
+**第 6 句（验证数据）**
 
-本项目是「**不确定性感知的供水管网余氯模型校准**」。Rossman 1994 与项目各模块的对应：
+> The model is applied to chlorine measurements taken at nine locations over 53 h from a portion of the South Central Connecticut Regional Water Authority's service area.
+>
+> 本研究将模型应用于 SCCRWA 部分服务区的余氯实测数据——9 个位置、53 小时。
 
-| 项目模块（README §4.3） | 关联点 |
-| --- | --- |
-| **T2 模型搭建** | 我们 demo 用的就是 Eq 3。`src/01_demo_wntr.py` 里 `bulk_coeff` 与 `wall_coeff` 两个开关对应 $k_b$ 与 $k_w$ |
-| **T2 — 数值方法** | EPANET 引擎跑的就是 DVEM。我们不用自己写 |
-| **T3 数据组织** | Cherry Hill 数据集（53 h, 181 对实测）是经典 benchmark；如能拿到原始数据可作为本项目可重复实验的对照 |
-| **T4 确定性校准** | $k_b$ 独立 lab 测定 + $k_w$ 手动 sweep 范围——这正是 baseline 校准的范式；可作为我 Plan A 的最简对照 |
-| **T5 不确定性感知校准** | **这正是本项目要补的 gap**：1994 paper 把校准当作确定性 + 手动 sweep，没考虑测量不确定性、没给出 $k_w$ 的后验分布。本项目用 MC / Bayesian 直接补这条 |
-| **Methodology 章节** | 可直接引用 Eq 3 + DVEM 作为 EPANET 水质方程的来源 |
-| **Discussion** | 「水力刻画差的点 → 水质模型也差」这条观察可呼应「sensor placement / 采样设计影响 calibration 质量」 |
+**讲解**：
 
-### 可参考要点（写论文 / 做实验时可直接引用）
-
-1. **Background / Methodology**：引用 Rossman 1994 作为 EPANET 水质模块来源；写清 **Eq. 3 + DVEM** 即 WNTR 中 `bulk_coeff` / `wall_coeff` 的物理含义。
-2. **T4 确定性 baseline**：复现「**瓶试定 $k_b$ + 现场扫 $k_w$**」两阶段流程；Brushy Plain 手工校准 $k_{w,1}=0.15\text{–}0.45$ m/d、RMS ≈ 0.17–0.19 mg/L 可作为你 baseline 的 **文献对照区间**。
-3. **T2 代码**：`src/01_demo_wntr.py` 中关 wall、bulk=−0.5/day 是在 **故意简化**；Discussion 可对照本文 Fig. 14 的 wall/bulk/tank **衰减贡献分解** 解释 Net1 修改前后差异。
-4. **T3 数据**：Cherry Hill / Trollhättan 53 h、181 对观测是经典 benchmark 规模 — 若用合成数据，样本量与时空覆盖应 **不低于** 此量级才有校准意义。
-5. **T5 研究 gap（Introduction / Discussion）**：原文把校准当 **确定性 + 手动 sweep**，无测量误差、无 $k_w$ 后验 — 可直接写「本项目在 Rossman 框架上加入 DPD 误差与 Bayesian/MCS」。
-6. **水力先行**：Fluoride conservative tracer **先校水力、再校水质** — Methodology 可照搬为 Week 3–4 工作流（即使 Net1 暂无 tracer，也应在 Discussion 说明局限）。
-7. **Poster / Results 图**：仿 Fig. 14 做「bulk vs wall vs 水箱」占比饼图或柱状图，解释 `<0.2` mg/L 节点比例变化。
+- **"applied to"**（应用于实测数据）——这是在告诉审稿人/读者："**我们不只是纸上谈兵，我们用真实数据验证过**"。这是论文从 model → applied science 的转折。
+- **"nine locations over 53 h"** 是个**关键数字**。在 1990 年代初，这种规模的时空连续观测非常稀少。这也是为什么 SCCRWA Cherry Hill 数据集后来成为**经典 benchmark**——同时代很难找到第二份。
+- **隐含的限制**：只有一个网络、一段时间。摘要不会说，但你做研究要明白——基于单一案例的结论外推到其他系统**有不确定性**。
 
 ---
 
-## 9. 可借鉴 / 可批判之处
+**第 7 句（关键诚实声明）**
 
-### 9.1 可借鉴
+> Good agreement with observed chlorine levels is obtained at locations where the hydraulics are well characterized.
+>
+> 在**水力条件刻画得清楚**的位置，模拟与实测氯浓度吻合良好。
 
-- **公式紧凑**：Eq 3 把传质 + 反应揉成一条等价一阶项，对工程师友好
-- **fluoride 作 conservative tracer 先校水力、再校水质**：两阶段校准范式非常清晰
-- **$k_b$ 用 lab beaker test 独立测定**：把校准变量减为 1 个 $k_w$，避免参数互相补偿
-- **承认局限**：明确写出"水力差则水质差""死端节点拟合差"、"单一 $k_w$ 不一定全网都对"
-- **贡献分解（Fig 14）思路**：可在我们的论文里用同样的图说明 wall/bulk/tank 各自占比
+**讲解**：
 
-### 9.2 可批判（也是我们要改进的）
-
-| 1994 论文的局限 | 本项目对应的补强 |
-| --- | --- |
-| 校准是**确定性的手动 sweep**（仅在 0.15–0.45 之间试几个值） | T5：用 MC + Bayesian 给出 $k_w$ 的**后验分布**，而不是单点估计 |
-| 没有考虑**观测不确定性**（RMSE 报了，但没把 DPD/电化学探头误差作为模型输入） | T5：把 D5 (Guigues 2022) 的 6–38% 不确定度做成测量误差先验 |
-| 单一 $k_b$、$k_w$ 应用于全网 | T4 之后：考虑分管径段或分管材的 $k_w$（呼应 A4 Hallam 2002 的实测分布） |
-| 仅一个 SCCRWA 子区域案例 | 本项目：Net1 + Net3 (+BWSN 若可) 对照 |
-| 校准 $k_w$ 时未做敏感性分析 | T4 校准前用 SALib (Morris/Sobol) 做参数可识别性分析 |
-| 反应贡献 67% wall 的结论建立在**只跑了两个 $k_w$ 值**上 | 用 MC 重新采样 $k_w$ 区间，给出贡献分解的不确定性区间 |
-| 没看测量误差怎么影响校准 | T5 论文核心：测量误差 → 校准参数 → 节点低于阈值的概率 |
+- **这一句是整个摘要最重要的"隐藏陷阱"**。作者没说 "good agreement is obtained"，而是加了限定语 **"where the hydraulics are well characterized"**。
+- 翻译成大白话：**水力没校准好的地方，水质模型也好不了**。这是水质建模领域的"金科玉律"，也是 1990 年代实践的痛点。
+- **对你毕设的直接含义**：
+  - 这就是为什么论文用了"先 fluoride 校水力 → 再 chlorine 校水质"的两阶段流程
+  - 这也是为什么 Cherry Hill 案例里那些**死端节点（10, 28, 34）拟合差**——它们用水量小、随机性大，水力本身就没校准好
+  - 你跑 Net1 demo 时，因为 Net1 是**合成网络**（水力是已知的，无需校准），所以这条限制对你**不适用**。但如果未来要做真实管网，要把这条记在脑子里。
+- 写 thesis 的 Methodology 或 Discussion 时，**可以直接引这一句作为"hydraulics-first"工作流的依据**。
 
 ---
 
-## 10. 已答复事项 + 仍需补充
+**第 8 句（应用展望）**
 
-### 10.1 已答复（之前的 `[需补]` 项）
+> The model should prove to be a valuable tool for managing chlorine-disinfection practices in drinking-water distribution systems.
+>
+> 本模型应能成为饮用水管网中管理氯消毒实践的有效工具。
 
-- ✅ Eq 推导 → §4.2
-- ✅ 数值方法 = **DVEM**（不是 method of characteristics）→ §4.3
-- ✅ 测量方法 = 连续 Rosemount 电化学 + DPD Hach 比色法（**混合**）→ §5
-- ✅ $k_b$ 具体取值 = **0.55 /day**，方法 = beaker test → §6.1
-- ✅ $k_w$ 取值范围 = **0.15–0.45 m/day** → §6.1
-- ✅ RMSE = **0.186 / 0.211 mg/L** → §6.1
-- ✅ 哪些点拟合差 = **10, 28, 34（死端，水力差）** → §6.1
-- ✅ 作者承认的局限 → §6.5 + §9.2
+**讲解**：
 
-### 10.2 仍需补充 / 下一步
-
-- [ ] 把 Cherry Hill 网络拓扑文件（如果有 EPANET `.inp` 版本流传）找出来，复刻该案例做不确定性校准对照
-- [ ] 通读 Clark et al. 1993（contaminant propagation）与 Grayman & Clark 1993（tank effect）以理解前置工作
-- [ ] 通读 Hallam et al. 2002（A4），对照 SCCRWA 推出的 $k_w \approx 0.15$–$0.45$ m/day 是否仍在该论文给出的实测分布内
-- [ ] 通读 Rossman, Boulos, Altman 1993 (DVEM 原文)，必要时在 Methodology 简述 DVEM
-- [ ] 通读 EPANET 2.2 Manual（B2），核对 EPANET 现行 implementation 是否仍是 DVEM
+- 摘要的标准收尾——把工具往**应用价值**上推。注意用词是 **"should prove to be"**（"应能成为"，**未来时 + 推测语气**），不是 "is"（"是"）。这是一种学术上谨慎的措辞——作者在说"我们认为它有用，但能不能成为行业标准，要看后续实践"。
+- 事实上，30 年后回看，EPANET 确实成为了行业标准——**这句"should prove to be"的预言完全兑现了**。
+- 写 thesis 的 Introduction 时，如果你需要论证"EPANET 是行业标准工具"，可以引这篇 + 引用次数（截至 2026-04 已 386+ 次）作为证据。
 
 ---
 
-## 11. 思考题（精读后更新）
+### 1.4 一段话把整个摘要消化成"我懂了什么"
 
-1. **关于 mass-transfer 限制在 Net1 demo 的表现**：Net1 管径 6–18 in（与 Cherry Hill 8/12 in 同量级），如果开 wall decay 并设 $k_w$ 在 0.15–0.45 m/day 区间，应能复现 Fig 13 的 transition；这可以是 Week 3 baseline 的一组对照实验。
-2. **关于不确定性的传播**：如果观测有 5–10% 相对误差（D5 给出的实测数），$k_w$ sweep 的 0.186 vs 0.211 mg/L 这种 RMSE 差异**可能在噪声水平内**——意味着 1994 paper 选哪个 $k_w$ 都"无法被数据拒绝"。这是 T5 的核心 motivation：**确定性校准在嘈杂数据下给出的"最佳值"可能不显著优于一个区间**。
-3. **关于 wall 67% 的稳健性**：如果用 MC 在 $k_w \in [0.15, 0.45]$ 均匀采样 1000 次，wall 占比的 90% CI 可能横跨 48–67%——这一区间是否会改变"应优先做管道清洗"的工程建议？
-4. **关于 Cherry Hill 数据可获取性**：是否有公开 `.inp` 版本？BWSN 不是这一个网络，需要单独找。可问导师或邮件 SCCRWA archives。
+如果让你用自己的话向同学讲清这个摘要，可以这样讲：
+
+> "1994 年之前大家发现，余氯在管网里掉得比烧杯里快得多，但**说不清原因**——你只能给每根管子调一个 `k` 硬凑。Rossman 这篇论文说：'其实管壁本身也在吃氯，但更关键的是——**氯要先从水里运到管壁才能被吃掉**。所以表面上看是化学反应，其实有一半是物理传质的事'。把这个想法写成方程之后，**小管/快流速衰减快**这个十几年没人解释清楚的现象，自然就出来了。他们把这套模型塞进了一个叫 EPANET 的软件，并用一组真实管网数据（53 小时、9 个点）验证——水力条件清楚的地方拟合很好，水力差的地方拟合也差（这条诚实声明对工程很重要）。三十年后，这篇文章定义了整个领域的标准工具。"
 
 ---
 
-## 12. 引用模板
+## 2. 一分钟看懂这篇论文
+
+**这是什么**：EPANET 水质模块的奠基论文。第一作者 Rossman 就是 EPANET 的作者本人。
+
+**它干了一件事**：用一个**物理上说得通**的模型，解释了 1980–1990 年代工程师反复观察到、但说不清原因的一个现象——
+
+> "为什么同一份水，放在烧杯里慢悠悠地衰减，进了管网就**快好几倍**？而且小管比大管更快、流速大的地方比流速小的地方更快？"
+
+**它的答案分三层**：
+
+1. **bulk reaction**（水体里的反应）——和烧杯里发生的是一回事，速率 = `k_b`
+2. **wall reaction**（管壁上的反应）——这是烧杯里**没有**的东西，速率 = `k_w`
+3. **传质**（mass transfer）——管壁反应**只能消耗到达管壁的氯**。水中央的氯得先"走"到壁面才能反应，这个"走"的速度 = `k_f`，由流速和管径决定
+
+**为什么这个洞察重要**：第三层是**关键创新**。前人也想过 wall reaction，但要么完全忽略传质（简单粗暴），要么用一根管一个 `k_b` 硬拟合（参数爆炸）。Rossman 把传质这层显式加进来，**全网只需两个参数 `k_b` 和 `k_w`** 就能解释为什么"小管 + 快流速 = 衰减快"。
+
+如果你只能记三件事：
+
+- 余氯衰减是**串联过程**：先传质到壁，再在壁上反应。任意一环慢，整条链就慢。
+- 全网两个参数：`**k_b`（水里的）+ `k_w`（管壁的）**。EPANET 里 `bulk_coeff` / `wall_coeff` 就是这俩。
+- Rossman 用**试 2 个值看 RMSE** 做校准（确定性、手动 sweep）——**这正是你毕设要补的洞**：他没给 `k_w` 的不确定性。
+
+---
+
+## 3. 故事的起点：1994 年之前大家在为什么发愁
+
+想象你是 1990 年的供水工程师。你要保证管网末端的家庭水龙头流出来的水还有一点余氯（防细菌），所以你在水厂出口投了 1.1 mg/L 的氯。可问题来了：
+
+- **烧杯试验**告诉你：这水放 12 小时也就掉一半，按这速度，远端 8 小时车程的居民家应该还剩 0.7 mg/L 才对。
+- **现场实测**告诉你：远端实际只剩 0.2 mg/L，少了一倍多。
+
+**水在管网里被什么东西"额外吃掉"了？**
+
+当时学界的几个回答：
+
+
+| 谁                    | 怎么说                        | 问题在哪                       |
+| -------------------- | -------------------------- | -------------------------- |
+| Clark et al. (1993)  | "余氯到处都不一样，确实有这现象"          | **现象描述，没机理**               |
+| Wable et al. (1991)  | "管子里掉得比烧杯快，可能是壁的事儿"        | 没有定量模型                     |
+| Hunt & Kroon (1991)  | "那我每根管子调一个不同的 `k_b` 总能拟合上" | **几百根管几百个参数**，工程上不可用       |
+| Biswas et al. (1993) | "单根管子稳态下，可以同时考虑径向扩散 + 壁反应" | 只能算**一根管子、稳态**，不能算管网、不能算时变 |
+
+
+Rossman 看到的痛点：缺一个**简洁、物理、能跑整张管网、能跑动态**的工具。这就是这篇论文要干的。
+
+---
+
+## 4. Rossman 的三层洞察（论文的核心思想）
+
+### 4.1 第一层：水体里的反应（bulk）
+
+这层好理解。水里有有机物（NOM）和氨等还原剂，氯会和它们慢慢反应。这就是你**烧杯试验**里测到的那种衰减，是一阶反应：
+
+```
+dc/dt = -k_b · c
+```
+
+这里 `c` 是水里氯浓度，`k_b` 是 bulk decay rate。**在烧杯里这是唯一发生的事**。
+
+### 4.2 第二层：管壁上的反应（wall）——烧杯里没有
+
+把同样的水灌进一根管子，再来一层反应：**管壁本身（腐蚀产物、生物膜、铁锈）也会消耗氯**。
+
+如果我们假设这个反应也是一阶的，速率应该是：
+
+```
+壁面反应速率 = k_w · c_w
+```
+
+注意：这里用的是 `c_w`（壁面处氯浓度），**不是 `c`（水中央浓度）**。
+
+> **这一步是论文真正聪明的地方**：很多人会偷懒写成 `k_w · c`，但物理上不对——壁面反应只能吃掉**已经到达壁面的氯**。要是水中央有氯但壁面没有（来不及补充），反应就停了。
+
+### 4.3 第三层：传质（mass transfer）——把氯从水中央"运"到壁面
+
+水流是湍流（一般情况下），主流速度方向沿管轴。**横向**（径向）的氯输运靠湍流扩散 + 分子扩散，通过一层薄薄的**边界层**完成。
+
+这个"运货"的速度由 `k_f` 描述，单位是 m/s（不是 /s！这是一个**通量**速率，不是化学反应速率）：
+
+```
+单位时间从主流送到壁的氯量 ∝ k_f · (c - c_w)
+```
+
+直觉：
+
+- 如果 `c_w` 接近 `c`（壁面浓度和水中央一样高）→ 没有浓度梯度 → 不传输 → 反应饿死
+- 如果 `c_w` 接近 0（壁面把氯吃得很猛）→ 浓度梯度很大 → 拼命传 → 但能不能跟上反应速度，得看 `k_f` 够不够大
+
+### 4.4 串联起来：取小者为瓶颈
+
+这是论文最漂亮的物理直觉。可以用**串联电路**类比：
+
+```
+水中央(c)  ──[传质阻力 1/k_f]──  壁面(c_w)  ──[反应阻力 1/k_w]──  消失
+```
+
+像两个电阻串联，**总阻力 = 1/k_w + 1/k_f**，所以等效"导通率"是：
+
+```
+1 / (1/k_w + 1/k_f) = (k_w · k_f) / (k_w + k_f)
+```
+
+这就是论文 Eq 3 里那个看起来有点突兀的 `(k_w·k_f)/(k_w+k_f)` 的来历——**就是两个串联电阻的等效公式**。
+
+物理推论：
+
+- 如果 `k_f` 远大于 `k_w`（传质很快、反应很慢）→ 等效 ≈ `k_w` → **反应限制**，瓶颈在化学
+- 如果 `k_f` 远小于 `k_w`（传质很慢、反应很快）→ 等效 ≈ `k_f` → **传质限制**，瓶颈在物理
+- 取**较小**的那个为瓶颈，正是串联电路的常识
+
+这一条直觉是后面 §8 解读 Fig 13 的钥匙。
+
+---
+
+## 5. 数学是怎么变美的（不深究推导）
+
+把上面三层串起来，对一段沿轴向流动的水，写下守恒方程（论文 Eq 1）：
+
+```
+∂c/∂t = -u·(∂c/∂x) - k_b·c - (k_f/r_h)·(c - c_w)
+```
+
+**这里每一项的物理意义**：
+
+- `-u·∂c/∂x`：水流把氯沿管轴带走（对流）
+- `-k_b·c`：bulk 反应在吃氯
+- `-(k_f/r_h)·(c - c_w)`：往壁面流失的氯，`r_h = d/4` 是水力半径（壁面积/体积的几何因子）
+
+但这里有个新未知数 `c_w`。怎么办？
+
+**关键近似**：假设壁面浓度**准稳态**——壁面被反应吃掉的速度等于传质送来的速度（壁面不积累）：
+
+```
+k_f · (c - c_w) = k_w · c_w        ← 这是论文 Eq 2
+```
+
+解出 `c_w`，代回去，**消掉 `c_w` 这个变量**，得到论文最重要的 **Eq 3**：
+
+```
+**∂c/∂t = -u·(∂c/∂x) - k_b·c - (k_w·k_f) / (r_h·(k_w + k_f)) · c**
+```
+
+看出来了吗？这就是 §4.4 的串联电阻公式被乘上了几何因子 `1/r_h`，套进一阶衰减项里。
+
+**整段方程可以重写成更熟悉的形式**：
+
+```
+∂c/∂t = -u·(∂c/∂x) - K · c,    其中 K = k_b + (k_w·k_f) / (r_h·(k_w + k_f))
+```
+
+`K` 就是**等效一阶衰减系数**——这正是 EPANET / WNTR 在水质引擎里实际用的形式。
+
+> 对管网第 i 根管段就给每根管一个 `K_i`，因为 `r_h` 和 `k_f` 跟管径和流速有关（论文 Eq 9–10）。`k_b` 和 `k_w` 全网公用，但 `K_i` 每根管都不一样——**这就是"全网两个参数"的真实含义**。
+
+---
+
+## 6. 为什么"小管 + 快流速 = 衰减快"自然就出来了
+
+这一节是论文最大的"卖点"——之前需要硬拟合的现象，现在从物理推导**自然涌现**。
+
+回看 Eq 3 里的衰减系数：
+
+```
+K = k_b + (k_w·k_f) / (r_h·(k_w + k_f))
+```
+
+`k_b`、`k_w` 是化学常数，不变。`r_h = d/4` 跟管径直接相关。`k_f` 跟流态相关——通过 **Sherwood 数**（论文 Eq 4–8）：
+
+```
+k_f = Sh · (D/d)        ← D 是分子扩散系数（很小的常数），d 是管径
+
+湍流（Re > 2300）：Sh = 0.023 · Re^0.83 · Sc^0.333
+层流（Re < 2300）：Sh = 3.65 + (一个跟 d/L、Re、Sc 有关的修正项)
+
+其中 Re = u·d/ν（流速 × 管径 / 运动粘度）
+```
+
+**直觉解读**：
+
+- **管径 `d` 变小** → `r_h` 变小（壁面积/体积变大）→ 同样多的水接触更多壁 → 衰减更快 ✓
+- **流速 `u` 变大** → `Re` 变大 → 边界层变薄 → `k_f` 变大 → 传质更快 → 衰减更快 ✓
+- **管径 `d` 变小**（再来一次）→ `Re` 还在 → `k_f = Sh · D/d` 里分母变小 → `k_f` 也变大 ✓
+
+所以"小管 + 快流速 = 衰减快"**不是经验规律**，是这个模型的**直接预言**。这是论文真正出彩的地方。
+
+---
+
+## 7. 这套模型怎么验证？Cherry Hill 案例
+
+Rossman 团队跑了一个真实管网做对照：康涅狄格州 South Central Connecticut Regional Water Authority 的 **Cherry Hill/Brushy Plains 服务区**（5.2 km²，住宅区）。
+
+### 7.1 数据采集（1991 年 8 月 13–15 日）
+
+- 53 小时连续观测
+- 9 个采样点：1 个泵站 + 1 个水塔 + 7 个消火栓
+- 总样本：**181 对**（每对 = 余氯浓度 + fluoride 浓度）
+- 测量方式（混合）：
+  - 泵站 + 水塔用**连续电化学余氯分析仪**（Rosemount 4024）
+  - 7 个 hydrant 用 **DPD 比色法**（Hach 46700-05）做手动 grab sample
+- 进水维持 **1.1 mg/L**
+
+### 7.2 两阶段校准：先水力、后水质
+
+**这套流程值得抄进你毕设的 Methodology**。
+
+**阶段一：用 fluoride 当 conservative tracer 校准水力**
+
+- fluoride 不反应、不衰减，所以它的浓度变化**完全反映水流路径**
+- 8/13 9:00 关掉水厂的 fluoride 投加，看 fluoride 怎么稀释扩散
+- 调整节点用水量和管段粗糙度，让模拟 fluoride 序列 ≈ 实测 fluoride 序列
+- 这一步搞定**"水从哪儿来、什么时候到、有多少"**
+
+**阶段二：水质校准**
+
+- `k_b = 0.55 /day` **独立**用实验室 beaker test 测出来，**不动**
+- `k_w` 在 [0.15, 0.45] m/day 之间**手动 sweep**——只试几个值，看哪个 RMSE 小
+- 把模型预测的 chlorine 和 7 个 hydrant 的实测 chlorine 对比
+
+> **注意单位**：`k_b` 是 /day（一阶反应常数），`k_w` 是 **m/day**（传质式通量速率，因为它要乘 `c - c_w` 后再除 `r_h` 才能变成 /day）。**单位不一样是因为物理意义不一样**——这是初学者常踩的坑。
+
+### 7.3 结果
+
+
+| 校准参数               | RMSE           |
+| ------------------ | -------------- |
+| `k_w = 0.45 m/day` | **0.186 mg/L** |
+| `k_w = 0.15 m/day` | **0.211 mg/L** |
+
+
+**拟合好的点**：3, 6, 11, 19, 25（这些点水力刻画清晰）
+**拟合差的点**：10, 28, 34（位于人口稀疏的死端，需水量估不准 → 阶段一就没校准好 → 阶段二也好不了）
+
+**这是论文里一个重要的诚实声明**："水力差则水质差"——给你一个直接的教训。
+
+---
+
+## 8. 论文最深的洞察：瓶颈到底在哪？
+
+如果上面是"用这模型能算啥"，那这一节是"这模型告诉你**世界长什么样**"。
+
+### 8.1 反应贡献分解（Fig 14）
+
+Rossman 把整个 Cherry Hill 系统失去的氯按来源分了三份：
+
+
+| 损失来源     | `k_w = 0.45 m/day` | `k_w = 0.15 m/day` |
+| -------- | ------------------ | ------------------ |
+| **管壁反应** | **67%**            | 48%                |
+| 水体反应     | 12%                | 19%                |
+| 水塔（储存损失） | 21%                | 33%                |
+
+
+**第一个发现**：不管 `k_w` 取高还是低，**管壁占了一半以上的失氯量**。
+
+**工程含义**：在这套管网里——
+
+- 改水塔操作（缩短停留时间）的收益有限（最多 21–33%）
+- 真正能立竿见影的是**清管 / 换管**（占 48–67% 的源头）
+
+这条结论比"我能算出余氯"重要得多——**模型把工程优先级翻了过来**。
+
+### 8.2 反应限制 vs 传质限制（Fig 13）
+
+回到 §4.4 的串联类比。论文画了一张图：**等效衰减系数 vs 流速**。
+
+- `k_w = 0.15`（反应很慢）：曲线随流速基本平的——传质再快也没用，因为壁反应自己跟不上。→ **反应限制**
+- `k_w = 0.45`（反应较快）：曲线随流速明显上升——加快流速 → 加快传质 → 加快总衰减。→ **传质限制**
+
+**直觉**：低 `k_w` 时管壁这一段是"慢车道"，传质再快也只能等它；高 `k_w` 时管壁可以吃得很猛，但要看你能不能把氯送过去。
+
+**这个发现告诉你**：同样一根管，反应是化学的事，传质是流体力学的事——**你想干预哪边，先要知道当前瓶颈在哪边**。
+
+---
+
+## 9. 跟你毕设的关系（重点章节）
+
+这篇论文不是历史文献——它就是你毕设代码里跑的那个引擎。
+
+### 9.1 你的代码哪里用到了它
+
+
+| 你的代码/工件                                 | Rossman 1994 对应                                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/01_demo_wntr.py` 里 `bulk_coeff` 参数 | `k_b`（Eq 3 第二项）                                                                                    |
+| `src/01_demo_wntr.py` 里 `wall_coeff` 参数 | `k_w`（Eq 3 第三项的 `k_w`）                                                                             |
+| EPANET 水质引擎跑的算法                         | **DVEM**（Discrete Volume Element Method）；详见 Rossman 1994 PDF p.808 / Rossman, Boulos & Altman 1993 |
+| Net1 demo 计算出的节点余氯曲线                    | Eq 3 + DVEM 的直接结果                                                                                  |
+
+
+**这意味着**：你之前跑 demo 时调 `wall_coeff` 看到的余氯下降，物理上就是论文 Eq 3 在跑。**你不是在用一个不透明的工具——你在用 Rossman 这篇文章本身**。
+
+### 9.2 这篇论文的"洞"，正是你毕设要补的
+
+
+| Rossman 1994 的做法                                                       | 你的毕设要补什么                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------- |
+| 手动 sweep `k_w` ∈ [0.15, 0.45]，只试 2 个值，看 RMSE                           | 用 **Monte Carlo / Bayesian** 给 `k_w` 一个**后验分布**，不是一个点估计 |
+| RMSE 报了，但**没考虑测量误差**（DPD 自己就有 6–38% 的不确定度，见 D5 Guigues 2022）           | 把测量误差作为先验输入，让校准结果带不确定性                                  |
+| 单一 `k_b`、`k_w` 应用于全网                                                   | 分管材/管龄/管径段，呼应 A4 Hallam 2002 的实测 `k_w` 分布               |
+| **没有可识别性分析** —— 0.186 vs 0.211 mg/L 差异**可能在噪声水平之下**，但 1994 paper 没说这件事 | T4 之前用 SALib (Morris/Sobol) 先做参数敏感性/可识别性                |
+| 单一案例（Cherry Hill）                                                      | 你打算跑 Net1 + Net3（+ BWSN 如能拿到）                           |
+
+
+**T5 章节的核心 motivation 一句话讲**：
+
+> Rossman 1994 给出了**模型**，但把校准当成"找一组使 RMSE 最小的参数"。在嘈杂的现实数据里，这种"最佳值"很可能不显著优于一个**区间**——而这个区间会让"管壁占 67%"这条工程结论的不确定性翻出来。这正是本项目要做的事。
+
+### 9.3 写论文时怎么用
+
+
+| 章节                              | 怎么引用                                                                                          |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Background / Methodology**    | Eq 3 + DVEM 即 EPANET / WNTR 水质引擎的物理基础；引 Rossman 1994 一篇就够                                     |
+| **T4 baseline**                 | 复刻"瓶试定 `k_b` + 现场扫 `k_w`"两阶段流程，Brushy Plains 的 `k_w` ∈ [0.15, 0.45]、RMSE ≈ 0.19 是你的**文献对照区间** |
+| **Discussion (Fig 14 同款图)**     | 仿 Fig 14 做"bulk / wall / tank"占比图，对比 Net1 demo 在不同 `k_w` 下的占比变化                               |
+| **Discussion (局限)**             | "Hydraulics first, water quality second" → Net1 没有 tracer 数据所以不能严格水力校准，这是 demo 的局限            |
+| **Introduction (research gap)** | "现有校准框架（Rossman 1994 范式）把校准当确定性问题，不显式处理测量误差和参数不确定性" → 引出你的 Bayesian/MCS 方法                    |
+
+
+---
+
+## 10. 写论文 + 思考题
+
+### 10.1 三个值得写进 thesis 的关键引用点
+
+1. **物理模型来源**：Rossman et al. 1994 是 EPANET 水质模块的奠基论文，Eq 3 是 `wall_coeff` / `bulk_coeff` 物理含义的来源。
+2. **方法论范式**：两阶段校准（fluoride 先校水力 → chlorine 再校水质）是行业标准做法，可在 Methodology 直接引用。
+3. **研究 gap 切入点**：1994 paper 的 `k_w` 用了确定性手动 sweep，无可识别性分析、无测量误差、无后验分布——本项目用 MCS/Bayesian 补这条。
+
+### 10.2 想想看（开放问题）
+
+1. **Net1 demo 能不能复现 Fig 13？** Net1 管径 6–18 in 和 Cherry Hill 8/12 in 同量级，开 wall decay、扫 `k_w` ∈ [0.15, 0.45] 应能看到从反应限制到传质限制的过渡。可作为 Week 3 baseline 的一组实验。
+2. **测量误差能不能掩盖校准差异？** D5 (Guigues 2022) 给出 DPD 的相对不确定度 6–38%。Rossman 报的 RMSE 差 0.186 vs 0.211 = 0.025 mg/L，相对于 0.5–1 mg/L 量级的浓度大约 3–5%——**很可能在测量噪声之下**。这意味着 1994 paper 无法基于数据"显著拒绝"任一 `k_w`。**这就是 T5 的核心动机**。
+3. **wall 67% 这条工程结论有多稳？** 如果用 MC 在 `k_w` ∈ [0.15, 0.45] 均匀采样 1000 次，wall 占比的 90% CI 可能横跨 48–67%。这区间是否会改变"先做管道清洗"的优先级？这可以是一组实验。
+4. **Cherry Hill 的 `.inp` 文件能不能拿到？** 这是本领域罕见有完整 53h × 9 点实测的网络，能复刻它做不确定性校准的对照实验会很有价值。可能要邮件问 SCCRWA 或导师。
+
+---
+
+## 11. 速查表（公式 + 数据 + 符号）
+
+> 想看故事跳到 §2；这里是公式表 + 数据点速查。
+
+### 11.1 三个最重要的方程
+
+**等效衰减系数**（论文 Eq 3，写成熟悉的形式）：
+
+```
+∂c/∂t = -u·(∂c/∂x) - K · c
+
+其中 K = k_b + (k_w · k_f) / (r_h · (k_w + k_f))
+```
+
+**Sherwood 数关联**（论文 Eq 4–8）：
+
+```
+k_f = Sh · (D/d)
+
+湍流（Re > 2300）： Sh = 0.023 · Re^0.83 · Sc^0.333
+层流（Re < 2300）： Sh = 3.65 + (0.0668·(d/L)·(Re·Sc)) / (1 + 0.04·[(d/L)·(Re·Sc)]^(2/3))
+
+Re = u·d/ν,    Sc = ν/D
+```
+
+**水力半径**：满管圆管时 `r_h = d/4`（论文 p.804）。
+
+### 11.2 Cherry Hill 案例关键数字
+
+
+| 项                | 值                                          |
+| ---------------- | ------------------------------------------ |
+| 网络               | Cherry Hill/Brushy Plains, SCCRWA, 康涅狄格州   |
+| 服务区              | 5.2 km²（住宅）                                |
+| 平均用水             | 20.2 L/s                                   |
+| 干管管径             | 8 in (20.3 cm) 与 12 in (30.5 cm)           |
+| 采样               | 1991-08-13 至 08-15，53 h，9 点，**181 对**      |
+| 进水氯              | 1.1 mg/L                                   |
+| `k_b`            | **0.55 /day**（lab beaker test，**独立测，不调**）  |
+| `k_w` 试值         | **0.15、0.45 m/day**                        |
+| RMSE             | 0.186（`k_w=0.45`） / 0.211（`k_w=0.15`） mg/L |
+| 反应贡献（`k_w=0.45`） | wall **67%** / bulk 12% / tank 21%         |
+| 反应贡献（`k_w=0.15`） | wall 48% / bulk 19% / tank 33%             |
+| 拟合好的点            | 3, 6, 11, 19, 25                           |
+| 拟合差的点            | 10, 28, 34（死端，水力校准本身差）                     |
+
+
+### 11.3 符号速查（论文 Appendix II）
+
+
+| 符号    | 含义                 | 单位                 |
+| ----- | ------------------ | ------------------ |
+| `c`   | bulk 余氯浓度          | mg/L               |
+| `c_w` | 壁面余氯浓度             | mg/L               |
+| `k_b` | bulk 一阶反应常数        | **1/day**          |
+| `k_w` | 壁面一阶反应常数           | **m/day** ⚠️ 单位不同！ |
+| `k_f` | 传质系数               | m/s                |
+| `K`   | 等效一阶衰减常数           | 1/day              |
+| `r_h` | 水力半径 = d/4         | m                  |
+| `d`   | 管径                 | m                  |
+| `u`   | 流速                 | m/s                |
+| `Re`  | Reynolds 数 = u·d/ν | 无量纲                |
+| `Sc`  | Schmidt 数 = ν/D    | 无量纲                |
+| `Sh`  | Sherwood 数         | 无量纲                |
+| `D`   | 分子扩散系数             | m²/s               |
+| `ν`   | 运动粘度               | m²/s               |
+
+
+---
+
+## 12. 元数据（已验证）
+
+
+| 字段          | 内容                                                                 |
+| ----------- | ------------------------------------------------------------------ |
+| Title       | Modeling Chlorine Residuals in Drinking-Water Distribution Systems |
+| Authors     | **Lewis A. Rossman**, Robert M. Clark, Walter M. Grayman           |
+| Affiliation | US EPA Risk Reduction Engineering Lab, Cincinnati；Grayman 为咨询工程师   |
+| Journal     | *Journal of Environmental Engineering* (ASCE)                      |
+| 提交 / 出版     | Submitted 1993-04-15；published Vol 120, No. 4, **1994-07/08**      |
+| 页码          | 803–820（18 页）                                                      |
+| DOI         | `10.1061/(ASCE)0733-9372(1994)120:4(803)`                          |
+| Paper No.   | 5922                                                               |
+| 被引数         | 386 (CrossRef) / 494 (OpenAlex)（截至 2026-04）                        |
+| 优先级         | **P0**（literature.md §A1）                                          |
+| 状态          | `read`（PDF 已通读）                                                    |
+
+
+**为什么是 P0**：第一作者 Rossman 就是 EPANET 的作者本人，本文是 **EPANET water quality module** 的奠基论文。文中明确提到该模型已集成进 "a computer program called EPANET"（p.69）。
+
+---
+
+## 13. 引用模板
 
 **Vancouver 风格**：
 
@@ -329,7 +594,7 @@ $$\mathrm{Re} = \frac{ud}{\nu}, \quad \mathrm{Sc} = \frac{\nu}{D}$$
 
 > Rossman, L.A., Clark, R.M. and Grayman, W.M. (1994) 'Modeling chlorine residuals in drinking-water distribution systems', *Journal of Environmental Engineering*, 120(4), pp. 803–820. doi: 10.1061/(ASCE)0733-9372(1994)120:4(803).
 
-**BibTeX**（拟写入 `../../thesis/refs.bib`）：
+**BibTeX**（可写入 `../../thesis/refs.bib`）：
 
 ```bibtex
 @article{Rossman1994ChlorineResiduals,
@@ -347,17 +612,10 @@ $$\mathrm{Re} = \frac{ud}{\nu}, \quad \mathrm{Sc} = \frac{\nu}{D}$$
 
 ---
 
-## 13. 修正记录（2026-05-19 通读 PDF 后）
+## 14. 我下一步可以做的事
 
-| # | 旧版（基于摘要 + 推断） | 新版（基于 PDF 原文） |
-| --- | --- | --- |
-| 1 | §4.3 数值方法 = "method of characteristics 或 finite volume" `[推断]` | DVEM (Discrete Volume Element Method)，Rossman et al. 1993 JWRPM `[原文]` |
-| 2 | §5 测量方法 = "1994 年大概率是 DPD" `[推断]` | **混合**：泵站 + 水塔用 Rosemount 4024 + 膜电极（连续电化学）；7 个 hydrant 用 Hach 46700-05 DPD 比色法 `[原文]` |
-| 3 | §5 "53 h, 9 点" | 同上，且补充：**181 对**测值、Aug 13–15 1991、Cherry Hill/Brushy Plains 子区 `[原文]` |
-| 4 | §5 "$k_b$、$k_w$ 具体值 `[需补]`" | $k_b = 0.55$ /day（lab beaker test）；$k_w \in [0.15, 0.45]$ m/day（网络 sweep）`[原文]` |
-| 5 | §6 "good agreement, 具体 RMSE 待补" | RMSE = 0.186 mg/L（$k_w = 0.45$）vs 0.211 mg/L（$k_w = 0.15$）`[原文]` |
-| 6 | §4.2 Eq 形式 `[推断]` | **与论文 Eq 3 完全一致** —— 推断正确 ✅ |
-| 7 | §4.2 $k_f$ 的 Sherwood 数关联 `[推断]` | 与论文 Eq 4–8 一致 —— 推断正确 ✅ |
-| 8 | 全文 8 节缺反应贡献分解数据 | 已补：wall 67% / bulk 12% / tank 21%（at $k_w = 0.45$）`[原文]` |
-| 9 | 全文 缺 wall-rate vs mass-transfer-rate 转折机制 | 已补 §6.3：低 $k_w$ wall rate limited；高 $k_w$ mass-transfer limited（Fig 13）`[原文]` |
-| 10 | 全文 缺"参数 parsimony"明确论述 | 已补 §3 / §9.2：作者明确说 "in the spirit of model parsimony they were kept constant" `[原文]` |
+- 找 Cherry Hill 网络的 `.inp`（若公开），用本项目框架复刻该案例做不确定性校准对照
+- 通读 Rossman, Boulos, Altman 1993（DVEM 原文），必要时在 Methodology 简述 DVEM
+- 通读 EPANET 2.2 Manual（B2），核对现行 implementation 是否仍是 DVEM
+- 通读 Hallam et al. 2002（A4），对照 SCCRWA 推出的 `k_w` ≈ 0.15–0.45 m/day 是否在该论文实测分布内
+
