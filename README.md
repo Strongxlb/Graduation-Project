@@ -1,4 +1,8 @@
-# 不确定性感知的供水管网余氯模型校准
+# 三 DMA 一阶余氯衰减的不确定性感知校准 — Bristol Water Field Lab
+
+> 本 README 反映 **2026-05-25 导师邮件**确定的项目范围。
+> 中文版（本文件） ｜ English: [`README.en.md`](./README.en.md)
+> 配套执行计划：[`plan1.md`](./plan1.md) ｜ 文献清单：[`background/Literature/literature.md`](./background/Literature/literature.md)
 
 ## 1. 项目定位
 
@@ -14,22 +18,26 @@
 
 ## 2. 研究主题
 
-工作题目：**不确定性感知的供水管网余氯模型校准**。
+工作题目：**Uncertainty-aware calibration of first-order chlorine residual decay modelling in the Bristol Water Field Lab — a three-DMA comparative study**（基于 Bristol Water Field Lab 三个 DMA 的一阶余氯衰减不确定性感知校准）。
 
-研究主线是基于 EPANET/WNTR 建立供水管网水力与水质模型，重点模拟 free chlorine residual 在管网中的衰减和空间分布，并在模型校准中显式考虑测量不确定性。会议记录中反复出现的关键词包括：
+研究使用 Imperial College / Bristol Water Field Lab 现有 EPANET 模型与 10 个 free chlorine 在线监测点。3 个 DMA 入口的实测余氯作为时变 source boundary 输入 WNTR/EPANET；下游监测点用于校准与验证。重点关键词：
 
-- EPANET / WNTR：管网水力与水质模拟平台。
-- free chlorine residual：本项目的主要水质变量。
-- water quality model calibration：校准模型参数，使模拟结果与观测数据一致。
-- DPD / colorimetric method：余氯测量方法之一，存在读数和方法误差。
-- sensor uncertainty：传感器或采样测量的不确定性，需要进入模型校准和结果解释。
-- uncertainty-aware calibration：不只追求单一最佳参数，而是同时输出估计值及其不确定性。
+- **EPANET / WNTR**：管网水力与水质模拟平台（EPANET 2.2 水质引擎 + WNTR Python wrapper）。
+- **First-order chlorine decay**：仅考虑 first-order bulk (`k_b`) + first-order wall (`k_w`) + 边界层 mass-transfer 项（Rossman 1994 / EPANET 2.2 Manual）。
+- **3-DMA comparative calibration**：管材、管龄异质 → `k_w` 异质 → 一个 `k_w` per DMA，再比较 cross-DMA 可迁移性。
+- **Ensemble-based uncertainty**：用 GLUE（Plan A）或 Bayesian MCMC / hierarchical partial pooling（Plan B）量化参数与预测的不确定性。
+- **Time-varying inlet boundary**：3 个入口监测器的实测余氯直接喂进 source pattern，**入口浓度不参与校准**。
+- **DPD / colorimetric / online sensor uncertainty**：测量误差进入 likelihood，避免对"完美观测值"过度自信。
 
 ## 3. 研究动机
 
 供水管网中的余氯浓度直接关系到饮用水微生物安全。传统余氯模型校准常以观测值作为确定值处理，但实际监测数据受传感器精度、DPD 比色法误差、采样位置、采样时间和模型结构误差影响。若忽略这些不确定性，校准结果可能给出过度自信的参数和错误的风险判断。
 
-本项目希望回答：当余氯观测值本身带有不确定性时，管网水质模型应如何校准、如何表达预测置信度，以及如何判断管网中某些节点是否可能低于余氯控制阈值。
+更关键的是：**真实管网由多个 DMA 组成，管材与管龄各异**。一个 DMA 上校准出的 `k_w` 不一定能预测另一个 DMA——这是文献里反复指出（Hallam 2002, Maleki 2023）但很少正面回答的问题。本项目利用 Bristol Water Field Lab 3-DMA 的天然多区结构，将"估一个 `k_w`"升级为：
+
+1. **异质性问题**：3 个 DMA 的 `k_w` 之间差多少？是否有统计意义？
+2. **可迁移性问题**：在 DMA-A 上校准的模型迁移到 DMA-B / C 上时，预测可靠性下降多少？
+3. **不确定性是否改变结论**：当 `k_w` 带后验区间时，DMA 间的"差异"是真信号还是噪声？
 
 会议中提到 `0.2 mg/L` 可作为 free chlorine residual 的工作阈值示例。该阈值在当前阶段仅作为建模和结果展示的占位假设，最终论文前需要与导师确认是否采用。
 
@@ -37,89 +45,114 @@
 
 ### 4.1 研究问题
 
-1. 如何基于 EPANET/WNTR 构建可用于余氯衰减分析的供水管网模型？
-2. 如何校准余氯水质模型中的关键参数，例如 bulk decay 和 wall decay？
-3. DPD/colorimetric 测量误差和 sensor uncertainty 如何影响模型校准结果？
-4. 相比只输出单一校准参数，uncertainty-aware calibration 能否更可靠地解释节点余氯是否低于阈值？
-5. 如何将模型结果转化为清晰的图表和论文讨论，而不只停留在代码结果？
+1. **基线问题**：基于现有 EPANET 模型 + WNTR `simulate_chlorine(kb, kw)`，能否复现 3 个 DMA 下游监测点的 free chlorine 时间序列？
+2. **决定性校准**：在统一 `k_b` + 每 DMA 一个 `k_w` 的框架下，最佳拟合参数是多少？
+3. **不确定性传播**：在显式建模 DPD / 在线传感器测量误差的前提下，参数后验/置信区间是什么？
+4. **DMA 间异质性**：3 个 `k_w` 的后验分布是否显著不同？这种差异是否与管材/管龄信息一致（Hallam 2002 / Maleki 2023）？
+5. **可迁移性**：从 DMA-A 学到的参数去预测 DMA-B / C 时，predictive RMSE 与覆盖率（CRPS）下降多少？
+6. **阈值判断**：在不确定性下，节点低于 `0.2 mg/L` 的概率分布如何随空间和时间变化？
 
 ### 4.2 总目标
 
-建立一个可复现的 EPANET/WNTR 管网余氯模型校准流程，在校准过程中显式考虑观测不确定性，并输出余氯预测值、参数不确定性和低于阈值的概率判断。
+建立一个**可复现的、不确定性感知的、跨 DMA 比较**的 EPANET/WNTR 余氯校准工作流，输出每个 DMA 的 `k_w` 后验分布、跨 DMA 预测的可靠性指标、以及节点低于工作阈值的概率分布。
 
 ### 4.3 具体任务
 
-- 完成文献综述：余氯衰减机理、管网水质模型、EPANET/WNTR 应用、传感器不确定性、Monte Carlo 或贝叶斯/概率校准方法。
-- 搭建模型：准备或构造 EPANET `.inp` 管网模型，明确节点、管段、水源、水龄和余氯初始条件。
-- 组织数据：整理观测余氯数据、采样时间、采样位置、测量方法和测量误差假设；若真实数据暂缺，则使用合成数据或公开 benchmark 数据作为阶段性替代。
-- 参数校准：围绕 bulk decay、wall decay 或其他关键水质参数建立目标函数，比较确定性校准和不确定性感知校准。
-- 不确定性分析：使用 Monte Carlo 或等价概率方法传播 sensor uncertainty，输出预测区间和节点低于 `0.2 mg/L` 的概率。
-- 结果解释：用图表展示空间分布、时间序列、参数敏感性、误差带、阈值超限概率，并讨论工程意义。
-- 论文写作：将方法、数据、结果和局限性整理成 research paper 结构。
+- 完成文献综述：余氯衰减机理（A1/A2/A3/A4/A5/A6）、EPANET/WNTR（B1/B2/B3）、不确定性方法（E1/E3/E4/E5/E6/E7）、测量误差（D2/D3/D4/D5）、监管阈值（F1/F2）。
+- 基线仿真：基于导师提供的 Jupyter notebook 跑通 `simulate_chlorine(kb, kw)`，先用 Net3 练手，再切换到 Bristol 3-DMA 模型。
+- 数据组织：3 个入口监测 → time-varying source pattern；7 个下游监测 → 5 用于 calibration，2 用于 held-out validation（具体分配待 Week 5 确定）。
+- **确定性校准（baseline）**：weighted least squares 估 `(k_b, k_w_A, k_w_B, k_w_C)`，目标函数 NSE / RMSE / MAE。
+- **不确定性校准（Plan A）**：GLUE（Beven & Binley 1992，E6）—— Monte Carlo + likelihood 加权，得到参数与预测的 5–95% 区间。
+- **不确定性校准（Plan B）**：Bayesian hierarchical model（Gelman BDA，E7 Ch5）—— 3 个 `k_w` 共享族先验，partial pooling 借力；MCMC 用 `emcee` 或 `pymc`。
+- **cross-DMA 可迁移性评估**：在 DMA-A 上得到后验，分别对 DMA-B / C 做后验预测检查（PPC）。
+- 结果解释：每 DMA 的 `k_w` 后验小提琴图、跨 DMA 预测的 CRPS / 覆盖率对比图、节点低于阈值的概率热力图。
+- 论文写作：按 §7 结构整理。
 
 ## 5. 范围边界
 
-### 5.1 范围内
+### 5.1 范围内（导师邮件明确）
 
-- 供水管网中的 free chlorine residual 模拟。
-- EPANET/WNTR 作为主要建模和仿真工具。
-- 余氯衰减参数校准。
-- DPD/colorimetric 或传感器读数的不确定性建模。
-- Monte Carlo / 概率评估，用于解释传感器误差对校准和阈值判断的影响。
+- 三个监测 DMA 的 EPANET 管网模型（**Bristol Water Field Lab 现有 `.inp` 文件**）。
+- **First-order** chlorine kinetics（bulk + wall + mass-transfer）。
+- 10 个 chlorine monitors 的连续观测：3 个用作 inlet boundary，7 个用作 calibration / validation。
+- 参数校准目标：`k_b`（可能跨 DMA 共享） + `k_w` per DMA（3 个）。
+- 不确定性方法：**ensemble-based**（GLUE 优先；Bayesian / hierarchical 进阶）。
+- DPD / online sensor 测量误差建模（D2/D3/D4/D5 参考）。
 - 结果图表、可复现实验流程、论文和 poster 所需材料。
 
-### 5.2 范围外
+### 5.2 范围外（导师邮件明确排除）
 
-- 不开发新的硬件传感器。
-- 不做完整实验室水化学实验体系。
-- 不扩展到所有水质指标；当前聚焦 free chlorine residual。
+- **不做 hydraulic calibration**——节点需求与管段粗糙度信任既有 EPANET 模型。
+- **不做 multi-species modelling**（EPANET-MSX）——不考虑 TOC、DBP、生物膜耦合。
+- **不做 operational optimisation**——不优化传感器布点、不规划清管、不做 booster 优化。
+- 不开发新的硬件传感器、不做完整实验室水化学实验体系。
 - 不把 AI 工具输出直接作为论文内容提交；如使用 AI 进行代码辅助、语言润色或思路整理，需按 Imperial/CEE 要求披露和引用。
 
-### 5.3 待确定
+### 5.3 待确定（Tuesday 2026-06-02 会议清单）
 
-- 真实管网数据来源：TBD。
-- 具体 EPANET `.inp` 文件：TBD。
-- 余氯观测数据格式：TBD。
-- 测量误差分布形式：TBD，例如固定误差、相对误差、正态分布或截断分布。
+- **数据交付时间与格式**：10 个监测点的实时数据何时拿到？CSV 还是 SCADA dump？采样频率？时间跨度？
+- **EPANET 模型获取**：`.inp` 文件在哪？管材、管径、管龄信息齐全度？
+- **`k_b` 共享假设**：3 个 DMA 是否共用同一 `k_b`（同一水源）？还是各自估？
+- **"ensemble-based method" 具体定义**：导师心目中是 GLUE / ensemble Kalman / approximate Bayesian 哪一种？
+- **WP（Work Package）正式结构**：WP5 = hierarchical Bayesian；WP1–WP4 如何对应？
 - 是否采用 `0.2 mg/L` 作为最终论文阈值：TBD，需与导师确认。
 
 ## 6. 方法框架
 
-### 6.1 基准模型
+### 6.1 基线建模
 
-1. 用 EPANET/WNTR 读取或创建管网模型。
-2. 运行水力模拟，确认流量、压力、水龄和边界条件合理。
-3. 加入 chlorine quality simulation，定义初始浓度、源头浓度、bulk decay 和 wall decay。
-4. 选取观测节点和时间窗口，生成模型预测序列。
+1. 用 WNTR 读取 Bristol 3-DMA EPANET `.inp` 模型，确认 3 个 DMA 拓扑（入口节点 + 下游监测节点编号）。
+2. 把 3 个入口监测器的余氯时间序列写成 source pattern（time-varying boundary），喂给水质引擎。
+3. 跑 `simulate_chlorine(kb, kw)`：设 EPANET water-quality option `CHEMICAL`、`BULK ORDER 1`、`WALL ORDER 1`，给初始 `(k_b, k_w)` 试值（如 `k_b = -0.5/day`，`k_w = -0.15 m/day`）。
+4. 输出 7 个下游监测点的模拟浓度序列，肉眼对照实测，确认幅值/趋势合理。
 
-### 6.2 确定性校准
+### 6.2 确定性校准（baseline）
 
-确定性校准将观测值视为真实值，目标是最小化模拟值和观测值之间的误差。可选指标包括 RMSE、MAE、bias 或加权误差。该结果作为 baseline。
+最小化模拟与观测的 weighted residual：
+
+```
+J(k_b, k_w_A, k_w_B, k_w_C) = Σ_{节点 i, 时间 t} [ (y_obs - y_sim) / σ_i ]²
+```
+
+其中 `σ_i` 从测量误差模型（DPD ±0.02 mg/L 或在线传感器 ±5% 满量程）来。输出单点估计 `(k_b^*, k_w^*)`，用 RMSE / MAE / NSE 评估。**这是 baseline，不是最终结果**。
 
 ### 6.3 不确定性感知校准
 
-不确定性感知校准将每个观测值视为一个带误差范围的估计，而不是单一精确值。可行路线：
+#### Plan A — GLUE（Beven & Binley 1992，E6）
 
-- 为每个观测值定义测量误差模型，例如 `observed chlorine = true chlorine + measurement error`。
-- 通过 Monte Carlo 对观测值或模型参数进行重复采样。
-- 每次采样后重新计算校准结果或模型预测。
-- 汇总参数分布、预测区间和低于阈值的概率。
+1. 在先验范围内 LHS / 均匀抽样 `(k_b, k_w_A, k_w_B, k_w_C)` 共 `N ≈ 10⁴` 组。
+2. 对每组运行 `simulate_chlorine(kb, kw)`。
+3. 用 NSE 或 Gaussian likelihood 计算 likelihood weight；NSE < 阈值（如 0.6）的样本视为 non-behavioural 弃掉。
+4. 加权得到参数边缘分布 + 预测 5–95% 区间。
 
-输出不应只给一个“最优参数”，而应包括：
+#### Plan B — Bayesian hierarchical MCMC（Gelman BDA，E7 Ch5/Ch11）
 
-- 参数估计值及不确定性范围。
-- 各节点余氯预测均值和区间。
-- 节点低于工作阈值的概率。
-- 不确定性来源对结论的影响。
+```
+k_w_d ~ Normal(μ_kw, τ_kw²)              # DMA d ∈ {A, B, C} 共享族先验
+μ_kw  ~ Normal(0.15, 0.10²)              # 来自 Hallam 2002 / Maleki 2023 范围
+τ_kw  ~ HalfNormal(0.05)                 # DMA 间异质性的尺度
+k_b   ~ LogNormal(log 0.5, 0.5²)         # 全网共享 (水源相同假设)
+y_obs ~ Normal(y_sim(k_b, k_w_d), σ_meas²)
+```
 
-### 6.4 结果评价
+用 `emcee` 或 `pymc` 跑 ≥ 4 chains × 5,000 samples（含 warmup），监控 `R̂ < 1.05`、ESS > 1000。后验输出：每 DMA `k_w` 的 50% / 95% 区间 + `τ_kw` 后验（量化 DMA 间异质性）。
+
+### 6.4 跨 DMA 可迁移性评估
+
+把 calibration 数据按 DMA 切分：
+- 在 DMA-A 数据上得到后验 → 对 DMA-B / C 做后验预测检查（posterior predictive check）。
+- 报告：每 DMA 后验预测 RMSE、CRPS、95% 区间覆盖率（calibration coverage）。
+- 异质性显著 ⇒ 单一 `k_w` 模型不可迁移 ⇒ 必须 per-DMA 校准；否则可考虑 pooled `k_w` 简化。
+
+### 6.5 结果评价
 
 核心评价内容包括：
 
-- 模型是否能复现实测余氯的时间和空间变化。
-- 不确定性处理是否改变了校准参数和风险判断。
-- 哪些节点或时段更容易低于余氯阈值。
-- 结果对传感器布设、采样策略或模型使用有什么启示。
+- 模型是否能复现 7 个下游监测点的余氯时间序列（hourly / sub-hourly 量级）。
+- `k_w` per DMA 是否显著不同（用 `τ_kw` 后验是否远离 0 判断）。
+- 跨 DMA 预测的可靠性（CRPS / 覆盖率）下降幅度。
+- 哪些节点或时段更容易低于 `0.2 mg/L` 阈值；阈值超限概率图。
+- 结果对 Bristol Water 运营的工程意义（如哪种管材最值得优先翻新）。
 
 ## 7. 论文结构
 
@@ -298,15 +331,32 @@ codes/
 2. 当前最阻碍进展的问题。
 3. 自己提出的解决方案，而不是只带问题去会议。
 
-## 11. 当前优先事项
+## 11. 当前优先事项（2026-05-25 更新）
 
-- [ ] 确认导师正式项目题目和最终研究范围。
-- [ ] 确认是否有真实管网、传感器或 DPD/colorimetric 数据可用。
-- [ ] 找到或创建可运行的 EPANET/WNTR 示例网络。
-- [ ] 明确余氯阈值是否采用 `0.2 mg/L`。
-- [ ] 建立第一版文献表和背景综述框架。
-- [ ] 跑通一次 deterministic calibration baseline。
-- [ ] 设计 sensor uncertainty 的误差分布和 Monte Carlo 流程。
+### 已确认 ✓
+
+- [x] 项目正式题目与范围：3-DMA + first-order + ensemble-based + 排除水力 / MSX / 运营优化（2026-05-25 supervisor email）
+- [x] 文献清单 v1 完成（A1–A6 / B1–B4 / C1–C6 / D1–D5 / E1–E7 / F1–F2）
+- [x] 6 篇核心论文精读笔记入库（A1 / A2 / A3 / A4 / C1 / C2 / C5 / D2 / E1 / E3 / E5 / F2）
+
+### Tuesday 2026-06-02 会议前必做
+
+- [ ] **跑通导师 Jupyter notebook** `simulate_chlorine(kb, kw)`（Net3 练手）
+- [ ] **下载并速读** B1 Klise 2017（WNTR 论文）+ B2 EPANET 2.2 Manual（仅水质章节）+ A6 Vasconcelos 1997
+- [ ] **整理给导师的问题清单**（在 `meetings/2026-06-02.md` 预填）：数据格式、`.inp` 文件、`k_b` 共享假设、"ensemble-based" 具体定义、WP 结构、阈值定义
+
+### Week 3–4（06-02 → 06-12）
+
+- [ ] 拿到 Bristol 3-DMA `.inp` + 10 个监测点数据
+- [ ] 把 `simulate_chlorine` 从 Net3 切到真实模型并跑通
+- [ ] 实现 inlet → time-varying source pattern 的数据管线
+- [ ] baseline 确定性校准（WLS）
+
+### Week 5+（M1 之后）
+
+- [ ] Plan A 跑通：GLUE Monte Carlo + likelihood 加权
+- [ ] Plan B 跑通：Bayesian hierarchical MCMC（`emcee` 或 `pymc`）
+- [ ] 跨 DMA 可迁移性评估（后验预测检查）
 
 ## 12. AI 工具使用提醒
 
