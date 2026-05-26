@@ -25,6 +25,19 @@ profile_default/
 ipython_config.py
 
 # ------------------------------------------------------------
+# Jupyter notebooks
+# Policy: do NOT version-control .ipynb files. Notebooks carry binary
+# diffs (image base64, exec counts, metadata) that pollute git history.
+# Instead, commit rendered HTML exports as the reviewable artefact:
+#
+#   jupyter nbconvert --to html path/to/notebook.ipynb
+#
+# Keep notebooks locally for interactive use; share results via HTML.
+# Opt-in exceptions can be added below with `!path/to/keep.ipynb`.
+# ------------------------------------------------------------
+*.ipynb
+
+# ------------------------------------------------------------
 # macOS / Windows / Linux system files
 # ------------------------------------------------------------
 .DS_Store
