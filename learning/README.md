@@ -40,3 +40,21 @@ git commit -m "docs(learning): refresh HTML export of your_notebook"
 | `git_learning.md` | Git/GitHub 基础教程（本仓库使用规范） |
 | `wntr_chlorine_getting_started.ipynb` | **导师 2026-05-25 邮件附件**：WNTR 余氯仿真起步 notebook，定义全项目核心函数 `simulate_chlorine(kb, kw)`，含 5 道练习题 — **本地保留，不提交** |
 | `wntr_chlorine_getting_started.html` | 上述 notebook 的渲染快照（含运行输出与 3 张图） |
+| `02_exercises.ipynb` | **自学练习本**：把导师 §7 的 5 道题展开成"题目 + 骨架代码 + 提示 + 反思"格式，逐题做完后即具备 Bristol 真实建模的全部基础工具 — **本地保留，不提交** |
+| `_build_exercises_nb.py` | 生成 `02_exercises.ipynb` 的脚本（源于此可重新生成、修改题目） |
+| `net3_topology.png` | Net3 网络拓扑图：2 个 reservoir (River+Lake) · 3 个 tank · 6 个 monitor |
+| `kb_kw_compensation.png` | k_b / k_w 联合扫描的误差地形图：直观演示 identifiability 问题（"补偿沟"） |
+
+---
+
+## 推荐做练习的顺序
+
+1. **先看** `wntr_chlorine_getting_started.html` —— 把导师的 5 道题快速过一遍（5 分钟）
+2. **打开** `02_exercises.ipynb` —— 一题一题做（每题 20-40 分钟）
+3. **每题做完**：在 markdown 的"✏️ 你的发现"下用 1-2 句话写结论
+4. **5 题全做完后**：
+   - 你已经掌握 `simulate_chlorine(kb, kw)` 的用法和扩展
+   - 知道 bulk/wall 衰减的物理含义和数量级
+   - 会用 add_source 注入时变边界（Bristol 必备）
+   - 亲手做过最朴素的网格校准，理解 identifiability 问题
+5. **下一步**：等到拿到 Bristol 3-DMA `.inp` 和 SCADA 数据，可直接把 `PRACTICE_INP` 和 `MONITOR_NODES` 替换掉
