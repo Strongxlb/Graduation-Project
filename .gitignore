@@ -37,6 +37,9 @@ ipython_config.py
 # ------------------------------------------------------------
 *.ipynb
 
+# Opt-in: track the solved chlorine learning exercises notebook.
+!learning/02_exercises.ipynb
+
 # ------------------------------------------------------------
 # macOS / Windows / Linux system files
 # ------------------------------------------------------------
