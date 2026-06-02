@@ -38,7 +38,7 @@ ipython_config.py
 *.ipynb
 
 # Opt-in: track the solved chlorine learning exercises notebook.
-!learning/02_exercises.ipynb
+!Net3/02_exercises.ipynb
 
 # ------------------------------------------------------------
 # macOS / Windows / Linux system files
@@ -46,6 +46,9 @@ ipython_config.py
 .DS_Store
 .AppleDouble
 .LSOverride
+# Office temp / lock files (e.g. .~6.2.pptx, ~$report.docx)
+~$*
+.~*
 Icon
 Thumbs.db
 ehthumbs.db
