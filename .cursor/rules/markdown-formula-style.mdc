@@ -1,0 +1,53 @@
+---
+description: Markdown 笔记 / meeting / 解释性文档里公式的统一书写规范
+globs: **/*.md
+alwaysApply: true
+---
+
+# 公式书写规范（讲解性 markdown）
+
+适用范围：`background/notes/**`、`meetings/**`、`results/**`、`learning/**` 以及 README、解释性 markdown。
+
+## 规则
+
+1. **不要使用 LaTeX 块 `$$ ... $$` 或行内 `$ ... $`**。我们的 markdown 在多种渲染器（Cursor 预览、GitHub、VS Code）下表现不一致，LaTeX 渲染容易丢失。
+2. **块级公式用 fenced code block（` ``` `）**，不指定语言。
+3. **行内符号用反引号** ``` `θᵢ` ``` ``` `k_b` ```。
+4. **数学符号用 Unicode**（不要 LaTeX 命令）：
+   - 下标：`yᵢ`, `ŷᵢ`, `xⱼ`（用 ᵢ ⱼ ₁ ₂ ₃ 等 Unicode 上下标；下标多于一层时用 `_` 退化，如 `C_sim,i`）
+   - 求和：`Σ`（不要 `\sum`）
+   - 平方根：`√[ ... ]`
+   - 希腊字母：`σ`, `θ`, `μ`, `λ` 直接打
+   - 比较：`≤ ≥ ≠ ≈ ∈`
+   - 平方/立方：`x²`, `x³`
+5. **每条公式三件套**：一行解释 → 「**公式**：」→ 代码块 → 「**性质**：」 bullet 列出范围、单位、极限情况。
+6. **同一节的多步推导**用 `**步骤 1**` / `**步骤 2**` 标号，每步独立给「**公式**：」+ code block。
+
+## 示例（✅ 正确）
+
+```markdown
+**公式**：
+
+\`\`\`
+RMSE(θᵢ) = √[ (1/N) · Σ (C_obs − C_sim,i)² ]
+\`\`\`
+
+**性质**：
+
+- 范围 `[0, +∞)`，越小越好。
+- 单位 mg/L（与观测同单位）。
+- 对大误差敏感（平方放大离群点）。
+```
+
+## 示例（❌ 错误）
+
+```markdown
+$$RMSE(\theta_i) = \sqrt{\frac{1}{N} \sum (C_{obs} - C_{sim,i})^2}$$
+
+设 $\sigma_e^2 = \mathrm{MSE}$，则似然 $\mathcal{L} \propto \exp(-SSE/(2\sigma^2))$。
+```
+
+## 参考文件
+
+- 总规范源头：[`background/notes/error_metrics.md`](../../background/notes/error_metrics.md)
+- 已合规示例：[`background/notes/E/E6_BevenBinley1992.md`](../../background/notes/E/E6_BevenBinley1992.md) §3.3.0
