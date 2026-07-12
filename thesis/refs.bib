@@ -1,0 +1,115 @@
+% ============================================================================
+% refs.bib — 毕设集中参考文献库
+% 配套导览：../background/Literature/literature.md
+% 维护规则：
+%   - 每条以 literature.md 的编号 + 一作姓 + 年份 + 关键词作为 cite key（如 G1 → GomezCoronel2023GAChlorine）。
+%   - 元数据以 CrossRef / DataCite 为权威；已核验条目见 literature.md 验证日志。
+%   - 本文件目前仅收录 2026-07-01 新增的 8 篇（C7 / E8 / E9 / E10 / G1–G4）；
+%     其余分类 (A/B/C/D/E/F) 的 BibTeX 散见于 background/notes/ 各笔记，待后续统一回填。
+% ============================================================================
+
+% ---------------------------------------------------------------------------
+% C. 水质模型校准（确定性方法）
+% ---------------------------------------------------------------------------
+
+@article{Munavalli2003SteadyState,
+  author    = {Munavalli, G. R. and Mohan Kumar, M. S.},
+  title     = {Water Quality Parameter Estimation in Steady-State Distribution System},
+  journal   = {Journal of Water Resources Planning and Management},
+  volume    = {129},
+  number    = {2},
+  pages     = {124--134},
+  year      = {2003},
+  doi       = {10.1061/(ASCE)0733-9496(2003)129:2(124)},
+  publisher = {American Society of Civil Engineers}
+}
+
+% ---------------------------------------------------------------------------
+% E. 不确定性感知校准（Monte Carlo / Bayesian）
+% ---------------------------------------------------------------------------
+
+@inproceedings{Jenks2025BayesianDisinfectant,
+  author    = {Jenks, Bradley and Ulusoy, Aly-Joy and Stoianov, Ivan},
+  title     = {Bayesian Inference for Quantifying Parameter Uncertainty in Disinfectant Decay Models},
+  booktitle = {Proceedings of the 21st Computing and Control in the Water Industry Conference (CCWI 2025)},
+  address   = {Sheffield, UK},
+  year      = {2025},
+  publisher = {The University of Sheffield},
+  doi       = {10.15131/shef.data.29921225.v1},
+  url       = {https://orda.shef.ac.uk/articles/conference_contribution/Bayesian_Inference_for_Quantifying_Parameter_Uncertainty_in_Disinfectant_Decay_Models/29921225/1},
+  note      = {CCWI 2025, 1--3 September 2025}
+}
+
+@article{Hutton2014Uncertainty,
+  author    = {Hutton, Christopher J. and Kapelan, Zoran and Vamvakeridou-Lyroudia, Lydia and Savi{\'c}, Dragan A.},
+  title     = {Dealing with Uncertainty in Water Distribution System Models: A Framework for Real-Time Modeling and Data Assimilation},
+  journal   = {Journal of Water Resources Planning and Management},
+  volume    = {140},
+  number    = {2},
+  pages     = {169--183},
+  year      = {2014},
+  doi       = {10.1061/(ASCE)WR.1943-5452.0000325},
+  publisher = {American Society of Civil Engineers}
+}
+
+@article{Wu2022BEAR,
+  author    = {Wu, Xia and Marshall, Lucy and Sharma, Ashish},
+  title     = {Quantifying Input Uncertainty in the Calibration of Water Quality Models: Reordering Errors via the Secant Method},
+  journal   = {Hydrology and Earth System Sciences},
+  volume    = {26},
+  number    = {5},
+  pages     = {1203--1221},
+  year      = {2022},
+  doi       = {10.5194/hess-26-1203-2022},
+  publisher = {Copernicus GmbH}
+}
+
+% ---------------------------------------------------------------------------
+% G. 反问题求解算法（GA / PSO / EnKF）
+% ---------------------------------------------------------------------------
+
+@article{GomezCoronel2023GAChlorine,
+  author    = {G{\'o}mez-Coronel, Leonardo and Delgado-Agui{\~n}aga, Jorge Alejandro and Santos-Ruiz, Ildeberto and Navarro-D{\'i}az, Adri{\'a}n},
+  title     = {Estimation of Chlorine Concentration in Water Distribution Systems Based on a Genetic Algorithm},
+  journal   = {Processes},
+  volume    = {11},
+  number    = {3},
+  pages     = {676},
+  year      = {2023},
+  doi       = {10.3390/pr11030676},
+  publisher = {MDPI}
+}
+
+@article{PeiroviMinaee2019GAPSO,
+  author    = {Peirovi Minaee, Roya and Afsharnia, Mojtaba and Moghaddam, Alireza and Ebrahimi, Ali Asghar and Askarishahi, Mohsen and Mokhtari, Mehdi},
+  title     = {Calibration of Water Quality Model for Distribution Networks Using Genetic Algorithm, Particle Swarm Optimization, and Hybrid Methods},
+  journal   = {MethodsX},
+  volume    = {6},
+  pages     = {540--548},
+  year      = {2019},
+  doi       = {10.1016/j.mex.2019.03.008},
+  publisher = {Elsevier}
+}
+
+@article{Nejjari2014ChlorineCalibration,
+  author    = {Nejjari, F. and Puig, V. and P{\'e}rez, R. and Quevedo, J. and Cuguer{\'o}, M. A. and Sanz, G. and Mirats, J. M.},
+  title     = {Chlorine Decay Model Calibration and Comparison: Application to a Real Water Network},
+  journal   = {Procedia Engineering},
+  volume    = {70},
+  pages     = {1221--1230},
+  year      = {2014},
+  doi       = {10.1016/j.proeng.2014.02.135},
+  publisher = {Elsevier}
+}
+
+@article{Rajakumar2019EnKF,
+  author    = {Rajakumar, Anjana G. and Mohan Kumar, M. S. and Amrutur, Bharadwaj and Kapelan, Zoran},
+  title     = {Real-Time Water Quality Modeling with Ensemble Kalman Filter for State and Parameter Estimation in Water Distribution Networks},
+  journal   = {Journal of Water Resources Planning and Management},
+  volume    = {145},
+  number    = {11},
+  pages     = {04019049},
+  year      = {2019},
+  doi       = {10.1061/(ASCE)WR.1943-5452.0001118},
+  publisher = {American Society of Civil Engineers}
+}
