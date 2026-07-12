@@ -57,6 +57,8 @@
 | C5  | Ostfeld, Uber, Salomons, Berry, Hart, Phillips, Watson, Dorini, Jonkergouw, Kapelan, et al. (2008). The Battle of the Water Sensor Networks (BWSN): A Design Challenge for Engineers and Algorithms. *Journal of Water Resources Planning and Management* | 10.1061/(ASCE)0733-9496(2008)134:6(556) | BWSN benchmark、网络、奠基                      | P0  | ✓   | ✓   |     | BWSN 测试网络（BWSN1/BWSN2）的奠基论文，后续余氯/水质 benchmark 工作普遍引用此文作为模型来源。精读笔记：`[../notes/C/C5_Ostfeld2008.md](../notes/C/C5_Ostfeld2008.md)`。 |
 | C6  | Hermes, Artelt, Vrachimis, Polycarpou, Hammer (2025). A Benchmark for Physics-informed Machine Learning of Chlorine Concentration States in Water Distribution Networks. *SN Computer Science*                                                            | 10.1007/s42979-025-04008-y              | chlorine benchmark、PhML、GNN/RNN           | P2  |     |     |     | 最新公开的余氯浓度估计 benchmark（Hanoi、Net1、CY-DBP 三网 18,000 场景），可作为本项目数据驱动 baseline 对照。                                                     |
 
+| C7  | Munavalli, Mohan Kumar (2003). Water Quality Parameter Estimation in Steady-State Distribution System. *J. Water Resour. Plann. Manage.* 129(2):124–134 | 10.1061/(ASCE)0733-9496(2003)129:2(124) | 反问题、加权最小二乘、Gauss–Newton、single/grouped pipes | P1 |     |     |     | **C1 Munavalli 2005 的稳态前作**：simulation–optimization + 加权最小二乘 (Gauss–Newton) 反演反应参数，可对**单管或成组管道 (single or groups of pipes)** 估 `k_w`，直接支撑本项目「分组校准 (grouping)」的可行性与经典做法。BibTeX：`Munavalli2003SteadyState`。 |
+
 
 ## D. 测量不确定性 (DPD / colorimetric / 在线传感器)
 
@@ -87,6 +89,10 @@
 | E4  | Kang, Pasha, Lansey (2009). Approximate methods for uncertainty analysis of water distribution systems. *Urban Water Journal*                                                                                                       | 10.1080/15730620802566844                                               | Monte Carlo、LHS、FOSM、EPANET                               | P1  |     |     |     | 比较 MC、LHS 和 FOSM 对压力、水龄、余氯预测不确定性的效果，用于 Methodology 选择 MC baseline。                                                                                                                                                                               |
 | E5  | Sansone, Cozzolino, Padulano, Di Cristo, Del Giudice (2026). Detection of deteriorated areas in water distribution networks exploiting chlorine measurements in a Bayesian framework. *Engineering Proceedings* (CSDU-CSSI DAYS 25) | 10.3390/engproc2026135007                                               | Bayesian、MCMC、Metropolis–Hastings、kwall、管道老化              | P0  | ✓   | ✓   |     | 与 E3 Huang 2007 并列的**最新且最直接对手**：把 chlorine 测量喂进 MCMC（Metropolis–Hastings），反演每根管的 k_wall，并据此分类管道老化状态。**Gap（你要补的）**：该文用合成观测、未显式建模 DPD 测量误差，也未做参数可识别性 / 后验区间分析——本项目正是补这条。精读笔记：`[../notes/E/E5_Sansone2026.md](../notes/E/E5_Sansone2026.md)`。       |
 
+| E8  | Jenks, Ulusoy, Stoianov (2025). Bayesian Inference for Quantifying Parameter Uncertainty in Disinfectant Decay Models. *CCWI 2025*（Univ. of Sheffield） | 10.15131/shef.data.29921225.v1 ；[ORDA 页面](https://orda.shef.ac.uk/articles/conference_contribution/Bayesian_Inference_for_Quantifying_Parameter_Uncertainty_in_Disinfectant_Decay_Models/29921225/1) | Bayesian、MCMC、GP emulator、真实管网、连续传感 | P0  |     |     |     | **★ 导师团队最新工作（Stoianov et al. 2025）— 与本项目几乎同题**：用 MCMC + EPANET 水质求解器的**高斯过程 (GP) 代理**反演 disinfectant decay 系数的后验不确定性，并用**真实管网连续传感数据**验证。方法论与「研究 gap」论证的首选对照，且可对齐导师口径。注意：非 2026-05-25 reading list 项目（本项目自行检索）。BibTeX：`Jenks2025BayesianDisinfectant`。 |
+| E9  | Hutton, Kapelan, Vamvakeridou-Lyroudia, Savić (2014). Dealing with Uncertainty in Water Distribution System Models: A Framework for Real-Time Modeling and Data Assimilation. *J. Water Resour. Plann. Manage.* 140(2):169–183 | 10.1061/(ASCE)WR.1943-5452.0000325 | 不确定性来源分类、data assimilation、real-time | P1  |     |     |     | WDS 模型不确定性来源分类 + 实时建模 / 数据同化框架的总纲性文献，适合 Methodology 开篇为「为何做不确定性感知校准」定调。BibTeX：`Hutton2014Uncertainty`。 |
+| E10 | Wu, Marshall, Sharma (2022). Quantifying input uncertainty in the calibration of water quality models: reordering errors via the secant method. *Hydrol. Earth Syst. Sci.* 26(5):1203–1221 | 10.5194/hess-26-1203-2022 | 输入/测量误差、BEAR、似然设计 | P1  |     |     |     | 提出 **Bayesian Error Analysis with Reordering (BEAR)**，把**输入 / 测量误差从模型残差中分离**——直接服务本项目似然函数与测量误差模型设计（对接 `open_questions` Q7、D 类误差先验）。BibTeX：`Wu2022BEAR`。 |
+
 
 ## F. 监管与阈值（policy / regulation）
 
@@ -97,6 +103,18 @@
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | --- | --- | --- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F1  | UK Statutory Instrument (2016). The Water Supply (Water Quality) Regulations 2016, SI 2016 No. 614, Part 8 (Water treatment) Reg. 26 + Schedule 1.                                     | [https://www.legislation.gov.uk/uksi/2016/614/contents](https://www.legislation.gov.uk/uksi/2016/614/contents)                                                                                                                                                                                                     | UK 法规、disinfection、Schedule 1   | P0  |     |     |     | 英国（项目所在地）饮用水水质的现行法定要求，定义运营商必须维持的处理与监测义务，论文 Introduction / Discussion 引用本国法规的首选。                                                                                                                                                                                                             |
 | F2  | World Health Organization (2022). Guidelines for Drinking-water Quality: 4th ed. incorporating the first and second addenda. (Chlorine: §8 + WHO/SDE/WSH/03.04/45 background document) | [https://www.who.int/publications/i/item/9789240045064](https://www.who.int/publications/i/item/9789240045064) ；chlorine 背景文件：[https://cdn.who.int/media/docs/default-source/wash-documents/wash-chemicals/chlorine.pdf](https://cdn.who.int/media/docs/default-source/wash-documents/wash-chemicals/chlorine.pdf) | WHO、free chlorine 残余、≥ 0.2 mg/L | P0  | ✓   | ✓   |     | WHO 推荐管网末端 free chlorine ≥ 0.2 mg/L、接触 30 min 后 ≥ 0.5 mg/L（pH < 8），是本项目 `0.2 mg/L` 工作阈值的国际依据。**已读** 背景文件 `F2.2chlorine.pdf`（health GV 5 mg/L；0.2 为典型浓度非 formal residual — 见笔记）。GDWQ 全书仍待下载。精读笔记：`[../notes/F/F2_WHO2003ChlorineBackground.md](../notes/F/F2_WHO2003ChlorineBackground.md)`。 |
+
+
+## G. 反问题求解算法（GA / PSO / EnKF）
+
+> 目标：为「inverse method / parameter estimation」行动项建立算法对照——从元启发式全局优化 (GA/PSO) 到集合数据同化 (EnKF)，明确本项目 **GA 反演引擎**的文献依据与可比对象。区别于 §C（梯度型确定性校准）与 §E（不确定性感知 / Bayesian），本类聚焦「用什么算法求解那个 `min Σ(C_obs − C_sim)²` 的反问题」。
+
+| #   | Citation | DOI / Link | 主题关键词 | 优先级 | 下载 | 阅读 | 理解 | 收录理由 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| G1  | Gómez-Coronel, Delgado-Aguiñaga, Santos-Ruiz, Navarro-Díaz (2023). Estimation of Chlorine Concentration in Water Distribution Systems Based on a Genetic Algorithm. *Processes* 11(3):676 | 10.3390/pr11030676 | GA、`k_b`+`k_w` 标定、EPANET、阈值优化、全局单一系数 | P0  |     |     |     | **与本项目 GA 反演设定最接近**：GA 在 EPANET 里同时标定**全局** `k_b` + `k_w`（候选解 `c=[k_b,k_w]`，目标 = 最小化监测点 mse），再用第二个 GA 优化入口投氯以满足合规阈值。可直接作为 GA 反问题求解器的**方法模板与伪代码参照**。BibTeX：`GomezCoronel2023GAChlorine`。 |
+| G2  | Peirovi Minaee, Afsharnia, Moghaddam, Ebrahimi, Askarishahi, Mokhtari (2019). Calibration of water quality model for distribution networks using genetic algorithm, particle swarm optimization, and hybrid methods. *MethodsX* 6:540–548 | 10.1016/j.mex.2019.03.008 | GA vs PSO vs 混合、`k_w`、SSE+RMSE | P1  |     |     |     | **GA / PSO / 混合 GA-PSO** 对比标定 `k_w`（目标 SSE + RMSE，真实管网），混合法专治「陷局部最优 + 计算量大」——用于**论证为何选 GA** 及算法对照。BibTeX：`PeiroviMinaee2019GAPSO`。 |
+| G3  | Nejjari, Puig, Pérez, Quevedo, Cugueró, Sanz, Mirats (2014). Chlorine Decay Model Calibration and Comparison: Application to a Real Water Network. *Procedia Engineering* 70:1221–1230 | 10.1016/j.proeng.2014.02.135 | GA、归一化最小二乘、Barcelona 真实管网 | P1  |     |     |     | GA + 归一化二次代价函数标定氯衰减（因模型非显式 / 不可导才用 GA），应用于 **Barcelona 真实管网**，是「用 GA 求解非显式反问题」的经典案例。BibTeX：`Nejjari2014ChlorineCalibration`。 |
+| G4  | Rajakumar, Mohan Kumar, Amrutur, Kapelan (2019). Real-Time Water Quality Modeling with Ensemble Kalman Filter for State and Parameter Estimation in Water Distribution Networks. *J. Water Resour. Plann. Manage.* 145(11):04019049 | 10.1061/(ASCE)WR.1943-5452.0001118 | EnKF、集合数据同化、状态+`k_w` 联合估计、测量噪声 | P1  |     |     |     | **对齐导师「ensemble-based」口径**：用集合卡尔曼滤波 (NIR-/IR-EnKF) 同时估计氯浓度状态与 `k_w`，并系统分析**测量误差、噪声、监测点数量 / 位置**的影响；Case 2 按**管龄分 4 组** `k_w = −1 / −0.75 / −0.5 / −0.25 m/day`（与本项目老 / 中 / 新分档取值高度呼应）。BibTeX：`Rajakumar2019EnKF`。 |
 
 
 ---
@@ -124,7 +142,8 @@
 
 ## 待补字段（持续维护）
 
-- 把所有 P0 论文的 BibTeX 加到 `thesis/refs.bib`
+- 把所有 P0 论文的 BibTeX 加到 `thesis/refs.bib`（**2026-07-01 已建库**：先录入 C7 / E8 / E9 / E10 / G1–G4 共 8 条；A/B/C/D/E/F 旧条目 BibTeX 待从 `notes/` 回填）
+- 补齐「inverse method / parameter estimation」算法对照 — **2026-07-01 已新开 §G**（G1 GA、G2 GA/PSO、G3 GA、G4 EnKF）
 - 找 1–2 篇 BWSN benchmark 上的余氯校准论文（用于支撑选用 BWSN 的合理性） — 见 C5（Ostfeld 2008 奠基）、C6（Hermes et al. 2025 PhML chlorine benchmark）
 - 找 1 篇 Imperial / 英国管网余氯监管阈值的政策性文件 — 见 F1（UK SI 2016/614）、F2（WHO GDWQ 4th ed）
 - 找 1 篇关于 free chlorine 在线监测传感器市场综述（指明 DPD vs amperometric vs 其它） — 见 D4（Wilson 2019 JMTR）、D5（Guigues 2022 AQA）
@@ -231,3 +250,25 @@
 
 
 §C、§D、§F 未在导师 reading list 中出现，顺序与优先级保持不变。
+
+---
+
+## 验证日志（2026-07-01 · 反问题 / 不确定性文献扩充）
+
+> 依据 2026-06-29 会议行动项（① uncertainty 文献、③ inverse method / parameter estimation）扩充 **8 条**：C7（Munavalli 2003 稳态反问题）、E8（Jenks-Ulusoy-Stoianov 2025，**导师团队** Bayesian+GP）、E9（Hutton 2014 数据同化框架）、E10（Wu 2022 BEAR 输入误差）、G1–G4（GA/PSO/EnKF 反问题算法，**新开 §G**）。
+>
+> 核验：7 条经 CrossRef API 核对（作者 / 年份 / 标题 / 期刊 / 卷期页）；E8 为 figshare/ORDA 会议论文，经 DataCite API 核对。同步在 `thesis/refs.bib` **新建库**并录入 8 条 BibTeX。下载 / 阅读 / 理解三列均留空（待通读 PDF）。
+
+
+| #      | 字段 | 修正后（权威元数据）                                                                                                     | 来源                                             |
+| ------ | --- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 新增 C7  | —   | Munavalli, G. R.; Mohan Kumar, M. S.；2003；*J. Water Resour. Plann. Manage.* 129(2):124–134                      | CrossRef `10.1061/(ASCE)0733-9496(2003)129:2(124)` |
+| 新增 E8  | —   | Jenks, Bradley; Ulusoy, Aly-Joy; Stoianov, Ivan；2025；Univ. of Sheffield（CCWI 2025，2025-09-01/03）               | DataCite `10.15131/shef.data.29921225.v1`       |
+| 新增 E9  | —   | Hutton, C. J.; Kapelan, Z.; Vamvakeridou-Lyroudia, L.; Savić, D. A.；2014；*J. Water Resour. Plann. Manage.* 140(2):169–183 | CrossRef `10.1061/(ASCE)WR.1943-5452.0000325`   |
+| 新增 E10 | —   | Wu, Xia; Marshall, Lucy; Sharma, Ashish；2022；*Hydrol. Earth Syst. Sci.* 26(5):1203–1221                         | CrossRef `10.5194/hess-26-1203-2022`            |
+| 新增 G1  | —   | Gómez-Coronel, L.; Delgado-Aguiñaga, J. A.; Santos-Ruiz, I.; Navarro-Díaz, A.；2023；*Processes* 11(3):676         | CrossRef `10.3390/pr11030676`                   |
+| 新增 G2  | —   | Peirovi Minaee, R.; Afsharnia, M.; Moghaddam, A.; Ebrahimi, A. A.; Askarishahi, M.; Mokhtari, M.；2019；*MethodsX* 6:540–548 | CrossRef `10.1016/j.mex.2019.03.008`            |
+| 新增 G3  | —   | Nejjari, F.; Puig, V.; Pérez, R.; Quevedo, J.; Cugueró, M. A.; Sanz, G.; Mirats, J. M.；2014；*Procedia Engineering* 70:1221–1230（CrossRef 仅存首字母缩写） | CrossRef `10.1016/j.proeng.2014.02.135`         |
+| 新增 G4  | —   | Rajakumar, A. G.; Mohan Kumar, M. S.; Amrutur, B.; Kapelan, Z.；2019；*J. Water Resour. Plann. Manage.* 145(11):04019049 | CrossRef `10.1061/(ASCE)WR.1943-5452.0001118`   |
+
+复核标准：作者、年份、标题、期刊四项与 CrossRef / DataCite 一致即 `verified`；任一不一致以其字段为权威覆写。
