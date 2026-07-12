@@ -1,0 +1,363 @@
+[00:00:00] I was hoping hopefully over the weekend I'll finish it it's just because I have to do all
+[00:00:17] the marking and it's actually taken a lot of my time but I was hoping to share it with you but
+[00:00:23] what I'll do I'll share you what I've done because what it does it so takes the water quality data as we
+[00:00:30] discussed introduces all this uncertainty and then does the parameter estimation on the the bulk and
+[00:00:39] the wall okay so that's good okay and last week we said not 20 is
+[00:01:03] no no no no 20 has the the dark loss and okay loss for is low it's low but but I found that it's
+[00:01:19] because more than he is near the tank yes so so so you set up here so in that particular case you
+[00:01:29] know we set up to constant so this is the tanks yeah right so you set up the inlet concentration
+[00:01:34] here in the lake in the river yeah okay yeah and put the tank has a rest in style yes but I haven't said
+[00:01:42] said the tank okay but attack how you haven't set up the tank concentration okay so there is a decay so
+[00:01:51] the tanks where in the tanks where in the tanks we have a certain decay which we take into account okay
+[00:01:58] let me that's fine okay and because this is the assumption I have made in the so you yeah let's work on one
+[00:02:15] milligrams per liter that's fine
+[00:02:19] um
+[00:02:22] let's do which time yeah okay
+[00:02:26] that's fine okay um and last week we have that's uh zero or the yes yes um but but I still uh don't
+[00:02:43] know why we have to do zero or the decay I just purely could erase this time so so what's the zero
+[00:02:51] order decay we're just trying to use the hydraulics as a sort of get measure for the decay of the coin
+[00:02:57] you understand so so once we do the first order decay so the first order decay we have all the bulk and
+[00:03:05] the second and i want to get like an approximation like a simple way to do it by just using
+[00:03:13] the second and the zero order decay and then we sort of like correlate the residence time with the decay
+[00:03:20] which we observe into the system oh okay um so the uh the first order decay
+[00:03:28] uh i have done it but but i think it's a little strange oh so what do you get here
+[00:03:40] because uh we said the concentration uh is uh related to the water age correct yes yes but but i have draw
+[00:03:50] uh also uh with uh uh water age but it it isn't the line but there are some that's okay because they
+[00:04:04] come to a late stage where they basically uh you know the water age becomes constant so this is what
+[00:04:12] gives you remember we talked about the number of uh simulations where you get a kind of a
+[00:04:20] uh kind of continuous sorry in other words as we discussed there is this blood flow that travels
+[00:04:29] so that look as far as you're giving that initial concentration constant that sort of a water age is
+[00:04:34] not going to get worse you know that's the worst water age you get so that's why here it gets flat
+[00:04:40] at that point it doesn't increase so the the system reaches an equilibrium in that space as far as the
+[00:04:47] water quality is not the water quality is not the water quality is not the water quality okay
+[00:04:52] and then the first order okay um firstly i have uh randomly uh select 20 percent of all pipes
+[00:05:04] but but i found a little change yes but you see this is the interesting bit now so if we do if you go back to the
+[00:05:14] uh water age and if you plot the nodes which have the largest water age okay then we can track some of that you can do kind of uh
+[00:05:27] you can so let's assume that this is
+[00:05:44] let's assume you have water age uh to get your pipe so it comes here
+[00:05:54] and you find out that these are the nodes which has the
+[00:05:58] the kind of the worst uh of the longest water age okay so you can then sort of trap the root and
+[00:06:05] actually adopt these pipes or some of these pipes you change some of these characteristics do you understand
+[00:06:11] oh yes yes i have so you don't just do random you don't say oh 10 percent randomly i'll do the
+[00:06:17] yes so i i i found okay uh not 15 is uh it's uh far okay and it's far away the tanks yes so so i i select
+[00:06:32] the section of the section of the section of the section of the section of the section of the
+[00:06:34] okay so for that sort of for that nose we've got a much worse yes yes okay yes no 13 correct that's
+[00:06:42] exactly so we can we can sort of get a few pipes and then we can do that section we can do then we
+[00:06:48] can introduce some of the others one you can take probably the second and third words and you can
+[00:06:53] introduce some changes in the in the pipe page yeah okay so just because if you're very short if you
+[00:07:02] have source here pipe node here and irrespective of how much you change this pipe page you won't get
+[00:07:09] very much you understand yes yes and i get uh oh yeah yeah okay um so i'm
+[00:07:26] yeah and no it should be it should be so so normally
+[00:07:32] uh so i have some noise and some characteristics but normally we would have something like 0.1 milligrams
+[00:07:40] per liter so do you understand so because typically so this is the interesting thing typically water
+[00:07:48] companies put a threshold to 0.2 milligrams per liter that's on free chlorine
+[00:07:55] okay now what let's assume we're dealing with free chlorine at that point now they say we want to have
+[00:08:05] 0.2 milligrams per liter at minimum concentrations so in other words we kind of somehow need to make sure
+[00:08:11] that everywhere our concentration chlorine does not go below that or identify area where there is a high
+[00:08:17] risk that the concentration goes below that okay when we measure the instrument the instrument has an
+[00:08:24] accuracy of roughly 0.05 milligrams per liter i would say in reality what we're observing that the
+[00:08:32] actual instrument has an accuracy plus minus 0.1 okay do you understand yes so so you can so this is
+[00:08:41] what i'm saying so what we're trying to do is now to get the concentration and the modeling to basically
+[00:08:47] not to be an absolute number of 0.2 but just given that uncertainty potentially we'll be looking at an
+[00:08:53] absolute number of 0.3 milligrams per liter so it's not so we need to it's not slower than 0.2 so yeah so in
+[00:09:05] generally they're trying to say in order to demonstrate you know that we have some chlorine
+[00:09:10] residues we don't want to go below 0.2 milligrams per liter but this 3.2 milligrams per liter typically is done by
+[00:09:18] taking the dpd samples i'll take you with me upstairs your colleague is doing exactly that she's doing
+[00:09:23] dpd sampling okay okay so you can see what is happening the problem is that this is a colorimetric
+[00:09:30] method done on site it has a kind of a some accuracy of 0.05 milligrams per liter okay in our case we use
+[00:09:40] this electrochemical sensors which i would say that their uncertainty is about plus minus 0.1 milligrams per liter
+[00:09:48] of the region okay i mean it changes with five values but in that specific lower concentrations i would
+[00:09:55] say zero plus minus 0.2 milligrams per liter so you see that error is quite a significant percentage almost
+[00:10:03] from what we're trying to achieve with the threshold okay so then we sort of say well actually we need to
+[00:10:10] increase that value plus our uncertainty to be absolutely sure that we are actually not dropping below
+[00:10:17] okay okay okay
+[00:10:23] oh so uh yeah so i'll come back to you i'll show you what i've done in that case so i'll show you some of the
+[00:10:30] the the so what is happening here so uh for the uh inverse uh i have only uh i have set the kb
+[00:10:43] but only tries it track it out
+[00:10:49] yeah so the kb you set up kb that's right so we set up so let's say typically can do we take it from
+[00:10:57] yeah we set up the kb the only thing you that is the kw yes okay or alternatively for some modeling
+[00:11:05] sometimes people use one k which includes the boat and the wall but let's say in that case we split it
+[00:11:11] and say like let's look in the wall okay oh okay so i i tried uh kb uh there is a old uh old pipe and
+[00:11:29] new new pipe so what is that what is that new versus uh because we have uh this is the this is the
+[00:11:41] old or the new uh the red one is old and okay okay okay so old pipe new pipe i understand okay i was
+[00:11:50] thinking cold configuration of the configuration okay okay okay so we tried different oh
+[00:12:01] old kb and new kb and find the uh uh and find the lowest ffc is near the shoe
+[00:12:18] i don't understand what you're doing here
+[00:12:21] what is that shot so this is the correlation between the old and the new
+[00:12:25] okay okay why are you why are you showing me that what does that plot demonstrate first of all
+[00:12:32] uh because uh first we we have we have the uh
+[00:12:40] the value of the concentration so we need to try different k
+[00:12:48] uh
+[00:13:01] uh because because we have to go uh from
+[00:13:08] know the kw and and to find the concentration
+[00:13:14] uh from the concentration from the concentration
+[00:13:20] yes so so this this is we know the concentration and we
+[00:13:29] we set like for example
+[00:13:35] uh
+[00:13:35] uh
+[00:13:45] 
+[00:13:45] 
+[00:13:45] uh
+[00:13:47] then we
+[00:13:48] calculate the uh
+[00:13:51] foreign concentration
+[00:13:53] and compare with
+[00:13:59] do you have the code how did you change
+[00:14:01] right now
+[00:14:05] um
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] 
+[00:14:14] Thank you.
+[00:14:44] Yeah, but where did you calculate here?
+[00:14:53] So you just enumerated, where is the canyon?
+[00:14:56] Where is the canyon coming from?
+[00:15:00] You're just creating clean space blocks here for that.
+[00:15:06] Just explain to me what exactly is that?
+[00:15:09] What do you think that's the area?
+[00:15:14] We have select different kW.
+[00:15:20] Yeah, but it's just for the plot.
+[00:15:22] The link space here just gives me the plot.
+[00:15:24] But just the question is that what's very important.
+[00:15:31] I think it's good to get some of that code.
+[00:15:33] I mean, it's great with the cursor and such.
+[00:15:35] We can generate all the stuff.
+[00:15:37] But I think it's really important to understand what is actually doing.
+[00:15:41] Yeah.
+[00:15:43] Okay?
+[00:15:44] So it's sort of like what we've done generally here.
+[00:15:48] We had the network.
+[00:15:50] Then we generate all that network.
+[00:15:52] We assumed a certain inlet concentration.
+[00:15:56] Yeah.
+[00:15:57] We then change some of the types in terms of.
+[00:16:01] And we came up with a sort of simulation of the concentrations of that.
+[00:16:05] Okay?
+[00:16:06] But this is for a given.
+[00:16:07] So at that point you had your given.
+[00:16:10] You had your water quality time series.
+[00:16:13] Okay?
+[00:16:14] So you have the water quality time series for discrete points, which we assume are our monitoring
+[00:16:21] points.
+[00:16:22] Okay?
+[00:16:23] So that's what you've done so far.
+[00:16:26] So we assume that some of these are our monitoring points.
+[00:16:29] Then you came and introduced this noise.
+[00:16:32] So I don't understand where, you know, you have to be more specific about the noise,
+[00:16:37] the noise level, but introduce noise to the kind of, let's say, the monitored time series.
+[00:16:45] They're simulated, but we call them monitored time series.
+[00:16:48] Okay?
+[00:16:49] So now we have to solve the inverse problem.
+[00:16:53] The inverse problem is a parameter estimation problem.
+[00:16:56] That's why I don't see that here.
+[00:16:58] The inverse problem is basically given let's assume that these are the measurements we make into the system,
+[00:17:04] you know, let's calculate, you know, let's calculate, kW.
+[00:17:12] Okay?
+[00:17:14] For these specific measurements.
+[00:17:21] Because before we have kW, you know, in the first instance we have kW, we have pipelines,
+[00:17:31] and we calculated concentrations.
+[00:17:34] Yes.
+[00:17:35] Okay?
+[00:17:36] Yeah.
+[00:17:37] We then took these concentrations,
+[00:17:40] we added noise,
+[00:17:42] and we want to now go back and calculate kW.
+[00:17:48] This is our inverse problem.
+[00:17:50] So we are simulating what happens in reality.
+[00:17:53] we are going to have some measurements into the system,
+[00:17:58] and these measurements will have noise,
+[00:18:01] and from these measurements, we want to establish what makes kW into the system, into the network.
+[00:18:06] Oh.
+[00:18:07] So in reality, we have measurements, you know, measurements of water quality.
+[00:18:13] This is the process we are trying to simulate, you know, simulate, to kind of reproduce in a simulation.
+[00:18:18] So in reality, we have measurements.
+[00:18:21] This is measurements taken by instruments.
+[00:18:23] Yeah?
+[00:18:24] So these measurements, they have plus some noise, plus uncertainty.
+[00:18:29] Okay?
+[00:18:30] Because there's all sorts of factors that affect these measurements.
+[00:18:35] Okay?
+[00:18:36] So then from these measurements, we want to now calculate the kW into that system.
+[00:18:42] So we can use the concentration to calculate kW.
+[00:18:50] Yeah, because we have the hydraulics, so we calculate as an inverse problem.
+[00:18:54] So in other words, we try to establish the kW.
+[00:18:57] In other words, if we have, if you think what we are doing, like we did, the kind of the friction factors,
+[00:19:03] let's assume you have measurements here.
+[00:19:05] You have something which is the, the, the, the kind of the, in reality what happens, you have some time series.
+[00:19:14] Yeah?
+[00:19:15] So this time series is, let's say, the chlorine.
+[00:19:18] Okay?
+[00:19:19] So the point of that is that if I do just a forward simulation, I assume some kW, and simulate the chlorine,
+[00:19:28] probably the chlorine, the simulated, you look something like that.
+[00:19:32] Okay?
+[00:19:33] Okay.
+[00:19:34] So what we're trying to now is to change the kW to a point where these two things are very close to each other.
+[00:19:40] Yes, yes, I think, I think I do, do it like this.
+[00:19:44] Okay.
+[00:19:45] Yeah.
+[00:19:46] Okay.
+[00:19:47] Yes?
+[00:19:48] Okay.
+[00:19:49] So, so, so, so, I, I have choose, uh,
+[00:19:55] many, uh, old pipe kW and new pipe kW.
+[00:20:02] Okay.
+[00:20:03] Yeah.
+[00:20:04] And then, and then, uh, and then, uh, sim, simulates.
+[00:20:08] Yeah, so, the chlorine.
+[00:20:09] So this is where you simulate, you use the function to simulate the chlorine.
+[00:20:14] Yes.
+[00:20:15] That's right.
+[00:20:16] Yes.
+[00:20:17] And then, uh, and do that in a loop.
+[00:20:20] You do that.
+[00:20:21] Yes.
+[00:20:22] For this simulate so many times.
+[00:20:23] Yes.
+[00:20:24] Now, now, now.
+[00:20:25] The simulation now has been observed.
+[00:20:26] Is the residual if you're trying to minimize.
+[00:20:27] Yes.
+[00:20:28] Okay.
+[00:20:29] So it's, uh, it's easy.
+[00:20:30] Yes.
+[00:20:31] So this is, this, you can do that.
+[00:20:32] So you kind of, basically what you're doing here, you're running a multiple forward simulation.
+[00:20:35] okay so this is this you can do that with that so you're kind of basically what you're doing here
+[00:20:46] you're running a multiple forward and forward simulations with the objective with your kind
+[00:20:53] of notion you're changing every time the parameters to be able to reduce that oh yes
+[00:20:59] that sort of residual that which you have here yes
+[00:21:01] this is the right approach but i'm just what i'm trying to do is to be able to write it down
+[00:21:10] okay so that when writing down you can understand what exactly it's doing you can use uh you can use
+[00:21:16] graphs you can use combination of graphs equation and text to explain what is actually doing in your
+[00:21:24] thesis okay so so you this this method and this method that yeah you know this is the same thing
+[00:21:35] it just what i what i'm saying here in reality you have measurements yes these measurements have
+[00:21:41] noise and uncertainty yeah okay and what we're trying to do now is that you have your network
+[00:21:47] so this is the reality you have your network you know that you're measuring here you're measuring
+[00:21:52] chlorine here and what you're trying now to establish for the hydraulics of the network in other words
+[00:22:00] flow and pressure in the network which is happening and given these measurements what are your
+[00:22:08] what potentially are these k values
+[00:22:13] okay which which guarantee that the residuals here that these residuals are minimized
+[00:22:20] okay so the fact is that you want to have two time series so let's assume this one time series is
+[00:22:29] let's call this is a measured
+[00:22:34] and let's assume that this is simulated
+[00:22:38] so measured and simulated so measured and simulated you want that error to be minimal
+[00:22:51] yes okay okay so that's the idea can you try to write that so what you've done so can you write it down
+[00:22:59] okay like a methodological description okay so this is what my objective is that's what i'm trying to do
+[00:23:12] this is how you've done it these are the equations whatever this is the analytical process you can write
+[00:23:18] it as a very simple kind of uh you know typically what what we're trying to do sometimes where we we're
+[00:23:26] trying to when we try to describe something we have a description so this is description which has the
+[00:23:33] program formulation this is what i'm trying to solve problem formulation okay you can use a some kind of a
+[00:23:43] flow chart you know what a problem start here goes i do these analysis yes no and etc you can do a
+[00:23:52] some kind of interpretation of flow chart you can do and you can also write it as a pseudo code i mean
+[00:23:58] this is a particularly good piece of code but the most important is you can explain what it is and why
+[00:24:06] you're doing it that's right okay explain the method and explain results okay
+[00:24:14] okay
+[00:24:17] good so and i'll send you the stuff what i've been playing around slightly different than this but uh
+[00:24:25] let's see okay uh i have another question yes uh in my project uh
+[00:24:33] uh should i consider kb or just combine kb i would i would just use the kw because kb we give it a value
+[00:24:47] normally we always take kb as a as a way of uh going to a particular system and do these jar tests
+[00:24:55] so kb is what we call jar tests what is the jar test you take a bit of water put it under control conditions
+[00:25:01] and you measure the decay this is the natural decay of the water even if it stays in a pot
+[00:25:10] so generally this is i would say like a constant or parameter which we can define
+[00:25:19] but this is more difficult because it doesn't depend to the local conditions but what we're trying
+[00:25:26] to establish is kw which depends on the local conditions okay so so my suggestion for next time is
+[00:25:38] you know try to write what you've done go back to writing and try to write what you've done so far
+[00:25:45] with a better better characterization of the marketing results where you can think of how to improve some of
+[00:25:52] the visualization to better explain the methods okay and you're showing this one but you have to clearly
+[00:25:58] explain what it is and why do you think that actually is the job okay
+[00:26:07] do you want to kind of so what we can do is that if you want as a first instance even today think about
+[00:26:14] the structure of what you're writing what you're going to do to use to write word or overly for later
+[00:26:22] i really use word word okay so why don't you do the following so think about what you cannot
+[00:26:29] go right and send me a structure this afternoon i'll have a look at the structure
+[00:26:34] this afternoon if you want tomorrow that's okay it's not a problem do tomorrow just the structure
+[00:26:42] this is calendar i'm not asking you to write it i'm just asking you to write just the structure so i'll
+[00:26:47] treat it i'll explain that it's almost kind of a little a little kind of preliminary
+[00:26:54] bullet points okay so you should be easily be able to manage this this afternoon
+[00:26:59] so thinking carefully look at your calls and structure it and it's like so then i'll say yes
+[00:27:04] and then you go and do it and then we'll meet next week to send me the before you send me the document
+[00:27:14] but let's use this week to kind of because what i want to do so i wanted to kind of what i have in
+[00:27:20] my mind so now is june okay so what i want now is between now and july for you to uh kind of improve
+[00:27:33] on the methodology
+[00:27:38] and write up as much as you can in terms of the methods okay so then in july i will try to get real
+[00:27:46] dates i have a bit of problems i have to adjust a few things but on the 7th and 8th of july i'm on
+[00:27:52] site so i'm getting a lot of data around this time so i'll probably hope from the 10th of july to
+[00:27:59] something like 20th of july to give you a data set of 10 days okay of the real date and then we can
+[00:28:08] apply all this methodology here to this data set of the real date okay
+[00:28:16] is it good yes yes so so i sent me structure this afternoon yes and then you send me structure and
+[00:28:27] then you start writing up okay so then you start this methodology everything because they said what
+[00:28:34] think about i want to give a problem formulation what i'm trying to solve etc then use any forms of
+[00:28:42] graphics whether it's a flow chart and etc to explain visually what your analytical method does okay
+[00:28:50] then you can use you take your call you can explain the methods you know explain methods
+[00:28:55] but you can also include a pseudocode okay so explain the method you turn the pseudocode into that you can
+[00:29:06] cursor can easily go to the cloth and say turn that into a pseudocode and then verbally explain what the
+[00:29:13] pseudocode is what's the actual code okay okay because one this aims several things one is preparing material for
+[00:29:23] your report but actually helps you understand what you've done okay does that make sense good do you
+[00:29:33] want to take your upstairs just to show you what your colleague is doing
