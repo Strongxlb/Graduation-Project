@@ -7,6 +7,7 @@ __pycache__/
 *.so
 .Python
 .venv/
+.whisper_venv/
 venv/
 env/
 ENV/
@@ -40,7 +41,6 @@ ipython_config.py
 # Opt-in: track the solved chlorine learning exercises notebook.
 !Net3/02_exercises.ipynb
 !Net3/02_exercises_en.ipynb
-!Net3/03_pipeline_net3.ipynb
 
 # ------------------------------------------------------------
 # macOS / Windows / Linux system files
@@ -122,6 +122,11 @@ thesis/*.toc
 thesis/*.synctex.gz
 thesis/_build/
 thesis/build/
+
+# ------------------------------------------------------------
+# Scratch / temporary working files
+# ------------------------------------------------------------
+tmp/
 
 # ------------------------------------------------------------
 # Misc
