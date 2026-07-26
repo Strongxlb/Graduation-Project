@@ -1,0 +1,213 @@
+[00:00:00] I have done the exercise you have sent me, and this is the original network and the time
+[00:00:45] series.
+[00:00:46] Yes.
+[00:00:47] Okay.
+[00:00:48] And the first is compare the bulk and wall decay.
+[00:00:57] And I firstly simulate both KW and KB and turn off the wall decay and only have the
+[00:01:13] bulk decay.
+[00:01:14] Okay.
+[00:01:15] So we can see the bulk drop and the bulk decay and wall decay of the pipe.
+[00:01:28] And wall decay, but this is with relatively small numbers on the wall decay.
+[00:01:42] Yes.
+[00:01:43] Correct.
+[00:01:44] Yes.
+[00:01:49] Can I just go back to your kind of previous slide?
+[00:01:53] So you've said this suggests that wall decay is not uniformly visible to all sensors.
+[00:01:58] Yes.
+[00:01:59] But it can be significant at virtually sensitive locations.
+[00:02:03] What does that mean?
+[00:02:09] Because it has the, because for example, the turn, not turn only have very small wall
+[00:02:28] decay, but the other, other nodes we can, so the node wall decay is obvious.
+[00:02:38] So what, let's just, just very briefly, what do you mean hydraulic decay?
+[00:02:48] What do you mean hydraulic decay is sensitive?
+[00:02:51] Let's go to the, I'll just, this is slide number four.
+[00:02:54] Let's go to the rest and then we'll come back to it.
+[00:03:03] And for the mass transfer, first to half the pipe diameter, first I have only test single
+[00:03:19] pipe and we can see the, the K is, first we don't consider the diffusion scale.
+[00:03:37] So the, the K is the double of the original one.
+[00:03:51] But if we consider the diffusion cap, diffusion, and we found the K is smaller, but it's still,
+[00:04:06] but you still can see it's already double of the original one.
+[00:04:18] We will come back to that as well, thank you.
+[00:04:27] Okay.
+[00:04:28] And then I simulate for the whole, whole network, we have all the pipe diameter.
+[00:04:41] So in, in this case we, I found the K is not, not all the half, but the response is, is not the same as the single, single pipe.
+[00:05:08] So I think it's related to the hydraulics, but not only for the, the diameter.
+[00:05:22] Yes, I mean, it's, as you, as you know, by now it's an advection process.
+[00:05:28] So yes, all the geometry, hydraulics, mass transfer, residence times, they're all very, very closely related.
+[00:05:38] Oh yes.
+[00:05:41] And for time, very inlet, inlet, I have, I have set the inlet swinging, a swing.
+[00:06:00] And then we found the, there are, there are difference of the node have changed.
+[00:06:18] Okay.
+[00:06:20] So the inlet can influence the output of the node.
+[00:06:32] Yes, definitely.
+[00:06:35] Okay.
+[00:06:40] And for reassign the diameter quality in the original is a group by the length.
+[00:06:59] And then I have changed by a group by the diameter.
+[00:07:05] But, but the network's diameter is, they are mostly the same diameters.
+[00:07:15] So, so I have only three groups, three groups, and then I can go back to that.
+[00:07:33] Sorry, just if you don't mind.
+[00:07:36] So, just, so you currently hear groups by diameter quantities.
+[00:07:43] That's right. So that's what we did. Yeah. The diameter quantities you have, that's fine.
+[00:07:48] Yes. And I found the, the, the rank of the node is changed.
+[00:08:03] Okay.
+[00:08:12] And, yeah. Okay.
+[00:08:15] And for a merged five group into two to simulate the network, for the original we have only one group to simulate.
+[00:08:39] And the KW is minus four, minus one point one to five.
+[00:08:49] And for two group, the KW, KW new is minus one point five and the old is minus one point one two.
+[00:09:06] Okay.
+[00:09:08] And the SSE is, I think is only a little bit smaller.
+[00:09:22] And for the, for this one, we use zero order to simulate.
+[00:09:40] I found it can't completely simulate the data. And there is still a big difference between the, the, the number.
+[00:10:04] Okay. And, and the, before we select five, five points based on the distance.
+[00:10:28] But now we have, we changed into the info optimum.
+[00:10:37] So we found for the, after simulates the STD is smaller and the interval is also smaller.
+[00:10:57] So maybe we can, so I think in the real data, we should first to choose the info optimal node to simulate.
+[00:11:39] And this, this is first we choose the difference, choose the farthest points.
+[00:11:54] And this, this is the, this we have changed the, changed the choice of the node with pipeline shortest-path distance instead of
+[00:12:36] the Euclidean.
+[00:12:39] Okay. What does that mean? And why?
+[00:12:45] It means the, the, this before we, we choose the, this, before we choose the straight, I think before you say straight.
+[00:13:24] This is a straight line distance, but now we consider the pipeline distance.
+[00:13:37] So why did you have to consider Euclidean in the first place? Because you know that there could be a huge difference.
+[00:13:49] Because, because it's, firstly, I only want to the spatial.
+[00:14:11] It can have all the, because I think it can have wide coverage of all the network.
+[00:14:34] But, but I think now consider the network distance is, can have different time, time residence time.
+[00:15:05] Generally, I mean, the problem with, so normally we could use Euclidean just as a, just as an initial exercise.
+[00:15:13] But, but the idea being is here, we are very much depending cause you earlier pointing out on the network geometry, which means length of pipes and et cetera.
+[00:15:23] And, and sometimes it just easier because if you have to implement the length of pipes, you, you need to have kind of a more accurate hydraulic model.
+[00:15:33] You need to be able to do length of mains.
+[00:15:36] So there's a bit more kind of involved in terms of the coding in terms of preserving the hydraulic connectivity.
+[00:15:45] So sometimes we just take the Euclidean as a quick, quick initial kind of very rather vague estimate, which we can then iterate and et cetera.
+[00:15:55] But I would, for your report, I wouldn't just use the, the Euclidean distance.
+[00:16:01] I would generally use the shortest path.
+[00:16:04] Oh, but, but in, in, in my report, should I first do it like this to find the optimal node or just use Euclidean nodes?
+[00:16:28] I would just use the network distance, you know, in that particular case.
+[00:16:33] I mean, you're going to, in yours, just as you highlighted in 12, you go to look at the, you rank your basically nodes based on the simulation you have.
+[00:16:43] And that's what will inform your decision in that respect.
+[00:16:48] Okay.
+[00:16:51] And for the sigma, I have around three groups and we find the larger the sigma is and the, the interval is larger.
+[00:17:19] And the STD is larger.
+[00:17:24] And for, and for this one, we, we use the t-distribution likelihood.
+[00:17:54] I choose two, the lower of two sigma, we, we use the t-distribution likelihood.
+[00:18:14] And I found there are 71 points below the limit and the KW is using the t-distribution is a little bit lower than the KW.
+[00:18:40] We only use SSE.
+[00:18:44] Okay.
+[00:18:45] And for the time step, we have simulate 60 seconds and 300 seconds.
+[00:19:08] It's nearly the same.
+[00:19:11] So I think it will not influence the readout.
+[00:19:23] Very also bear in mind that these, you know, these dynamics, this is very funny.
+[00:19:32] I think it will be interesting in that sweet spot that about 60 seconds, we, we don't have such a great dynamics that we capture within the 60 seconds.
+[00:19:44] What will be interesting in that plot to also demonstrate the computational time. Do you understand?
+[00:19:52] But also it'd be nice to have a comparison of the computational time for the different time steps because that's why you kind of almost draw a little relationship between accuracy.
+[00:20:08] Let's assume the 60 seconds is the accurate or deviation of the, of the 300 seconds versus the 60 seconds versus computational time.
+[00:20:21] Okay.
+[00:20:24] You can do that for several nodes so you can actually show the general trend of what is actually happening.
+[00:20:32] Okay. Okay.
+[00:20:34] And for this, we have simulate both KW and KBS groups.
+[00:20:48] And we found the K and for the simulate both KW and KB, the SSE is larger than only simulate KW.
+[00:21:17] And the last one.
+[00:21:20] Yeah. Which was with the other direction. Yeah.
+[00:21:26] And then we junctions were, yeah, this kind of issues by the 48 hour record.
+[00:21:33] Yes. Yes.
+[00:21:42] So the simulate the longer time some, the residence of the nodes will change.
+[00:22:05] So what's your interpretation of this?
+[00:22:18] Actually, before I have simulate also the longer of the time and I found some nodes of the residence will, are still changed.
+[00:22:43] So, so I think maybe.
+[00:22:48] We should also this into the system.
+[00:22:54] It's always good to visualize these things to understand always kind of put a map with us.
+[00:23:07] So I think maybe we should simulate more more time when it simulates more time.
+[00:23:25] Okay.
+[00:23:30] Listen, what it's so good.
+[00:23:34] It just because I think there is there is a bit of a gap.
+[00:23:39] So you, you kind of implement some of these things, but I think your understanding probably still needs to improve.
+[00:23:46] You know, gives you a bit of time to comprehend this.
+[00:23:50] My suggestion is now you have plenty of material here.
+[00:23:54] My suggestion is, can you actually write this material with all the simulations, all the analysis, all the methods into your paper, into your draft paper?
+[00:24:05] Okay.
+[00:24:06] Okay.
+[00:24:07] Okay.
+[00:24:08] And in the process, spend a bit of time, just better understanding some of the, some of the issues.
+[00:24:15] And then we can sort of resolve these questions.
+[00:24:18] Do you understand?
+[00:24:19] So we can, we can discuss that.
+[00:24:21] But the first goal, the first thing is write your first draft of the report you based on this on the whole approach.
+[00:24:29] You understand starting from the beginning, the simulations, then the introduction of the time series, the uncertainties associated.
+[00:24:39] Then we do the inverse problem with no, no uncertainty with uncertainty and et cetera.
+[00:24:46] But ultimately what's very important into this once you go through all this analysis, what we want to spend a bit more time afterwards,
+[00:24:53] you just look and get the interpretation of that.
+[00:24:56] So what does that mean for us?
+[00:24:58] When we talk, we want to do this kind of water quality model with a certain uncertainty bounds.
+[00:25:05] If we can get the second model, I have the second model.
+[00:25:10] I have a lot of data kind of clearing issues.
+[00:25:15] And I don't want to throw this on you because then it gets quite complicated.
+[00:25:19] But even if we don't do the second model, just here, we have a lot of material for your thesis.
+[00:25:25] Do you understand?
+[00:25:26] Yes.
+[00:25:27] It's more than enough.
+[00:25:28] It's just the question now is that you're kind of you writing up the whole details.
+[00:25:35] But the most important thing is the critical interpretation of these results.
+[00:25:41] OK.
+[00:25:42] OK.
+[00:25:43] But what does that mean?
+[00:25:44] What does that mean if we take that?
+[00:25:46] So how do we approach the scenarios when we have these uncertainties,
+[00:25:50] when we have on each of these plus minus, I don't know, 0.2 milligrams per liter,
+[00:25:55] in terms of the uncertainty of the readings and et cetera.
+[00:25:58] What does it mean for our water quality models and the use of this?
+[00:26:04] OK.
+[00:26:08] So we clearly it's difficult for us.
+[00:26:11] We need to put a lot of time and effort to clearly establish that,
+[00:26:18] you know, clearly discipline the model to give us accurate results.
+[00:26:22] But what is actually possible to give us confident indication of, let's say,
+[00:26:28] areas where they're definitely we anticipate problems.
+[00:26:32] And these are problematic areas.
+[00:26:35] OK.
+[00:26:36] OK.
+[00:26:37] So let's try to let's for the next time, let's please try write this stuff.
+[00:26:46] You know, now you have, I would say that, you know,
+[00:26:49] I mean, you really have a lot of stuff here.
+[00:26:52] I think it's now really working on the understanding and interpretation of this.
+[00:26:59] OK.
+[00:27:00] OK.
+[00:27:01] So let's do this.
+[00:27:03] I mean, there is a lot of questions.
+[00:27:05] But again, so, for example, if you go through slides, you know,
+[00:27:10] the actual methodology when you actually interpretation of the results and et cetera,
+[00:27:15] even that every single step strongly suggest give a good thought what exactly means
+[00:27:22] and write it up even if you're not confident.
+[00:27:25] If you think that that's wrong, et cetera, just write it up so we can discuss it.
+[00:27:29] OK.
+[00:27:30] OK.
+[00:27:31] Let's do that.
+[00:27:33] Would you need a week to do that?
+[00:27:36] Shall we do next week?
+[00:27:37] Catch up.
+[00:27:39] Yes.
+[00:27:40] Yeah.
+[00:27:41] When do you want to do it?
+[00:27:45] Next Friday.
+[00:27:48] Because you have, you need to, you need to finish, you need to write the report, of course.
+[00:27:52] Do you understand?
+[00:27:54] Because you need to write your report and I need probably a day or two to read the report.
+[00:27:58] So what time do you need to actually write this initial draft?
+[00:28:05] Next Friday.
+[00:28:07] OK.
+[00:28:08] So let's do next Friday.
+[00:28:11] OK.
+[00:28:13] Shall we do next Friday?
+[00:28:15] So is that OK if we do, if you do it a bit earlier, probably around nine o'clock?
+[00:28:34] Oh, OK.
+[00:28:36] OK.
+[00:28:37] OK.
+[00:28:38] Thank you very much.
+[00:28:45] OK.
+[00:28:46] So I'll do Friday 17th at nine o'clock.
+[00:28:51] And in the meantime, if you have any questions, just drop me a, drop me a Teams message or an email.
+[00:28:57] OK.
+[00:28:58] OK.
+[00:28:59] OK.
+[00:29:00] Thank you very much.
+[00:29:01] Thank you.
+[00:29:02] Thank you.
+[00:29:03] Bye-bye.
+[00:29:04] Bye-bye.

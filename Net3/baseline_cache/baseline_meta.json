@@ -1,0 +1,72 @@
+{
+  "config": {
+    "monitor_nodes": [
+      "107",
+      "113",
+      "15",
+      "145",
+      "209",
+      "231"
+    ],
+    "inlet_mgl": 1.0,
+    "tank_mgl": 0.5,
+    "duration_h": 72,
+    "warmup_h": 24,
+    "hydraulic_timestep_s": 3600,
+    "report_timestep_s": 3600,
+    "quality_timestep_s": 300,
+    "kb_fixed": -0.5,
+    "kw_true": [
+      -1.0,
+      -0.1,
+      -0.05
+    ],
+    "prior": {
+      "old": [
+        -1.5,
+        -0.2
+      ],
+      "avg": [
+        -0.2,
+        -0.04
+      ],
+      "new": [
+        -0.1,
+        -0.005
+      ]
+    },
+    "n_mc": 2000,
+    "sigma_obs": 0.1,
+    "rmse_thr": 0.12,
+    "noise_seed": 42,
+    "sample_seed": 0,
+    "sigma_convention": "sigma = 0.1 mg/L is one standard deviation of the Gaussian observation error"
+  },
+  "summary": {
+    "behavioural_count": 1685,
+    "retention_rate": 0.8425,
+    "rmse_min": 0.09788935922683702,
+    "noise_rmse": 0.09228481429914692,
+    "n_clip": 28,
+    "Tn": 49,
+    "n_nodes": 92,
+    "kw_old_mean_sd": [
+      -0.9606065954666688,
+      0.31721662768824016
+    ],
+    "kw_avg_mean_sd": [
+      -0.11987357708310256,
+      0.04525697181385463
+    ],
+    "kw_new_mean_sd": [
+      -0.05326184149033221,
+      0.027126866412555153
+    ],
+    "true": [
+      -1.0,
+      -0.1,
+      -0.05
+    ],
+    "runtime_s": 39.3
+  }
+}
