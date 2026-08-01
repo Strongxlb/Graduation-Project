@@ -1,0 +1,93 @@
+node,P_breach_current,P_breach_heatwave,P_breach_heat_ageing,MC_SE,demand_L_s,likelihood,consequence,risk_score,risk_band_current,risk_band_heat_ageing,escalates_under_heat,monitored,sampling_priority,control_measure
+103,1.0,1.0,1.0,0.001,8.4,almost certain,major,15,very high,very high,False,False,0.001,Review dosing/booster strategy; consider flushing or turnover improvement
+107,1.0,1.0,1.0,0.0,3.45,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+151,1.0,1.0,1.0,0.0,9.12,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+177,1.0,1.0,1.0,0.0,3.67,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+205,1.0,1.0,1.0,0.0,4.12,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+207,1.0,1.0,1.0,0.0,4.38,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+215,1.0,1.0,1.0,0.0,5.82,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+229,1.0,1.0,1.0,0.0,4.05,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+247,1.0,1.0,1.0,0.0,4.44,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+253,1.0,1.0,1.0,0.0,3.44,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+191,0.98,1.0,1.0,0.01,5.17,almost certain,major,15,very high,very high,False,False,0.083,Review dosing/booster strategy; consider flushing or turnover improvement
+101,0.969,1.0,1.0,0.012,11.98,almost certain,major,15,very high,very high,False,False,0.124,Review dosing/booster strategy; consider flushing or turnover improvement
+193,0.727,0.998,1.0,0.03,4.5,likely,major,12,very high,very high,False,True,0.823,Review dosing/booster strategy; consider flushing or turnover improvement
+125,1.0,1.0,1.0,0.0,2.88,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+131,1.0,1.0,1.0,0.0,2.7,almost certain,moderate,10,very high,very high,False,True,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+145,1.0,1.0,1.0,0.0,1.74,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+149,1.0,1.0,1.0,0.0,1.71,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+153,1.0,1.0,1.0,0.0,2.79,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+185,1.0,1.0,1.0,0.001,1.62,almost certain,moderate,10,very high,very high,False,False,0.001,Review dosing/booster strategy; consider flushing or turnover improvement
+217,1.0,1.0,1.0,0.0,1.53,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+219,1.0,1.0,1.0,0.0,2.61,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+225,1.0,1.0,1.0,0.0,1.44,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+239,1.0,1.0,1.0,0.0,2.81,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+251,1.0,1.0,1.0,0.0,1.52,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+255,1.0,1.0,1.0,0.0,2.55,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+113,0.913,1.0,1.0,0.019,1.26,almost certain,moderate,10,very high,very high,False,False,0.219,Review dosing/booster strategy; consider flushing or turnover improvement
+105,0.406,0.989,1.0,0.034,8.54,possible,major,9,high,very high,True,False,1.0,Confirmatory sampling; review local operation and demand assumptions
+109,0.268,0.982,1.0,0.03,14.6,possible,major,9,high,very high,True,False,0.813,Confirmatory sampling; review local operation and demand assumptions
+189,0.175,0.967,1.0,0.026,6.81,unlikely,major,6,medium,very high,True,False,0.6,Scheduled sampling within the monitoring programme; watch trend
+111,0.052,0.914,1.0,0.015,8.96,unlikely,major,6,medium,very high,True,False,0.203,Scheduled sampling within the monitoring programme; watch trend
+15,1.0,1.0,1.0,0.0,0.06,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+127,1.0,1.0,1.0,0.0,1.11,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+139,1.0,1.0,1.0,0.0,0.37,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+141,1.0,1.0,1.0,0.0,0.62,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+143,1.0,1.0,1.0,0.0,0.39,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+147,1.0,1.0,1.0,0.0,0.54,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+166,1.0,1.0,1.0,0.0,0.16,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+197,1.0,1.0,1.0,0.0,1.08,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+209,1.0,1.0,1.0,0.0,0.05,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+211,1.0,1.0,1.0,0.0,0.55,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+213,1.0,1.0,1.0,0.0,0.88,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+231,1.0,1.0,1.0,0.0,1.04,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+237,1.0,1.0,1.0,0.0,0.98,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+243,1.0,1.0,1.0,0.0,0.27,almost certain,minor,5,medium,medium,False,True,0.0,Scheduled sampling within the monitoring programme; watch trend
+35,0.806,0.999,1.0,0.027,0.06,almost certain,minor,5,medium,medium,False,False,0.216,Scheduled sampling within the monitoring programme; watch trend
+199,0.002,0.746,1.0,0.003,7.53,rare,major,3,low,very high,True,False,0.009,No action beyond routine monitoring
+117,0.0,0.358,0.984,0.0,7.43,rare,major,3,low,very high,True,False,0.0,No action beyond routine monitoring
+119,0.0,0.018,0.608,0.0,11.11,rare,major,3,low,very high,True,False,0.0,No action beyond routine monitoring
+201,0.005,0.796,1.0,0.005,2.81,rare,moderate,2,low,very high,True,False,0.013,No action beyond routine monitoring
+115,0.002,0.711,0.999,0.003,3.29,rare,moderate,2,low,very high,True,False,0.005,No action beyond routine monitoring
+121,0.0,0.006,0.413,0.0,2.63,rare,moderate,2,low,medium,True,False,0.0,No action beyond routine monitoring
+157,0.0,0.052,0.805,0.0,3.27,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
+159,0.0,0.15,0.945,0.0,2.61,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
+171,0.0,0.476,0.995,0.0,2.48,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
+203,0.005,0.8,1.0,0.005,0.06,rare,minor,1,low,medium,True,False,0.007,No action beyond routine monitoring
+123,0.0,0.0,0.003,0.0,0.06,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+161,0.0,0.193,0.964,0.0,1.0,rare,minor,1,low,medium,True,False,0.0,No action beyond routine monitoring
+163,0.0,0.225,0.971,0.0,0.59,rare,minor,1,low,medium,True,False,0.0,No action beyond routine monitoring
+167,0.0,0.459,0.994,0.0,0.92,rare,minor,1,low,medium,True,False,0.0,No action beyond routine monitoring
+20,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+40,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+50,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+129,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+179,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+183,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+184,1.0,1.0,1.0,0.001,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+206,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+208,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+241,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+249,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+275,1.0,1.0,1.0,0.0,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+204,0.986,1.0,1.0,0.008,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+187,0.984,1.0,1.0,0.008,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+273,0.94,1.0,1.0,0.016,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+181,0.808,0.999,1.0,0.027,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+267,0.683,0.998,1.0,0.032,0.0,likely,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+195,0.096,0.944,1.0,0.02,0.0,unlikely,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+263,0.004,0.763,0.999,0.004,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+164,0.002,0.847,1.0,0.003,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+261,0.001,0.656,0.998,0.002,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+271,0.001,0.683,0.999,0.002,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+10,0.0,0.0,0.0,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,True,0.0,Not applicable
+60,0.0,0.0,0.0,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+601,0.0,0.0,0.0,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+61,0.0,0.0,0.0,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,True,0.0,Not applicable
+120,0.0,0.087,0.849,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+169,0.0,0.377,0.99,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+173,0.0,0.48,0.995,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+257,0.0,0.254,0.939,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+259,0.0,0.332,0.967,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+265,0.0,0.328,0.986,0.0,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
+269,0.0,0.563,0.997,0.001,0.0,rare,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
