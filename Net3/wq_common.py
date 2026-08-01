@@ -38,9 +38,25 @@ KW_OLD_TRUE, KW_AVG_TRUE, KW_NEW_TRUE = -1.0, -0.1, -0.05
 PRIOR = {"old": (-1.5, -0.2), "avg": (-0.2, -0.04), "new": (-0.10, -0.005)}
 N_MC = 2000
 SIGMA_OBS = 0.1          # one standard deviation of the Gaussian observation error (mg/L)
-RMSE_THR = 0.12
+# Behavioural thresholds. The draft used 0.12; the revised analysis uses a principled
+# ~95% acceptance band tied to the sampling distribution of the RMSE objective (see below).
+RMSE_THR_DRAFT = 0.12    # original (loose) draft threshold, kept as a comparator
+RMSE_THR = 0.107         # PRIMARY: one-sided 95% acceptance band at sigma = 0.1 mg/L
 NOISE_SEED = 42          # seed for the baseline noisy observation set
 SAMPLE_SEED = 0          # seed for the 2000 uniform-prior parameter draws
+
+# number of residuals per GLUE evaluation: monitors x post-warm-up hours
+N_RESID = len(MONITOR_NODES) * ((DURATION_H - WARMUP_H) + 1)   # 6 x 49 = 294
+
+
+def threshold_for_sigma(sigma, z=1.645):
+    """Principled behavioural threshold = one-sided acceptance band of the RMSE objective.
+
+    The RMSE at the truth has mean ~ sigma and sampling sd ~ sigma / sqrt(2 N_RESID); the
+    threshold accepts parameter sets whose RMSE is within z sampling-sd of the noise floor.
+    Default z = 1.645 gives a ~95% one-sided band (0.107 mg/L at sigma = 0.1).
+    """
+    return float(sigma * (1.0 + z / (2.0 * N_RESID) ** 0.5))
 
 # ---- three contiguous zones by node coordinates ----
 ZONE_Y_LOW = 10.0

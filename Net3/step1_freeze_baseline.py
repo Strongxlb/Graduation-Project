@@ -66,7 +66,7 @@ for s in range(B.N_MC):
 
 # 5) informal Gaussian likelihood, behavioural filter, normalised weights
 L = np.exp(-0.5 * (RMSE / B.SIGMA_OBS) ** 2)
-behavioural = RMSE < B.RMSE_THR
+behavioural = RMSE < B.RMSE_THR_DRAFT      # Step 1 reproduces the draft, which used 0.12
 weights = L * behavioural
 weights = weights / weights.sum()
 
@@ -105,7 +105,7 @@ config = {
     "kb_fixed": B.KB_FIXED,
     "kw_true": [B.KW_OLD_TRUE, B.KW_AVG_TRUE, B.KW_NEW_TRUE],
     "prior": B.PRIOR, "n_mc": B.N_MC, "sigma_obs": B.SIGMA_OBS,
-    "rmse_thr": B.RMSE_THR, "noise_seed": B.NOISE_SEED, "sample_seed": B.SAMPLE_SEED,
+    "rmse_thr": B.RMSE_THR_DRAFT, "noise_seed": B.NOISE_SEED, "sample_seed": B.SAMPLE_SEED,
     "sigma_convention": "sigma = 0.1 mg/L is one standard deviation of the Gaussian observation error",
 }
 
