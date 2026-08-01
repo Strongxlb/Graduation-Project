@@ -136,3 +136,18 @@ tmp/
 .env.*
 !.env.example
 node_modules/
+
+# ------------------------------------------------------------
+# Kilo Code extension workspace (npm deps, agent config)
+# ------------------------------------------------------------
+.kilo/
+
+# ------------------------------------------------------------
+# EPANET input written to Net3/ during run_sim() (runtime artefact)
+# ------------------------------------------------------------
+Net3/temp.*
+
+# ------------------------------------------------------------
+# Large regenerable residual grid (rebuild via step7c)
+# ------------------------------------------------------------
+Net3/baseline_cache/step7c_resid_grid.npy
