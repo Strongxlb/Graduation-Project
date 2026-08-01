@@ -1,0 +1,47 @@
+{
+  "NG": 21,
+  "N": 294,
+  "sigma": 0.1,
+  "rmse_min": 0.09785076095575786,
+  "coef": {
+    "old": {
+      "profile_95": {
+        "lo": -1.175,
+        "hi": -0.85,
+        "open_low": false,
+        "open_high": false
+      },
+      "profile_flat": false,
+      "prior_range": [
+        -1.5,
+        -0.2
+      ]
+    },
+    "average": {
+      "profile_95": {
+        "lo": -0.128,
+        "hi": -0.08000000000000002,
+        "open_low": false,
+        "open_high": false
+      },
+      "profile_flat": false,
+      "prior_range": [
+        -0.2,
+        -0.04
+      ]
+    },
+    "new": {
+      "profile_95": {
+        "lo": -0.06675,
+        "hi": -0.038250000000000006,
+        "open_low": false,
+        "open_high": false
+      },
+      "profile_flat": false,
+      "prior_range": [
+        -0.1,
+        -0.005
+      ]
+    }
+  }
+}
