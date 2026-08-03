@@ -42,6 +42,7 @@ Every number in this log is produced by a script; nothing is hand-entered.
 | `step9_zeroclip.py`              | zero-floor censoring (L=0): naive-exact-0 vs censored likelihood                                 | `figures/step9_zeroclip.png`, `step9_zeroclip.json` |
 | `step10_risk_metrics.py`         | risk duration/depth (trapezoid, 48 h) + water-age corroboration                                 | `figures/step10_risk_metrics.png`, `step10_risk_metrics.json` |
 | `step11_loo.py`                  | leave-one-monitor-out predictive validation                                                     | `figures/step11_loo.png`, `step11_loo.json` |
+| `step12_scenarios.py`            | temperature/ageing scenario projection of the GLUE ensemble + dosing + risk register            | `figures/step12_*.png`, `step12_scenarios.json`, `step12_risk_register.csv` |
 
 
 Run from the `Net3/` directory (conda env `water-supply`):
@@ -1034,4 +1035,269 @@ Findings:
    generalise to unseen locations at the noise floor with well-calibrated bands, and the calibration
    is robust to the monitor set, with old's (localised) information the only thing a single dropped
    sensor can perceptibly weaken.
+
+---
+
+## Step 12 — operational temperature / ageing scenario projection (WSP application)
+
+**Role.** After calibration (Steps 1–9), baseline risk metrics (Step 10) and LOO validation
+(Step 11), this step answers the operational question the supervisor posed: *given the GLUE
+behavioural ensemble, what happens to network-wide low-chlorine risk under warm-season and
+heatwave conditions with an ageing-reactivity stress, and does raising the source dose
+restore the baseline position?*
+
+This is **not** a re-run of the enclosed homogeneous-`k_w` notebook. The scenario *method*
+(Arrhenius scaling → ensemble propagation → likelihood×consequence → risk register → dosing
+evaluation) is transplanted onto **this** project's six-monitor, three-zone GLUE ensemble
+(`k_b = −0.5` fixed; behavioural threshold 0.107; 1126/2000 members). The supervisor's
+numbers are not comparable with these and must never be quoted as results of this study.
+
+### 12.1 Two probability definitions — keep them distinct
+
+Step 10 reported a *time-averaged* probability; Step 12's headline is a *window-breach*
+probability. They answer different questions and both are reported.
+
+**Formulas**:
+
+```
+P_min(s,n) = Σᵢ wᵢ · 1[ min over t ∈ [24, 72] h of C(s,i,n,t) < C_crit ]
+P_bar(s,n) = E[D(s,n)] / 48                     (the Step-10 quantity)
+E[D(s,n)]  = Σᵢ wᵢ · ∫ 1[C < C_crit] dt          (h, trapezoid over 48 intervals)
+E[A(s,n)]  = Σᵢ wᵢ · ∫ max(0, C_crit − C) dt     (mg/L·h)
+```
+
+**Properties**:
+
+- `P_min` = probability the node dips below `0.2 mg/L` **at least once** in the window;
+  `P_bar` = probability a randomly chosen hour is below it. `P_min ≥ P_bar` always.
+- The window is **48 h** (`t = 24…72`, post warm-up), so `P_min` is a 48-hour window
+  minimum, **not** a 24-hour "daily minimum". For otherwise identical trajectories a
+  48-hour window-breach probability **cannot be lower** than the corresponding probability
+  on a nested 24-hour window, and the two are **equal** whenever the diurnal pattern
+  repeats. Window length is therefore only a secondary reason not to compare with the
+  supervisor's figures; the primary reasons are the different parameterisation, monitoring
+  array, ensemble and simulation set-up.
+- "`P_min > 0.5` nodes" counts over all 92 junctions; "indeterminate" is `0.05 < P_min < 0.95`;
+  "demand at risk" sums base demand over junctions with `P_min > 0.5` (zero-demand nodes
+  contribute 0); "network mean" of `E[D]` / `E[A]` is the **unweighted arithmetic mean over
+  all 92 junctions**, in `h` and `mg/L·h` respectively.
+
+### 12.2 Scenario construction
+
+Three sources of scenario uncertainty are propagated jointly with **common random numbers** —
+one `(E_a,bulk, E_a,wall, δT)` draw per behavioural member, reused across every scenario and
+every dose — so scenario differences are physical, not Monte-Carlo noise.
+
+**Formula**:
+
+```
+T(s,i)       = T_mean(s) + δTᵢ,          δTᵢ ~ N(0, 1²) °C
+f(T, Ea)     = exp[ −(Ea/R) · (1/T − 1/T_ref) ],   T in K
+k_b,i(s)     = (−0.5) · f(T(s,i), E_a,b,i)
+k_w,g,i(s)   = k_w,g,i(T_ref) · f(T(s,i), E_a,w,i) · α_g(s),   g ∈ {old, average, new}
+```
+
+with `E_a,bulk ~ N(45, 8²)` kJ/mol and `E_a,wall ~ N(35, 10²)` kJ/mol, both **truncated below
+at 5 kJ/mol** (drawn from a truncated normal rather than clipped, so no draw can be
+non-physical and no probability mass piles up on the bound). The script asserts it: realised
+draws span `17.6–66.1` (bulk) and `6.4–68.8` kJ/mol (wall), all positive. Sampled water
+temperature spans `9.39–23.47 °C` across all four scenarios, asserted to stay inside the
+stated `8–24 °C` validity range.
+
+| key | label | mean water T | ageing multipliers `α` |
+|---|---|---|---|
+| A | Baseline 12 °C | 12 °C | all 1.00 |
+| B | Warm season 16 °C | 16 °C | all 1.00 |
+| C | Heatwave 20 °C | 20 °C | all 1.00 |
+| D | Heatwave + ageing stress | 20 °C | new 1.00 / avg 1.35 / old 1.85 |
+
+**Assumptions to state in the thesis**:
+
+- Calibrated coefficients are **effective parameters at an illustrative reference temperature**
+  `T_ref = 12 °C`; this is inherited from the supervisor's material, **not** measured from Net3.
+- Ageing multipliers are **escalation-only stress-test inputs** (`α ≥ 1`), not asset records.
+  Because the baseline model already distinguishes new/average/old `k_w`, `α_new < 1` is not
+  used — it would weaken already-weak new pipes and double-count the zone structure. Scenario
+  D is therefore named an *ageing-reactivity stress*, not "the effect of ageing".
+- `C_crit = 0.2 mg/L` and the demand-based consequence terciles (`1.16`, `3.39 L/s`) are
+  illustrative operational inputs, not legal limits. Demand is a **consequence proxy**, not
+  population or exposure.
+
+**Numerical guard (important).** Zonal `k_w` are clipped to `CLIP_LO = −8.0 m/day` purely as a
+solver guard. An earlier run used `−3.0`, which was **active for 46.8 % of members in scenario
+D** (prior lower bound `−1.5` × `f_w ≈ 1.5` × `α_old = 1.85` reaches `−5.3`) and silently
+biased the reported mean. The guard is now inert: the script asserts **0 clipped draws in every
+scenario**, and verifies
+
+```
+mean k_w,old(D) / mean k_w,old(C) = 1.8500 = α_old      (exact to 1e-6)
+```
+
+Any future change to the priors or to `α` must re-check this assertion.
+
+### 12.3 Scenario results
+
+All means below are **GLUE-weighted**.
+
+| Scenario | mean k_b | mean k_w,old | `P_min>0.5` nodes | demand at risk | % demand | high/very-high | indeterminate | net-mean `P_bar` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A. Baseline 12 °C | −0.501 | −1.045 | 22 | 36.4 L/s | 18.9 % | 10 | 8 | 0.0546 | 2.621 | 0.2210 |
+| B. Warm season 16 °C | −0.652 | −1.285 | 29 | 45.2 L/s | 23.5 % | 13 | 8 | 0.0820 | 3.935 | 0.3278 |
+| C. Heatwave 20 °C | −0.845 | −1.575 | 30 | 48.0 L/s | 24.9 % | 14 | 4 | 0.1118 | 5.364 | 0.4873 |
+| D. Heatwave + ageing stress | −0.845 | −2.914 | 32 | 49.5 L/s | 25.7 % | 16 | 4 | 0.1257 | 6.032 | 0.5480 |
+
+Continuity check against Steps 1–11: with the temperature held at `T_ref` exactly (cached
+`C_all`, no `δT`), the baseline gives 22 nodes / 36.4 L/s and `E[A] = 0.2193`. Sampling the
+stated temperature uncertainty therefore did **not materially change** the baseline
+classification — the `P_min>0.5` count and demand at risk are unchanged and network-mean
+`E[A]` moves by under 1 % (`0.2193 → 0.2210`).
+
+![Four-panel window-breach probability maps](figures/step12_scenario_maps.png)
+
+![Ageing increment ΔP_min = P(D) − P(C) at 20 °C](figures/step12_ageing_delta.png)
+
+![Scenario escalation, dosing evaluation and ageing sensitivity](figures/step12_summary.png)
+
+**Escalation.** Eight consumer junctions change risk band between A and D, carrying 21.8 L/s
+(11 % of network demand); **seven of the eight are unmonitored**. The largest ageing-only
+increments at the same temperature (D − C) are nodes 217 (`ΔP_min = +0.230`), 215 (`+0.162`)
+and 239 (`+0.140`).
+
+**Ageing-stress sensitivity — is scenario D an artefact of `α_old = 1.85`?**
+
+| ageing set | `α_avg` | `α_old` | `P_min>0.5` nodes | demand at risk | high/very-high | indeterminate | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
+|---|---|---|---|---|---|---|---|---|
+| mild | 1.15 | 1.40 | 31 | 49.5 L/s | 15 | 4 | 5.759 | 0.518 |
+| central | 1.35 | 1.85 | 32 | 49.5 L/s | 16 | 4 | 6.032 | 0.548 |
+| severe | 1.50 | 2.20 | 32 | 49.5 L/s | 16 | 4 | 6.211 | 0.569 |
+
+The **headline binary metrics are nearly insensitive** to the tested multiplier range: the count
+varies only from 31 to 32, demand at risk stays at 49.5 L/s and the indeterminate count is
+constant. The **continuous severity metric increases monotonically** (`E[A]` 0.518 → 0.548 →
+0.569 mg/L·h), and node-level probabilities do move with `α`. So the hot-spot conclusion is
+robust to the multiplier choice, but the magnitude of the ageing penalty is not — it should be
+reported as a stress-test range, never as "the effect of ageing".
+
+### 12.4 Corrective dosing (control-measure evaluation, not a recommendation)
+
+The dose scales **both** the reservoir source quality and the tank initial quality, so the whole
+source regime is raised consistently. (An earlier run left tanks fixed at `0.5 mg/L`, which
+confounded the result with an un-dosed boundary condition.) `inlet = 1.00` reuses scenario C.
+
+| inlet (mg/L) | `P_min>0.5` nodes | demand at risk | % demand | net-mean `P_min` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) | median-over-nodes of mean window min (mg/L) |
+|---|---|---|---|---|---|---|---|
+| 1.00 | 30 | 48.0 L/s | 24.9 % | 0.3317 | 5.364 | 0.4873 | 0.460 |
+| 1.15 | 29 | 45.2 L/s | 23.5 % | 0.3174 | 4.587 | 0.4110 | 0.529 |
+| 1.30 | 29 | 45.2 L/s | 23.5 % | 0.2989 | 3.955 | 0.3532 | 0.598 |
+
+(The last column takes, per junction, the GLUE-weighted mean of the per-member window minimum,
+then the median across the 92 junctions — it is **not** a pooled member-node median. It scales
+almost exactly with the dose, `0.460 × 1.15 = 0.529`, `0.460 × 1.30 = 0.598`.)
+
+**Linearity known-answer test.** Measured `max |C(1.3) − 1.3·C(1.0)| = 2.3e-06 mg/L`. Stated
+precisely: *under fixed hydraulics and demands, first-order bulk and wall kinetics, and
+proportional scaling of all source and initial chlorine concentrations, increasing the dose by a
+factor `r` is mathematically equivalent to evaluating the unscaled concentration field against a
+threshold `C_crit / r`.* This equivalence is a property of that idealisation — it does **not**
+imply that dosing is linear in a real network with dose-dependent chemistry, DBP formation or
+booster constraints.
+
+**Paired warm-up test.** Identical 141-member subset (stride 8), identical weights and identical
+`(E_a, δT)` draws; **only the simulation horizon differs**, so the contrast isolates warm-up
+length from ensemble composition:
+
+| inlet (mg/L) | nodes short / long | demand at risk short / long | `E[D]` short / long (h) | `E[A]` short / long (mg/L·h) |
+|---|---|---|---|---|
+| 1.00 | 30 / 30 | 48.0 / 49.4 L/s | 5.367 / 5.409 | 0.4854 / 0.5330 |
+| 1.15 | 29 / 29 | 45.2 / 47.8 L/s | 4.583 / 4.798 | 0.4089 / 0.4601 |
+| 1.30 | 29 / 28 | 45.2 / 45.0 L/s | 3.939 / 4.391 | 0.3512 / 0.4005 |
+
+Read honestly: the subset itself is representative (short-horizon subset `E[A] = 0.4854` vs full
+ensemble `0.4873`, a 0.4 % difference), so the remaining gap **is** attributable to warm-up
+length — the longer run reaches a more depleted quasi-steady state and raises `E[A]` by roughly
+10 %. The **conclusion is unchanged** under both horizons: node counts and demand at risk are
+essentially the same, every metric still improves monotonically with dose, and demand at risk
+stays well above the 36.4 L/s baseline. Absolute severity values should nevertheless be quoted
+as horizon-dependent.
+
+**Read the binary and continuous columns together.** The identical 45.2 L/s at 1.15 and 1.30 is
+a **threshold artefact**, not evidence that the extra dose does nothing: the continuous metrics
+improve monotonically (`E[D]` 5.36 → 4.59 → 3.96 h; `E[A]` 0.487 → 0.411 → 0.353). Even so,
++30 % dose leaves 45.2 L/s at risk against 36.4 L/s at baseline — **source dosing alone does not
+restore the pre-heatwave demand-at-risk position**. Turnover measures (flushing, storage
+management, rezoning) act on residence time and should be evaluated alongside dosing. DBP
+formation, taste and acceptability are not modelled.
+
+### 12.5 Risk register, product statement and review triggers
+
+`baseline_cache/step12_risk_register.csv` (92 rows): `P_min` under current / heatwave /
+heat+ageing, `P_bar`, `E[D]`, `E[A]` at baseline, demand, likelihood, consequence, risk score
+and bands, escalation flag, monitor flag, sampling priority and control-measure text.
+
+**Classification rules (put these in Methods or an appendix — the register is not reproducible
+without them).**
+
+| likelihood band | on `P_min` | score |
+|---|---|---|
+| rare | `< 0.05` | 1 |
+| unlikely | `0.05 – 0.20` | 2 |
+| possible | `0.20 – 0.50` | 3 |
+| likely | `0.50 – 0.80` | 4 |
+| almost certain | `≥ 0.80` | 5 |
+
+| consequence band | on base demand `d` (L/s) | score |
+|---|---|---|
+| non-consumer | `d = 0` | 0 |
+| minor | `0 < d ≤ 1.16` | 1 |
+| moderate | `1.16 < d ≤ 3.39` | 2 |
+| major | `d > 3.39` | 3 |
+
+Terciles are the `1/3` and `2/3` quantiles of base demand over the **59 junctions with non-zero
+demand** (Net3 stores demand in CFS; `×1000` gives L/s). The risk score is
+`likelihood score × consequence score` (range `0–15`), mapped as `0 → not applicable`,
+`1–3 → low`, `4–6 → medium`, `7–9 → high`, `≥10 → very high`.
+
+Sampling priority uses the **discrete consequence score (0–3), not raw demand**:
+
+```
+priority(n) = consequence_score(n) · P_min(n) · [1 − P_min(n)]     normalised by its maximum
+priority(n) = 0  where base demand = 0
+```
+
+so it peaks at `P_min = 0.5` — the junctions the assessment cannot classify either way.
+
+**Product statement (use this wording).** The output is a **GLUE calibration-conditioned
+scenario projection** from the network model under stated assumptions. It is **not** a sensor
+nowcast (no same-day re-conditioning is performed), **not** a spatial measurement or
+geostatistical interpolation, and **not** a statement that water is safe. Chlorine residual is
+one operational indicator among the WSP's preventive barriers.
+
+**Review triggers (the assessment expires if):** sensor QA failure or reference-check
+disagreement; hydraulic model or demand allocation revised; source/treatment regime change;
+water temperature outside the 8–24 °C scenario range; a forecast heat episode; mains works
+altering the assumed age profile; calibration record exceeding its approved age.
+
+### 12.6 Findings for the Results / Discussion
+
+1. **Temperature escalates risk materially but does not flatten the network.** `P_min>0.5`
+   nodes rise 22 → 29 → 30 from 12 → 16 → 20 °C; demand at risk 18.9 % → 24.9 %; network-mean
+   `E[A]` roughly doubles (0.221 → 0.487 mg/L·h).
+2. **Ageing at the same temperature adds a spatially selective increment** (30 → 32 nodes;
+   `E[A]` 0.487 → 0.548), concentrated where old/average pipes control the supply path. The
+   hot-spot set is robust across the tested `α` range (31–32 nodes, 49.5 L/s), while the
+   severity magnitude scales with `α` — report it as a stress range, not as a measured effect.
+3. **The escalating nodes are almost all unmonitored** (7 of 8), which is an argument for
+   information-led monitoring design rather than for more monitoring in general.
+4. **Source dosing is an incomplete control.** +30 % inlet dose improves every continuous
+   metric but does not return demand-at-risk to baseline. Under the idealisation of fixed
+   hydraulics, first-order kinetics and proportional source scaling, dosing by `r` is exactly
+   equivalent to testing against `C_crit / r`; it cannot buy back residence time.
+5. **Scenario maps are planning products outside the calibrated regime.** The Arrhenius form,
+   `T_ref` and `α_g` are assumptions; unlike the Step-11 LOO check, these projections cannot be
+   verified against held-out chlorine observations. Absolute severity metrics are additionally
+   horizon-dependent (paired warm-up test, §12.4).
+
+Outputs: `figures/step12_scenario_maps.png`, `figures/step12_ageing_delta.png`,
+`figures/step12_summary.png`, `baseline_cache/step12_scenarios.json`,
+`baseline_cache/step12_risk_register.csv`.
 

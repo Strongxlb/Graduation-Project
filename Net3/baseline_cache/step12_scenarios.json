@@ -1,0 +1,451 @@
+{
+  "description": "Step 12 operational temperature/ageing scenario projection of the three-zone GLUE ensemble",
+  "threshold": 0.107,
+  "n_behavioural": 1126,
+  "C_CRIT": 0.2,
+  "assessment_window_h": [
+    24,
+    72
+  ],
+  "T_window_intervals": 48,
+  "definitions": {
+    "P_min": "sum_i w_i * 1[min_t C_i(t) < C_crit] over t = 24..72 h (48-hour window minimum, NOT a 24-hour daily minimum)",
+    "P_bar": "E[D]/T_window, the Step-10 time-averaged below-threshold probability",
+    "E_duration_h": "weighted expected hours below C_crit, trapezoid over 48 intervals",
+    "E_deficit": "weighted expected cumulative deficit, mg/L*h",
+    "network_mean": "unweighted arithmetic mean over all 92 junctions",
+    "indeterminate": "0.05 < P_min < 0.95",
+    "demand_at_risk": "sum of base demand over junctions with P_min > 0.5 (zero-demand nodes contribute 0)",
+    "median_over_nodes_of_mean_window_min_mgl": "per junction take the GLUE-weighted mean of the per-member window minimum, then the median of those 92 node values (NOT a pooled member-node median)",
+    "likelihood_bands_on_P_min": {
+      "rare": "P_min < 0.05",
+      "unlikely": "0.05 <= P_min < 0.20",
+      "possible": "0.20 <= P_min < 0.50",
+      "likely": "0.50 <= P_min < 0.80",
+      "almost certain": "P_min >= 0.80"
+    },
+    "likelihood_scores": {
+      "rare": 1,
+      "unlikely": 2,
+      "possible": 3,
+      "likely": 4,
+      "almost certain": 5
+    },
+    "consequence_scores": {
+      "non-consumer (base demand = 0)": 0,
+      "minor (0 < d <= tercile1)": 1,
+      "moderate (tercile1 < d <= tercile2)": 2,
+      "major (d > tercile2)": 3
+    },
+    "consequence_terciles": "1/3 and 2/3 quantiles of base demand over the 59 junctions with non-zero base demand (Net3 CFS x 1000 -> L/s)",
+    "risk_score": "likelihood score x consequence score, range 0-15",
+    "risk_band_mapping": {
+      "not applicable": "score = 0",
+      "low": "1 <= score <= 3",
+      "medium": "4 <= score <= 6",
+      "high": "7 <= score <= 9",
+      "very high": "score >= 10"
+    },
+    "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), normalised by its maximum; forced to 0 at zero-demand nodes"
+  },
+  "uncertainty_sources": {
+    "kinetics": "GLUE behavioural ensemble (1126 members, weights at threshold 0.107)",
+    "Ea_bulk_J_per_mol": {
+      "mean": 45000.0,
+      "sd": 8000.0
+    },
+    "Ea_wall_J_per_mol": {
+      "mean": 35000.0,
+      "sd": 10000.0
+    },
+    "water_temperature_C": "dT ~ N(0, 1.0^2) added to the scenario mean",
+    "common_random_numbers": true
+  },
+  "T_ref_C": 12.0,
+  "clip_guard_m_per_day": -8.0,
+  "clipped_draws_per_scenario": {
+    "A_baseline": 0,
+    "B_warm": 0,
+    "C_heatwave": 0,
+    "D_heat_age": 0
+  },
+  "kw_old_ratio_D_over_C": 1.85,
+  "ageing_alphas_illustrative": {
+    "mild": {
+      "new": 1.0,
+      "average": 1.15,
+      "old": 1.4
+    },
+    "central": {
+      "new": 1.0,
+      "average": 1.35,
+      "old": 1.85
+    },
+    "severe": {
+      "new": 1.0,
+      "average": 1.5,
+      "old": 2.2
+    }
+  },
+  "ageing_sensitivity": [
+    {
+      "ageing_set": "mild",
+      "alpha_avg": 1.15,
+      "alpha_old": 1.4,
+      "P_min_gt_0.5_nodes": 31,
+      "demand_at_risk_L_s": 49.5,
+      "high_or_very_high": 15,
+      "indeterminate": 4,
+      "net_mean_E_duration_h": 5.676,
+      "net_mean_E_deficit": 0.518
+    },
+    {
+      "ageing_set": "central",
+      "alpha_avg": 1.35,
+      "alpha_old": 1.85,
+      "P_min_gt_0.5_nodes": 32,
+      "demand_at_risk_L_s": 49.5,
+      "high_or_very_high": 16,
+      "indeterminate": 4,
+      "net_mean_E_duration_h": 6.032,
+      "net_mean_E_deficit": 0.548
+    },
+    {
+      "ageing_set": "severe",
+      "alpha_avg": 1.5,
+      "alpha_old": 2.2,
+      "P_min_gt_0.5_nodes": 32,
+      "demand_at_risk_L_s": 49.5,
+      "high_or_very_high": 16,
+      "indeterminate": 4,
+      "net_mean_E_duration_h": 6.266,
+      "net_mean_E_deficit": 0.569
+    }
+  ],
+  "sigma_convention": "observation sigma = 0.1 mg/L is one standard deviation",
+  "product_statement": "GLUE calibration-conditioned scenario projection from the network model; not a sensor nowcast, not a spatial measurement, and not a statement that water is safe",
+  "consequence_terciles_L_s": [
+    1.1635935222706661,
+    3.388784749298665
+  ],
+  "scenario_summary": [
+    {
+      "scenario": "A. Baseline 12 \u00b0C",
+      "mean_kb": -0.501,
+      "mean_kw_old": -1.045,
+      "P_min_gt_0.5_nodes": 22,
+      "demand_at_risk_L_s": 36.4,
+      "pct_demand_at_risk": 18.9,
+      "high_or_very_high": 10,
+      "indeterminate": 8,
+      "net_mean_P_bar": 0.0546,
+      "net_mean_E_duration_h": 2.621,
+      "net_mean_E_deficit": 0.221
+    },
+    {
+      "scenario": "B. Warm season 16 \u00b0C",
+      "mean_kb": -0.652,
+      "mean_kw_old": -1.285,
+      "P_min_gt_0.5_nodes": 29,
+      "demand_at_risk_L_s": 45.2,
+      "pct_demand_at_risk": 23.5,
+      "high_or_very_high": 13,
+      "indeterminate": 8,
+      "net_mean_P_bar": 0.082,
+      "net_mean_E_duration_h": 3.935,
+      "net_mean_E_deficit": 0.3278
+    },
+    {
+      "scenario": "C. Heatwave 20 \u00b0C",
+      "mean_kb": -0.845,
+      "mean_kw_old": -1.575,
+      "P_min_gt_0.5_nodes": 30,
+      "demand_at_risk_L_s": 48.0,
+      "pct_demand_at_risk": 24.9,
+      "high_or_very_high": 14,
+      "indeterminate": 4,
+      "net_mean_P_bar": 0.1118,
+      "net_mean_E_duration_h": 5.364,
+      "net_mean_E_deficit": 0.4873
+    },
+    {
+      "scenario": "D. Heatwave 20 \u00b0C + ageing stress",
+      "mean_kb": -0.845,
+      "mean_kw_old": -2.914,
+      "P_min_gt_0.5_nodes": 32,
+      "demand_at_risk_L_s": 49.5,
+      "pct_demand_at_risk": 25.7,
+      "high_or_very_high": 16,
+      "indeterminate": 4,
+      "net_mean_P_bar": 0.1257,
+      "net_mean_E_duration_h": 6.032,
+      "net_mean_E_deficit": 0.548
+    }
+  ],
+  "reference_at_T_ref_exact": {
+    "P_min_gt_0.5_nodes": 22,
+    "demand_at_risk_L_s": 36.4,
+    "net_mean_E_deficit": 0.2193
+  },
+  "dosing_heatwave": [
+    {
+      "inlet_dose_mgl": 1.0,
+      "P_min_gt_0.5_nodes": 30,
+      "demand_at_risk_L_s": 48.0,
+      "pct_demand_at_risk": 24.9,
+      "net_mean_P_min": 0.3317,
+      "net_mean_E_duration_h": 5.364,
+      "net_mean_E_deficit": 0.4873,
+      "median_over_nodes_of_mean_window_min_mgl": 0.46
+    },
+    {
+      "inlet_dose_mgl": 1.15,
+      "P_min_gt_0.5_nodes": 29,
+      "demand_at_risk_L_s": 45.2,
+      "pct_demand_at_risk": 23.5,
+      "net_mean_P_min": 0.3174,
+      "net_mean_E_duration_h": 4.587,
+      "net_mean_E_deficit": 0.411,
+      "median_over_nodes_of_mean_window_min_mgl": 0.529
+    },
+    {
+      "inlet_dose_mgl": 1.3,
+      "P_min_gt_0.5_nodes": 29,
+      "demand_at_risk_L_s": 45.2,
+      "pct_demand_at_risk": 23.5,
+      "net_mean_P_min": 0.2989,
+      "net_mean_E_duration_h": 3.955,
+      "net_mean_E_deficit": 0.3532,
+      "median_over_nodes_of_mean_window_min_mgl": 0.598
+    }
+  ],
+  "dosing_boundary": "reservoir source quality AND tank initial quality both scaled by dose",
+  "dosing_linearity_check": {
+    "max_abs_err_mgL": 2.2798776626586914e-06,
+    "conditions": "holds under fixed hydraulics and demands, first-order bulk and wall kinetics, and proportional scaling of ALL source and initial chlorine concentrations; a dose factor r is then equivalent to evaluating the unscaled field against C_crit / r"
+  },
+  "dosing_paired_warmup_test": {
+    "design": "identical member subset, weights and scenario draws; only the simulation horizon differs, so the contrast isolates warm-up length",
+    "short": {
+      "duration_h": 72,
+      "warmup_h": 24
+    },
+    "long": {
+      "duration_h": 168,
+      "warmup_h": 120
+    },
+    "n_members": 141,
+    "subset_stride": 8,
+    "rows": [
+      {
+        "inlet_dose_mgl": 1.0,
+        "short_P_min_gt_0.5_nodes": 30,
+        "long_P_min_gt_0.5_nodes": 30,
+        "short_demand_at_risk_L_s": 48.0,
+        "long_demand_at_risk_L_s": 49.4,
+        "short_net_mean_E_duration_h": 5.367,
+        "long_net_mean_E_duration_h": 5.409,
+        "short_net_mean_E_deficit": 0.4854,
+        "long_net_mean_E_deficit": 0.533
+      },
+      {
+        "inlet_dose_mgl": 1.15,
+        "short_P_min_gt_0.5_nodes": 29,
+        "long_P_min_gt_0.5_nodes": 29,
+        "short_demand_at_risk_L_s": 45.2,
+        "long_demand_at_risk_L_s": 47.8,
+        "short_net_mean_E_duration_h": 4.583,
+        "long_net_mean_E_duration_h": 4.798,
+        "short_net_mean_E_deficit": 0.4089,
+        "long_net_mean_E_deficit": 0.4601
+      },
+      {
+        "inlet_dose_mgl": 1.3,
+        "short_P_min_gt_0.5_nodes": 29,
+        "long_P_min_gt_0.5_nodes": 28,
+        "short_demand_at_risk_L_s": 45.2,
+        "long_demand_at_risk_L_s": 45.0,
+        "short_net_mean_E_duration_h": 3.939,
+        "long_net_mean_E_duration_h": 4.391,
+        "short_net_mean_E_deficit": 0.3512,
+        "long_net_mean_E_deficit": 0.4005
+      }
+    ]
+  },
+  "baseline_demand_at_risk_L_s": 36.41818496993601,
+  "dosing_restores_baseline": false,
+  "n_escalating_consumer_nodes": 8,
+  "escalating_demand_L_s": 21.799999999999997,
+  "top_escalating": [
+    {
+      "node": "215",
+      "P_min_baseline": 0.0,
+      "P_min_heatwave": 0.075,
+      "P_min_heat_ageing": 0.237,
+      "dP_ageing": 0.162,
+      "demand_L_s": 5.82,
+      "band_current": "low",
+      "band_heat_ageing": "high",
+      "monitored": false
+    },
+    {
+      "node": "177",
+      "P_min_baseline": 0.002,
+      "P_min_heatwave": 0.998,
+      "P_min_heat_ageing": 0.998,
+      "dP_ageing": 0.0,
+      "demand_L_s": 3.67,
+      "band_current": "low",
+      "band_heat_ageing": "very high",
+      "monitored": false
+    },
+    {
+      "node": "125",
+      "P_min_baseline": 0.54,
+      "P_min_heatwave": 1.0,
+      "P_min_heat_ageing": 1.0,
+      "dP_ageing": 0.0,
+      "demand_L_s": 2.88,
+      "band_current": "high",
+      "band_heat_ageing": "very high",
+      "monitored": false
+    },
+    {
+      "node": "239",
+      "P_min_baseline": 0.0,
+      "P_min_heatwave": 0.74,
+      "P_min_heat_ageing": 0.879,
+      "dP_ageing": 0.14,
+      "demand_L_s": 2.81,
+      "band_current": "low",
+      "band_heat_ageing": "very high",
+      "monitored": false
+    },
+    {
+      "node": "219",
+      "P_min_baseline": 0.155,
+      "P_min_heatwave": 0.984,
+      "P_min_heat_ageing": 1.0,
+      "dP_ageing": 0.016,
+      "demand_L_s": 2.61,
+      "band_current": "medium",
+      "band_heat_ageing": "very high",
+      "monitored": false
+    },
+    {
+      "node": "217",
+      "P_min_baseline": 0.0,
+      "P_min_heatwave": 0.481,
+      "P_min_heat_ageing": 0.711,
+      "dP_ageing": 0.23,
+      "demand_L_s": 1.53,
+      "band_current": "low",
+      "band_heat_ageing": "high",
+      "monitored": false
+    },
+    {
+      "node": "225",
+      "P_min_baseline": 0.207,
+      "P_min_heatwave": 0.993,
+      "P_min_heat_ageing": 1.0,
+      "dP_ageing": 0.007,
+      "demand_L_s": 1.44,
+      "band_current": "medium",
+      "band_heat_ageing": "very high",
+      "monitored": false
+    },
+    {
+      "node": "231",
+      "P_min_baseline": 0.072,
+      "P_min_heatwave": 0.983,
+      "P_min_heat_ageing": 0.998,
+      "dP_ageing": 0.015,
+      "demand_L_s": 1.04,
+      "band_current": "low",
+      "band_heat_ageing": "medium",
+      "monitored": true
+    }
+  ],
+  "top_ageing_delta": [
+    {
+      "node": "249",
+      "dP_min": 0.281,
+      "P_C": 0.264,
+      "P_D": 0.545,
+      "demand_L_s": 0.0
+    },
+    {
+      "node": "217",
+      "dP_min": 0.23,
+      "P_C": 0.481,
+      "P_D": 0.711,
+      "demand_L_s": 1.53
+    },
+    {
+      "node": "215",
+      "dP_min": 0.162,
+      "P_C": 0.075,
+      "P_D": 0.237,
+      "demand_L_s": 5.82
+    },
+    {
+      "node": "239",
+      "dP_min": 0.14,
+      "P_C": 0.74,
+      "P_D": 0.879,
+      "demand_L_s": 2.81
+    },
+    {
+      "node": "219",
+      "dP_min": 0.016,
+      "P_C": 0.984,
+      "P_D": 1.0,
+      "demand_L_s": 2.61
+    },
+    {
+      "node": "231",
+      "dP_min": 0.015,
+      "P_C": 0.983,
+      "P_D": 0.998,
+      "demand_L_s": 1.04
+    },
+    {
+      "node": "237",
+      "dP_min": 0.01,
+      "P_C": 0.002,
+      "P_D": 0.011,
+      "demand_L_s": 0.98
+    },
+    {
+      "node": "225",
+      "dP_min": 0.007,
+      "P_C": 0.993,
+      "P_D": 1.0,
+      "demand_L_s": 1.44
+    },
+    {
+      "node": "229",
+      "dP_min": 0.007,
+      "P_C": 0.001,
+      "P_D": 0.008,
+      "demand_L_s": 4.05
+    },
+    {
+      "node": "211",
+      "dP_min": 0.002,
+      "P_C": 0.0,
+      "P_D": 0.002,
+      "demand_L_s": 0.55
+    }
+  ],
+  "review_triggers": [
+    "sensor QA failure / reference-check disagreement / sensor service",
+    "hydraulic model or demand allocation revised",
+    "source/treatment regime changes inlet chlorine",
+    "water temperature moves outside the 8-24 degC scenario range",
+    "forecast heat episode (switch to the scenario-D register; pre-authorise response)",
+    "mains rehabilitation or burst altering the assumed age profile",
+    "calibration record exceeds its approved age"
+  ],
+  "runtime_s": 185.4
+}
