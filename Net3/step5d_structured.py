@@ -6,23 +6,25 @@ correlated with pipe length: longer pipes decay more strongly. The per-zone ARIT
 held exactly at the zone mean, while the LENGTH-weighted mean is shifted stronger, so the two
 candidate "targets" of a three-zone homogeneous fit are separated and can be told apart.
 
-Length weighting is only ONE candidate effective weighting, not the hydraulically effective one.
-The reaction weight of a pipe also depends on its flow, direction, diameter, residence time and
-on how strongly the monitors see it, so length-weighted must NOT be read as residence-weighted or
-as "the" effective mean. What this step establishes is a DIRECTION, not a target that is recovered:
-the fitted coefficient moves off the arithmetic mean toward the length-weighted value, by 39%
-(old), 133% (average, i.e. past it) and 74% (new) of the arith -> length-weighted gap. Identifying
-the true effective weighting needs a sensitivity/Jacobian-weighted mean, which this step does not
-compute.
+Length weighting is only ONE candidate effective weighting, and it is NOT the hydraulically
+effective one. The reaction weight of a pipe also depends on its flow, direction, diameter,
+residence time and on how strongly the monitors see it, so "length-weighted" must never be read as
+"residence-weighted" or as "the" effective mean — they are different quantities that happen to be
+separated from the arithmetic mean in the same direction here. What this step establishes is a
+DIRECTION of travel, not a target that is recovered: the fitted coefficient moves off the arithmetic
+mean toward the length-weighted value without landing on it. Identifying the genuinely effective
+weighting needs a sensitivity/Jacobian-weighted mean, which this step does not compute, so the
+claim available from it is bounded accordingly.
 
-Same caveat as Step 5c: `bias` is measured with the informal GLUE score, whose weighted mean
-already departs from the truth on the homogeneous baseline (old -0.044, avg -0.019 at the same
-seed and threshold), so part of each shift here is a weighting artefact rather than structural.
+PRIMARY: formal censored likelihood. COMPARATOR: informal GLUE at the primary threshold. This
+matters for the size of the effect as well as its direction: on the homogeneous baseline the
+informal score's weighted mean already sits away from the truth, so part of any shift it reports is
+its own artefact, and the baseline offset of each scheme is recorded here for exactly that reason.
 
 Contrast with Step 5a/5c (random, uncorrelated jitter): there length-weighted ~ arithmetic, so the
 two targets coincide and no separation is observable. Here the correlation is what separates them.
 
-Reuses the frozen baseline GLUE candidate predictions (truth-independent); primary threshold 0.107.
+Reuses the frozen baseline candidate predictions (truth-independent).
 """
 import os
 import json
@@ -98,14 +100,14 @@ for kwo in kw_old_grid:
 struct = min(np.sqrt(((sim - truth_post_mon) ** 2).mean()) for sim in GRID.values())
 print(f"grid {len(GRID)} sims ({time.time()-t0:.1f}s); structural residual {struct:.4f}")
 
-# noisy obs + GLUE (reuse cached candidates), primary threshold 0.107
+# noisy obs, then both weightings from the cached candidates
+SCHEMES = [B.PRIMARY_WEIGHTING, "informal_glue"]
 rng_n = np.random.default_rng(B.NOISE_SEED)
 obs = np.clip(truth_mon + rng_n.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
-RMSE = np.sqrt(((C_all_mon - obs[None]) ** 2).mean(axis=(1, 2)))
-L = np.exp(-0.5 * (RMSE / B.SIGMA_OBS) ** 2)
+RMSE = B.rmse_of(C_all_mon, obs)
 beh = RMSE < B.RMSE_THR
-w = L * beh
-w = w / w.sum()
+wts = B.all_weightings(C_all_mon, obs, threshold=B.RMSE_THR, schemes=SCHEMES)
+w = wts[B.PRIMARY_WEIGHTING][0]
 GRIDFIT = None
 best_rmse = np.inf
 for kw, sim in GRID.items():
@@ -114,18 +116,21 @@ for kw, sim in GRID.items():
         best_rmse, GRIDFIT = r, kw
 gf = {"old": GRIDFIT[0], "average": GRIDFIT[1], "new": GRIDFIT[2]}
 
-glue = {}
-for z in ZKEYS:
-    m = float(np.sum(w * S[z]))
-    sd = float(np.sqrt(np.sum(w * (S[z] - m) ** 2)))
-    glue[z] = {"mean": m, "sd": sd}
+# The same seed on the HOMOGENEOUS truth, so each scheme's structural shift can be separated from
+# the offset it already carries with no structural error at all.
+obs_hom = cache["obs_glue"]
+wts_hom = B.all_weightings(C_all_mon, obs_hom, threshold=B.RMSE_THR, schemes=SCHEMES)
+fit = {s: {z: dict(zip(("mean", "sd"), B.weighted_mean_sd(wts[s][0], S[z]))) for z in ZKEYS}
+       for s in SCHEMES}
+base_offset = {s: {z: float(B.weighted_mean_sd(wts_hom[s][0], S[z])[0] - ZONE_MEAN[z])
+                   for z in ZKEYS} for s in SCHEMES}
 
-# risk
+# risk under the primary rule
 below = (C_all < C_MIN)
-P_glue = np.tensordot(w, below.astype(float), axes=(0, 0)).mean(axis=0)
+P_fit = np.tensordot(w, below.astype(float), axes=(0, 0)).mean(axis=0)
 P_true = (truth_all[B.WARMUP_H:] < C_MIN).mean(axis=0)
-rank_glue = [ALL_NODES[i] for i in np.argsort(P_glue)[::-1][:6]]
-rank_true = [ALL_NODES[i] for i in np.argsort(P_true)[::-1][:6]]
+rank_fit = [str(ALL_NODES[i]) for i in np.argsort(P_fit)[::-1][:6]]
+rank_true = [str(ALL_NODES[i]) for i in np.argsort(P_true)[::-1][:6]]
 
 # ---- dose-response over the correlation strength, with 30 noise realisations each ----
 # The truth here is deterministic (length rank order), so there is no heterogeneity FIELD to average
@@ -157,29 +162,39 @@ for corr in CORR_SWEEP:
 
     tm = B.simulate_chlorine(B.KB_FIXED, 0.0, pre_run=hook_c,
                              monitor_nodes=ALL_NODES).values[:, mon_pos]
-    fr = {z: [] for z in ZKEYS}
+    fr = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
     for seed in range(42, 42 + N_NOISE_5D):
         rr = np.random.default_rng(seed)
         ob = np.clip(tm + rr.normal(0, B.SIGMA_OBS, tm.shape), 0, None)[B.WARMUP_H:]
-        wc, _ = B.weights_from_loglik(B.log_censored(C_all_mon, ob))
-        for z in ZKEYS:
-            m = float(np.sum(wc * S[z]))
-            gap = ref[z]["lenwt"] - ref[z]["arith"]
-            # fraction of the arithmetic -> length-weighted gap travelled; undefined at CORR = 0,
-            # where the two targets coincide, so the raw bias is recorded there instead
-            fr[z].append((m - ref[z]["arith"]) / gap if abs(gap) > 1e-9 else np.nan)
-    row = {"corr": corr, "gap": {z: ref[z]["lenwt"] - ref[z]["arith"] for z in ZKEYS}, "zones": {}}
+        wc = B.all_weightings(C_all_mon, ob, threshold=B.RMSE_THR, schemes=SCHEMES)
+        for s in SCHEMES:
+            if wc[s][0] is None:
+                continue
+            for z in ZKEYS:
+                m = float(np.sum(wc[s][0] * S[z]))
+                gap = ref[z]["lenwt"] - ref[z]["arith"]
+                # fraction of the arithmetic -> length-weighted gap travelled; undefined at CORR = 0,
+                # where the two targets coincide, so that row is the control instead
+                fr[s][z].append((m - ref[z]["arith"]) / gap if abs(gap) > 1e-9 else np.nan)
+    row = {"corr": corr, "gap": {z: ref[z]["lenwt"] - ref[z]["arith"] for z in ZKEYS},
+           "by_scheme": {}}
     line = f"{corr:>5.2f} |"
-    for z in ZKEYS:
-        a = np.array(fr[z], dtype=float)
-        if np.all(np.isnan(a)):
-            row["zones"][z] = {"shift_frac_med": None, "note": "targets coincide at CORR = 0"}
-            line += "        control        |"
-            continue
-        row["zones"][z] = {"shift_frac_med": float(np.median(a)),
-                           "shift_frac_5_95": [float(np.percentile(a, 5)),
-                                               float(np.percentile(a, 95))]}
-        line += f" {np.median(a):+6.2f} [{np.percentile(a, 5):+.2f},{np.percentile(a, 95):+.2f}] |"
+    for s in SCHEMES:
+        row["by_scheme"][s] = {}
+        for z in ZKEYS:
+            a = np.array(fr[s][z], dtype=float)
+            if np.all(np.isnan(a)):
+                row["by_scheme"][s][z] = {"shift_frac_med": None,
+                                          "note": "targets coincide at CORR = 0"}
+                if s == B.PRIMARY_WEIGHTING:
+                    line += "        control        |"
+                continue
+            row["by_scheme"][s][z] = {"shift_frac_med": float(np.median(a)),
+                                      "shift_frac_5_95": [float(np.percentile(a, 5)),
+                                                          float(np.percentile(a, 95))]}
+            if s == B.PRIMARY_WEIGHTING:
+                line += (f" {np.median(a):+6.2f} [{np.percentile(a, 5):+.2f},"
+                         f"{np.percentile(a, 95):+.2f}] |")
     dose.append(row)
     print(line)
 print("shift-frac = (fitted mean − arithmetic) / (length-weighted − arithmetic). 0 means the fit sits")
@@ -187,9 +202,14 @@ print("on the arithmetic mean, 1 on the length-weighted value. At CORR = 0 the t
 print("row is the homogeneous control and no fraction is defined.")
 
 GRID_AXES = {"old": kw_old_grid, "average": kw_avg_grid, "new": kw_new_grid}
-report = {"design": "within-zone length-correlated heterogeneity (CORR=%.2f)" % CORR,
-          "threshold": B.RMSE_THR, "structural_residual": float(struct),
-          "behavioural": int(beh.sum()), "rmse_min": float(RMSE.min()),
+report = {**B.weighting_provenance(comparators=["informal_glue"]),
+          "design": "within-zone length-correlated heterogeneity (CORR=%.2f)" % CORR,
+          "target_semantics": "length-weighted is an illustrative proxy target, NOT the "
+                              "residence-weighted or hydraulically effective coefficient; only the "
+                              "DIRECTION of the shift is established here",
+          "informal_threshold": B.RMSE_THR, "structural_residual": float(struct),
+          "behavioural_informal": int(beh.sum()), "rmse_min": float(RMSE.min()),
+          "homogeneous_baseline_offset": base_offset,
           # the grid resolution bounds how close any grid fit can get, so it is recorded rather
           # than left to be recomputed by hand when the fit is discussed
           "grid": {z: {"nodes": [float(v) for v in ax],
@@ -200,23 +220,39 @@ report = {"design": "within-zone length-correlated heterogeneity (CORR=%.2f)" % 
                        "nearest_node_to_truth": float(ax[np.argmin(np.abs(ax - ZONE_MEAN[z]))]),
                        "distance_to_truth": float(np.min(np.abs(ax - ZONE_MEAN[z])))}
                    for z, ax in GRID_AXES.items()},
-          "grid_fit": GRIDFIT, "zones": {}, "rank_glue": rank_glue, "rank_true": rank_true,
+          "grid_fit": GRIDFIT, "zones": {}, "rank_fit": rank_fit, "rank_true": rank_true,
           "correlation_dose_response": {"corr_levels": CORR_SWEEP, "n_noise": N_NOISE_5D,
-                                        "weighting": "formal_censored", "rows": dose}}
-print("\n=== Step 5d: structured (length-correlated) within-zone heterogeneity, thr=0.107 ===")
-print(f"behavioural {int(beh.sum())}/{B.N_MC}, min RMSE {RMSE.min():.4f}")
-print(f"{'zone':>8} | {'arith':>7} {'lenwt':>7} | {'GLUE mean±sd':>15} | {'gridfit':>8} | "
-      f"{'bias(GLUE-arith)':>16} | {'lenwt-arith':>11} | shift")
-for z in ZKEYS:
-    tr = true_ref[z]
-    bias = glue[z]["mean"] - tr["arith"]
-    gap = tr["lenwt"] - tr["arith"]
-    report["zones"][z] = {**tr, "glue_mean": glue[z]["mean"], "glue_sd": glue[z]["sd"],
-                          "grid_fit": gf[z], "bias": bias, "lenwt_minus_arith": gap,
-                          "shift_frac_of_lenwt_gap": bias / gap if abs(gap) > 1e-12 else None}
-    print(f"{z:>8} | {tr['arith']:7.3f} {tr['lenwt']:7.3f} | {glue[z]['mean']:7.3f}±{glue[z]['sd']:.3f} "
-          f"| {gf[z]:8.3f} | {bias:+16.3f} | {gap:+11.3f} | {100 * bias / gap:5.0f}% of gap")
-print(f"risk GLUE {rank_glue}\nrisk TRUE {rank_true}")
+                                        "rows": dose}}
+print("\n=== Step 5d: structured (length-correlated) within-zone heterogeneity ===")
+print(f"structural residual {struct:.4f}; min RMSE over the candidate library {RMSE.min():.4f}")
+for s in SCHEMES:
+    tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
+    print(f"\n--- {s} ({tag}) ---")
+    print(f"{'zone':>8} | {'arith':>7} {'lenwt':>7} | {'fit mean±sd':>15} | {'gridfit':>8} | "
+          f"{'shift':>8} {'hom. offset':>11} | {'lenwt-arith':>11} | frac of gap")
+    for z in ZKEYS:
+        tr = true_ref[z]
+        m, sd = fit[s][z]["mean"], fit[s][z]["sd"]
+        bias = m - tr["arith"]
+        gap = tr["lenwt"] - tr["arith"]
+        rec = {"mean": m, "sd": sd, "bias": bias,
+               "homogeneous_baseline_offset": base_offset[s][z],
+               # the shift net of what the scheme already does with no structural error at all
+               "bias_net_of_baseline": bias - base_offset[s][z],
+               "shift_frac_of_lenwt_gap": bias / gap if abs(gap) > 1e-12 else None,
+               "shift_frac_net_of_baseline": ((bias - base_offset[s][z]) / gap
+                                             if abs(gap) > 1e-12 else None)}
+        if s == B.PRIMARY_WEIGHTING:
+            report["zones"][z] = {**tr, "grid_fit": gf[z], "lenwt_minus_arith": gap,
+                                  "by_scheme": {s: rec}}
+        else:
+            report["zones"][z]["by_scheme"][s] = rec
+        print(f"{z:>8} | {tr['arith']:7.3f} {tr['lenwt']:7.3f} | {m:7.3f}±{sd:.3f} | "
+              f"{gf[z]:8.3f} | {bias:>+8.3f} {base_offset[s][z]:>+11.3f} | {gap:>+11.3f} | "
+              f"{100 * bias / gap:5.0f}%")
+print(f"\n'hom. offset' is the same scheme's departure from the truth on the HOMOGENEOUS baseline:")
+print("subtract it before reading any shift as structural.")
+print(f"risk (primary) {rank_fit}\nrisk TRUE      {rank_true}")
 
 
 def _jsafe(o):
@@ -230,26 +266,32 @@ def _jsafe(o):
 with open(os.path.join(HERE, "baseline_cache", "step5d_structured.json"), "w") as f:
     json.dump(report, f, indent=2, default=_jsafe)
 
-# figure: kw vs pipe length per zone + arith/lenwt/GLUE lines
+# figure: kw vs pipe length per zone + arithmetic / length-weighted / fitted lines
 fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))
 for ax, z in zip(axes, ZKEYS):
     ps = zone_pipes[z]
     lens = np.array([PIPE_LEN[p] for p in ps])
     kws = np.array([KW_PIPE[p] for p in ps])
+    m_prim = fit[B.PRIMARY_WEIGHTING][z]["mean"]
     ax.scatter(lens, kws, s=18, color="0.5", label="true pipe k_w")
     ax.axhline(true_ref[z]["arith"], color="black", lw=2, label="true arith. mean")
-    ax.axhline(true_ref[z]["lenwt"], color="green", lw=2, ls="-.", label="length-weighted mean")
-    ax.axhline(glue[z]["mean"], color="steelblue", lw=2, ls="--", label="GLUE behavioural mean")
-    frac = ((glue[z]["mean"] - true_ref[z]["arith"])
-            / (true_ref[z]["lenwt"] - true_ref[z]["arith"]))
+    ax.axhline(true_ref[z]["lenwt"], color="green", lw=2, ls="-.",
+               label="length-weighted proxy (not residence-weighted)")
+    ax.axhline(m_prim, color="steelblue", lw=2, ls="--",
+               label="posterior mean, formal censored")
+    ax.axhline(fit["informal_glue"][z]["mean"], color="0.35", lw=1.2, ls=":",
+               label="posterior mean, informal GLUE")
+    frac = (m_prim - true_ref[z]["arith"]) / (true_ref[z]["lenwt"] - true_ref[z]["arith"])
     ax.set_xlabel("pipe length")
     ax.set_ylabel("k_w (m/day)")
     ax.set_title(f"{z} zone\nfit moved {100 * frac:.0f}% of the arith. -> length-weighted gap",
                  fontsize=10)
     ax.grid(alpha=0.3)
-axes[0].legend(fontsize=7)
+axes[0].legend(fontsize=6.5)
 fig.suptitle("Step 5d — structured (length-correlated) heterogeneity: the fit moves off the "
-             "arithmetic mean toward a length-weighted value, but does not land on it", y=1.02)
+             "arithmetic mean toward a length-weighted proxy without landing on it\n"
+             "(the proxy is an illustrative target, not the residence-weighted coefficient)",
+             y=1.04)
 plt.tight_layout()
 figpath = os.path.join(FIGDIR, "step5d_structured.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")

@@ -154,3 +154,5 @@ Net3/temp.*
 Net3/baseline_cache/step7c_resid_grid.npy
 Net3/baseline_cache/step7b_rmse_grid.npy
 Net3/baseline_cache/*.npy.key.json
+# Prediction libraries reused by displaced-prior / k_b sweeps (rebuild via the step that writes them).
+Net3/baseline_cache/step*_preds_*.npy

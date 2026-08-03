@@ -1,4 +1,8 @@
 {
+  "weighting": "informal_glue",
+  "weighting_role": "comparator; SUPERSEDED by step4d, which reports the primary formal rule over 30 noise realisations and both displacement directions",
+  "primary_weighting_elsewhere": "formal_censored",
+  "n_noise_realisations": 1,
   "behavioural_count": 3359,
   "retention": 0.41,
   "rmse_min": 0.0972,

@@ -1,11 +1,18 @@
-"""Step 8b: GLUE calibration under a misspecified k_b (± 20%) — Priority-2 #5.
+"""Step 8b: calibration under a misspecified k_b (± 20%) — Priority-2 #5.
 
-The observations are generated with the true k_b = -0.5. We then re-run GLUE while FIXING k_b at
--0.4, -0.5, -0.6 (±20%) and see how the three grouped k_w behavioural means move to compensate
-(the bulk–wall trade-off). This is the empirical partner to Fisher Case B.
+The observations are generated with the true k_b = -0.5. The calibration is then re-run while FIXING
+k_b at -0.4, -0.5, -0.6 (±20%) to see how the three grouped k_w move to compensate: the bulk-wall
+trade-off. This is the empirical partner to Fisher Case B, which predicts the same trade-off from
+the Jacobian alone.
 
-k_b = -0.5 reuses the baseline cache; k_b = -0.4 / -0.6 are simulated here (all nodes, for risk).
-Primary threshold 0.107; 30 noise realisations, median reported.
+PRIMARY: formal censored likelihood. COMPARATOR: informal GLUE at the primary threshold. Running
+both matters here because the whole quantity of interest is a systematic displacement, and a flat
+score under-reports displacement — the same effect Step 8 finds for sensor bias.
+
+k_b = -0.5 reuses the baseline cache; k_b = -0.4 / -0.6 are simulated here over all 92 nodes (the
+risk field needs them) and cached, so a re-run costs nothing. 30 noise realisations; the reported
+coefficient is the median across them, and the risk ranking is taken from the median risk field
+across the same realisations rather than from one arbitrary seed.
 """
 import os
 import json
@@ -14,18 +21,22 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from scipy.stats import spearmanr
 import wq_common as B
+import provenance
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIGDIR = os.path.join(HERE, "figures")
+CACHEDIR = os.path.join(HERE, "baseline_cache")
 ZKEYS = ["old", "average", "new"]
+JKEY = {"old": "old", "average": "avg", "new": "new"}     # report key per zone
 TRUE = {"old": B.KW_OLD_TRUE, "average": B.KW_AVG_TRUE, "new": B.KW_NEW_TRUE}
 C_MIN = 0.2
 
-cache = np.load(os.path.join(HERE, "baseline_cache", "baseline.npz"), allow_pickle=True)
+cache = np.load(os.path.join(CACHEDIR, "baseline.npz"), allow_pickle=True)
 ALL_NODES = list(cache["all_nodes"])
 mon_pos = list(cache["mon_pos"])
-truth_mon = cache["truth_all"][:, mon_pos]                # true field (k_b=-0.5) at monitors
+truth_mon = cache["truth_all"][:, mon_pos]                # true field (k_b = -0.5) at the monitors
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
 N_MC = B.N_MC
 Tn = cache["obs_glue"].shape[0]
@@ -33,18 +44,28 @@ Tn = cache["obs_glue"].shape[0]
 KBS = [-0.4, -0.5, -0.6]
 N_NOISE = 30
 SEEDS = list(range(42, 42 + N_NOISE))
+SCHEMES = [B.PRIMARY_WEIGHTING, "informal_glue"]
+TOP_K = 6
 
-# candidate predictions per k_b (all nodes); reuse baseline cache for k_b = -0.5
+# candidate predictions per k_b (all nodes); reuse the baseline cache for k_b = -0.5
 preds = {-0.5: cache["C_all"]}
 for kb in [-0.4, -0.6]:
-    Ck = np.empty((N_MC, Tn, len(ALL_NODES)), dtype=np.float32)
-    t0 = time.time()
-    for s in range(N_MC):
-        Ck[s] = B.simulate_chlorine(kb, 0.0,
-                                    pre_run=B.make_kw_hook(S["old"][s], S["average"][s], S["new"][s]),
-                                    monitor_nodes=ALL_NODES).values[B.WARMUP_H:].astype(np.float32)
-        if (s + 1) % 1000 == 0:
-            print(f"  kb={kb}: {s+1}/{N_MC} ({time.time()-t0:.0f}s)")
+    path = os.path.join(CACHEDIR, f"step8b_preds_kb{kb}.npy")
+    Ck = provenance.load_keyed_array(path, kb=kb, n_mc=N_MC)
+    if Ck is None:
+        Ck = np.empty((N_MC, Tn, len(ALL_NODES)), dtype=np.float32)
+        t0 = time.time()
+        for s in range(N_MC):
+            Ck[s] = B.simulate_chlorine(kb, 0.0,
+                                        pre_run=B.make_kw_hook(S["old"][s], S["average"][s],
+                                                               S["new"][s]),
+                                        monitor_nodes=ALL_NODES).values[B.WARMUP_H:].astype(
+                                            np.float32)
+            if (s + 1) % 1000 == 0:
+                print(f"  kb={kb}: {s + 1}/{N_MC} ({time.time() - t0:.0f}s)")
+        provenance.save_keyed_array(path, Ck, kb=kb, n_mc=N_MC)
+    else:
+        print(f"  kb={kb}: reusing cached prediction library {Ck.shape}")
     preds[kb] = Ck
 
 
@@ -54,41 +75,81 @@ def med(a):
 
 rows = []
 for kb in KBS:
-    Cmon = preds[kb][:, :, mon_pos]
-    om, am, nm, sdo = [], [], [], []
+    Call = preds[kb].astype(np.float64)
+    Cmon = Call[:, :, mon_pos]
+    below = (Call < C_MIN).astype(np.float64)
+    acc = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
+    sd_acc = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
+    ess_acc = {s: [] for s in SCHEMES}
+    P_acc = {s: [] for s in SCHEMES}
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
-        rmse = np.sqrt(((Cmon - obs[None]) ** 2).mean(axis=(1, 2)))
-        w = np.exp(-0.5 * (rmse / B.SIGMA_OBS) ** 2) * (rmse < B.RMSE_THR)
-        if w.sum() == 0:
-            continue
-        w = w / w.sum()
-        mo = float(np.sum(w * S["old"]))
-        om.append(mo); am.append(float(np.sum(w * S["average"]))); nm.append(float(np.sum(w * S["new"])))
-        sdo.append(float(np.sqrt(np.sum(w * (S["old"] - mo) ** 2))))
-    # risk ranking at this kb (baseline obs, seed 42)
-    rng = np.random.default_rng(42)
-    obs0 = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
-    rmse0 = np.sqrt(((Cmon - obs0[None]) ** 2).mean(axis=(1, 2)))
-    w0 = np.exp(-0.5 * (rmse0 / B.SIGMA_OBS) ** 2) * (rmse0 < B.RMSE_THR)
-    w0 = w0 / w0.sum()
-    P = np.tensordot(w0, (preds[kb] < C_MIN).astype(float), axes=(0, 0)).mean(axis=0)
-    rank = [ALL_NODES[i] for i in np.argsort(P)[::-1][:6]]
-    rows.append({"kb": kb, "old": med(om), "avg": med(am), "new": med(nm),
-                 "old_sd": med(sdo), "risk_top6": rank})
+        wts = B.all_weightings(Cmon, obs, threshold=B.RMSE_THR, schemes=SCHEMES)
+        for s in SCHEMES:
+            w, diag = wts[s]
+            if w is None:
+                continue
+            ess_acc[s].append(diag["ess"])
+            for z in ZKEYS:
+                m, sd = B.weighted_mean_sd(w, S[z])
+                acc[s][z].append(m)
+                sd_acc[s][z].append(sd)
+            # the risk field per realisation, so the ranking below is a median over the noise
+            # rather than whatever one arbitrary seed happened to give
+            P_acc[s].append(np.tensordot(w, below, axes=(0, 0)).mean(axis=0))
+    row = {"kb": kb, "by_scheme": {}}
+    for s in SCHEMES:
+        P_med = np.median(np.vstack(P_acc[s]), axis=0)
+        order = np.argsort(P_med)[::-1]
+        row["by_scheme"][s] = {
+            **{JKEY[z]: med(acc[s][z]) for z in ZKEYS},
+            **{JKEY[z] + "_sd": med(sd_acc[s][z]) for z in ZKEYS},
+            "ess_med": med(ess_acc[s]),
+            f"risk_top{TOP_K}": [ALL_NODES[i] for i in order[:TOP_K]],
+            "_P": P_med}
+    rows.append(row)
 
-base = next(r for r in rows if r["kb"] == -0.5)
-print("\n=== Step 8b: GLUE under misspecified k_b (obs generated at k_b=-0.5) ===")
-print(f"{'k_b':>5} | {'old':>8} {'shift':>7} | {'avg':>8} | {'new':>8} | top-3 risk")
+# shift of each coefficient relative to the reference k_b, which is what the log tabulates
+ref = next(r for r in rows if r["kb"] == B.KB_FIXED)
 for r in rows:
-    print(f"{r['kb']:>5} | {r['old']:>8.3f} {r['old']-base['old']:>+7.3f} | {r['avg']:>8.3f} | "
-          f"{r['new']:>8.3f} | {list(r['risk_top6'][:3])}")
-print(f"\nbaseline old behavioural SD = {base['old_sd']:.3f}")
-print(f"old shift for ±20% k_b: {rows[0]['old']-base['old']:+.3f} (k_b=-0.4), "
-      f"{rows[2]['old']-base['old']:+.3f} (k_b=-0.6)")
+    for s in SCHEMES:
+        a, b = r["by_scheme"][s], ref["by_scheme"][s]
+        a["shift_vs_kb_ref"] = {k: a[k] - b[k] for k in ("old", "avg", "new")}
+        a["shift_over_own_sd"] = {k: (a[k] - b[k]) / b[k + "_sd"] if b[k + "_sd"] else None
+                                  for k in ("old", "avg", "new")}
+        a["risk_spearman_vs_kb_ref"] = float(spearmanr(a["_P"], b["_P"]).statistic)
+        top, reftop = set(a[f"risk_top{TOP_K}"]), set(b[f"risk_top{TOP_K}"])
+        a[f"risk_top{TOP_K}_jaccard_vs_kb_ref"] = len(top & reftop) / len(top | reftop)
 
-report = {"kbs": KBS, "rows": rows, "baseline_old_sd": base["old_sd"]}
+print("\n=== Step 8b: calibration under a misspecified k_b (observations generated at k_b = -0.5) ===")
+for s in SCHEMES:
+    tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
+    print(f"\n--- {s} ({tag}) ---")
+    print(f"{'k_b':>5} {'ESS':>7} | {'old':>8} {'shift/SD':>9} | {'avg':>8} {'shift/SD':>9} | "
+          f"{'new':>8} {'shift/SD':>9} | {'rho_risk':>8} {'J6':>5}")
+    for r in rows:
+        a = r["by_scheme"][s]
+        sos = a["shift_over_own_sd"]
+        print(f"{r['kb']:>5} {a['ess_med']:>7.0f} | {a['old']:>8.3f} {sos['old']:>+9.2f} | "
+              f"{a['avg']:>8.3f} {sos['avg']:>+9.2f} | {a['new']:>8.3f} {sos['new']:>+9.2f} | "
+              f"{a['risk_spearman_vs_kb_ref']:>8.3f} "
+              f"{a[f'risk_top{TOP_K}_jaccard_vs_kb_ref']:>5.2f}")
+    b = ref["by_scheme"][s]
+    print(f"      posterior SD at the true k_b: " +
+          ", ".join(f"{JKEY[z]} {b[JKEY[z] + '_sd']:.4f}" for z in ZKEYS))
+print("\nshift/SD = displacement of the coefficient caused by the wrong k_b, in units of that")
+print(f"coefficient's own posterior SD at the true k_b; rho_risk / J{TOP_K} compare the 92-node risk")
+print("field and its leading set against the correctly specified case.")
+
+for r in rows:
+    for s in SCHEMES:
+        del r["by_scheme"][s]["_P"]
+report = {**B.weighting_provenance(comparators=["informal_glue"]),
+          "kbs": KBS, "kb_true": B.KB_FIXED, "n_noise": N_NOISE,
+          "informal_threshold": B.RMSE_THR,
+          "risk_ranking_basis": f"median risk field over the {N_NOISE} noise realisations",
+          "rows": rows}
 
 
 def _jsafe(o):
@@ -99,28 +160,25 @@ def _jsafe(o):
     return str(o)
 
 
-# shift of each coefficient relative to the reference k_b, which is what the log tabulates
-ref = next(r for r in rows if r["kb"] == B.KB_FIXED)
-for r in rows:
-    r["shift_vs_kb_ref"] = {k: r[k] - ref[k] for k in ("old", "avg", "new")}
-
-with open(os.path.join(HERE, "baseline_cache", "step8b_kb_sensitivity.json"), "w") as f:
+with open(os.path.join(CACHEDIR, "step8b_kb_sensitivity.json"), "w") as f:
     json.dump(report, f, indent=2, default=_jsafe)
 
-# ---- figure: kw behavioural means vs fixed k_b ----
-fig, ax = plt.subplots(figsize=(8, 5))
+# ---- figure: posterior mean of each k_w vs the fixed k_b, primary vs comparator ----
+fig, axes = plt.subplots(1, 2, figsize=(13, 4.8), sharey=False)
 kbs = [r["kb"] for r in rows]
-KEY = {"old": "old", "average": "avg", "new": "new"}
-for z, c in zip(ZKEYS, ["tab:red", "tab:orange", "tab:green"]):
-    ax.plot(kbs, [r[KEY[z]] for r in rows], marker="o", color=c, label=f"{z}")
-    ax.axhline(TRUE[z], color=c, ls=":", lw=1)
-ax.axvline(-0.5, color="gray", ls="--", lw=1, label="true k_b")
-ax.set_xlabel("fixed k_b in calibration (1/day)")
-ax.set_ylabel("GLUE behavioural mean of k_w (m/day)")
-ax.set_title("Step 8b — bulk–wall compensation: misspecifying k_b (±20%) shifts the k_w estimates\n"
-             "(dotted = true k_w; risk ranking checked separately)")
-ax.legend()
-ax.grid(alpha=0.3)
+for ax, s in zip(axes, SCHEMES):
+    for z, c in zip(ZKEYS, ["tab:red", "tab:orange", "tab:green"]):
+        ax.plot(kbs, [r["by_scheme"][s][JKEY[z]] for r in rows], marker="o", color=c, label=z)
+        ax.axhline(TRUE[z], color=c, ls=":", lw=1)
+    ax.axvline(B.KB_FIXED, color="gray", ls="--", lw=1, label="true k_b")
+    ax.set_xlabel("fixed k_b in calibration (1/day)")
+    ax.set_ylabel("posterior mean of k_w (m/day)")
+    ax.set_title(("formal censored likelihood (PRIMARY)" if s == B.PRIMARY_WEIGHTING
+                  else f"informal GLUE, threshold {B.RMSE_THR} (comparator)"), fontsize=10)
+    ax.grid(alpha=0.3)
+axes[0].legend(fontsize=8)
+fig.suptitle("Step 8b — bulk-wall compensation: misspecifying k_b by ±20% displaces the k_w "
+             "estimates\n(dotted = true k_w; the risk ranking is checked separately)", y=1.03)
 plt.tight_layout()
 figpath = os.path.join(FIGDIR, "step8b_kb_sensitivity.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")

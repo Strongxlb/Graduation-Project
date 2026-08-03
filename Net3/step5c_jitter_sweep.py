@@ -249,7 +249,8 @@ def _jsafe(o):
 
 
 with open(os.path.join(HERE, "baseline_cache", "step5c_jitter_sweep.json"), "w") as f:
-    json.dump(rows, f, indent=2, default=_jsafe)
+    json.dump({**B.weighting_provenance(comparators=["informal_glue"]), "rows": rows},
+              f, indent=2, default=_jsafe)
 
 # ---- figure: |bias| vs jitter per zone (+ bias in SD units) ----
 fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))

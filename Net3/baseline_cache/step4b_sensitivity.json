@@ -1,5 +1,8 @@
 {
   "summary": {
+    "weighting": "none",
+    "weighting_role": "this step plots the RMSE objective itself, so no weighting is applied; the two thresholds are drawn only to show where the informal comparator would cut the curve",
+    "primary_weighting_elsewhere": "formal_censored",
     "hold_others_at": "true values",
     "observations": "baseline noisy (seed 42)",
     "noise_floor_rmse": 0.09731842182483968,

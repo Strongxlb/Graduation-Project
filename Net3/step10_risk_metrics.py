@@ -99,20 +99,45 @@ for node in ["243", "131", "166", "141"]:
     print(f"{node:>5} | {age_full[T_A, j]:6.1f} {age_full[T_B, j]:6.1f} {age_full[T_C, j]:6.1f} | "
           f"{mean_age_post[j]:11.1f} {mean_age_last24[j]:11.1f}")
 
-# ---- correlations over all junctions (Spearman primary + bootstrap CI) ----
+# ---- association between water age and risk: DESCRIPTIVE ONLY ----
+# No p-value and no ordinary bootstrap are reported. Both assume the 92 junctions are independent
+# samples, and they are not: neighbouring junctions share pipes, tanks and the same demand patterns,
+# so the effective number of independent units is a small fraction of 92. A p-value computed as if
+# n = 92 was previously quoted as ~1e-16, which is a statement about the wrong null hypothesis rather
+# than a small one. The rank correlation itself is still a legitimate DESCRIPTION of the pattern, and
+# a spatial-BLOCK bootstrap is reported beside it as a deliberately conservative width: whole
+# coordinate blocks of junctions are resampled together, so within-block dependence is preserved.
 n_nodes = len(ALL_NODES)
-rho_dur, p_dur = spearmanr(mean_age_post, Dbar)
-rho_def, p_def = spearmanr(mean_age_post, Abar)
-r_dur, _ = pearsonr(mean_age_post, Dbar)
+rho_dur = float(spearmanr(mean_age_post, Dbar).statistic)
+rho_def = float(spearmanr(mean_age_post, Abar).statistic)
+r_dur = float(pearsonr(mean_age_post, Dbar).statistic)
+
+N_BLOCKS = 10
+coords = np.array([wn.get_node(n).coordinates for n in ALL_NODES], dtype=float)
+cz = (coords - coords.mean(axis=0)) / coords.std(axis=0)
 rng = np.random.default_rng(0)
+centres = cz[rng.choice(n_nodes, N_BLOCKS, replace=False)]
+for _ in range(50):                        # Lloyd's algorithm; spatial blocks, not a claim about clusters
+    lab = np.argmin(((cz[:, None, :] - centres[None]) ** 2).sum(axis=2), axis=1)
+    for b in range(N_BLOCKS):
+        if np.any(lab == b):
+            centres[b] = cz[lab == b].mean(axis=0)
+blocks = [np.where(lab == b)[0] for b in range(N_BLOCKS) if np.any(lab == b)]
 boot = []
 for _ in range(2000):
-    idx = rng.integers(0, n_nodes, n_nodes)
-    boot.append(spearmanr(mean_age_post[idx], Dbar[idx]).statistic)
-ci = (float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)))
-print(f"\ncorrelation over all n={n_nodes} junctions (mean water age vs risk):")
-print(f"  duration : Spearman {rho_dur:.2f} (p={p_dur:.1e}, boot95%[{ci[0]:.2f},{ci[1]:.2f}])  Pearson {r_dur:.2f}")
-print(f"  deficit  : Spearman {rho_def:.2f} (p={p_def:.1e})")
+    pick = np.concatenate([blocks[i] for i in rng.integers(0, len(blocks), len(blocks))])
+    s = spearmanr(mean_age_post[pick], Dbar[pick]).statistic
+    if np.isfinite(s):
+        boot.append(s)
+ci_block = (float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)))
+print(f"\nwater age vs risk over all n={n_nodes} junctions — DESCRIPTIVE association:")
+print(f"  duration : Spearman {rho_dur:.2f}   Pearson {r_dur:.2f}")
+print(f"  deficit  : Spearman {rho_def:.2f}")
+print(f"  spatial-block bootstrap 95% (whole coordinate blocks resampled, {len(blocks)} blocks): "
+      f"[{ci_block[0]:.2f}, {ci_block[1]:.2f}]")
+print("No p-value is reported: the junctions are not independent samples, so a p-value computed at")
+print("n = 92 tests a null hypothesis that does not apply. The block interval is conservative and is")
+print("a width, not a significance test.")
 
 # ---- top nodes by cumulative deficit, with 5-95% ensemble bands ----
 order = np.argsort(Abar)[::-1]
@@ -234,8 +259,22 @@ report = {"C_MIN": C_MIN, "threshold": B.RMSE_THR, "T_window_h": T_WINDOW, "n_no
           "network_averages": {"n_consumer_junctions": int(consumer.sum()),
                                "total_demand_L_s": float(dem.sum()), "by_metric": net_avgs},
           "cross_scheme_robustness": xs,
-          "corr": {"spearman_dur": float(rho_dur), "p_dur": float(p_dur), "boot95_dur": ci,
-                   "pearson_dur": float(r_dur), "spearman_def": float(rho_def)},
+          "age_risk_association": {
+              "status": "descriptive only",
+              "spearman_dur": rho_dur, "spearman_def": rho_def, "pearson_dur": r_dur,
+              "n_junctions": n_nodes,
+              "p_value": None,
+              "p_value_omitted_because": "the 92 junctions share pipes, tanks and demand patterns, "
+                                         "so they are not independent samples; a p-value computed "
+                                         "at n = 92 (previously quoted as ~1e-16) tests a null "
+                                         "hypothesis that does not apply here",
+              "iid_bootstrap_omitted_because": "same reason: resampling individual junctions "
+                                               "assumes the independence that fails",
+              "block_bootstrap": {"n_blocks": len(blocks), "block_rule": "k-means on standardised "
+                                  "node coordinates; whole blocks resampled with replacement",
+                                  "n_resamples": len(boot), "ci95_spearman_dur": list(ci_block),
+                                  "interpretation": "a conservative width for the rank "
+                                                    "correlation, not a significance test"}},
           "age_windows": {
               "mean_age_h": f"primary: mean over the post-warm-up record ({B.WARMUP_H}-"
                             f"{B.DURATION_H} h)",
@@ -264,8 +303,8 @@ for i in order[:5]:
                  xytext=(5, 4), fontsize=9, color="crimson")
 axA.set_xlabel("mean water age (h), post-warm-up — reaction-independent")
 axA.set_ylabel(f"expected hours below {C_MIN} mg/L (of {T_WINDOW} h)")
-axA.set_title(f"(a) Risk associated with water age\nSpearman = {rho_dur:.2f} "
-              f"(n={n_nodes}, boot95% [{ci[0]:.2f},{ci[1]:.2f}])")
+axA.set_title(f"(a) Risk associated with water age\n"
+              f"Spearman ρ = {rho_dur:.2f}, descriptive association (n={n_nodes} dependent junctions)")
 axA.grid(alpha=0.3)
 
 top10 = order[:10]

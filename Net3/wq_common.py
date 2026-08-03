@@ -70,6 +70,13 @@ QUALITY_TIMESTEP_S = 300
 KB_FIXED = -0.5
 KW_OLD_TRUE, KW_AVG_TRUE, KW_NEW_TRUE = -1.0, -0.1, -0.05
 
+# Finite-difference steps for the Jacobian, one per coefficient rather than one shared absolute
+# step. The three truths span a factor of 20, so a single 0.02 m/day is 2% of the old coefficient
+# but 40% of the new one — for `new` that is a secant over a large arc, not a derivative. Each step
+# is ~2-5% of its own truth and each is a member of that coefficient's convergence sweep in Step 7.
+FD_STEP = {"old": 0.02, "average": 0.005, "new": 0.0025}
+FD_STEP_KB = 0.05
+
 # ---- GLUE configuration ----
 PRIOR = {"old": (-1.5, -0.2), "avg": (-0.2, -0.04), "new": (-0.10, -0.005)}
 # Sobol rather than pseudo-random: a scrambled Sobol set fills the 3-D prior box more evenly, and
@@ -82,8 +89,11 @@ N_MC = 2 ** N_MC_LOG2    # 8192
 SIGMA_OBS = 0.1          # one standard deviation of the Gaussian observation error (mg/L)
 # Behavioural thresholds. The draft used 0.12; the revised analysis uses a principled
 # ~95% acceptance band tied to the sampling distribution of the RMSE objective (see below).
-RMSE_THR_DRAFT = 0.12    # original (loose) draft threshold, kept as a comparator
-RMSE_THR = 0.107         # PRIMARY: one-sided 95% acceptance band at sigma = 0.1 mg/L
+# Both thresholds belong to the INFORMAL GLUE comparator only. The primary analysis
+# (PRIMARY_WEIGHTING below) is a formal likelihood and carries no threshold at all, because a hard
+# acceptance cut-off is a feature of behavioural weighting, not of a likelihood.
+RMSE_THR_DRAFT = 0.12    # the draft's loose threshold, kept so its configuration is reproducible
+RMSE_THR = 0.107         # the defensible one: one-sided 95% band of the objective at sigma = 0.1
 NOISE_SEED = 42          # seed for the baseline noisy observation set
 SAMPLE_SEED = 0          # seed for the Sobol scramble of the prior draws
 
@@ -91,11 +101,11 @@ SAMPLE_SEED = 0          # seed for the Sobol scramble of the prior draws
 N_RESID = len(MONITOR_NODES) * ((DURATION_H - WARMUP_H) + 1)   # 6 x 49 = 294
 
 
-def prior_draws(n=None, seed=None):
-    """Scrambled-Sobol draws from the uniform prior box, returned as a dict of arrays.
+def sobol_draws(box, n=None, seed=None):
+    """Scrambled-Sobol draws from an arbitrary 3-D box {"old": (a,b), "avg": ..., "new": ...}.
 
-    Leading 2^k subsets of a Sobol sequence are themselves balanced, so `prior_draws(n)[:m]` is a
-    valid smaller design for m a power of two — that is what the sampling-convergence check uses.
+    Displaced-prior designs must be sampled the same way as the baseline, otherwise a difference
+    between them mixes a change of prior with a change of sampler.
     """
     from scipy.stats import qmc
     n = N_MC if n is None else n
@@ -104,10 +114,19 @@ def prior_draws(n=None, seed=None):
     if 2 ** m != n:
         raise ValueError(f"Sobol designs must be a power of two, got {n}")
     u = qmc.Sobol(d=3, scramble=True, seed=seed).random_base2(m)     # (n, 3) in [0, 1)
-    lo = np.array([PRIOR["old"][0], PRIOR["avg"][0], PRIOR["new"][0]])
-    hi = np.array([PRIOR["old"][1], PRIOR["avg"][1], PRIOR["new"][1]])
+    lo = np.array([box["old"][0], box["avg"][0], box["new"][0]])
+    hi = np.array([box["old"][1], box["avg"][1], box["new"][1]])
     x = qmc.scale(u, lo, hi)
     return {"old": x[:, 0], "avg": x[:, 1], "new": x[:, 2]}
+
+
+def prior_draws(n=None, seed=None):
+    """Scrambled-Sobol draws from the baseline uniform prior box, as a dict of arrays.
+
+    Leading 2^k subsets of a Sobol sequence are themselves balanced, so `prior_draws(n)[:m]` is a
+    valid smaller design for m a power of two — that is what the sampling-convergence check uses.
+    """
+    return sobol_draws(PRIOR, n=n, seed=seed)
 
 
 def threshold_for_sigma(sigma, z=1.645):
@@ -145,6 +164,16 @@ def objective_sampling_sd(sigma=None, n_resid=None):
 
 WEIGHTINGS = ("formal_censored", "formal_iid", "informal_glue")
 PRIMARY_WEIGHTING = "formal_censored"
+COMPARATOR_WEIGHTINGS = ("formal_iid", "informal_glue")
+
+
+def weighting_provenance(comparators=COMPARATOR_WEIGHTINGS, **extra):
+    """The stanza every result artifact must carry so a table can never be read under the wrong rule.
+
+    Without it a JSON file records numbers whose weighting is only implied by the script that wrote
+    them, which is how an informal-GLUE table ends up quoted under a formal heading.
+    """
+    return {"primary_weighting": PRIMARY_WEIGHTING, "comparators": list(comparators), **extra}
 
 
 def _sum_over_data_axes(a):
@@ -218,6 +247,41 @@ def weights_from_loglik(loglik, mask=None):
         "entropy_bits": entropy,
         "entropy_bits_if_uniform": float(np.log2(w.size)),
     }
+
+
+def rmse_of(pred, obs):
+    """Root-mean-square residual per candidate, the objective the informal comparator scores."""
+    resid = np.asarray(pred, dtype=np.float64) - np.asarray(obs, dtype=np.float64)[None]
+    return np.sqrt((resid.reshape(resid.shape[0], -1) ** 2).mean(axis=1))
+
+
+def all_weightings(pred, obs, sigma=None, threshold=None, schemes=WEIGHTINGS):
+    """{scheme: (weights, diagnostics)} for one set of predictions and observations.
+
+    Every step that compares the primary rule with the comparator goes through this function, so the
+    two can never drift apart in the details (which sigma scales the score, whether the behavioural
+    mask is applied, how the effective sample size is defined). A scheme whose weights are all zero
+    — possible only for the thresholded comparator — comes back as (None, None) rather than raising,
+    because a realisation with an empty behavioural set is a result about the comparator.
+    """
+    sigma = SIGMA_OBS if sigma is None else sigma
+    threshold = threshold_for_sigma(sigma) if threshold is None else threshold
+    out = {}
+    rmse = rmse_of(pred, obs) if "informal_glue" in schemes else None
+    for s in schemes:
+        if s == "formal_censored":
+            ll, mask = log_censored(pred, obs, sigma), None
+        elif s == "formal_iid":
+            ll, mask = log_gaussian(pred, obs, sigma), None
+        elif s == "informal_glue":
+            ll, mask = glue_score(rmse, sigma), rmse < threshold
+        else:
+            raise ValueError(f"unknown weighting scheme {s!r}")
+        try:
+            out[s] = weights_from_loglik(ll, mask)
+        except ValueError:
+            out[s] = (None, None)
+    return out
 
 
 def weighted_mean_sd(w, x):

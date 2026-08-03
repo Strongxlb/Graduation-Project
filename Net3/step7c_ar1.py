@@ -22,7 +22,7 @@ ZKEYS = ["old", "average", "new"]
 TRUTH = [B.KW_OLD_TRUE, B.KW_AVG_TRUE, B.KW_NEW_TRUE]
 PRIOR_SD = {"old": (1.5 - 0.2) / np.sqrt(12), "average": (0.2 - 0.04) / np.sqrt(12),
             "new": (0.10 - 0.005) / np.sqrt(12)}
-H = 0.02
+HS = [B.FD_STEP[z] for z in ZKEYS]          # scale-dependent, same as Step 7
 SIGMA = 0.10
 RHO = 0.40
 NT = B.DURATION_H - B.WARMUP_H + 1          # 49 post-warm-up hours
@@ -37,10 +37,11 @@ def sim_mon(kwo, kwa, kwn):
 # ---- Jacobian in NODE-MAJOR order (so Σ is block-diagonal per sensor) ----
 cols = []
 for j in range(3):
+    h = HS[j]
     kp, km = list(TRUTH), list(TRUTH)
-    kp[j] += H
-    km[j] -= H
-    dC = (sim_mon(*kp) - sim_mon(*km)) / (2 * H)        # (49, 6)
+    kp[j] += h
+    km[j] -= h
+    dC = (sim_mon(*kp) - sim_mon(*km)) / (2 * h)        # (49, 6)
     cols.append(dC.T.ravel())                            # node-major: node0 h0..48, node1 ...
 J = np.column_stack(cols)                                # (294, 3)
 
@@ -64,7 +65,8 @@ print(f"scalar ESS reference: inflation √[(1+ρ)/(1−ρ)] = {ess_factor:.2f};
       f"N_eff ≈ {n_eff:.0f} of {NT*NMON}\n")
 print(f"{'coef':>8} | {'CRLB indep':>10} | {'CRLB AR(1)':>10} | {'widening':>8} | "
       f"{'CRLB/prior indep':>16} | {'CRLB/prior AR(1)':>16}")
-report = {"rho": RHO, "ess_factor": float(ess_factor), "n_eff": float(n_eff), "coef": {}}
+report = {"rho": RHO, "ess_factor": float(ess_factor), "n_eff": float(n_eff),
+          "fd_default_steps": dict(B.FD_STEP), "coef": {}}
 for j, z in enumerate(ZKEYS):
     wf = crlb_ar1[j] / crlb_indep[j]
     report["coef"][z] = {"crlb_indep": float(crlb_indep[j]), "crlb_ar1": float(crlb_ar1[j]),

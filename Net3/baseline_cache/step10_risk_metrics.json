@@ -155,15 +155,25 @@
       "top10_jaccard_vs_primary": 0.8181818181818182
     }
   },
-  "corr": {
+  "age_risk_association": {
+    "status": "descriptive only",
     "spearman_dur": 0.7284887947994313,
-    "p_dur": 1.873067127619929e-16,
-    "boot95_dur": [
-      0.6129639197609225,
-      0.8114359995632958
-    ],
+    "spearman_def": 0.7219383796644234,
     "pearson_dur": 0.8611002498967324,
-    "spearman_def": 0.7219383796644234
+    "n_junctions": 92,
+    "p_value": null,
+    "p_value_omitted_because": "the 92 junctions share pipes, tanks and demand patterns, so they are not independent samples; a p-value computed at n = 92 (previously quoted as ~1e-16) tests a null hypothesis that does not apply here",
+    "iid_bootstrap_omitted_because": "same reason: resampling individual junctions assumes the independence that fails",
+    "block_bootstrap": {
+      "n_blocks": 10,
+      "block_rule": "k-means on standardised node coordinates; whole blocks resampled with replacement",
+      "n_resamples": 2000,
+      "ci95_spearman_dur": [
+        0.45459737981257814,
+        0.8970105592662537
+      ],
+      "interpretation": "a conservative width for the rank correlation, not a significance test"
+    }
   },
   "age_windows": {
     "mean_age_h": "primary: mean over the post-warm-up record (120-168 h)",

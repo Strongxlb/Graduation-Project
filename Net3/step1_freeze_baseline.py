@@ -188,7 +188,7 @@ np.savez_compressed(
     mon_pos=np.asarray(mon_pos),
 )
 with open(os.path.join(OUT, "baseline_meta.json"), "w") as f:
-    json.dump({"config": config, "summary": summary}, f, indent=2)
+    json.dump({**B.weighting_provenance(), "config": config, "summary": summary}, f, indent=2)
 
 print(f"\nbehavioural at {B.RMSE_THR}: {summary['behavioural_count_primary_thr']}/{B.N_MC}; "
       f"at {B.RMSE_THR_DRAFT}: {summary['behavioural_count_draft_thr']}/{B.N_MC}; "

@@ -1,12 +1,12 @@
 # 分组一阶余氯壁衰减的不确定性感知校准与可辨识性研究（EPANET Net3 合成三区案例）
 
 > 本 README 为 **2026-08 修订版**，反映导师 2026-07-25 论文评审后的实际研究内容（见 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)）。
-> 中文版（本文件） ｜ English: [`README.en.md`](./README.en.md)（英文版尚未同步到本修订）
+> 中文版（本文件） ｜ English: [`README.en.md`](./README.en.md)
 > 配套执行计划：[`plan1.md`](./plan1.md) ｜ 文献清单：[`background/Literature/literature.md`](./background/Literature/literature.md)
 
 ## 0. 一句话概括
 
-在 **EPANET Net3** 基准管网上，按管材/管龄把管道分为 **old / average / new 三个连续区**，用**已知的合成真值**生成含噪观测，系统研究一阶壁衰减系数 `k_w` 的**不确定性感知校准**与**可辨识性**：数据到底能约束哪些参数、GLUE 的诚实局限在哪、结构/系统/自相关/截断误差如何影响估计，以及**参数不确定性如何（不）传播到运营低余氯风险图**。全部实验可复现、可脚本重跑，结果记录在 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)。
+在 **EPANET Net3** 基准管网上，按节点坐标把管道分为 **old / average / new 三个合成空间区**（标签是人为赋予的，Net3 并无真实管龄/管材记录），用**已知的合成真值**生成含噪观测，系统研究一阶壁衰减系数 `k_w` 的**不确定性感知校准**与**可辨识性**：数据到底能约束哪些参数、**informal GLUE 与正式似然的差距有多大**、结构/系统/自相关/截断误差如何影响估计，以及**参数不确定性如何（不）传播到运营低余氯风险图**。主分析用 **censored 正式高斯似然**，informal GLUE 全程作为对照保留——两者的对比本身是一个结果。全部实验可复现、可脚本重跑并自动校验，结果记录在 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)，对评审意见的逐条回应见 [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md)。
 
 ## 1. 项目定位
 
@@ -27,8 +27,8 @@
 
 - **EPANET / WNTR**：EPANET 2.2 水质引擎 + WNTR Python wrapper（`wntr 1.4.0`）。
 - **First-order chlorine decay**：一阶 bulk (`k_b`) + 一阶 wall (`k_w`)（Rossman 1994 / EPANET 2.2 Manual）。
-- **分区 `k_w`（material/age zones）**：按节点坐标把 Net3 分为 old / average / new 三个连续区，每区一个 `k_w`——把「多 DMA 异质性」问题落到一个可控合成案例上。
-- **GLUE（informal likelihood）**：Beven & Binley 1992；本项目正面讨论其统计低效与阈值/先验依赖。
+- **分区 `k_w`（三个合成空间区）**：按节点坐标（`y ≤ 10` → average；否则 `x ≤ 26` → new，其余 → old；跨区管道归给更新的一侧）把 Net3 分为 old / average / new 三个连续区，每区一个 `k_w`。**这些标签是为构造受控真值而人为赋予的，不是 Net3 的真实管龄或管材数据**——把「多 DMA 异质性」问题落到一个可控合成案例上。
+- **三套推断口径并列**：主分析是 **censored 正式高斯似然**（零截断点用 `log Φ(−μ/σ)`）；`formal_iid` 用于隔离零截断处理的影响；**GLUE（informal likelihood）**（Beven & Binley 1992）作为**对照**保留，因为草稿用的是它，而两者的差距正是本研究的核心结果之一（Mantovan & Todini 2006 / Stedinger 2008 的批评在此有了定量实例）。
 - **正式可辨识性工具**：Fisher information / Cramér–Rao 下界（CRLB）、profile likelihood、AR(1) 协方差修正。
 - **测量误差进入 likelihood**：Gaussian 观测噪声、系统偏置、零截断（censored likelihood），避免对「完美观测」过度自信。
 - **运营风险传播**：节点低于工作阈值 `0.2 mg/L` 的时长/深度/累计缺口，并用 water age 做水力佐证。
@@ -46,7 +46,7 @@
 
 ### 4.1 研究问题（对应已完成实验）
 
-1. **基线复现**：能否复现三区下游监测点的余氯时序，并冻结一个可复现的 GLUE baseline？（Step 1）
+1. **基线与预热**：能否冻结一个可复现、且预热长度由收敛检验而非惯例决定的三区 baseline？（Step 0、1）
 2. **可辨识性**：6 个监测点（每区 2 个）+ σ=0.1 噪声下，三个分区 `k_w` 分别能被约束到什么程度？（Step 2–4、7、7b）
 3. **阈值/先验依赖**：behavioural 阈值怎么定才有原则？结论对阈值/先验稳健吗？（Step 3、4）
 4. **误差来源敏感性**：结构误差、传感器系统偏置、`k_b` 误设（bulk–wall 补偿）、时间自相关 AR(1)、零截断，各自如何影响估计？（Step 5、7c、8、8b、9）
@@ -64,7 +64,7 @@
 - **EPANET Net3 基准网**（WNTR 自带 `.inp`），按坐标分 old/average/new 三连续区。
 - **First-order** 动力学（bulk + wall）；`k_b` 固定为 `-0.5 day⁻¹`，估三个分区 `k_w`。
 - **合成真值** + Gaussian 观测噪声（σ=0.1 mg/L 为**一个标准差**）；6 个监测点（每区 2 个）。
-- **GLUE**（2000 组均匀先验）+ **正式可辨识性**（Fisher/CRLB、profile、AR(1)）。
+- **8192 组 scrambled-Sobol 先验抽样**，三套加权口径并列 + **正式可辨识性**（Fisher/CRLB、连续 profile、AR(1)）。
 - 误差建模：系统偏置、`k_b` 误设、零截断（censored/Tobit-type likelihood）。
 - 运营风险：低于 `0.2 mg/L` 的时长/深度/累计缺口 + water age 佐证 + LOO 预测验证。
 
@@ -82,8 +82,8 @@
 
 - 合成真值：`k_b = -0.5 day⁻¹`（固定）；`k_w`：old `-1.0`、average `-0.1`、new `-0.05`（`m/day`）。
 - 监测点（每区 2 个）：new `107/113`、old `15/145`、average `209/231`。
-- 时序：72 h 仿真、24 h 预热 → **49 个报告点 = 48 h 窗口**；观测噪声 `σ = 0.1 mg/L`。
-- GLUE：2000 组均匀先验抽样，缓存**每组在全网 92 个节点的预测**，后续实验直接复用缓存、无需重跑 EPANET。
+- 时序：**168 h 仿真、120 h 预热** → **49 个报告点 = 48 h 窗口**；观测噪声 `σ = 0.1 mg/L`。预热长度由 Step 0 的收敛检验决定而非沿用惯例（见 §6.6）；因为 `168 − 120 = 72 − 24 = 48`，残差数 `N = 6 × 49 = 294` 不变。
+- 抽样：**8192 = 2¹³ 组 scrambled Sobol**（不是伪随机）——正式似然远比 informal 评分尖锐，2000 组抽样下它的有效样本量只有约 37。Sobol 的前 `2^k` 子集本身是平衡设计，这让收敛检验可以精确比较 1024/2048/4096/8192。缓存**每组在全网 92 个节点的预测**，后续实验直接复用缓存、无需重跑 EPANET。
 
 先验范围（`m/day`）：
 
@@ -93,16 +93,32 @@ average  : [-0.2,  -0.04]
 new      : [-0.10, -0.005]
 ```
 
-### 6.2 GLUE 与 behavioural 阈值（Step 2–3）
+### 6.2 三套加权口径（Step 1–3）
 
-informal Gaussian 加权与行为阈值：
+**主分析：censored 正式高斯似然。** 未截断点用高斯密度，被传感器下限截到 0 的点用左截断概率：
 
 ```
-w_i ∝ exp[ -½ · (RMSEᵢ / σ)² ] · 1[ RMSEᵢ < RMSE_thr ]
-RMSE_thr = σ · (1 + z / √(2·N_resid))      # z=1.645 → 单侧 95% 带；σ=0.1, N_resid=294 → 0.107
+ℓ(θ) = −½ · Σ_{y>0} ((y − μ)/σ)²  +  Σ_{y=0} log Φ(−μ/σ)
 ```
 
-主阈值 `0.107`（草稿曾用较松的 `0.12`，保留作对照）。
+**对照：informal GLUE 评分**（草稿用的那个），加上行为阈值：
+
+```
+GLUE:  w_i ∝ exp[ −½ · (RMSEᵢ/σ)² ] · 1[ RMSEᵢ < RMSE_thr ]
+阈值:   RMSE_thr = σ · (1 + z/√(2·N_resid))     # z=1.645；σ=0.1, N=294 → 0.107
+```
+
+**为什么这不是一回事。** informal 评分等于正式高斯似然**除以 `N = 294`**——也就是假设观测误差标准差为 `σ√N = 1.71 mg/L`，是传感器噪声的 17 倍、比进水口浓度 1.0 mg/L 还大。所以它在行为集内部几乎是平的，报出来的主要是先验盒子而不是数据。
+
+阈值**只属于对照组**：正式似然不带硬截断，因为硬截断是行为加权的特征而非似然的特征。`0.107` 的含义要说准——它是「真值在 95% 的噪声实现下会被接受」，不是参数的 95% 可信区间；`0.12` 是草稿用的较松值，保留以便复现那套配置。
+
+### 6.6 预热长度与工具链验证（Step 0 / Step 13）
+
+这两项不是评审意见，但是上面所有数字可信的前提。
+
+- **Step 0 预热选择**：需求模式与泵排班都是 24 h 周期，正确判据是**逐日周期场重现**（容差事先写死）。120 h 时余氯浓度场达到预设容差，但累计缺口仍有约 **5.5%** 的周期漂移、水龄 p95 仍差 **12.8 h**——因此 120 h 是有限时域的务实选择，不是「完全周期稳态」。硬约束：泵 10 的绝对时刻控制只列到 159 h，超过 168 h 泵会永久停转。
+- **Step 13 已知答案测试**：单管一阶衰减有闭式解 `C = C₀·exp(k_b·t_res)`，用来验证「以 1/day 写入、除以 86400 交给 WNTR」的系数真的被 EPANET 实现为那个系数。wall 臂只验证符号/单调/有界，不做精确解析匹配。
+- **Step 14 重复噪声校准**：对同一候选库重抽 100 组噪声，检查 formal 后验均值的偏差、经验 SD 与 Case-A CRLB 之比、以及名义 90%/95% 区间覆盖率。
 
 ### 6.3 可辨识性：正式工具（Step 7 / 7b / 7c）
 
@@ -130,21 +146,23 @@ RMSE_thr = σ · (1 + z / √(2·N_resid))      # z=1.645 → 单侧 95% 带；�
 
 复现方式见 §9 与 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md) 顶部「Files and how to reproduce」。
 
-## 7. 主要发现（Step 1–11 摘要）
+## 7. 主要发现（Step 0–14 摘要）
 
-> 完整数据、表格与图见 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)；以下为要点。
+> 完整数据、表格与图见 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)；对评审逐条回应见 [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md)。以下为要点。
 
-1. **只有主导的 old 系数被明显约束**：GLUE 下 old 后验明显收窄，average/new 基本停留在先验（弱信息）；草稿里「三个都恢复得不错」部分是**先验居中**造成的假象（Step 2、4）。
-2. **阈值/风险稳健**：原则化阈值 `0.107`（噪声底之上 95% 带）；收紧阈值主要让 old 变尖，风险热点排序对阈值稳健（Step 3）。
-3. **old 是单侧可辨识**：观测能从弱衰减一侧把 old 拉回真值附近，但强衰减侧约束很弱（Step 4/4b）。
-4. **结构误差 → precise-but-biased**：对称抖动下稳健；长度相关的区内异质会让 GLUE **精确但有偏**地追随长度加权均值（Step 5）。
-5. **所需精度**：σ ≲ 0.05 才能收紧决定风险图的低余氯节点；`±0.1` 只能恢复 old + 粗略风险格局；`±0.15` 基本回到先验（Step 6，回应导师邮件）。
-6. **正式 vs 非正式**：理想 baseline 下 Fisher（CRLB/prior 0.25/0.29/0.29）与 profile 都认为三者可辨识；GLUE 明显更宽、更依赖先验（informal likelihood 丢了 `N` 因子的统计低效）。现实性因素（`k_b`、传感器偏置、AR(1)）会显著削弱 average/new，唯 old 相对稳健（Step 7/7b/7c）。
-7. **系统误差**：node 15 注入 `+0.05` 偏置把 old 推移约 0.5 个 behavioural SD、`+0.10` 约 1.4 SD；`k_b ±20%` 通过 bulk–wall 补偿把 `k_w` 推 ∓0.03–0.04；两者都**不改变**风险热点排序（Step 8/8b）。
-8. **零截断（L=0）稳健性**：校准用的 294 点中仅 8 个被截到 0（全在 old 区；完整记录 28/438）；把 0 当精确值 vs censored likelihood，`k_w`、profile、node-15 风险、热点排序**几乎一致**——原处理未实质推偏结论（Step 9）。
-9. **风险图物理锚定**：时长/深度给出比单一概率更细的风险刻画；风险与 water age 的秩相关 `Spearman 0.73`（n=92, bootstrap `[0.63,0.80]`）——风险由**停留时间 + 可辨识的 old 衰减**主导（Step 10）。
-10. **样本外验证**：LOO 预测未见监测点的 RMSE ≈ 噪声底 `0.1`，90% 带覆盖 92–94%，参数稳定——**old 仅在拿掉 old 区监测点时才微变**，独立印证其信息定位（Step 11）。
-11. **总主线**：参数不确定性**确实传播**进风险指标的**数值**（见 5–95% 带），但在已测扰动（阈值、`k_b`、偏置、噪声）下**主要风险热点的排序稳定**。
+1. **「数据无法辨识 average/new」是关于评分的陈述，不是关于数据的。** 同一批观测、同一批抽样：informal GLUE（草稿阈值 `0.12`）保留了先验宽度的 **86 / 98 / 98%**，而 censored 正式似然只保留 **25 / 31 / 28%**。数据一直含有信息，是 informal 评分没有把它提取出来（Step 1–3）。
+2. **正式后验宽度与 Case-A CRLB 局部一致，不是「证明估计高效」。** 单实现经验 SD 与 CRLB 相差 1–6%（比值 0.99 / 1.06 / 0.98）；100 次重复噪声下经验估计 SD / CRLB ≈ 1.04 / 1.06 / 1.12，名义 90% 覆盖约 0.85–0.89。informal 宽度是下界的约 2.8–3.2 倍，靠「更宽」而不是「更准」拿到高覆盖（Step 7 / 7b / 14）。
+3. **任何阈值都修不好一个低效的评分。** 从 `0.12` 收紧到 `0.107` 对 old 只挽回约七分之一的差距、对 average/new 几乎为零；换成正式似然把三个标准差全部压到三分之一。所以阈值扫描现在被定位为「**对照组对分析者选择有多敏感**」（Step 3）。
+4. **预热 24 h 不够；120 h 是有限时域务实选择，不是完全收敛。** 余氯浓度场在 **120 h** 达到预设容差，但累计缺口仍有约 **5.5%** 周期漂移；水龄周期差在 120–144 h 仍有 12.8 h，外推约 **600 h**，远超模型 168 h 上限。绝对水龄绝不能当稳态值引用（Step 0）。
+5. **对称异质性不产生可检测的结构偏差；与流路相关的异质性产生方向性偏移。** ±20% 对称抖动在 **25 个独立异质性场**上的结构增量是 `+0.0107 ± 0.0335`（`|均值|/标准差 = 0.32`），检测不到；长度相关异质性使齐次估计向 **length-weighted proxy** 移动——不能把它叫作 residence-weighted 有效系数（Step 5c / 5d）。
+6. **所需精度（修订后）：σ ≈ 0.10 在 formal 主口径下已经有用。** formal 在 σ = 0.10 保留先验宽度的 **27 / 30 / 29%**；原先「需要 σ ≲ 0.05」是 informal 评分的产物（同条件下 informal 报 65 / 91 / 87%）。σ ≤ 0.05 在固定 Sobol 库上是 sampling-limited（formal ESS median ≈ 21 / 1.8），只能表示方向（Step 6）。
+7. **未校正的传感器偏置毁掉系数，却几乎不动风险排序。** node 15 注入 `+0.05` 把 old 推移 **2.19 个后验标准差**、`+0.10` 推 **3.87 个**；但即使在 ±0.10，92 节点风险排序的 Spearman 仍是 0.999、Kendall ≥ 0.988。响应是**凹**的且**不对称**，所以偏置结果必须带符号引用（Step 8 / 8c）。
+8. **零截断：影响可测但很小，且不再局限于 old 区。** 校准用的 294 点中有 **10** 个被截到 0（old 9、average 1；完整记录 43/1014）。censored 把 old 的加权均值移动 **−0.0116**，风险排序不变（Step 9）。
+9. **风险图的物理佐证与三种网络均值。** 风险与 water age 的描述性 Spearman ρ = 0.73（空间 block bootstrap `[0.61, 0.81]`）；普通 p-value 已删除。三种网络均值往相反方向走——仅消费节点更差、需求加权更好——说明风险集中于小用户（Step 10）。
+10. **预测成功不能证明参数可辨识。** 留一监测点看起来很好；但去掉某区两个监测点后，该区系数退回先验中点（old → −0.850，SD 保留 100%），而预测几乎不变。空间预测和参数辨识是两个独立主张（Step 11a–d）。
+11. **风险结论对预热与加权口径修正都稳健。** 12 °C baseline 21 nodes / 36.3 L/s at risk；heatwave 29 / 47.8；heat + ageing 31 / 49.4。测试范围内 +30% source dose 改善连续严重度，但未恢复 baseline demand-at-risk（Step 10 / 12）。
+12. **数值层面的两处修正。** 连续 profile 相对 21 点网格把 95% 半宽外扩 **15–36%**；Fisher 原始条件数 216 在先验标准化后只有 **3.2**（Step 7 / 7b）。
+13. **方法论教训。** 单实现结果在审查中被推翻过两次；有效防御是配对控制、对任意选择做 ensemble、用正式似然、以及多路径互相印证。
 
 ## 8. 论文结构（对齐实际结果）
 
@@ -152,46 +170,64 @@ RMSE_thr = σ · (1 + z / √(2·N_resid))      # z=1.645 → 单侧 95% 带；�
 - **Background / Literature**：一阶余氯衰减、EPANET/WNTR 水质模拟、GLUE 与其批评（Mantovan & Todini 2006 / Stedinger 2008）、Fisher/CRLB 与 profile likelihood、测量误差与截断。
 - **Methodology**：Net3 三区设定、合成真值与噪声、GLUE + 阈值推导、Fisher/profile/AR(1)、误差敏感性（结构/偏置/`k_b`/截断）、风险指标与 LOO。
 - **Results**：Step 1–11（可辨识性 → 误差敏感性 → 所需精度 → 风险与验证）。
-- **Discussion**：GLUE 的保守性与统计低效、可辨识性梯度、precise-but-biased、所需传感器精度对水安全计划的意义、局限（AR(1) 使理想区间偏乐观、水龄未达稳态等）。
+- **Discussion**：informal GLUE 的统计低效（有 CRLB 对照的定量实例）、可辨识性梯度、precise-but-biased 只在与流路相关时出现、预测成功与参数辨识必须分开、所需传感器精度对水安全计划的意义、局限（AR(1) 的 `ρ` 是假设值而非估计值、**水龄在本模型的 168 h 上限内无法收敛**、无任何实测验证）。
 - **Conclusion**：回答每个研究问题；uncertainty-aware calibration 的价值；未来工作（真实多 DMA 数据、贝叶斯分层、更长仿真达稳态水龄、更密集集合）。
 
 ## 9. 复现方式
 
-代码在 [`Net3/`](Net3/)，conda 环境 `water-supply`（`numpy 2.4.2`, `wntr 1.4.0`）。核心文件：
+代码在 [`Net3/`](Net3/)，conda 环境 `water-supply`（`python 3.13.12`, `numpy 2.4.2`, `scipy 1.17.1`, `wntr 1.4.0`）。[`environment.yml`](environment.yml) 声明该环境，[`environment.lock.yml`](environment.lock.yml) 是完整传递解。网络文件是冻结副本 `models/net3_frozen/Net3.inp`，import 时校验 SHA-256，所以升级 WNTR 不会悄悄改变模型。核心文件：
 
-- [`Net3/wq_common.py`](Net3/wq_common.py)：冻结的三区 baseline 配置 + WNTR/EPANET 助手（监测点、分区、种子、先验、时序）。
-- `Net3/step1_freeze_baseline.py`：建合成真值 + 含噪观测 + 2000 组 GLUE，缓存所有预测。
-- `Net3/step3 … step11_*.py`：阈值、位移先验、结构误差、噪声扫描、Fisher/profile/AR(1)、传感器偏置、`k_b`、censored、风险指标、LOO。
-- [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)：**所有实验的方法、表格、图与结论**（每个数字都由脚本产生，顶部有完整文件清单与运行命令）。
-- `Net3/baseline_cache/`：缓存（`baseline.npz` 等），使后续实验无需重跑 EPANET。
+- [`Net3/wq_common.py`](Net3/wq_common.py)：冻结的三区 baseline 配置 + WNTR/EPANET 助手（监测点、分区、种子、先验、时序、三套加权）。
+- `Net3/step1_freeze_baseline.py`：建合成真值 + 含噪观测 + **8192 组 Sobol** 候选库，缓存全网预测。
+- `Net3/step3 … step14_*.py`：阈值、位移先验、结构误差、噪声扫描、Fisher/profile/AR(1)、传感器偏置、`k_b`、censored、风险、LOO、情景、已知答案、重复噪声校准。
+- [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)：**所有实验的方法、表格、图与结论**（顶部有完整文件清单、推断口径约定与运行命令）。
+- [`Net3/provenance.py`](Net3/provenance.py)：记录 git commit / tree hash / dirty diff hash、冻结 `.inp` 哈希、`wq_common` 与 step 脚本哈希、精确 numpy/scipy 版本，以及 **config 哈希**。
+- [`Net3/validate_artifacts.py`](Net3/validate_artifacts.py)：注册声明、加权字段、数字漂移、禁用措辞等检查；**不能**证明语义一致性。
+- `Net3/baseline_cache/`：缓存（`baseline.npz` 约 124 MB 等），使后续实验无需重跑 EPANET。
 
 典型运行（`Net3/` 目录下）：
 
 ```
-export MPLCONFIGDIR=/tmp/mpl
-python step1_freeze_baseline.py        # ~40 s（2000 次 EPANET）
-python step7b_profile.py               # 建 21³ 网格
-python step10_risk_metrics.py          # 风险指标 + water age
-python step11_loo.py                   # 留一验证
+conda activate water-supply
+cd Net3
+export MPLCONFIGDIR=../.mplcache
+python step0_warmup_convergence.py     # 预热收敛检验（决定 WARMUP_H）
+python step1_freeze_baseline.py        # ~280 s（8192 次 168 h EPANET）
+python step7b_profile.py               # 21³ 网格 + 连续 profile
+python step10_risk_metrics.py          # 风险指标 + water age + 报告步长敏感性
+python step11_loo.py                   # 留一监测点/分区/未监测节点验证
+python step13_known_answer.py          # 解析已知答案测试
+python step14_repeated_noise.py        # 100 次重复噪声校准（无 EPANET）
+python provenance.py                   # 刷新 cache_manifest.json
+python validate_artifacts.py           # 校验日志与产物一致
 ```
+
+两个 step 脚本**不能在同一目录并行运行**：WNTR 把 EPANET 临时文件写成 `Net3/temp.inp|rpt|bin`，并发会互相覆盖。
 
 ## 10. 时间计划（修订，2026-08）
 
+下表的「阶段」指论文工作阶段；`Step N` 一律指 `Net3/stepN_*.py` 脚本，两者不再混用编号。
+
 | 阶段 | 状态 |
 | --- | --- |
-| 基线复现 + GLUE（Step 1–2） | ✅ 完成 |
-| 可辨识性 + 阈值/位移先验（Step 3–4） | ✅ 完成 |
+| 预热收敛检验 + 冻结基线（Step 0–1） | ✅ 完成 |
+| 三套加权口径 + 阈值/位移先验（Step 2–4） | ✅ 完成 |
 | 误差敏感性（结构/噪声/Fisher/偏置/`k_b`/截断，Step 5–9） | ✅ 完成 |
-| 风险指标 + water age + LOO 验证（Step 10–11） | ✅ 完成 |
-| **重写 Results / Discussion / Conclusion（Step 12）** | ⏳ 进行中 |
-| 图表统一/单位/压缩篇幅/Word 格式（Step 13） | ⏳ 待做 |
+| 风险指标 + water age + 四层验证（Step 10–11） | ✅ 完成 |
+| 温度/管龄情景 + 工具链已知答案测试（Step 12–13） | ✅ 完成 |
+| 重复噪声校准（Step 14） | ✅ 完成 |
+| 可复现基础设施（冻结模型、provenance、自动校验） | ✅ 完成（clean release tag 仍待做） |
+| **重写 Results / Discussion / Conclusion（论文正文）** | ⏳ 进行中 |
+| 压缩篇幅至 30 页、标题样式、图表编号、参考文献补 Stedinger 2008 / Mantovan & Todini 2006 | ⏳ 待做 |
 | Research paper 提交 | 截止 2026-08-21 |
 | Research poster 提交 | 截止 2026-08-28 |
+
+**代码/产物侧的科学主线与 formal 主口径已对齐**；仍需在 clean working tree 上做最终 release 重跑与人工语义审查。逐条状态与仍存在的限制见 [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md)。论文正文整合仍是主要剩余工作。
 
 ## 11. 工作流
 
 - **Git/GitHub**：每阶段至少一次有意义 commit；不提交大型原始数据/临时输出/隐私数据；代码、图表、草稿保持可追溯。
-- **结果留痕**：所有数值由脚本生成并写入 `RESULTS_LOG.md` 与 `baseline_cache/`，杜绝手工填数。
+- **结果留痕**：所有数值由脚本生成并写入 `baseline_cache/`；转抄进 `RESULTS_LOG.md` 的部分由 `validate_artifacts.py` 逐个数字对回产物（这一步是必要的——上一轮审查在日志里查出 93 处因重跑而过期的数字）。注意它保证的是**一致性**而非正确性：产物本身错了，它只会确认日志忠实抄录了一个错误的数字。
 - **建议目录**：`background/`（文献）｜`Net3/`（代码+缓存+结果）｜`thesis/`（论文草稿与图）｜`meetings/`（会议纪要）。
 
 ## 12. AI 工具使用提醒

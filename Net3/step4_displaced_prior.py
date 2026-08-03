@@ -1,9 +1,16 @@
-"""Step 4: displaced-prior GLUE experiment.
+"""Step 4: displaced-prior experiment, first look (informal GLUE, one noise realisation).
 
-Same truth, same monitoring array, same baseline noisy observations. Only the prior
-ranges change: each range keeps its width but is shifted so its midpoint sits one prior
-standard deviation from the true value (all ranges stay non-positive and still contain
-the truth). Question: do the observations pull the behavioural mean back toward the truth?
+Same truth, same monitoring array, same baseline noisy observations. Only the prior ranges change:
+each range keeps its width but is shifted so its midpoint sits one prior standard deviation from the
+true value (all ranges stay non-positive and still contain the truth). Question: do the observations
+pull the estimate back toward the truth?
+
+SUPERSEDED BY STEP 4d for every reported conclusion. This version uses the informal comparator, one
+noise realisation and one displacement direction, so it can neither separate a genuine pull-back from
+a lucky noise draw nor separate the data's information from the score's flatness. It is kept because
+it is the configuration the draft ran, and because the contrast with Step 4d is instructive: 4d
+displaces in both directions, repeats over 30 realisations and reports the primary formal rule
+alongside the comparator.
 """
 import os
 import json
@@ -100,12 +107,17 @@ for g in ["old", "avg", "new"]:
     })
 
 summary = {
+    "weighting": "informal_glue",
+    "weighting_role": "comparator; SUPERSEDED by step4d, which reports the primary formal rule over "
+                      "30 noise realisations and both displacement directions",
+    "primary_weighting_elsewhere": B.PRIMARY_WEIGHTING,
+    "n_noise_realisations": 1,
     "behavioural_count": int(beh.sum()),
     "retention": round(float(beh.mean()), 4),
     "rmse_min": round(float(RMSE.min()), 4),
     "rows": rows,
 }
-print("\n=== displaced-prior GLUE ===")
+print("\n=== displaced-prior, informal GLUE, single realisation (superseded by Step 4d) ===")
 print(f"behavioural {summary['behavioural_count']}/{B.N_MC} "
       f"({summary['retention']*100:.1f}%) | min RMSE {summary['rmse_min']}")
 print(f"{'grp':>4} {'origMid':>8} {'dispMid':>8} {'true':>7} {'behMean':>8} "

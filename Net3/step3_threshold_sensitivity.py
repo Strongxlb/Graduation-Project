@@ -1,9 +1,15 @@
-"""Step 3: GLUE behavioural-threshold sensitivity.
+"""Step 3: behavioural-threshold sensitivity of the INFORMAL GLUE comparator.
 
-Uses the frozen baseline cache only (no EPANET re-run). For each RMSE threshold it
-recomputes the behavioural set, the normalised GLUE weights, the weighted mean/SD of
-the three coefficients, the prior-to-behavioural width ratio, the 5-95% predictive band
-at a near-source and a downstream node, and the top low-chlorine risk nodes.
+This section is deliberately and entirely informal: the threshold is a feature of behavioural
+weighting, the formal likelihood has none, so "how much does the answer depend on the threshold?" is
+a question that can only be asked of the comparator. What it establishes is how sensitive the
+draft's conclusions were to an analyst's choice — not what the data support, which is the primary
+formal analysis in Steps 1 and 7.
+
+Uses the frozen baseline cache only (no EPANET re-run). For each RMSE threshold it recomputes the
+behavioural set, the normalised GLUE weights, the weighted mean/SD of the three coefficients, the
+prior-to-behavioural width ratio, the 5-95% predictive band at a near-source and a downstream node,
+and the top low-chlorine risk nodes.
 """
 import os
 import json
@@ -117,5 +123,10 @@ for r in rows:
     print(f"  thr={r['threshold']}: {r['top_risk']}")
 
 with open(os.path.join(HERE, "baseline_cache", "step3_threshold.json"), "w") as f:
-    json.dump(rows, f, indent=2)
+    json.dump({"weighting": "informal_glue",
+               "weighting_role": "comparator only — a threshold sweep is a property of behavioural "
+                                 "weighting; the primary formal likelihood has no threshold, so no "
+                                 "row here may be quoted as a headline result",
+               "primary_weighting_elsewhere": B.PRIMARY_WEIGHTING,
+               "thresholds": THRESHOLDS, "rows": rows}, f, indent=2)
 print("\nsaved step3_threshold.json")

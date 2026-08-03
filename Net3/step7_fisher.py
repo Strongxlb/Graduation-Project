@@ -33,7 +33,8 @@ TRUTH = [B.KW_OLD_TRUE, B.KW_AVG_TRUE, B.KW_NEW_TRUE]
 KB = B.KB_FIXED
 PRIOR_SD = {"old": (1.5 - 0.2) / np.sqrt(12), "average": (0.2 - 0.04) / np.sqrt(12),
             "new": (0.10 - 0.005) / np.sqrt(12)}
-H, HKB = 0.02, 0.05
+HS = [B.FD_STEP[z] for z in ZKEYS]        # one step per coefficient, ~2-5% of its own truth
+HKB = B.FD_STEP_KB
 SIGMA = 0.10
 NMON = len(B.MONITOR_NODES)
 
@@ -52,7 +53,7 @@ def col(idx, h):
     return ((sim(kbp, *kwp) - sim(kbm, *kwm)) / (2 * h)).ravel()   # (294,) row = hour*6 + node
 
 
-phys = [col(0, H), col(1, H), col(2, H), col(3, HKB)]              # old,avg,new,kb
+phys = [col(0, HS[0]), col(1, HS[1]), col(2, HS[2]), col(3, HKB)]  # old,avg,new,kb
 n_obs = phys[0].size
 node_of_row = np.arange(n_obs) % NMON                              # row -> monitor index
 offsets = [(node_of_row == m).astype(float) for m in range(NMON)] # per-monitor additive bias
@@ -84,38 +85,46 @@ cases = {"A: kw only": [0, 1, 2],
          "C: kw+kb+6 offsets": list(range(J_full.shape[1]))}
 
 # ---- finite-difference step convergence ----
-# One absolute step H = 0.02 is used for all three coefficients, which is 2% of the old truth but
-# 40% of the new one, so for `new` it is not obviously a small perturbation and may be picking up
-# curvature rather than the derivative. Each coefficient is therefore re-differenced over a range of
-# steps and the resulting Case-A CRLB compared; a converged derivative gives a flat column.
+# The default step is SCALE-DEPENDENT (wq_common.FD_STEP): one shared absolute step would be 2% of
+# the old truth but 40% of the new one, and at 40% a central difference is a secant over a large arc
+# rather than a derivative. Each coefficient is re-differenced over a range of steps and the
+# resulting Case-A CRLB compared; a converged derivative gives a flat column. Every sweep is
+# asserted to contain its own default, so the reported spread really does bound the error the
+# default carries.
 STEP_SWEEP = {0: [0.005, 0.01, 0.02, 0.04],
               1: [0.002, 0.005, 0.01, 0.02],
               2: [0.001, 0.0025, 0.005, 0.01]}
+for i, z in enumerate(ZKEYS):
+    assert B.FD_STEP[z] in STEP_SWEEP[i], f"default step for {z} is outside its convergence sweep"
 print("=== finite-difference step convergence (Case A CRLB, other columns at their default step) ===")
+print("default steps: " + ", ".join(f"{z} {B.FD_STEP[z]:g}" for z in ZKEYS) +
+      f" (each ~{100 * B.FD_STEP['old'] / abs(TRUTH[0]):.0f}-"
+      f"{100 * B.FD_STEP['new'] / abs(TRUTH[2]):.0f}% of its own truth)")
 print(f"{'coef':>8} {'step':>8} {'step/|truth|':>12} {'CRLB':>9} {'rel. change':>12}")
 fd_conv = {}
 for idx, steps in STEP_SWEEP.items():
     z = ZKEYS[idx]
     rows_fd, prev = [], None
     for h in steps:
-        cols3 = [col(0, STEP_SWEEP[0][2] if idx != 0 else h),
-                 col(1, STEP_SWEEP[1][2] if idx != 1 else h),
-                 col(2, STEP_SWEEP[2][2] if idx != 2 else h)]
+        cols3 = [col(i, h if i == idx else HS[i]) for i in range(3)]
         J3 = np.column_stack(cols3)
         crlb3 = SIGMA * np.sqrt(np.diag(np.linalg.pinv(J3.T @ J3)))
         rel = None if prev is None else abs(crlb3[idx] - prev) / prev
         rows_fd.append({"step": h, "step_over_truth": h / abs(TRUTH[idx]),
+                        "is_default": h == B.FD_STEP[z],
                         "crlb": float(crlb3[idx]),
                         "rel_change_vs_previous": None if rel is None else float(rel)})
         print(f"{z:>8} {h:>8.4f} {h / abs(TRUTH[idx]):>11.0%} {crlb3[idx]:>9.5f} "
-              f"{'—' if rel is None else f'{rel:11.2%}'}")
+              f"{'—' if rel is None else f'{rel:11.2%}'}"
+              f"{'   <- default' if h == B.FD_STEP[z] else ''}")
         prev = crlb3[idx]
     spread = max(r["crlb"] for r in rows_fd) / min(r["crlb"] for r in rows_fd) - 1.0
-    fd_conv[z] = {"default_step": [H, H, H][idx], "rows": rows_fd,
-                  "crlb_spread_over_sweep": float(spread)}
+    fd_conv[z] = {"default_step": B.FD_STEP[z],
+                  "default_step_over_truth": B.FD_STEP[z] / abs(TRUTH[idx]),
+                  "rows": rows_fd, "crlb_spread_over_sweep": float(spread)}
     print(f"{'':>8} {'spread over the sweep':>32}: {spread:.2%}\n")
-print("A flat column means the derivative is converged and the choice of step is not driving the")
-print("CRLB. The default 0.02 is inside every sweep, so any spread here bounds the error it carries.")
+print("A flat column means the derivative is converged and the step is not driving the CRLB. Each")
+print("default is a member of its own sweep, so the spread above bounds the error it carries.")
 
 # Empirical posterior SD from the frozen ensemble, under EVERY weighting scheme.
 # The CRLB is a bound on the variance of an efficient estimator under the correct likelihood, so
@@ -160,7 +169,9 @@ print("The raw condition number is inflated by the parameter scales; on the dime
 print("spread is far smaller, so the three coefficients are much more comparably informed than the")
 print("raw number suggests. The sloppiest direction names the combination the data constrain least.")
 
-report = {"sigma": SIGMA, "prior_sd": PRIOR_SD,
+report = {**B.weighting_provenance(),
+          "sigma": SIGMA, "prior_sd": PRIOR_SD,
+          "fd_default_steps": {**B.FD_STEP, "kb": HKB},
           "fd_step_convergence": fd_conv,
           "fisher_geometry": {
               "note": "a condition number on the unnormalised matrix mixes units; the prior-scaled "
@@ -174,6 +185,13 @@ report = {"sigma": SIGMA, "prior_sd": PRIOR_SD,
           "comparability_note": "the CRLB is a bound for an efficient estimator under the correct "
                                 "likelihood, so only the formal schemes are like-for-like; the "
                                 "informal GLUE SD is listed as a comparator, not as a benchmark",
+          "crlb_agreement_claim": "the formal posterior spread is LOCALLY CONSISTENT with the "
+                                  "Case-A CRLB. It is not a demonstration of frequentist "
+                                  "efficiency: the CRLB bounds the variance of an unbiased "
+                                  "estimator over repeated sampling, whereas the posterior SD here "
+                                  "is the width from ONE noise realisation, and both use the same "
+                                  "model, truth and error assumptions. Step 14 does the repeated-"
+                                  "sampling test that efficiency and calibration actually require.",
           "cases": {}}
 print("=== Step 7: Fisher / CRLB with nuisance parameters (σ = 0.10) ===\n")
 print(f"{'case':>22} | {'coef':>7} | {'CRLB':>7} | {'priorSD':>7} | {'CRLB/prior':>10} | identif.? | cond#")
@@ -200,6 +218,11 @@ print("        prior SD                  | "
 print("\nCase A is the like-for-like benchmark for the FORMAL schemes (both fix k_b and assume no")
 print("sensor bias). The informal GLUE SD is 2-3x wider than the formal one on the same data, which")
 print("is the inefficiency of the informal score, not a property of the observations.")
+print("\nAgreement between the formal posterior SD and the Case-A CRLB is a LOCAL CONSISTENCY check,")
+print("not proof of efficiency: the bound is over repeated sampling while the posterior width comes")
+print("from one noise realisation, and the two share a model, a truth and an error assumption. The")
+print("repeated-sampling version of the claim — bias, estimator variance, interval coverage — is")
+print("Step 14.")
 
 # CRLB(C) vs sigma (scales linearly)
 crlbC_unit, _ = marginal(cases["C: kw+kb+6 offsets"], 1.0)

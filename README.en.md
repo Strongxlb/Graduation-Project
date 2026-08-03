@@ -4,13 +4,9 @@
 > Chinese: [`README.md`](./README.md) ｜ English (this file)
 > Execution plan: [`plan1.md`](./plan1.md) ｜ Literature list: [`background/Literature/literature.md`](./background/Literature/literature.md)
 
----
-
 ## 0. In one sentence
 
-On the **EPANET Net3** benchmark network, partitioned by pipe material/age into three contiguous zones (**old / average / new**), we use a **known synthetic truth** to generate noisy observations and systematically study the **uncertainty-aware calibration** and **identifiability** of the first-order wall-decay coefficients `k_w`: what the data can actually constrain, where GLUE's honest limitations lie, how structural / systematic / autocorrelated / censoring errors affect the estimates, and how parameter uncertainty does (and does not) propagate into the operational low-chlorine **risk map**. Everything is reproducible and script-driven; results live in [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md).
-
----
+On the **EPANET Net3** benchmark network, pipes are partitioned by node coordinates into three **synthetic spatial zones** (**old / average / new** — labels are imposed; Net3 has no real pipe-age/material record). A **known synthetic truth** generates noisy observations for a controlled study of **uncertainty-aware calibration** and **identifiability** of first-order wall-decay coefficients `k_w`: what the data can constrain, how large the gap is between **informal GLUE** and a **formal likelihood**, how structural / systematic / autocorrelated / censoring errors affect estimates, and how parameter uncertainty does (and does not) propagate into the operational low-chlorine **risk map**. The primary analysis uses a **censored formal Gaussian likelihood**; informal GLUE is retained throughout as a **comparator** — the contrast is itself a result. Everything is reproducible and script-driven; results live in [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md); point-by-point responses are in [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md).
 
 ## 1. Project context
 
@@ -19,64 +15,56 @@ This is an MSc dissertation for **Imperial College London CIVE70058 Research Dis
 - **Research paper** — due 2026-08-21 12:00; scientific-paper format; up to 12,000 words.
 - **Research poster** — due 2026-08-28 12:00.
 - Completed checkpoints: 2026-06-19 supervisor checkpoint; 2026-07-03 student checkpoint.
-- **Current phase**: the supervisor returned a paper review + a revised Jupyter notebook on 2026-07-25; the work is now in **final revision** (Priority-1 corrections + Priority-2 methodological additions) and integrating the experiments into the manuscript.
+- **Current phase**: final revision after the 2026-07-25 review (Priority-1 corrections + Priority-2 methodological additions) and integration into the manuscript.
 
-The repository tracks code, models, result figures, literature notes and dissertation drafts; all key progress is recorded via Git.
-
----
+The repository tracks code, models, result figures, literature notes and dissertation drafts; key progress is recorded via Git.
 
 ## 2. Research topic
 
 Revised working title: **Uncertainty-aware calibration and identifiability of grouped first-order chlorine wall-decay coefficients — a controlled EPANET Net3 three-zone study**.
 
-The point is not to "estimate one number" but to answer: **given realistic monitor density and measurement noise, can the grouped `k_w` be identified at all, and what does that mean for operational risk?** A **synthetic truth** is used as a controlled testbed — because the truth is known, identifiability can be assessed rigorously, "precise" can be separated from "unbiased", and validation can be honest. Keywords:
+The point is not to "estimate one number" but to answer: **given realistic monitor density and measurement noise, can the grouped `k_w` be identified, and what does that mean for operational risk?** A **synthetic truth** is used as a controlled testbed. Keywords:
 
 - **EPANET / WNTR** — EPANET 2.2 water-quality engine + WNTR Python wrapper (`wntr 1.4.0`).
 - **First-order chlorine decay** — first-order bulk (`k_b`) + first-order wall (`k_w`) (Rossman 1994 / EPANET 2.2 Manual).
-- **Grouped `k_w` (material/age zones)** — Net3 split by node coordinates into old / average / new contiguous zones, one `k_w` per zone — reducing the "multi-DMA heterogeneity" question to a controlled synthetic case.
-- **GLUE (informal likelihood)** — Beven & Binley 1992; this project confronts its statistical inefficiency and threshold/prior dependence head-on.
-- **Formal identifiability tools** — Fisher information / Cramér–Rao lower bound (CRLB), profile likelihood, AR(1) covariance correction.
-- **Measurement error in the likelihood** — Gaussian observation noise, systematic bias, zero-clipping (censored likelihood); avoid over-confidence in "perfect" observations.
-- **Operational risk propagation** — duration/depth/cumulative deficit of nodes below the operational threshold `0.2 mg/L`, corroborated by water age.
-
----
+- **Grouped `k_w` (three synthetic zones)** — split by node coordinates (`y ≤ 10` → average; else `x ≤ 26` → new; else old; cross-zone pipes assigned to the newer side). Labels are synthetic, not Net3 material/age data.
+- **Three inference conventions side by side** — primary: **censored formal Gaussian likelihood** (`log Φ(−μ/σ)` at the sensor floor); `formal_iid` isolates the censoring treatment; **GLUE (informal likelihood)** (Beven & Binley 1992) is the **comparator**. The gap between them is a core result (Mantovan & Todini 2006 / Stedinger 2008 made quantitative).
+- **Formal identifiability tools** — Fisher information / Cramér–Rao lower bound (CRLB), continuous profile likelihood, AR(1) covariance correction.
+- **Measurement error in the likelihood** — Gaussian noise, systematic bias, zero-clipping (censored likelihood).
+- **Operational risk propagation** — duration / depth / cumulative deficit below the operational threshold `0.2 mg/L`, corroborated by water age.
 
 ## 3. Motivation
 
-Chlorine residual directly governs microbial safety. Traditional calibration treats observations as exact and reports single-point parameters, which can yield **over-confident parameters** and **misleading risk judgements**. Two neglected issues:
+Chlorine residual governs microbial safety. Traditional calibration treats observations as exact and reports point estimates, which can yield **over-confident parameters** and **misleading risk judgements**. Two neglected issues:
 
-1. **Identifiability** — with sparse monitors and non-trivial noise, **not all grouped `k_w` are identifiable from the data**. Without checking, "successful calibration" may just be a **prior-centring** artefact.
-2. **Error structure** — observations carry systematic bias, temporal autocorrelation, and **zero-clipping** at low residuals (`C_obs = max(0, C_true+ε)`); the model also has structural error. All of these can decouple "good fit" from "correct parameters" (precise-but-biased).
+1. **Identifiability** — with sparse monitors and non-trivial noise, **not all grouped `k_w` are identifiable**. Without checking, "successful calibration" may be a **prior-centring** artefact.
+2. **Error structure** — systematic bias, temporal autocorrelation, **zero-clipping** at low residuals (`C_obs = max(0, C_true+ε)`), plus structural model error. These can decouple "good fit" from "correct parameters" (precise-but-biased).
 
-This project makes both points concrete on a **synthetic three-zone case with known truth**, and carries the conclusions all the way to the **operational risk map**: even if some `k_w` are poorly identified, are the risk hot-spots still robust? In this study `0.2 mg/L` is a **selected operational low-chlorine threshold** (representative operational value), **not** a legal/compliance safety limit.
-
----
+This project makes both points concrete on a **synthetic three-zone case with known truth**, and carries conclusions to the **operational risk map**. Here `0.2 mg/L` is a **selected operational low-chlorine threshold**, not a legal/compliance limit.
 
 ## 4. Research questions and objectives
 
 ### 4.1 Research questions (mapped to completed experiments)
 
-1. **Baseline reproduction** — can the three-zone downstream chlorine series be reproduced and frozen into a reproducible GLUE baseline? (Step 1)
-2. **Identifiability** — with 6 monitors (2 per zone) and σ = 0.1 noise, to what extent is each grouped `k_w` constrained? (Steps 2–4, 7, 7b)
-3. **Threshold/prior dependence** — how is the behavioural threshold set on principled grounds, and are the conclusions robust to threshold/prior? (Steps 3, 4)
-4. **Error-source sensitivity** — how do structural error, systematic sensor bias, `k_b` misspecification (bulk–wall compensation), temporal autocorrelation AR(1), and zero-clipping each affect the estimates? (Steps 5, 7c, 8, 8b, 9)
-5. **Required sensor accuracy** (the supervisor's email question) — how small must sensor σ be for useful chlorine predictions? (Step 6)
-6. **Risk propagation and validation** — does parameter uncertainty change the operational low-chlorine **hot-spot ranking**? Is the risk map physically corroborated? Can the model predict **unseen** monitors? (Steps 10, 11)
+1. **Baseline and warm-up** — can a reproducible three-zone baseline be frozen with warm-up length chosen by a convergence test rather than convention? (Steps 0, 1)
+2. **Identifiability** — with 6 monitors (2 per zone) and σ = 0.1 noise, how tightly is each grouped `k_w` constrained? (Steps 2–4, 7, 7b, 14)
+3. **Threshold/prior dependence** — how is the behavioural threshold set, and are conclusions robust? (Steps 3, 4)
+4. **Error-source sensitivity** — structural error, sensor bias, `k_b` misspecification, AR(1), zero-clipping. (Steps 5, 7c, 8, 8b, 9)
+5. **Required sensor accuracy** (supervisor email) — how small must σ be for useful chlorine predictions? (Step 6)
+6. **Risk propagation and validation** — does parameter uncertainty change operational hot-spot ranking? Is the risk map hydraulically corroborated? Can the model predict unseen monitors? (Steps 10, 11)
 
 ### 4.2 Overall objective
 
-Build a **reproducible, uncertainty-aware, identifiability-focused** workflow for grouped-`k_w` calibration and risk assessment that honestly delimits what GLUE can do and what the data can constrain, and that propagates parameter uncertainty all the way to operational risk decisions and predictive validation.
-
----
+Build a **reproducible, uncertainty-aware, identifiability-focused** workflow for grouped-`k_w` calibration and risk assessment that honestly delimits what informal GLUE can do and what the data can constrain, and that propagates parameter uncertainty to operational risk decisions and predictive validation.
 
 ## 5. Scope
 
 ### 5.1 In scope
 
-- **EPANET Net3** benchmark network (WNTR's bundled `.inp`), split by coordinates into old/average/new contiguous zones.
+- **EPANET Net3** benchmark network, split by coordinates into old/average/new contiguous zones.
 - **First-order** kinetics (bulk + wall); `k_b` fixed at `-0.5 day⁻¹`, estimating three grouped `k_w`.
 - **Synthetic truth** + Gaussian observation noise (σ = 0.1 mg/L is **one standard deviation**); 6 monitors (2 per zone).
-- **GLUE** (2000 uniform-prior draws) + **formal identifiability** (Fisher/CRLB, profile, AR(1)).
+- **8192 scrambled-Sobol prior draws**, three weighting schemes + **formal identifiability** (Fisher/CRLB, continuous profile, AR(1)).
 - Error modelling: systematic bias, `k_b` misspecification, zero-clipping (censored / Tobit-type likelihood).
 - Operational risk: duration/depth/cumulative deficit below `0.2 mg/L` + water-age corroboration + LOO predictive validation.
 
@@ -85,10 +73,8 @@ Build a **reproducible, uncertainty-aware, identifiability-focused** workflow fo
 - **No hydraulic calibration** — demands and roughness trust the existing model.
 - **No multi-species modelling** (EPANET-MSX); no TOC/DBP/biofilm coupling.
 - **No operational optimisation** (no sensor placement / flushing / booster optimisation).
-- Real Bristol 3-DMA field data are **not** included in this revision (the study uses the controlled Net3 synthetic case as the vehicle for the methodology; a known truth is prerequisite for identifiability analysis).
-- AI tools are used only for code assistance / language polishing / idea organisation, disclosed per Imperial/CEE rules, never submitted directly as dissertation content.
-
----
+- Real Bristol 3-DMA field data are **not** included in this revision.
+- AI tools are used only for code assistance / language polishing / idea organisation, disclosed per Imperial/CEE rules.
 
 ## 6. Method framework and key settings
 
@@ -96,8 +82,8 @@ Build a **reproducible, uncertainty-aware, identifiability-focused** workflow fo
 
 - Synthetic truth: `k_b = -0.5 day⁻¹` (fixed); `k_w`: old `-1.0`, average `-0.1`, new `-0.05` (`m/day`).
 - Monitors (2 per zone): new `107/113`, old `15/145`, average `209/231`.
-- Timing: 72 h simulation, 24 h warm-up → **49 reporting points = 48 h window**; observation noise `σ = 0.1 mg/L`.
-- GLUE: 2000 uniform-prior draws, caching **every candidate's prediction at all 92 nodes**, so downstream experiments reuse the cache without re-running EPANET.
+- Timing: **168 h simulation, 120 h warm-up** → **49 reporting points = 48 h window**; observation noise `σ = 0.1 mg/L`. Warm-up length comes from Step 0, not convention; because `168 − 120 = 72 − 24 = 48`, the residual count `N = 6 × 49 = 294` is unchanged.
+- Sampling: **8192 = 2¹³ scrambled Sobol** draws (not pseudo-random) — the formal likelihood is far sharper than the informal score; under the superseded pre-Sobol design its ESS was only ~37. Leading `2^k` subsets support an exact convergence table at 1024/2048/4096/8192. The cache stores **every candidate's prediction at all 92 nodes**.
 
 Prior ranges (`m/day`):
 
@@ -107,118 +93,126 @@ average  : [-0.2,  -0.04]
 new      : [-0.10, -0.005]
 ```
 
-### 6.2 GLUE and the behavioural threshold (Steps 2–3)
+### 6.2 Three weighting conventions (Steps 1–3)
 
-Informal Gaussian weighting and behavioural threshold:
+**Primary: censored formal Gaussian likelihood.** Density on uncensored points; left-censoring probability at the sensor floor:
 
 ```
-w_i ∝ exp[ -½ · (RMSEᵢ / σ)² ] · 1[ RMSEᵢ < RMSE_thr ]
-RMSE_thr = σ · (1 + z / √(2·N_resid))      # z=1.645 → one-sided 95% band; σ=0.1, N_resid=294 → 0.107
+ℓ(θ) = −½ · Σ_{y>0} ((y − μ)/σ)²  +  Σ_{y=0} log Φ(−μ/σ)
 ```
 
-Primary threshold `0.107` (the draft's looser `0.12` is kept for comparison).
+**Comparator: informal GLUE score** (the draft's rule), with a behavioural threshold:
+
+```
+GLUE:  w_i ∝ exp[ −½ · (RMSEᵢ/σ)² ] · 1[ RMSEᵢ < RMSE_thr ]
+thr:   RMSE_thr = σ · (1 + z/√(2·N_resid))     # z=1.645; σ=0.1, N=294 → 0.107
+```
+
+The informal score equals the formal iid Gaussian likelihood **divided by `N = 294`** — equivalently assuming `σ_eff = σ√N = 1.71 mg/L`. It is nearly flat inside the behavioural set. The threshold belongs to the **comparator only**; the formal likelihood carries no hard cut.
+
+### 6.6 Warm-up choice and toolchain verification (Steps 0 / 13 / 14)
+
+- **Step 0** — demand patterns and pump schedules are 24 h periodic; the right criterion is cycle-to-cycle field recurrence with pre-declared tolerances. At 120 h the chlorine concentration criteria pass, but residual **~5.5%** cycle-to-cycle drift remains in the integrated deficit and water-age p95 still changes by **12.8 h**. So 120 h is a **pragmatic finite-horizon warm-up**, not a fully cyclostationary risk/age state. Hard ceiling: pump 10's absolute-time controls stop at 159 h, so runs beyond 168 h break the 24 h pump pattern.
+- **Step 13** — single-pipe analytic bulk check; wall arm verifies sign / monotonicity / bound only (mass-transfer prevents an exact wall analytic match without further controls).
+- **Step 14** — 100 independent noise redraws on the fixed candidate library: bias of the formal posterior mean, empirical SD vs Case-A CRLB, and nominal 90%/95% coverage.
 
 ### 6.3 Identifiability: formal tools (Steps 7 / 7b / 7c)
 
-- **Fisher / CRLB (a priori)** — `F = Jᵀ J / σ²`, marginalised via the Schur complement, giving the **theoretical minimum variance** for a given sensitivity and noise level.
-- **Profile likelihood (a posteriori / practical)** — fix one coefficient, re-optimise the others; `ΔNLL ≤ 1.92` gives the 95% interval.
-- **AR(1) autocorrelation** — recompute `F = JᵀΣ⁻¹J` and the profile with covariance `Σ[t,s] = σ²ρ^|t−s|`, quantifying interval inflation (not a single mechanical multiplier).
+- **Fisher / CRLB (a priori)** — `F = Jᵀ J / σ²`, marginalised via the Schur complement.
+- **Profile likelihood (a posteriori / practical)** — fix one coefficient, re-optimise the others; `ΔNLL ≤ 1.92` gives the 95% interval. Continuous endpoints are primary; the 21-point grid is visualisation only.
+- **AR(1)** — recompute with `Σ[t,s] = σ²ρ^|t−s|`.
 
-Read in two layers: **(1) controlled-baseline identifiability** (Fisher A ↔ profile ↔ GLUE under the same conditions); **(2) realism sensitivity** (+`k_b`, + sensor bias, AR(1), censoring).
+Read in two layers: **(1) controlled-baseline identifiability** (Fisher A ↔ profile ↔ formal ensemble); **(2) realism sensitivity** (+`k_b`, +sensor bias, AR(1), censoring).
 
 ### 6.4 Error-source sensitivity (Steps 5 / 8 / 8b / 9)
 
-Structural error (pipe-level jitter / length-correlated heterogeneity), systematic sensor bias, `k_b ±20%` (bulk–wall compensation), and zero-clipping censored likelihood:
-
-```
-uncensored (obs>0): Gaussian    -½·((obs-μ)/σ)²
-clipped-0  (obs=0): P(Y*≤0)     log Φ(-μ/σ)      # scipy log_ndtr
-```
+Structural error (pipe-level jitter / length-correlated heterogeneity), systematic sensor bias, `k_b ±20%` (bulk–wall compensation), and zero-clipping censored likelihood.
 
 ### 6.5 Operational risk and validation (Steps 6 / 10 / 11)
 
-- **Required-accuracy sweep** — σ = 0.02 / 0.05 / 0.10 / 0.15, threshold scaled with σ.
-- **Risk metrics** (trapezoidal over the 48 h window): below-`0.2 mg/L` **duration**, **minimum concentration**, **cumulative deficit** `∫max(0,0.2−C)dt`; ensemble-weighted expectation + 5–95% bands.
-- **Water age** — a hydraulic diagnostic independent of the reaction coefficients, used as **physical corroboration** of the risk pattern (Spearman rank correlation).
-- **Leave-one-monitor-out (LOO)** — hold out a monitor, calibrate on the other five, then predict it; check out-of-sample error and band coverage.
+- **Required-accuracy sweep** — σ = 0.02 / 0.05 / 0.10 / 0.15 under **formal primary** (+ informal comparator).
+- **Risk metrics** — below-`0.2 mg/L` duration, minimum, cumulative deficit; ensemble-weighted expectation + 5–95% bands; unweighted / consumer-only / demand-weighted network means.
+- **Water age** — descriptive Spearman association (no iid p-value); spatial-block bootstrap width.
+- **LOO / leave-one-zone-out** — predictive success ≠ parameter identifiability.
 
-Reproduction: see §9 and the "Files and how to reproduce" header of [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md).
+## 7. Key findings (summary of Steps 0–14)
 
----
+> Full tables and figures: [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md). Point-by-point status: [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md).
 
-## 7. Key findings (summary of Steps 1–11)
+1. **"average/new are unidentifiable" was a statement about the scoring rule, not the data.** On the same observations and draws, informal GLUE (draft threshold 0.12) retains **86 / 98 / 98%** of prior width; censored formal retains **25 / 31 / 28%** (Steps 1–3).
+2. **Formal posterior spread is locally consistent with the Case-A CRLB — not a proof of frequentist efficiency.** Single-run SD within 1–6% of CRLB; over 100 noise realisations, empirical SD / CRLB ≈ 1.04 / 1.06 / 1.12 and nominal 90% coverage ≈ 0.85–0.89. Informal is ~2.8–3.2× wider and over-covers by being wide (Steps 7 / 7b / 14).
+3. **No threshold repairs an inefficient score.** Tightening 0.12 → 0.107 recovers little; switching to the formal likelihood cuts every SD threefold (Step 3).
+4. **A 24 h warm-up (draft / superseded) is inadequate; 120 h is a finite-horizon pragmatic choice, not full convergence.** Concentration criteria pass at 120 h with residual ~5.5% deficit drift; water age does not settle inside the 168 h ceiling (Step 0).
+5. **Symmetric heterogeneity shows no detectable structural bias; flow-path-correlated heterogeneity produces a directional shift** toward a **length-weighted proxy** — not recoverable as an identified residence-weighted effective coefficient (Steps 5c / 5d).
+6. **Required accuracy (revised): σ ≈ 0.10 is already useful under the formal primary.** Formal retains **27 / 30 / 29%** of prior width at σ = 0.10; the earlier "σ ≲ 0.05 required" claim was an informal-score artefact. σ ≤ 0.05 is sampling-limited on the fixed Sobol library (Step 6).
+7. **Uncorrected sensor bias can destroy coefficients while leaving risk rankings almost intact.** At node 15, +0.05 / +0.10 mg/L move old by **2.19 / 3.87** posterior SD; Spearman of the 92-node risk field stays ≈ 0.999 (Steps 8 / 8c).
+8. **Zero-clipping is measurable but small** (10 of 294 calibration points; Steps 9).
+9. **Risk vs water age**: descriptive Spearman ρ = 0.73; ordinary p-values removed. Unweighted / consumer-only / demand-weighted means move in opposite directions — risk concentrated among small users (Step 10).
+10. **Predictive success ≠ parameter identifiability.** Leave-one-zone-out returns the dropped zone's coefficient to the prior midpoint while prediction RMSE stays ≈ noise floor (Step 11).
+11. **Scenario headlines (formal ensemble):** baseline 21 nodes / 36.3 L/s at risk; heatwave 29 / 47.8; heat+ageing 31 / 49.4. Tested +30% source dose improves continuous severity but does not restore baseline demand-at-risk (Step 12).
+12. **Continuous profile intervals are 15–36% wider (half-width) than the 21-point grid**; prior-scaled Fisher condition number is 3.2, not 216 (Steps 7 / 7b).
+13. **Methodological lesson:** single-realisation results were overturned twice under scrutiny; defences that worked were paired controls, ensembles over arbitrary choices, a formal likelihood, and multi-route corroboration.
 
-> Full data, tables and figures are in [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md); highlights below.
+## 8. Dissertation structure
 
-1. **Only the dominant old coefficient is appreciably constrained** — under GLUE the old posterior narrows markedly, while average/new stay near the prior (weakly informed); the draft's "all three recovered well" was partly a **prior-centring** artefact (Steps 2, 4).
-2. **Threshold/risk robustness** — a principled threshold `0.107` (95% band above the noise floor); tightening mainly sharpens old, and the risk hot-spot ranking is robust to the threshold (Step 3).
-3. **old is one-sidedly identifiable** — the observations pull old back toward the truth from the weak-decay side but constrain the strong side only weakly (Steps 4/4b).
-4. **Structural error → precise-but-biased** — robust under symmetric jitter; length-correlated within-zone heterogeneity makes GLUE track the length-weighted mean **precisely but with bias** (Step 5).
-5. **Required accuracy** — σ ≲ 0.05 is needed to tighten the low-residual nodes that decide the risk map; `±0.1` recovers only old + the coarse risk pattern; `±0.15` is essentially back to the prior (Step 6, answering the supervisor's email).
-6. **Formal vs informal** — under the idealised baseline both Fisher (CRLB/prior 0.25/0.29/0.29) and profile deem all three identifiable; GLUE is much broader and more prior-sensitive (the informal likelihood drops the factor `N`, a statistical inefficiency). Realism factors (`k_b`, sensor bias, AR(1)) substantially weaken average/new, while old stays comparatively robust (Steps 7/7b/7c).
-7. **Systematic error** — a `+0.05` bias at node 15 shifts old by ≈ 0.5 behavioural SD, `+0.10` by ≈ 1.4 SD; `k_b ±20%` shifts `k_w` by ∓0.03–0.04 via bulk–wall compensation; **neither changes** the risk hot-spot ranking (Steps 8/8b).
-8. **Zero-clipping (L=0) robustness** — of the 294 calibration points only 8 are clipped to 0 (all in the old zone; 28/438 over the full record); treating zeros as exact vs a censored likelihood gives **effectively identical** `k_w`, profile, node-15 risk and hot-spot ranking — the original treatment did not materially bias the conclusions (Step 9).
-9. **Physically anchored risk map** — duration/depth give a richer risk picture than a single probability; risk correlates with water age at `Spearman 0.73` (n=92, bootstrap `[0.63,0.80]`) — risk is governed by **residence time + the identifiable old decay** (Step 10).
-10. **Out-of-sample validation** — LOO predicts an unseen monitor with RMSE ≈ the noise floor `0.1`, 90% band coverage 92–94%, and stable parameters — **old moves only when an old-zone monitor is dropped**, independently confirming where its information lives (Step 11).
-11. **Overall line** — parameter uncertainty **does propagate** into the *magnitude* of the risk metrics (see the 5–95% bands), but the **ranking of the leading hot-spots is stable** under the tested perturbations (threshold, `k_b`, bias, noise).
-
----
-
-## 8. Dissertation structure (aligned to the actual results)
-
-- **Introduction** — chlorine safety, why measurement uncertainty affects calibration, the identifiability problem for grouped `k_w`, and the contribution.
-- **Background / Literature** — first-order chlorine decay, EPANET/WNTR water-quality simulation, GLUE and its critiques (Mantovan & Todini 2006 / Stedinger 2008), Fisher/CRLB and profile likelihood, measurement error and censoring.
-- **Methodology** — Net3 three-zone setup, synthetic truth and noise, GLUE + threshold derivation, Fisher/profile/AR(1), error sensitivity (structure/bias/`k_b`/censoring), risk metrics and LOO.
-- **Results** — Steps 1–11 (identifiability → error sensitivity → required accuracy → risk and validation).
-- **Discussion** — GLUE's conservatism and statistical inefficiency, the identifiability gradient, precise-but-biased, the meaning of required sensor accuracy for water-safety plans, limitations (AR(1) makes idealised intervals optimistic, water age not at steady state, etc.).
-- **Conclusion** — answer each research question; the value of uncertainty-aware calibration; future work (real multi-DMA data, hierarchical Bayes, longer runs for steady-state water age, denser ensembles).
-
----
+- **Introduction** — chlorine safety, measurement uncertainty, grouped-`k_w` identifiability, contribution.
+- **Background / Literature** — first-order decay, EPANET/WNTR, GLUE critiques, Fisher/CRLB/profile, measurement error and censoring.
+- **Methodology** — Net3 three-zone setup, synthetic truth, formal primary + informal comparator, Fisher/profile/AR(1), error sensitivity, risk metrics and LOO.
+- **Results** — Steps 0–14.
+- **Discussion** — scoring-rule vs data information; ideal vs practical identifiability; parameter unreliability ≠ risk-map unreliability; limitations (finite-horizon warm-up, assumed AR(1) ρ, illustrative scenario kinetics, no field validation).
+- **Conclusion** — answer each research question; future work.
 
 ## 9. Reproduction
 
-Code is in [`Net3/`](Net3/), conda env `water-supply` (`numpy 2.4.2`, `wntr 1.4.0`). Core files:
+Code is in [`Net3/`](Net3/), conda env `water-supply` (`python 3.13.12`, `numpy 2.4.2`, `scipy 1.17.1`, `wntr 1.4.0`). See [`environment.yml`](environment.yml) / [`environment.lock.yml`](environment.lock.yml). Network file is the frozen copy `models/net3_frozen/Net3.inp` with SHA-256 check on import.
 
-- [`Net3/wq_common.py`](Net3/wq_common.py) — the frozen three-zone baseline config + WNTR/EPANET helpers (monitors, zoning, seeds, priors, timing).
-- `Net3/step1_freeze_baseline.py` — build the synthetic truth + noisy observations + 2000-draw GLUE, caching all predictions.
-- `Net3/step3 … step11_*.py` — threshold, displaced prior, structural error, noise sweep, Fisher/profile/AR(1), sensor bias, `k_b`, censored, risk metrics, LOO.
-- [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md) — **methods, tables, figures and conclusions of every experiment** (every number is produced by a script; the header lists all files and run commands).
-- `Net3/baseline_cache/` — caches (`baseline.npz`, etc.) so downstream experiments avoid re-running EPANET.
-
-Typical run (from `Net3/`):
+- [`Net3/wq_common.py`](Net3/wq_common.py) — frozen baseline config + helpers + three weightings.
+- `Net3/step1_freeze_baseline.py` — synthetic truth + noisy observations + **8192 Sobol** library.
+- `Net3/step3 … step14_*.py` — full experimental suite.
+- [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md) — methods, tables, figures, conclusions.
+- [`Net3/provenance.py`](Net3/provenance.py) — git commit/tree/dirty-diff hashes, `.inp` hash, `wq_common` + step-script hashes, exact library versions, config hash.
+- [`Net3/validate_artifacts.py`](Net3/validate_artifacts.py) — registered claims, weighting fields, numerical drift, forbidden wording; **does not** establish semantic consistency.
 
 ```
-export MPLCONFIGDIR=/tmp/mpl
-python step1_freeze_baseline.py        # ~40 s (2000 EPANET runs)
-python step7b_profile.py               # builds the 21³ grid
-python step10_risk_metrics.py          # risk metrics + water age
-python step11_loo.py                   # leave-one-out validation
+conda activate water-supply
+cd Net3
+export MPLCONFIGDIR=../.mplcache
+python step0_warmup_convergence.py
+python step1_freeze_baseline.py        # ~280 s (8192 × 168 h EPANET)
+python step7b_profile.py
+python step10_risk_metrics.py
+python step11_loo.py
+python step13_known_answer.py
+python step14_repeated_noise.py        # ~10 s, cache only
+python provenance.py
+python validate_artifacts.py
 ```
 
----
+Two step scripts must not run concurrently from the same directory (shared WNTR scratch files).
 
 ## 10. Timeline (revised, 2026-08)
 
 | Stage | Status |
 | --- | --- |
-| Baseline reproduction + GLUE (Steps 1–2) | ✅ done |
-| Identifiability + threshold/displaced prior (Steps 3–4) | ✅ done |
-| Error sensitivity (structure/noise/Fisher/bias/`k_b`/censoring, Steps 5–9) | ✅ done |
-| Risk metrics + water age + LOO validation (Steps 10–11) | ✅ done |
-| **Rewrite Results / Discussion / Conclusion (Step 12)** | ⏳ in progress |
-| Figure/unit unification, length compression, Word formatting (Step 13) | ⏳ to do |
+| Warm-up test + frozen baseline (Steps 0–1) | ✅ done |
+| Three weightings + threshold/displaced prior (Steps 2–4) | ✅ done |
+| Error sensitivity (Steps 5–9) | ✅ done |
+| Risk metrics + four-layer validation (Steps 10–11) | ✅ done |
+| Scenarios + known-answer test (Steps 12–13) | ✅ done |
+| Repeated-noise calibration (Step 14) | ✅ done |
+| Reproducibility infrastructure | ✅ done (clean release tag still pending) |
+| **Rewrite Results / Discussion / Conclusion** | ⏳ in progress |
+| Compress to 30 pages, formatting, references | ⏳ to do |
 | Research paper submission | due 2026-08-21 |
 | Research poster submission | due 2026-08-28 |
 
----
+The scientific spine and formal primary convention are aligned in the repository; a final clean-tree release rerun and manuscript integration remain. See [`REVISION_RESPONSE_MATRIX.md`](REVISION_RESPONSE_MATRIX.md) for item-level status and remaining limitations.
 
 ## 11. Workflow
 
-- **Git/GitHub** — at least one meaningful commit per stage; do not commit large raw data / temporary outputs / private data; keep code, figures and drafts traceable.
-- **Result provenance** — all numbers are generated by scripts and written to `RESULTS_LOG.md` and `baseline_cache/`; no hand-entered values.
-- **Suggested layout** — `background/` (literature) ｜ `Net3/` (code + cache + results) ｜ `thesis/` (drafts + figures) ｜ `meetings/` (minutes).
-
----
+- **Git/GitHub** — at least one meaningful commit per stage; do not commit large raw data / temporary outputs / private data.
+- **Result provenance** — numbers are generated by scripts into `baseline_cache/`; `validate_artifacts.py` checks consistency of transcribed prose against JSON, not correctness of the science.
+- **Suggested layout** — `background/` ｜ `Net3/` ｜ `thesis/` ｜ `meetings/`.
 
 ## 12. Note on AI-tool use
 

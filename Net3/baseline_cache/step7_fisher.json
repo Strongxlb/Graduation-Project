@@ -5,116 +5,137 @@
     "average": 0.046188021535170064,
     "new": 0.027424137786507225
   },
+  "fd_default_steps": {
+    "old": 0.02,
+    "average": 0.005,
+    "new": 0.0025,
+    "kb": 0.05
+  },
   "fd_step_convergence": {
     "old": {
       "default_step": 0.02,
+      "default_step_over_truth": 0.02,
       "rows": [
         {
           "step": 0.005,
           "step_over_truth": 0.005,
-          "crlb": 0.09481681138277054,
+          "is_default": false,
+          "crlb": 0.09481843560934067,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.01,
           "step_over_truth": 0.01,
-          "crlb": 0.09481396526098251,
-          "rel_change_vs_previous": 3.001705954375211e-05
+          "is_default": false,
+          "crlb": 0.09481559693813324,
+          "rel_change_vs_previous": 2.993796624650713e-05
         },
         {
           "step": 0.02,
           "step_over_truth": 0.02,
-          "crlb": 0.09473208338022232,
-          "rel_change_vs_previous": 0.0008636057027615607
+          "is_default": true,
+          "crlb": 0.09473370015621185,
+          "rel_change_vs_previous": 0.0008637480204924941
         },
         {
           "step": 0.04,
           "step_over_truth": 0.04,
-          "crlb": 0.09472265094518661,
-          "rel_change_vs_previous": 9.956959547707811e-05
+          "is_default": false,
+          "crlb": 0.09472426772117615,
+          "rel_change_vs_previous": 9.956789290299639e-05
         }
       ],
-      "crlb_spread_over_sweep": 0.0009940646365398376
+      "crlb_spread_over_sweep": 0.0009941263250692334
     },
     "average": {
-      "default_step": 0.02,
+      "default_step": 0.005,
+      "default_step_over_truth": 0.049999999999999996,
       "rows": [
         {
           "step": 0.002,
           "step_over_truth": 0.02,
-          "crlb": 0.01353394240140915,
+          "is_default": false,
+          "crlb": 0.013534138910472393,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.005,
           "step_over_truth": 0.049999999999999996,
-          "crlb": 0.013508892618119717,
-          "rel_change_vs_previous": 0.0018508859211578965
+          "is_default": true,
+          "crlb": 0.013509090058505535,
+          "rel_change_vs_previous": 0.0018507902277633548
         },
         {
           "step": 0.01,
           "step_over_truth": 0.09999999999999999,
-          "crlb": 0.01348716951906681,
-          "rel_change_vs_previous": 0.0016080591594800353
+          "is_default": false,
+          "crlb": 0.013487366028130054,
+          "rel_change_vs_previous": 0.0016081046778708696
         },
         {
           "step": 0.02,
           "step_over_truth": 0.19999999999999998,
-          "crlb": 0.013399693183600903,
-          "rel_change_vs_previous": 0.006485892925411463
+          "is_default": false,
+          "crlb": 0.013399886898696423,
+          "rel_change_vs_previous": 0.006486005615442991
         }
       ],
-      "crlb_spread_over_sweep": 0.010018827742455105
+      "crlb_spread_over_sweep": 0.010018891412362008
     },
     "new": {
-      "default_step": 0.02,
+      "default_step": 0.0025,
+      "default_step_over_truth": 0.049999999999999996,
       "rows": [
         {
           "step": 0.001,
           "step_over_truth": 0.02,
-          "crlb": 0.008029036223888397,
+          "is_default": false,
+          "crlb": 0.008030235767364502,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.0025,
           "step_over_truth": 0.049999999999999996,
-          "crlb": 0.007954801432788372,
-          "rel_change_vs_previous": 0.009245791472494602
+          "is_default": true,
+          "crlb": 0.007955988869071007,
+          "rel_change_vs_previous": 0.009245917201042175
         },
         {
           "step": 0.005,
           "step_over_truth": 0.09999999999999999,
-          "crlb": 0.007953834719955921,
-          "rel_change_vs_previous": 0.00012152569979662076
+          "is_default": false,
+          "crlb": 0.007955021224915981,
+          "rel_change_vs_previous": 0.0001216246237163432
         },
         {
           "step": 0.01,
           "step_over_truth": 0.19999999999999998,
-          "crlb": 0.007938358001410961,
-          "rel_change_vs_previous": 0.001945818425156176
+          "is_default": false,
+          "crlb": 0.007939541712403297,
+          "rel_change_vs_previous": 0.0019458794267848134
         }
       ],
-      "crlb_spread_over_sweep": 0.011422793285629007
+      "crlb_spread_over_sweep": 0.011423084385276283
     }
   },
   "fisher_geometry": {
     "note": "a condition number on the unnormalised matrix mixes units; the prior-scaled form is the dimensionless one",
     "eigenvalues_raw": [
-      24056.191955685652,
-      5189.477665378551,
-      111.36887401642963
+      23906.310147118846,
+      5106.338161990617,
+      111.32633825025188
     ],
-    "condition_number_raw": 216.00462578203653,
+    "condition_number_raw": 214.7408288358461,
     "eigenvalues_prior_scaled": [
-      24.70718935148481,
-      16.609183358933436,
-      7.655487922929649
+      24.53689915162767,
+      16.55293472773852,
+      7.560586874542517
     ],
-    "condition_number_prior_scaled": 3.2273827090082734,
+    "condition_number_prior_scaled": 3.2453696464022666,
     "sloppiest_direction_prior_sd_units": {
-      "old": -0.30130809476893367,
-      "average": -0.6583415674062847,
-      "new": 0.6897824386368153
+      "old": -0.2967870564562104,
+      "average": -0.6627952140427921,
+      "new": 0.6874735975745015
     }
   },
   "ensemble_sd_by_scheme": {
@@ -164,78 +185,79 @@
     }
   },
   "comparability_note": "the CRLB is a bound for an efficient estimator under the correct likelihood, so only the formal schemes are like-for-like; the informal GLUE SD is listed as a comparator, not as a benchmark",
+  "crlb_agreement_claim": "the formal posterior spread is LOCALLY CONSISTENT with the Case-A CRLB. It is not a demonstration of frequentist efficiency: the CRLB bounds the variance of an unbiased estimator over repeated sampling, whereas the posterior SD here is the width from ONE noise realisation, and both use the same model, truth and error assumptions. Step 14 does the repeated-sampling test that efficiency and calibration actually require.",
   "cases": {
     "A: kw only": {
-      "condition_number": 216.0046257820364,
+      "condition_number": 214.74082883584597,
       "eigenvalues": [
-        24056.19195568565,
-        5189.477665378558,
-        111.36887401642966
+        23906.310147118827,
+        5106.3381619906095,
+        111.32633825025187
       ],
       "coef": {
         "old": {
-          "crlb": 0.09471638970943906,
-          "crlb_over_prior": 0.25239015274806526,
+          "crlb": 0.09473369006981404,
+          "crlb_over_prior": 0.25243625290677096,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.01339597225195894,
-          "crlb_over_prior": 0.2900313069646969,
+          "crlb": 0.01350909067881071,
+          "crlb_over_prior": 0.29248039274694104,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.007924010121503356,
-          "crlb_over_prior": 0.2889429080028178,
+          "crlb": 0.007955988481251095,
+          "crlb_over_prior": 0.2901089741886241,
           "identifiable": true
         }
       }
     },
     "B: kw+kb": {
-      "condition_number": 101.62919451782751,
+      "condition_number": 100.52424968093337,
       "eigenvalues": [
-        7807.286569794958,
-        1996.3902229723335,
-        76.82129733327194
+        7733.5647993717375,
+        1978.2833601279872,
+        76.93233049655458
       ],
       "coef": {
         "old": {
-          "crlb": 0.11322716776492621,
-          "crlb_over_prior": 0.3017157036399649,
+          "crlb": 0.11314043489192105,
+          "crlb_over_prior": 0.3014845871126859,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.02466700548125694,
-          "crlb_over_prior": 0.5340563345514625,
+          "crlb": 0.024797172663785935,
+          "crlb_over_prior": 0.5368745367216914,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.014743147905132354,
-          "crlb_over_prior": 0.5375974996882504,
+          "crlb": 0.01475038263104709,
+          "crlb_over_prior": 0.5378613083801064,
           "identifiable": true
         }
       }
     },
     "C: kw+kb+6 offsets": {
-      "condition_number": 88.8542060134999,
+      "condition_number": 88.02508532226175,
       "eigenvalues": [
-        1408.6448527122377,
-        94.92541333584578,
-        15.853440325584788
+        1392.9861604929897,
+        93.64865918973857,
+        15.82487714034286
       ],
       "coef": {
         "old": {
-          "crlb": 0.25071335813428763,
-          "crlb_over_prior": 0.6680742683458432,
+          "crlb": 0.25092776214681856,
+          "crlb_over_prior": 0.6686455893351512,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.10287362623239392,
-          "crlb_over_prior": 2.227279342416959,
+          "crlb": 0.10358119487077724,
+          "crlb_over_prior": 2.242598652810987,
           "identifiable": false
         },
         "new": {
-          "crlb": 0.029700323906631777,
-          "crlb_over_prior": 1.0829993685797643,
+          "crlb": 0.029898658619759835,
+          "crlb_over_prior": 1.0902314906859198,
           "identifiable": false
         }
       }
@@ -243,19 +265,19 @@
   },
   "crlbC_vs_sigma": {
     "0.05": {
-      "old": 0.12535667906714382,
-      "average": 0.05143681311619696,
-      "new": 0.014850161953315889
+      "old": 0.12546388107340928,
+      "average": 0.05179059743538862,
+      "new": 0.014949329309879918
     },
     "0.10": {
-      "old": 0.25071335813428763,
-      "average": 0.10287362623239392,
-      "new": 0.029700323906631777
+      "old": 0.25092776214681856,
+      "average": 0.10358119487077724,
+      "new": 0.029898658619759835
     },
     "0.15": {
-      "old": 0.3760700372014314,
-      "average": 0.15431043934859087,
-      "new": 0.04455048585994766
+      "old": 0.3763916432202278,
+      "average": 0.15537179230616585,
+      "new": 0.044847987929639746
     }
   }
 }

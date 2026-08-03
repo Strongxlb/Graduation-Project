@@ -95,7 +95,10 @@ def q(a):
 
 print("\n=== k_w estimates: naive-exact-0 vs censored-at-0  (median [IQR] over 30 noise) ===")
 print(f"{'coef':>8} | {'truth':>6} | {'naive median [IQR]':>26} | {'censored median [IQR]':>26} | Δmedian")
-report = {"sigma": sigma, "full_zero": int(full_zero.sum()), "cal_zero": int(cal_zero.sum()),
+report = {**B.weighting_provenance(comparators=["formal_iid"]),
+          "comparison": "formal censored (primary) vs formal iid, which treats a floored reading as "
+                        "an exact zero; the informal score plays no part here",
+          "sigma": sigma, "full_zero": int(full_zero.sum()), "cal_zero": int(cal_zero.sum()),
           "zeros_by_node": zeros_by_node, "zeros_by_zone": by_zone, "coef": {}}
 for z in ZKEYS:
     nm, nlo, nhi = q(res["naive"][z]); cm, clo, chi = q(res["cens"][z])

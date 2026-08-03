@@ -114,6 +114,11 @@ figpath = os.path.join(FIGDIR, "step4b_sensitivity_curves.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")
 
 summary = {
+    "weighting": "none",
+    "weighting_role": "this step plots the RMSE objective itself, so no weighting is applied; the "
+                      "two thresholds are drawn only to show where the informal comparator would "
+                      "cut the curve",
+    "primary_weighting_elsewhere": B.PRIMARY_WEIGHTING,
     "hold_others_at": "true values",
     "observations": "baseline noisy (seed 42)",
     "noise_floor_rmse": NOISE_FLOOR,

@@ -1,13 +1,21 @@
-"""Step 8c: does the sensor-bias location matter? Inject the SAME offset at each of the six monitors
-in turn and compare (answers "why node 15, and would other nodes differ?").
+"""Step 8c: does the sensor-bias LOCATION matter? Inject the same offset at each of the six monitors
+in turn and compare — this is what answers "why node 15, and would another node behave differently?"
 
-Monitors are two-per-zone: new 107/113 | old 15/145 | average 209/231. A constant offset is added
-to one monitor's column, GLUE is re-run (cache reused, threshold 0.107, 30 noise realisations), and
-we report the shift of every coefficient's behavioural mean relative to its own baseline SD.
+Monitors are two per zone: new 107/113 | old 15/145 | average 209/231. A constant offset is added to
+one monitor's column, the calibration is re-run from the cached predictions, and the displacement of
+every coefficient is reported in units of its own unbiased posterior SD, together with what happens
+to the risk field.
+
+PRIMARY: formal censored likelihood. COMPARATOR: informal GLUE at the primary threshold.
+Both signs are swept. Because observations are censored at the sensor floor, a negative offset is
+not the mirror image of a positive one — it pushes readings onto the floor, where they carry
+different information — so a one-sided sweep would report half of the behaviour as if it were all
+of it. 30 noise realisations per cell; medians reported.
 """
 import os
 import json
 import numpy as np
+from scipy.stats import spearmanr
 import wq_common as B
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -15,89 +23,124 @@ ZKEYS = ["old", "average", "new"]
 ZONE_OF = {"107": "new", "113": "new", "15": "old", "145": "old", "209": "average", "231": "average"}
 
 cache = np.load(os.path.join(HERE, "baseline_cache", "baseline.npz"), allow_pickle=True)
-C_all = cache["C_all"]
+C_all = cache["C_all"].astype(np.float64)
 ALL_NODES = list(cache["all_nodes"])
 mon_pos = list(cache["mon_pos"])
 truth_mon = cache["truth_all"][:, mon_pos]
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
 C_all_mon = C_all[:, :, mon_pos]
-C_MIN, thr = 0.2, B.RMSE_THR
-OFFSETS = [0.05, 0.10]
+BELOW = (C_all < 0.2).astype(np.float64)
+C_MIN = 0.2
+OFFSETS = [-0.10, -0.05, 0.05, 0.10]
 SEEDS = list(range(42, 72))
-
-
-def glue(obs_post):
-    rmse = np.sqrt(((C_all_mon - obs_post[None]) ** 2).mean(axis=(1, 2)))
-    w = np.exp(-0.5 * (rmse / B.SIGMA_OBS) ** 2) * (rmse < thr)
-    if w.sum() == 0:
-        return None, None, None
-    w = w / w.sum()
-    means = {z: float(np.sum(w * S[z])) for z in ZKEYS}
-    sds = {z: float(np.sqrt(np.sum(w * (S[z] - means[z]) ** 2))) for z in ZKEYS}
-    below = (C_all < C_MIN)
-    P = np.tensordot(w, below.astype(float), axes=(0, 0)).mean(axis=0)
-    rank = [ALL_NODES[i] for i in np.argsort(P)[::-1][:3]]
-    return means, sds, rank
+SCHEMES = [B.PRIMARY_WEIGHTING, "informal_glue"]
+TOP_K = 6
 
 
 def run(bcol, off):
-    ms = {z: [] for z in ZKEYS}
-    ranks = []
+    """Median coefficient means/SDs, median risk field and censoring count over the noise seeds."""
+    out = {s: {"means": {z: [] for z in ZKEYS}, "sds": {z: [] for z in ZKEYS}, "P": []}
+           for s in SCHEMES}
+    n_clipped = []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
         if bcol is not None:
             obs[:, bcol] += off
+        n_clipped.append(int((obs[B.WARMUP_H:] < 0).sum()))
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
-        means, sds, rank = glue(obs)
-        if means is None:
-            continue
-        for z in ZKEYS:
-            ms[z].append(means[z])
-        ranks.append(tuple(rank))
-    return ({z: float(np.median(ms[z])) for z in ZKEYS},
-            max(set(ranks), key=ranks.count))
+        wts = B.all_weightings(C_all_mon, obs, threshold=B.RMSE_THR, schemes=SCHEMES)
+        for s in SCHEMES:
+            w, _ = wts[s]
+            if w is None:
+                continue
+            for z in ZKEYS:
+                m, sd = B.weighted_mean_sd(w, S[z])
+                out[s]["means"][z].append(m)
+                out[s]["sds"][z].append(sd)
+            out[s]["P"].append(np.tensordot(w, BELOW, axes=(0, 0)).mean(axis=0))
+    res = {}
+    for s in SCHEMES:
+        P_med = np.median(np.vstack(out[s]["P"]), axis=0)
+        res[s] = {"means": {z: float(np.median(out[s]["means"][z])) for z in ZKEYS},
+                  "sds": {z: float(np.median(out[s]["sds"][z])) for z in ZKEYS},
+                  "P": P_med,
+                  "top": [ALL_NODES[i] for i in np.argsort(P_med)[::-1][:TOP_K]]}
+    return res, float(np.median(n_clipped))
 
 
-# unbiased baseline (means + per-coefficient SD)
-base_means, base_rank = run(None, 0.0)
-base_sd = {}
-for z in ZKEYS:
-    vals = []
-    for seed in SEEDS:
-        rng = np.random.default_rng(seed)
-        obs = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
-        m, s, _ = glue(obs)
-        if s:
-            vals.append(s[z])
-    base_sd[z] = float(np.median(vals))
+base, base_clip = run(None, 0.0)
 
-print("=== Step 8c: bias location sweep (threshold 0.107, 30 noise) ===")
-print(f"unbiased baseline means: old {base_means['old']:.3f}  avg {base_means['average']:.3f}  "
-      f"new {base_means['new']:.3f}")
-print(f"baseline behavioural SDs: old {base_sd['old']:.3f}  avg {base_sd['average']:.3f}  "
-      f"new {base_sd['new']:.3f}\n")
+print("=== Step 8c: sensor-bias location sweep (both signs, 30 noise realisations) ===")
+for s in SCHEMES:
+    tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
+    print(f"{s:>16} ({tag}) unbiased means: " +
+          ", ".join(f"{z} {base[s]['means'][z]:+.4f}" for z in ZKEYS))
+    print(f"{'':>16}       unbiased SDs  : " +
+          ", ".join(f"{z} {base[s]['sds'][z]:.4f}" for z in ZKEYS))
+print(f"median censored observations with no offset: {base_clip:.0f} of {6 * (C_all.shape[1])}\n")
 
-report = {"threshold": thr, "base_means": base_means, "base_sd": base_sd, "base_rank": list(base_rank),
-          "offsets": OFFSETS, "rows": []}
-for off in OFFSETS:
-    print(f"--- offset = +{off} mg/L ---")
-    print(f"{'node':>5} {'zone':>8} | {'Δold':>7} {'Δavg':>7} {'Δnew':>7} | "
-          f"{'own-coef shift/SD':>17} | top-3 risk")
-    for node in B.MONITOR_NODES:
-        bcol = B.MONITOR_NODES.index(node)
-        means, rank = run(bcol, off)
-        d = {z: means[z] - base_means[z] for z in ZKEYS}
-        own = ZONE_OF[node]
-        s_over_sd = d[own] / base_sd[own]
-        rank_same = "same" if tuple(rank) == tuple(base_rank) else str(list(rank))
-        report["rows"].append({"node": node, "zone": own, "offset": off,
-                               "d_old": d["old"], "d_avg": d["average"], "d_new": d["new"],
-                               "own_shift_over_sd": s_over_sd, "rank": list(rank)})
-        print(f"{node:>5} {own:>8} | {d['old']:>+7.3f} {d['average']:>+7.3f} {d['new']:>+7.3f} | "
-              f"{s_over_sd:>+17.2f} | {rank_same}")
+report = {**B.weighting_provenance(comparators=["informal_glue"]),
+          "informal_threshold": B.RMSE_THR, "offsets": OFFSETS, "n_noise": len(SEEDS),
+          "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric",
+          "risk_ranking_basis": f"median risk field over the {len(SEEDS)} noise realisations",
+          "baseline": {s: {"means": base[s]["means"], "sds": base[s]["sds"],
+                           f"top{TOP_K}": base[s]["top"]} for s in SCHEMES},
+          "baseline_censored_med": base_clip, "rows": []}
+
+for s in SCHEMES:
+    tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
+    print(f"--- {s} ({tag}) ---")
+    print(f"{'node':>5} {'zone':>8} {'offset':>7} | {'Δold/SD':>8} {'Δavg/SD':>8} {'Δnew/SD':>8} | "
+          f"{'own/SD':>7} | {'cens':>5} {'rho':>6} {'J6':>5}")
+    for off in OFFSETS:
+        for node in B.MONITOR_NODES:
+            bcol = B.MONITOR_NODES.index(node)
+            res, clip = run(bcol, off)
+            r = res[s]
+            d = {z: r["means"][z] - base[s]["means"][z] for z in ZKEYS}
+            dsd = {z: d[z] / base[s]["sds"][z] for z in ZKEYS}
+            own = ZONE_OF[node]
+            rho = float(spearmanr(r["P"], base[s]["P"]).statistic)
+            jac = (len(set(r["top"]) & set(base[s]["top"]))
+                   / len(set(r["top"]) | set(base[s]["top"])))
+            report["rows"].append({
+                "scheme": s, "node": node, "zone": own, "offset": off,
+                "d_old": d["old"], "d_avg": d["average"], "d_new": d["new"],
+                "d_old_over_sd": dsd["old"], "d_avg_over_sd": dsd["average"],
+                "d_new_over_sd": dsd["new"], "own_shift_over_sd": dsd[own],
+                "n_censored_med": clip, "risk_spearman_vs_unbiased": rho,
+                f"risk_top{TOP_K}_jaccard_vs_unbiased": jac, f"top{TOP_K}": r["top"]})
+            print(f"{node:>5} {own:>8} {off:>+7.3f} | {dsd['old']:>+8.2f} {dsd['average']:>+8.2f} "
+                  f"{dsd['new']:>+8.2f} | {dsd[own]:>+7.2f} | {clip:>5.0f} {rho:>6.3f} {jac:>5.2f}")
     print()
 
+prim = [r for r in report["rows"] if r["scheme"] == B.PRIMARY_WEIGHTING]
+worst = max(prim, key=lambda r: abs(r["own_shift_over_sd"]))
+report["summary"] = {
+    "max_own_shift_over_sd": {"node": worst["node"], "zone": worst["zone"],
+                              "offset": worst["offset"],
+                              "value": worst["own_shift_over_sd"]},
+    "min_risk_spearman": min(r["risk_spearman_vs_unbiased"] for r in prim),
+    f"min_risk_top{TOP_K}_jaccard": min(r[f"risk_top{TOP_K}_jaccard_vs_unbiased"] for r in prim),
+    "asymmetry_note": "compare the +0.05 and -0.05 rows of the same node: the censoring count "
+                      "differs, so the two are not mirror images"}
+print(f"largest own-coefficient displacement under the primary rule: node {worst['node']} "
+      f"({worst['zone']}) at {worst['offset']:+.3f} -> {worst['own_shift_over_sd']:+.2f} posterior SD")
+print(f"across every cell the 92-node risk ranking keeps Spearman >= "
+      f"{report['summary']['min_risk_spearman']:.3f} and top-{TOP_K} Jaccard >= "
+      f"{report['summary'][f'min_risk_top{TOP_K}_jaccard']:.2f}: the coefficients move far more "
+      f"than the operational ranking does.")
+
+
+def _jsafe(o):
+    if isinstance(o, np.floating):
+        return float(o)
+    if isinstance(o, np.integer):
+        return int(o)
+    return str(o)
+
+
 with open(os.path.join(HERE, "baseline_cache", "step8c_bias_bynode.json"), "w") as f:
-    json.dump(report, f, indent=2)
+    json.dump(report, f, indent=2, default=_jsafe)
 print("saved step8c_bias_bynode.json")

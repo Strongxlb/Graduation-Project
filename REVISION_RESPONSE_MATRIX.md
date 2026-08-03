@@ -14,8 +14,11 @@ Status vocabulary, used strictly:
 - **open** — not yet done.
 - **thesis document** — the work is in the `.docx`, not in this repository.
 
-All numbers below are produced by the scripts named and are checked against the artifacts by
-`Net3/validate_artifacts.py` (7/7 checks passing). `Net3/RESULTS_LOG.md` is the long-form record.
+All numbers below are produced by the scripts named. `Net3/validate_artifacts.py` catches a
+**subset** of numerical drift, missing weighting declarations, unit/path errors and forbidden
+phrasing; it does **not** establish semantic consistency (stale node IDs, formal/informal label
+mismatches, or over-claims that do not contain a near-miss number). `Net3/RESULTS_LOG.md` is the
+long-form record and must still be read.
 
 ---
 
@@ -32,7 +35,8 @@ All numbers below are produced by the scripts named and are checked against the 
 | **Artifact** | `baseline_meta.json`, `step3_threshold.json`, `step4_displaced_prior.json`, `step4d_displaced_robust.json` |
 | **Status** | **closed, stronger** |
 | **What changed beyond the comment** | The informal GLUE score `exp(−½(RMSE/σ)²)` is not a Gaussian likelihood: it drops the factor `N = 294`, which is equivalent to assuming an observation error of `σ√N = 1.71 mg/L` — 17× the sensor noise and larger than the inlet concentration. Under a formal censored Gaussian likelihood, on the *same* observations and draws, all three coefficients contract to **25–31%** of the prior width instead of 86–98%. So "the data do not inform average and new" was a statement about the scoring rule, not about the data. |
-| **Remaining limitation** | Under the formal likelihood the means are informed but still biased by up to ~0.7 posterior SD on this single noise realisation; a 30-realisation version of the formal analysis has not been run. |
+| **Repeated-noise check (Step 14)** | 100 independent noise realisations on the fixed 8192-member library: formal posterior-mean bias is ≤0.15 of the estimator's own sampling SD for every coefficient; empirical SD / Case-A CRLB ≈ 1.04 / 1.06 / 1.12; nominal 90% weighted-quantile coverage ≈ 0.89 / 0.88 / 0.85. The informal comparator over-covers (≈0.98–0.99) by being ~4.6–4.7× wider within a realisation. |
+| **Remaining limitation** | Realisations share one Sobol prediction library, so Monte Carlo errors are not independent; ESS median ≈ 158 bounds how finely interval endpoints are resolved. This is a local consistency / calibration check under the synthetic generative model, not an external validation. |
 
 ### 3.2 The behavioural threshold cannot discriminate
 
@@ -79,9 +83,9 @@ All numbers below are produced by the scripts named and are checked against the 
 | **Change made** | Re-run inside the three-zone setup over σ = 0.02/0.05/0.10/0.15, 30 noise realisations each, with the behavioural threshold scaling as `σ(1 + 1.645/√(2N))`; reports behavioural width retained per coefficient and the predictive band at node 15. |
 | **Code** | `step6_noise_sensitivity.py` |
 | **Artifact** | `step6_noise_sensitivity.json` |
-| **Status** | **partly closed** |
-| **Also fixed this pass** | Realisations with an empty behavioural set used to be **skipped silently**, biasing the median toward realisations that happened to sample well. They are now counted, alongside accepted counts and ESS. With 8192 Sobol draws instead of 2000 pseudo-random ones **all 30 realisations are valid at every σ**, so the selection bias is eliminated rather than merely disclosed. |
-| **Remaining limitation** | σ = 0.02 is still sampling-limited on a stricter criterion: median ESS is 37, under the ~100 effective members a 5–95% interval needs. The row indicates a direction, not a magnitude. Exploiting σ = 0.02 needs importance or adaptive sampling near the optimum. The sweep also still uses the informal threshold, so a formal-likelihood version would give tighter widths at every σ. |
+| **Status** | **closed, stronger** |
+| **Also fixed this pass** | Re-run under **formal censored primary** (+ informal comparator). Realisations with an empty behavioural set are counted; ESS is reported as median / p5 / min / fraction `<100`. With 8192 Sobol draws **all 30 realisations are valid at every σ**. The email answer changes: under the primary rule a **σ ≈ 0.10** sensor already retains 27 / 30 / 29% of prior width; the earlier "σ ≲ 0.05 required" claim was an informal-score artefact (same data: informal 65 / 91 / 87%). |
+| **Remaining limitation** | Under the formal rule, σ ≤ 0.05 is sampling-limited on this fixed library (ESS median ≈ 20.9 at 0.05 and ≈ 1.8 at 0.02). Those rows indicate direction, not magnitude; quantifying tighter sensors needs a likelihood-adapted design. |
 
 ---
 
@@ -92,7 +96,7 @@ All numbers below are produced by the scripts named and are checked against the 
 | field | content |
 |---|---|
 | **Comment** | At the ±0.1 mg/L class the systematic term dominates. A +0.05 mg/L offset at one informative monitor shifts the estimate by more than the whole random spread, and the effect is **concave — halving the offset retains ~70% of the bias**. |
-| **Change made** | Two-sided offsets −0.10 … +0.10 mg/L at node 15 under the **formal** weighting, 30 noise realisations, plus the six-monitor location sweep (Step 8c). Rank agreement with the unbiased case is reported on the full 92-node risk field (Spearman, Kendall) and on the top-6 set (Jaccard), and the number of observations pushed onto the sensor floor is tracked. The comment's first claim is confirmed emphatically: +0.05 mg/L shifts `k_w,old` by **2.19 posterior SD** and +0.10 by 3.87 SD, so a systematic offset dominates the random spread several times over. |
+| **Change made** | Two-sided offsets −0.10 … +0.10 mg/L at node 15 under the **formal** weighting, 30 noise realisations, plus the six-monitor location sweep under the same formal primary (+ informal comparator; Step 8c). Rank agreement with the unbiased case is reported on the full 92-node risk field (Spearman, Kendall) and on the top-6 set (Jaccard), and the number of observations pushed onto the sensor floor is tracked. The comment's first claim is confirmed emphatically: +0.05 mg/L shifts `k_w,old` by **2.19 posterior SD** and +0.10 by 3.87 SD, so a systematic offset dominates the random spread several times over. |
 | **Code** | `step8_sensor_bias.py`, `step8c_bias_bynode.py` |
 | **Artifact** | `step8_sensor_bias.json`, `step8c_bias_bynode.json` |
 | **Status** | **closed** |
@@ -109,9 +113,9 @@ All numbers below are produced by the scripts named and are checked against the 
 | **Code** | `step7_fisher.py`, `step7_verify.py`, `step7b_profile.py`, `step7c_ar1.py`, `step7c_profile_ar1.py` |
 | **Artifact** | `step7_fisher.json`, `step7b_profile.json`, `step7c_ar1.json`, `step7c_profile_ar1.json` |
 | **Status** | **closed, stronger** |
-| **What changed beyond the comment** | The prediction and the calibration now **agree quantitatively**, which is the check the comment was reaching for. The formally weighted ensemble's empirical SD is within 1–6% of the Case-A CRLB (0.0938 vs 0.0947; 0.0142 vs 0.0134; 0.0078 vs 0.0079), i.e. the formal analysis is efficient and the Fisher computation is corroborated by an independent route. The informal score gives 2.8–3.1× the bound on the same data. The long-standing "GLUE is three times wider than the CRLB" gap was therefore neither a Jacobian bug nor evidence of uninformative data. Separately, `step7_verify.py` was reporting the **Jacobian-column cosine** as a parameter correlation; the two differ in sign (+0.34/+0.77/+0.83 against −0.57/−0.84/−0.84), and it is the negative estimator correlation that carries the bulk–wall compensation story. |
+| **What changed beyond the comment** | The prediction and the calibration now **agree quantitatively**, which is the check the comment was reaching for. The formally weighted ensemble's empirical SD is within 1–6% of the Case-A CRLB (0.0938 vs 0.0947; 0.0142 vs 0.0135; 0.0078 vs 0.0080) — i.e. the formal posterior spread is **locally consistent with the Case-A CRLB**. That is a consistency check under the same model, truth and error assumptions, not a frequentist-efficiency proof. Step 14's 100-realisation empirical SD / CRLB ratios (≈1.04 / 1.06 / 1.12) strengthen the same local reading. The informal score gives 2.8–3.2× the bound on the same data. Separately, `step7_verify.py` was reporting the **Jacobian-column cosine** as a parameter correlation; the two differ in sign (+0.34/+0.77/+0.83 against −0.57/−0.84/−0.84), and it is the negative estimator correlation that carries the bulk–wall compensation story. |
 | **Grid quantisation now measured and removed** | The profile is recomputed continuously — Nelder–Mead over the two nuisance coefficients at each target value, endpoints by Brent bisection on `ΔNLL − 1.92`, 2316 EPANET evaluations. Every interval was **too narrow on the grid**, by +36.3% (`old`), +14.5% (`average`) and +28.4% (`new`) in half-width, with endpoints moving ~0.8 of a grid step and always outward. That is the signature of quantisation, not noise: a grid stops at the last node inside the interval. Only the continuous intervals should be quoted, and the AR(1) widening factor of 2.00× for `old` in #4 is explained by the same cause — its independent-case denominator was one of these narrow grid intervals. |
-| **Step convergence and scaling now checked** | Each coefficient was re-differenced across a fourfold to tenfold range of step: the Case-A CRLB varies by **0.10% / 1.00% / 1.14%** for old / average / new, so the shared `H = 0.02` carries at most ~1% error even where it is a 40% perturbation. The concern was legitimate and the answer is that it does not matter at this precision. On scaling: the raw condition number of 216 is largely a **units artefact** — the coefficients differ in scale by 20× — and on the prior-scaled, dimensionless matrix it is **3.2** (eigenvalues 24.7 / 16.6 / 7.7 against raw 24056 / 5189 / 111). That qualifies the "eigenvalues spanning three orders of magnitude" framing the comment quotes from the operational notebook: it describes the units, not the identifiability. The sloppiest direction is `old −0.301, average −0.658, new +0.690`, i.e. average traded against new — the same confounding every other diagnostic finds. |
+| **Step convergence and scaling now checked** | Each coefficient was re-differenced across a fourfold to tenfold range of step with **scale-dependent** FD steps (`old 0.02`, `average 0.005`, `new 0.0025`). The Case-A CRLB varies by about 1% across the sweep. On scaling: the raw condition number of ~215 is largely a **units artefact** — the coefficients differ in scale by 20× — and on the prior-scaled, dimensionless matrix it is **3.2** (eigenvalues 24.5 / 16.6 / 7.6 against raw 23906 / 5106 / 111). That qualifies the "eigenvalues spanning three orders of magnitude" framing: it describes the units, not the identifiability. The sloppiest direction is `old −0.297, average −0.663, new +0.687`, i.e. average traded against new. |
 | **Remaining limitation** | Fisher is linearised at the synthetic truth, so it is an oracle benchmark rather than a true pre-experiment design tool; a prior-averaged or worst-case Fisher would be needed for that. |
 
 ### #3 Censored likelihood
@@ -195,7 +199,7 @@ All numbers below are produced by the scripts named and are checked against the 
 | **Artifact** | `step10_risk_metrics.json`, `step12_scenarios.json`, `step12_risk_register.csv` |
 | **Status** | **closed** for the repository, **thesis document** for the Discussion wording |
 | **Also done this pass** | The reporting-resolution question is answered rather than left open: re-running the highest-weight members at 3600 / 900 / 300 s changes network-mean `E[D]` by **−1.6%** and `E[A]` by **−0.7%**, with an identical top-10 set. The change is *negative*, so hourly reporting slightly over-estimates duration rather than missing excursions — trapezoidal smearing of crossings outweighs any dip lost between reports — and most of it appears by 900 s and stops, which is what convergence looks like. Hourly reporting is adequate **because the field is smooth on the hour scale here**, not by assumption. |
-| **Remaining limitation** | Network means are unweighted over 92 junctions, counting zero-demand nodes equally with high-demand ones; demand-weighted and consumer-only means should be reported alongside. The water-age corroboration is mechanistic, not independent validation, and the `p ≈ 1e-16` originally quoted has been removed because the 92 junctions are strongly spatially dependent. |
+| **Remaining limitation** | Unweighted, consumer-only and demand-weighted network means are now all reported (and they move in opposite directions). The water-age corroboration remains mechanistic, not independent validation; ordinary Spearman p-values and iid junction bootstrap CIs are omitted because the 92 junctions are strongly spatially dependent — only a descriptive ρ and a spatial-block bootstrap width are kept. |
 
 ---
 
@@ -205,7 +209,7 @@ All numbers below are produced by the scripts named and are checked against the 
 |---|---|
 | **Comment** | 59 pages against a 30-page limit; no heading styles, no numbered sections or figures, no tables, placeholders remaining, front matter missing; engage with the statistical critique of GLUE (Stedinger et al. 2008; Mantovan and Todini 2006), consider Powell et al. (2000). |
 | **Status** | **thesis document** — outside this repository, except the references |
-| **What this repository contributes** | The GLUE critique is no longer something to cite politely: this project now contains a concrete, quantified instance of exactly what those papers warn about (the factor-`N` omission, the 2.8–3.1× inflation over the CRLB, and the resulting prior domination). That makes the required engagement short and pointed. The numeric prose the comment wants converted to tables already exists as tables in `RESULTS_LOG.md` and as machine-readable JSON. |
+| **What this repository contributes** | The GLUE critique is no longer something to cite politely: this project now contains a concrete, quantified instance of exactly what those papers warn about (the factor-`N` omission, the 2.8–3.2× inflation over the CRLB, and the resulting prior domination). That makes the required engagement short and pointed. The numeric prose the comment wants converted to tables already exists as tables in `RESULTS_LOG.md` and as machine-readable JSON. |
 
 ---
 
@@ -216,12 +220,13 @@ two of them changed published conclusions.
 
 | item | why it was necessary | outcome |
 |---|---|---|
-| **Warm-up convergence test** (`step0_warmup_convergence.py`) | The 24 h warm-up was never justified, while the high-risk junctions have mean water ages of 34–45 h. | Chlorine is not cyclostationary until **120 h**; the warm-up was raised and the whole cache rebuilt. Integrated risk severity rose ~10% and the top-risk node identities changed. Water age turns out to be **horizon-dependent and unconvergeable** inside the model's 168 h ceiling, so absolute ages must never be quoted as steady state. |
+| **Warm-up convergence test** (`step0_warmup_convergence.py`) | The 24 h warm-up was never justified, while the high-risk junctions have mean water ages of 34–45 h. | Chlorine concentration criteria pass at **120 h**, chosen as a **pragmatic finite-horizon warm-up**; residual ~5.5% cycle-to-cycle deficit drift remains and water age is **horizon-dependent and unconvergeable** inside the 168 h ceiling. Absolute ages must never be quoted as steady state; the cache was rebuilt and risk severity / top nodes moved. |
 | **Model-file freezing** (`models/net3_frozen/Net3.inp`, SHA-256 checked on import) | The pipeline read `Net3.inp` from the installed WNTR package, so a library upgrade could silently change the model underneath every cached result. | Frozen copy with a hard hash check; a tampered file now raises on import. |
-| **Provenance manifest** (`provenance.py`) | Nothing recorded which code, configuration or library versions produced a cached result. | `cache_manifest.json` records the git commit, the `.inp` hash, library versions and a **config hash** over every baseline choice, so any change to the experiment definition invalidates the cache in one field. |
-| **Artifact validator** (`validate_artifacts.py`) | The log claimed "every number is produced by a script; nothing is hand-entered", which was false — numbers were transcribed by hand and had drifted. | 7 automated checks including number-by-number comparison of the log against the JSON with line numbers. It found 93 stale numbers, a mislabelled figure line, and a wrong-unit table header. |
+| **Provenance manifest** (`provenance.py`) | Nothing recorded which code, configuration or library versions produced a cached result. | `cache_manifest.json` records config hash, `.inp` hash, **`wq_common` hash**, per-step script hashes, git commit **and** tree/dirty-diff hashes, plus exact numpy/scipy versions. Critical cache invalidation includes `wq_common` and library exact versions — not commit id alone. A dirty working tree is identified, not pretended clean; a final release still needs a clean-tree rerun. |
+| **Artifact validator** (`validate_artifacts.py`) | The log claimed "every number is produced by a script; nothing is hand-entered", which was false — numbers were transcribed by hand and had drifted. | Registered claims, weighting declarations, near-miss drift, and forbidden phrasing. Useful against numerical drift; **not** a proof of semantic consistency. |
+| **Repeated-noise calibration** (`step14_repeated_noise.py`) | Formal results were quoted from one noise realisation; CRLB agreement alone does not establish bias or coverage. | 100 redraws: formal means nearly unbiased; empirical SD locally consistent with Case-A CRLB; 90%/95% coverage near nominal; informal over-covers by width. |
 | **Config-keyed grid caches** | `step7b_rmse_grid.npy` and `step7c_resid_grid.npy` were cached on file existence alone, so after the warm-up change three scripts silently reused grids built under the old configuration and reported stale intervals. | Grids are now keyed on the config and `.inp` hashes; a mismatch rebuilds or raises. |
-| **Sobol sampling and a convergence check** | The formal likelihood is far sharper than the informal score, so 2000 prior draws gave it an effective sample size of only ~37. | 8192 scrambled-Sobol draws (ESS 157); leading `2^k` subsets give an exact convergence table showing the quantiles stable to 0.01 prior SD. |
+| **Sobol sampling and a convergence check** | The formal likelihood is far sharper than the informal score, so the earlier pre-Sobol draw count (~2k) gave it an effective sample size of only ~37. | 8192 scrambled-Sobol draws (ESS 157); leading `2^k` subsets give an exact convergence table showing the quantiles stable to 0.01 prior SD. |
 
 ---
 
@@ -231,9 +236,10 @@ Three things in this response need a decision rather than just reading:
 
 1. **The central diagnosis has moved.** The review's 3.1 said the data do not inform two of three
    coefficients. The corrected analysis says the *informal GLUE score* does not, and the data do —
-   confirmed independently by the CRLB agreement. The dissertation's identifiability narrative has to
-   be rewritten around that distinction, and it becomes a stronger contribution: a quantified
-   demonstration of the Stedinger / Mantovan–Todini critique on a controlled synthetic case.
+   corroborated by Case-A CRLB local consistency and by Step 14's repeated-noise calibration. The
+   dissertation's identifiability narrative has to be rewritten around that distinction, and it
+   becomes a stronger contribution: a quantified demonstration of the Stedinger / Mantovan–Todini
+   critique on a controlled synthetic case.
 2. **The informal score reverses conclusions in three separate places**, so it cannot be left as the
    analysis of record anywhere: it hides the structural bias in 3.3, makes the threshold look like
    the binding choice in 3.2, and inverts the curvature of the sensor-bias response in #1. In each
@@ -247,4 +253,5 @@ Three things in this response need a decision rather than just reading:
    again when one heterogeneity field became 25; the sensor-bias curvature flipped when the weighting
    changed. The methodological lesson belongs in the Discussion: **in this setup a good fit and a
    single realisation are jointly capable of supporting the wrong conclusion**, and the defences that
-   worked were a paired control, an ensemble over the arbitrary choice, and an efficient likelihood.
+   worked were a paired control, an ensemble over the arbitrary choice, and a formal likelihood
+   whose posterior spread is locally consistent with the Case-A CRLB.

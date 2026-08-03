@@ -1,9 +1,27 @@
 """Provenance of the cached results: what code, model file and library versions produced them.
 
-The point is that `baseline_cache/*.json` and `baseline.npz` are only meaningful together with the
-network file, the frozen configuration in `wq_common.py` and the library versions that ran EPANET.
-This module writes those facts to `baseline_cache/cache_manifest.json` and can check a later
-environment against them, so a stale cache is detected instead of silently reused.
+`baseline_cache/*.json` and `baseline.npz` are only meaningful together with the network file, the
+frozen configuration, THE SOURCE CODE, and the library versions that ran EPANET. This module writes
+those facts to `baseline_cache/cache_manifest.json` and can check a later environment against them,
+so a stale cache is detected instead of silently reused.
+
+What is hashed, and why each is needed:
+
+  config_sha256      every baseline choice (monitors, seeds, priors, timing, truth) serialised and
+                     hashed, so a changed experiment definition is one field
+  net3_inp_sha256    the frozen network file
+  wq_common_sha256   the module that defines the model AND the likelihoods. Config alone is not
+                     enough: rewriting the likelihood implementation without touching a single
+                     configuration value changes every weighted number while leaving the config hash
+                     identical. That gap is why this field is CRITICAL.
+  step_scripts_sha256  one hash per step script plus a combined hash, so it is possible to say which
+                     scripts have changed since the cache was written. Not critical, because editing
+                     one step's prose must not invalidate another step's cache.
+  git.tree_sha256    a hash over the CONTENT of every tracked file, i.e. an identifier for the
+                     working tree rather than for the commit. A commit id says nothing about a dirty
+                     tree; this does.
+  git.dirty_files    which tracked files are modified, so a dirty result set names its own gap
+  numpy/scipy        exact versions, not just python's minor version
 
 Usage:
     python provenance.py            # write/refresh the manifest
@@ -23,20 +41,85 @@ import wq_common as B
 HERE = os.path.dirname(os.path.abspath(__file__))
 MANIFEST = os.path.join(HERE, "baseline_cache", "cache_manifest.json")
 
-# Fields that must match for a cache to be reusable. Everything else in the manifest is recorded
-# for the record only (e.g. the timestamp, or the git commit, which changes on every commit).
-CRITICAL = ["config_sha256", "net3_inp_sha256", "wntr", "python_minor"]
+# Fields that must match for a cache to be reusable. Everything else in the manifest is recorded for
+# the record only (the timestamp, the commit id, the per-script hashes). `wq_common_sha256` is here
+# because that module defines both the forward model and the likelihoods: a change there can move
+# every cached number without moving the config hash. numpy/scipy are exact, because the weights come
+# from log_ndtr and the design from scipy.stats.qmc.
+CRITICAL = ["config_sha256", "net3_inp_sha256", "wq_common_sha256",
+            "wntr", "numpy", "scipy", "python_minor"]
+
+STEP_GLOB = "step"
+
+
+def _run_git(*args):
+    try:
+        r = subprocess.run(["git", *args], cwd=HERE, capture_output=True, text=True, timeout=20)
+        return r.stdout if r.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
 
 
 def git_info():
-    def run(*args):
-        try:
-            return subprocess.run(["git", *args], cwd=HERE, capture_output=True,
-                                  text=True, timeout=10).stdout.strip()
-        except (OSError, subprocess.SubprocessError):
-            return ""
-    return {"commit": run("rev-parse", "HEAD"),
-            "dirty": bool(run("status", "--porcelain"))}
+    """Commit id plus a content hash of the whole tracked tree.
+
+    `git rev-parse HEAD` identifies a commit, which is not the same thing as identifying the code
+    that ran: with uncommitted edits the commit id is a link to something else. `git ls-files -s`
+    lists the staged blob id of every tracked file, and hashing that listing gives a stable
+    fingerprint for the tree; `git diff` covers what is modified but not yet staged.
+    """
+    ls = _run_git("ls-files", "-s")
+    status = _run_git("status", "--porcelain")
+    diff = _run_git("diff", "HEAD")
+    dirty_files = sorted(line[3:].strip() for line in status.splitlines() if line.strip())
+    return {
+        "commit": _run_git("rev-parse", "HEAD").strip(),
+        "dirty": bool(dirty_files),
+        "dirty_files": dirty_files,
+        "tree_sha256": hashlib.sha256(ls.encode()).hexdigest() if ls else None,
+        # hash of the uncommitted diff, so a dirty result set is at least identified rather than
+        # merely flagged; None when the tree is clean, which is the state a release should be in
+        "uncommitted_diff_sha256": (hashlib.sha256(diff.encode()).hexdigest() if diff.strip()
+                                    else None),
+    }
+
+
+def source_hashes():
+    """Hash wq_common.py and every step script, plus a combined hash over the step scripts."""
+    steps = sorted(f for f in os.listdir(HERE)
+                   if f.startswith(STEP_GLOB) and f.endswith(".py"))
+    per_step = {f: sha256_of_file(os.path.join(HERE, f)) for f in steps}
+    blob = json.dumps(per_step, sort_keys=True, separators=(",", ":")).encode()
+    return {
+        "wq_common_sha256": sha256_of_file(os.path.join(HERE, "wq_common.py")),
+        "provenance_sha256": sha256_of_file(os.path.join(HERE, "provenance.py")),
+        "step_scripts_sha256": per_step,
+        "step_scripts_combined_sha256": hashlib.sha256(blob).hexdigest(),
+    }
+
+
+def sha256_of_file(path):
+    return B.sha256_of(path) if os.path.exists(path) else None
+
+
+def changed_step_scripts(path=None):
+    """[(script, recorded, current)] for each step script whose hash differs from the manifest.
+
+    Not part of CRITICAL: editing one step's prose must not invalidate another step's cache. It is
+    reported separately so "which results predate which edit?" has an answer.
+    """
+    path = MANIFEST if path is None else path
+    if not os.path.exists(path):
+        return []
+    with open(path) as f:
+        old = json.load(f)
+    rec = (old.get("code") or {}).get("step_scripts_sha256", {})
+    now = source_hashes()["step_scripts_sha256"]
+    out = []
+    for name in sorted(set(rec) | set(now)):
+        if rec.get(name) != now.get(name):
+            out.append((name, rec.get(name), now.get(name)))
+    return out
 
 
 def versions():
@@ -95,6 +178,7 @@ def config_sha256(cfg=None):
 
 def manifest():
     cfg = frozen_config()
+    code = source_hashes()
     return {
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "git": git_info(),
@@ -102,6 +186,15 @@ def manifest():
         "net3_inp_sha256": B.sha256_of(B.NET3_INP),
         "config": cfg,
         "config_sha256": config_sha256(cfg),
+        # promoted to the top level so it can be a CRITICAL field; the rest of `code` is a record
+        "wq_common_sha256": code["wq_common_sha256"],
+        "code": code,
+        "critical_fields": list(CRITICAL),
+        "scope": ("These hashes identify the code and environment that produced the cache. They do "
+                  "NOT make the results reconstructible from the manifest alone when "
+                  "git.uncommitted_diff_sha256 is non-null: the diff itself is not stored, only "
+                  "identified. A release should be tagged from a clean tree, where that field is "
+                  "null and git.tree_sha256 fully determines the source."),
         **versions(),
     }
 
@@ -180,18 +273,35 @@ def require_fresh_cache(path=MANIFEST):
 if __name__ == "__main__":
     if "--check" in sys.argv:
         bad = check_manifest()
+        drift = changed_step_scripts()
         if bad:
             print("MANIFEST MISMATCH")
             for k, o, n in bad:
                 print(f"  {k}\n    cache : {o}\n    now   : {n}")
+        if drift:
+            print(f"step scripts changed since the manifest was written ({len(drift)}); the "
+                  f"artifacts they write may predate the edit:")
+            for name, o, n in drift:
+                print(f"  {name}: {'(new file)' if o is None else o[:12]} -> "
+                      f"{'(deleted)' if n is None else n[:12]}")
+        if bad:
             sys.exit(1)
-        print("manifest OK — current environment matches the cached results")
+        print("manifest OK — current environment matches the cached results"
+              + (" (but see the step-script drift above)" if drift else ""))
     else:
         m = write_manifest()
+        g = m["git"]
         print(f"wrote {os.path.relpath(MANIFEST, os.path.dirname(HERE))}")
         print(f"  config_sha256  {m['config_sha256']}")
+        print(f"  wq_common      {m['wq_common_sha256'][:16]}...")
+        print(f"  step scripts   {m['code']['step_scripts_combined_sha256'][:16]}... "
+              f"({len(m['code']['step_scripts_sha256'])} files)")
         print(f"  net3_inp       {m['net3_inp']}  {m['net3_inp_sha256'][:16]}...")
-        print(f"  git            {m['git']['commit'][:12]}"
-              f"{' (dirty)' if m['git']['dirty'] else ''}")
+        print(f"  git commit     {g['commit'][:12]}{' (DIRTY)' if g['dirty'] else ' (clean)'}")
+        print(f"  git tree       {g['tree_sha256'][:16] if g['tree_sha256'] else '—'}...")
+        if g["uncommitted_diff_sha256"]:
+            print(f"  uncommitted    diff {g['uncommitted_diff_sha256'][:16]}... over "
+                  f"{len(g['dirty_files'])} file(s) — the diff is identified but NOT stored, so "
+                  f"this manifest does not by itself reconstruct the code that ran")
         print(f"  env            {m['conda_env']}  python {m['python']}  "
               f"numpy {m['numpy']}  scipy {m['scipy']}  wntr {m['wntr']}")

@@ -1,4 +1,9 @@
 {
+  "primary_weighting": "formal_censored",
+  "comparators": [
+    "formal_iid",
+    "informal_glue"
+  ],
   "config": {
     "monitor_nodes": [
       "107",
@@ -371,6 +376,6 @@
         }
       }
     ],
-    "runtime_s": 277.9
+    "runtime_s": 332.8
   }
 }

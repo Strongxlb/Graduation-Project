@@ -1,20 +1,29 @@
 """Step 4d: robust displaced-prior experiment (option d = a + b).
 
-Two displacement designs, each keeping prior width fixed and the truth inside the range:
+If a calibration only ever looks good because the prior happens to be centred on the truth, moving
+the prior off the truth will expose it: an informative dataset pulls the estimate back, an
+uninformative one leaves it at the displaced midpoint. Two displacement designs are used, each
+keeping the prior width fixed and the truth inside the range:
+
   DOWN    : all three midpoints set to  truth - 1 prior SD  (into the strong-decay regime)
-  OLDUP   : old midpoint set to  truth + 1 prior SD  (weaker/steep side; upper bound capped
+  OLDUP   : old midpoint set to  truth + 1 prior SD  (weaker/steep side; the upper bound is capped
             at -0.005 to stay non-positive); avg/new displaced DOWN as above.
 
-Both designs displace all three coefficients, so gap_closed is well defined for every group;
-only the DIRECTION of the old displacement differs between them.
+Both designs displace all three coefficients, so gap_closed is well defined for every group; only
+the DIRECTION of the old displacement differs between them.
 
-For each design the 2000 forward simulations are run ONCE (monitors only) and cached; then the
-gap-closing statistic is recomputed over N_NOISE independent noisy observation sets and two
-behavioural thresholds. Robustness is reported as median [IQR] across the noise realisations.
+PRIMARY: formal censored likelihood (no threshold). COMPARATOR: informal GLUE at both thresholds.
+The comparison is the point of running both — the pull-back is a statement about how much
+information the weighting extracts, so measuring it with the informal score answers a different
+question from the one the section asks.
 
-gap_closed = (behavioural_mean - displaced_mid) / (truth - displaced_mid)
-  0  = behavioural mean stayed at the displaced prior midpoint (data uninformative)
-  1  = behavioural mean pulled all the way to the truth (data fully informative)
+Each design's 8192 forward simulations are run ONCE (monitors only) and cached with the design box
+as part of the cache key; then the gap-closing statistic is recomputed over N_NOISE independent
+noisy observation sets. Robustness is reported as median [IQR] across the noise realisations.
+
+gap_closed = (posterior_mean - displaced_mid) / (truth - displaced_mid)
+  0  = the estimate stayed at the displaced prior midpoint (data uninformative)
+  1  = the estimate was pulled all the way to the truth (data fully informative)
 """
 import os
 import json
@@ -25,22 +34,25 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import wq_common as B
+import provenance
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIGDIR = os.path.join(HERE, "figures")
+CACHEDIR = os.path.join(HERE, "baseline_cache")
 os.makedirs(FIGDIR, exist_ok=True)
 
-cache = np.load(os.path.join(HERE, "baseline_cache", "baseline.npz"), allow_pickle=True)
-ALL_NODES = list(cache["all_nodes"])
+cache = np.load(os.path.join(CACHEDIR, "baseline.npz"), allow_pickle=True)
 mon_pos = list(cache["mon_pos"])
-truth_mon = cache["truth_all"][:, mon_pos]          # (73, 6) noise-free monitor truth
+truth_mon = cache["truth_all"][:, mon_pos]          # noise-free monitor truth
 
 TRUE = {"old": B.KW_OLD_TRUE, "avg": B.KW_AVG_TRUE, "new": B.KW_NEW_TRUE}
 GROUPS = ["old", "avg", "new"]
-THRESHOLDS = [0.107, 0.12]
+THRESHOLDS = [B.RMSE_THR, B.RMSE_THR_DRAFT]
 N_NOISE = 30
 NOISE_SEEDS = list(range(42, 42 + N_NOISE))
 UPPER_CAP = -0.005
+PRIMARY = B.PRIMARY_WEIGHTING
+COMPARATORS = [f"informal_glue@{t}" for t in THRESHOLDS]
 
 
 def prior_sd(rng):
@@ -60,57 +72,70 @@ def up_range(orig, truth, cap=UPPER_CAP):
     w = b - a
     mid = truth + w / np.sqrt(12)
     lo, hi = mid - w / 2, mid + w / 2
-    if hi > cap:                       # shift window down to keep it non-positive
+    if hi > cap:                       # shift the window down to keep it non-positive
         shift = hi - cap
         lo, hi = lo - shift, hi - shift
     return (lo, hi)
 
 
 def run_design(name, priors):
-    """priors: dict group -> (a,b). Returns cached monitor predictions + midpoints."""
-    rng = np.random.default_rng(B.SAMPLE_SEED)
-    S = {g: rng.uniform(*priors[g], B.N_MC) for g in GROUPS}
-    preds = np.empty((B.N_MC, truth_mon.shape[0] - B.WARMUP_H, len(B.MONITOR_NODES)),
-                     dtype=np.float32)
-    t0 = time.time()
-    for s in range(B.N_MC):
-        preds[s] = B.simulate_chlorine(
-            B.KB_FIXED, 0.0,
-            pre_run=B.make_kw_hook(S["old"][s], S["avg"][s], S["new"][s]),
-        ).values[B.WARMUP_H:].astype(np.float32)
-        if (s + 1) % 500 == 0:
-            print(f"  [{name}] {s + 1}/{B.N_MC} ({time.time() - t0:.1f}s)")
+    """Sobol draws from the displaced box + cached monitor predictions + midpoints.
+
+    Sobol rather than pseudo-random, and the same scramble seed as the baseline: otherwise a
+    difference between this design and the baseline mixes a change of prior with a change of
+    sampler. The prediction library is keyed on the box itself, so editing a design invalidates its
+    own cache instead of silently reusing the previous one.
+    """
+    S = B.sobol_draws(priors)
+    path = os.path.join(CACHEDIR, f"step4d_preds_{name}.npy")
+    box = [float(v) for g in GROUPS for v in priors[g]]
+    preds = provenance.load_keyed_array(path, design=name, box=box, n_mc=B.N_MC)
+    if preds is None:
+        preds = np.empty((B.N_MC, truth_mon.shape[0] - B.WARMUP_H, len(B.MONITOR_NODES)),
+                         dtype=np.float32)
+        t0 = time.time()
+        for s in range(B.N_MC):
+            preds[s] = B.simulate_chlorine(
+                B.KB_FIXED, 0.0,
+                pre_run=B.make_kw_hook(S["old"][s], S["avg"][s], S["new"][s]),
+            ).values[B.WARMUP_H:].astype(np.float32)
+            if (s + 1) % 1000 == 0:
+                print(f"  [{name}] {s + 1}/{B.N_MC} ({time.time() - t0:.0f}s)")
+        provenance.save_keyed_array(path, preds, design=name, box=box, n_mc=B.N_MC)
+    else:
+        print(f"  [{name}] reusing cached prediction library {preds.shape}")
     mids = {g: 0.5 * (priors[g][0] + priors[g][1]) for g in GROUPS}
-    return S, preds, mids
+    return S, preds.astype(np.float64), mids
 
 
 def evaluate(S, preds, mids, priors):
-    """Return per-threshold, per-group arrays of gap_closed / sd_retained / retention
-    across the N_NOISE noisy observation sets."""
-    out = {thr: {g: {"gap": [], "sd_ret": []} for g in GROUPS} for thr in THRESHOLDS}
-    out_ret = {thr: [] for thr in THRESHOLDS}
+    """Per-scheme, per-group arrays of gap_closed / sd_retained across the noisy observation sets."""
+    schemes = [PRIMARY] + COMPARATORS
+    out = {s: {g: {"gap": [], "sd_ret": []} for g in GROUPS} for s in schemes}
+    diag = {s: {"ess": [], "retention": []} for s in schemes}
     psd = {g: prior_sd(priors[g]) for g in GROUPS}
     for seed in NOISE_SEEDS:
         rng = np.random.default_rng(seed)
         obs = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)
         obs = obs[B.WARMUP_H:]
-        rmse = np.sqrt(((preds - obs[None]) ** 2).mean(axis=(1, 2)))
-        L = np.exp(-0.5 * (rmse / B.SIGMA_OBS) ** 2)
+        rmse = B.rmse_of(preds, obs)
+        w_primary, d_primary = B.all_weightings(preds, obs, schemes=[PRIMARY])[PRIMARY]
+        per_scheme = {PRIMARY: (w_primary, d_primary, None)}
         for thr in THRESHOLDS:
-            beh = rmse < thr
-            w = L * beh
-            if w.sum() == 0:
+            w, d = B.all_weightings(preds, obs, threshold=thr,
+                                    schemes=["informal_glue"])["informal_glue"]
+            per_scheme[f"informal_glue@{thr}"] = (w, d, float((rmse < thr).mean()))
+        for s, (w, d, ret) in per_scheme.items():
+            if w is None:
                 continue
-            w = w / w.sum()
-            out_ret[thr].append(float(beh.mean()))
+            diag[s]["ess"].append(d["ess"])
+            diag[s]["retention"].append(d["ess_frac"] if ret is None else ret)
             for g in GROUPS:
-                m = float(np.sum(w * S[g]))
-                sd = float(np.sqrt(np.sum(w * (S[g] - m) ** 2)))
+                m, sd = B.weighted_mean_sd(w, S[g])
                 denom = TRUE[g] - mids[g]
-                gap = (m - mids[g]) / denom if abs(denom) > 1e-9 else np.nan
-                out[thr][g]["gap"].append(gap)
-                out[thr][g]["sd_ret"].append(sd / psd[g])
-    return out, out_ret
+                out[s][g]["gap"].append((m - mids[g]) / denom if abs(denom) > 1e-9 else np.nan)
+                out[s][g]["sd_ret"].append(sd / psd[g])
+    return out, diag
 
 
 def med_iqr(a):
@@ -122,8 +147,6 @@ def med_iqr(a):
 
 
 # ---- designs (both displace all three so every gap-closed is valid) ----
-#   DOWN  : old down, avg down, new down (all into the strong-decay regime)
-#   OLDUP : old up (weak/steep side), avg down, new down
 PRIORS_DOWN = {g: down_range(B.PRIOR[g], TRUE[g]) for g in GROUPS}
 PRIORS_OLDUP = {"old": up_range(B.PRIOR["old"], TRUE["old"]),
                 "avg": down_range(B.PRIOR["avg"], TRUE["avg"]),
@@ -135,59 +158,67 @@ for name, pr in DESIGNS:
         assert b <= 1e-9, f"{name}/{g} upper bound positive"
         assert a <= TRUE[g] <= b, f"{name}/{g} truth not in range"
 
-report = {"n_noise": N_NOISE, "thresholds": THRESHOLDS, "designs": {}}
-box = {thr: {} for thr in THRESHOLDS}   # for the figure
+report = {**B.weighting_provenance(comparators=COMPARATORS),
+          "n_noise": N_NOISE, "informal_thresholds": THRESHOLDS,
+          "sampler": "scrambled Sobol from the displaced box, same seed as the baseline",
+          "designs": {}}
+box = {}   # for the figure: (scheme, design) -> per-group gap samples
 
 for name, priors in DESIGNS:
     S, preds, mids = run_design(name, priors)
-    ev, ret = evaluate(S, preds, mids, priors)
-    report["designs"][name] = {"priors": {g: list(priors[g]) for g in GROUPS},
-                               "midpoints": mids, "thresholds": {}}
-    for thr in THRESHOLDS:
+    ev, diag = evaluate(S, preds, mids, priors)
+    d_out = {"priors": {g: list(priors[g]) for g in GROUPS}, "midpoints": mids, "by_scheme": {}}
+    for s in [PRIMARY] + COMPARATORS:
         gstats = {}
         for g in GROUPS:
-            gm, glo, ghi = med_iqr(ev[thr][g]["gap"])
-            sm, slo, shi = med_iqr(ev[thr][g]["sd_ret"])
+            gm, glo, ghi = med_iqr(ev[s][g]["gap"])
+            sm, slo, shi = med_iqr(ev[s][g]["sd_ret"])
             gstats[g] = {"gap_med": gm, "gap_iqr": [glo, ghi],
                          "sd_ret_med": sm, "sd_ret_iqr": [slo, shi]}
-            box[thr][f"{g}\n({name})"] = [x for x in ev[thr][g]["gap"] if not np.isnan(x)]
-        rm, rlo, rhi = med_iqr(ret[thr])
-        report["designs"][name]["thresholds"][str(thr)] = {
-            "retention_med": rm, "retention_iqr": [rlo, rhi], "groups": gstats}
+            box[(s, name, g)] = [x for x in ev[s][g]["gap"] if not np.isnan(x)]
+        rm, rlo, rhi = med_iqr(diag[s]["retention"])
+        d_out["by_scheme"][s] = {"retention_med": rm, "retention_iqr": [rlo, rhi],
+                                 "ess_med": med_iqr(diag[s]["ess"])[0], "groups": gstats}
+    report["designs"][name] = d_out
 
-with open(os.path.join(HERE, "baseline_cache", "step4d_displaced_robust.json"), "w") as f:
+with open(os.path.join(CACHEDIR, "step4d_displaced_robust.json"), "w") as f:
     json.dump(report, f, indent=2)
 
 # ---- print summary ----
 for name in ["DOWN", "OLDUP"]:
+    d = report["designs"][name]
     print(f"\n=== {name} ===  priors: " +
-          ", ".join(f"{g}[{report['designs'][name]['priors'][g][0]:.3f},"
-                    f"{report['designs'][name]['priors'][g][1]:.3f}]" for g in GROUPS))
-    for thr in THRESHOLDS:
-        d = report["designs"][name]["thresholds"][str(thr)]
-        print(f"  thr={thr} retention {d['retention_med']*100:.0f}% :")
+          ", ".join(f"{g}[{d['priors'][g][0]:.3f},{d['priors'][g][1]:.3f}]" for g in GROUPS))
+    for s in [PRIMARY] + COMPARATORS:
+        b = d["by_scheme"][s]
+        tag = "PRIMARY" if s == PRIMARY else "comparator"
+        print(f"  {s} ({tag}) ESS {b['ess_med']:.0f}:")
         for g in GROUPS:
-            s = d["groups"][g]
-            print(f"    {g:>3}: gap closed {s['gap_med']*100:5.0f}% "
-                  f"[{s['gap_iqr'][0]*100:.0f}-{s['gap_iqr'][1]*100:.0f}%]  "
-                  f"SD retained {s['sd_ret_med']*100:4.0f}%")
+            q = b["groups"][g]
+            print(f"    {g:>3}: gap closed {q['gap_med'] * 100:5.0f}% "
+                  f"[{q['gap_iqr'][0] * 100:.0f}-{q['gap_iqr'][1] * 100:.0f}%]  "
+                  f"SD retained {q['sd_ret_med'] * 100:4.0f}%")
+print("\ngap closed = fraction of the displaced-midpoint -> truth distance recovered by the data.")
+print("Read the primary row: the comparator rows show how much of any apparent prior dependence is")
+print("the informal score's flatness rather than a limit of the observations.")
 
-# ---- figure: boxplots of gap_closed over noise realisations ----
-fig, axes = plt.subplots(1, len(THRESHOLDS), figsize=(15, 4.8), sharey=True)
-series_order = ["old\n(DOWN)", "old\n(OLDUP)", "avg\n(DOWN)", "avg\n(OLDUP)",
-                "new\n(DOWN)", "new\n(OLDUP)"]
-for ax, thr in zip(axes, THRESHOLDS):
-    data = [box[thr][k] for k in series_order]
-    ax.boxplot(data, labels=[k.replace("\n", " ") for k in series_order], showmeans=True)
+# ---- figure: gap_closed under the primary rule, with the comparator beside it ----
+PANELS = [(PRIMARY, "formal censored likelihood (PRIMARY)"),
+          (COMPARATORS[0], f"informal GLUE, threshold {THRESHOLDS[0]} (comparator)")]
+fig, axes = plt.subplots(1, len(PANELS), figsize=(15, 4.8), sharey=True)
+series = [(g, dn) for g in GROUPS for dn in ("DOWN", "OLDUP")]
+for ax, (s, title) in zip(axes, PANELS):
+    ax.boxplot([box[(s, dn, g)] for g, dn in series],
+               tick_labels=[f"{g} ({dn})" for g, dn in series], showmeans=True)
     ax.axhline(0.0, color="gray", ls=":", lw=1, label="0% (stayed at prior mid)")
     ax.axhline(1.0, color="green", ls="--", lw=1, label="100% (reached truth)")
-    ax.set_title(f"threshold {thr}")
+    ax.set_title(title, fontsize=10)
     ax.set_ylabel("gap to truth closed")
     ax.tick_params(axis="x", labelrotation=20)
     ax.grid(alpha=0.3, axis="y")
 axes[0].legend(fontsize=8, loc="upper left")
 fig.suptitle(f"Displaced-prior pull-back over {N_NOISE} noise realisations "
-             "(all three displaced; old recovered only from the weak/steep side)", y=1.02)
+             "(all three coefficients displaced; primary rule vs the draft's comparator)", y=1.02)
 plt.tight_layout()
 figpath = os.path.join(FIGDIR, "step4d_displaced_robust.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")

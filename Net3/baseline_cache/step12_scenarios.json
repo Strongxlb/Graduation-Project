@@ -1,7 +1,10 @@
 {
-  "description": "Step 12 operational temperature/ageing scenario projection of the three-zone GLUE ensemble",
-  "threshold": 0.107,
-  "n_behavioural": 2196,
+  "primary_weighting": "formal_censored",
+  "comparators": [],
+  "description": "Step 12 operational temperature/ageing scenario projection of the three-zone posterior ensemble, weighted by the primary formal censored likelihood",
+  "informal_threshold_reference_only": 0.107,
+  "n_retained_draws": 2196,
+  "retention_rule": "draws whose formal censored relative weight exceeds WEIGHT_FLOOR; this is a numerical truncation of a likelihood, NOT a behavioural acceptance threshold",
   "C_CRIT": 0.2,
   "assessment_window_h": [
     120,
@@ -16,7 +19,7 @@
     "network_mean": "unweighted arithmetic mean over all 92 junctions",
     "indeterminate": "0.05 < P_min < 0.95",
     "demand_at_risk": "sum of base demand over junctions with P_min > 0.5 (zero-demand nodes contribute 0)",
-    "median_over_nodes_of_mean_window_min_mgl": "per junction take the GLUE-weighted mean of the per-member window minimum, then the median of those 92 node values (NOT a pooled member-node median)",
+    "median_over_nodes_of_mean_window_min_mgl": "per junction take the likelihood-weighted mean of the per-member window minimum, then the median of those 92 node values (NOT a pooled member-node median)",
     "likelihood_bands_on_P_min": {
       "rare": "P_min < 0.05",
       "unlikely": "0.05 <= P_min < 0.20",
@@ -134,7 +137,7 @@
     }
   ],
   "sigma_convention": "observation sigma = 0.1 mg/L is one standard deviation",
-  "product_statement": "GLUE calibration-conditioned scenario projection from the network model; not a sensor nowcast, not a spatial measurement, and not a statement that water is safe",
+  "product_statement": "calibration-conditioned scenario projection from the network model; not a sensor nowcast, not a spatial measurement, and not a statement that water is safe",
   "consequence_terciles_L_s": [
     1.1635935222706661,
     3.388784749298665
@@ -452,5 +455,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 611.5
+  "runtime_s": 742.5
 }

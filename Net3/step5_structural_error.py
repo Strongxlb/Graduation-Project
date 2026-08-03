@@ -153,6 +153,12 @@ rank_true = [ALL_NODES[i] for i in np.argsort(P_node_true)[::-1][:6]]
 
 # ---- report ----
 report = {
+    "weighting": "informal_glue",
+    "weighting_role": "comparator; SUPERSEDED by step5c (jitter ensemble, formal primary) and "
+                      "step5d (structured heterogeneity, formal primary). A single jitter field and "
+                      "the informal score cannot separate a structural bias from either the field "
+                      "drawn or the score's own offset.",
+    "primary_weighting_elsewhere": B.PRIMARY_WEIGHTING,
     "jitter": JITTER, "jitter_seed": JITTER_SEED,
     "noise_floor_rmse": noise_rmse,
     "structural_min_rmse_noisefree": best_nf_rmse,

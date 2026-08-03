@@ -1,18 +1,22 @@
-"""Step 8: systematic sensor-bias experiment (GLUE, empirical) — Priority-2 #1.
+"""Step 8: systematic sensor-bias experiment (empirical) — Priority-2 #1.
 
-A constant offset (systematic bias) is added to ONE informative monitor (node 15, old zone) and
-the GLUE calibration is re-run. We report how far the behavioural mean of the identifiable
-coefficient (old) is pushed, relative to the random behavioural spread, and how the shift scales
-with the offset: shift(0.025)/shift(0.05) below 50% means SUPER-LINEAR (convex) growth, above 50%
-means sub-linear (concave). Measured here it is ~39%, i.e. convex — a larger offset does
-proportionally more damage, so small offsets are comparatively forgiving. The risk ranking is also
-checked.
+A constant offset (systematic bias) is added to ONE informative monitor (node 15, old zone) and the
+calibration is re-run under the PRIMARY formal censored likelihood. Reported: how far the posterior
+mean of the old coefficient is pushed relative to its own posterior SD, how that displacement scales
+with the offset, and what happens to the operational risk ranking — which is the quantity a utility
+would act on.
 
-Only NON-NEGATIVE offsets are swept, which is a limitation: because observations are censored at
-zero, a negative offset is not the mirror image of a positive one (see Step 9).
+Scaling convention: shift(0.025)/shift(0.05) below 50% means SUPER-LINEAR (convex) growth, above 50%
+sub-linear (concave).
 
-Reuses the baseline cache (candidate predictions are observation-independent); the bias only
-changes the observations, so no EPANET is re-run. Primary threshold 0.107, 30 noise realisations.
+The sweep is TWO-SIDED. Because observations are censored at the sensor floor, a negative offset is
+not the mirror image of a positive one — it pushes readings onto the floor, where they carry
+different information (see Step 9) — so the asymmetry is measured rather than assumed away.
+
+Step 8c repeats the experiment at every monitor in turn; the worst case is not node 15.
+
+Reuses the baseline cache (candidate predictions are observation-independent); the bias only changes
+the observations, so no EPANET is re-run. 30 noise realisations.
 """
 import os
 import json
@@ -47,15 +51,15 @@ SEEDS = list(range(42, 42 + N_NOISE))
 thr = B.RMSE_THR                                       # 0.107
 
 
-def glue_means(obs_post):
+def posterior_means(obs_post):
     """Weighted means, SDs and the risk field under the formal censored likelihood.
 
-    Formal rather than informal: a sensor offset is exactly the kind of systematic error whose
-    effect the informal score is too flat to register, so measuring the damage with it would
-    understate the damage (see Step 5c for the same effect on structural error).
+    Formal rather than informal: a sensor offset is exactly the kind of systematic error the
+    informal score is too flat to register, so measuring the damage with it would understate the
+    damage (Step 8c quantifies that understatement at every monitor).
     """
-    rmse = np.sqrt(((C_all_mon - obs_post[None]) ** 2).mean(axis=(1, 2)))
-    w, _ = B.weights_from_loglik(B.log_censored(C_all_mon, obs_post))
+    w, _ = B.all_weightings(C_all_mon, obs_post,
+                            schemes=[B.PRIMARY_WEIGHTING])[B.PRIMARY_WEIGHTING]
     means = {z: float(np.sum(w * S[z])) for z in ZKEYS}
     sds = {z: float(np.sqrt(np.sum(w * (S[z] - means[z]) ** 2))) for z in ZKEYS}
     below = (C_all < C_MIN)
@@ -78,7 +82,7 @@ for off in OFFSETS:
         obs[:, bcol] += off                            # inject systematic bias at node 15
         raw_neg = int((obs[B.WARMUP_H:] < 0).sum())
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
-        means, sds, rank, P = glue_means(obs)
+        means, sds, rank, P = posterior_means(obs)
         old_means.append(means["old"]); old_sds.append(sds["old"])
         avg_means.append(means["average"]); new_means.append(means["new"])
         ranks.append(tuple(rank)); Ps.append(P); n_clipped.append(raw_neg)
@@ -129,13 +133,34 @@ def shift_at(off):
 
 ratio = shift_at(0.025) / shift_at(0.05)
 shape = "super-linear (convex)" if ratio < 0.5 else "sub-linear (concave)"
+
+
+def informal_old_mean(off):
+    """The comparator's old posterior mean at one offset, for the curvature contrast below."""
+    vals = []
+    for seed in SEEDS:
+        rng = np.random.default_rng(seed)
+        o = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
+        o[:, bcol] += off
+        o = np.clip(o, 0, None)[B.WARMUP_H:]
+        wi, _ = B.all_weightings(C_all_mon, o, threshold=thr,
+                                 schemes=["informal_glue"])["informal_glue"]
+        vals.append(B.weighted_mean_sd(wi, S["old"])[0])
+    return float(np.median(vals))
+
+
+# The curvature is quoted, so the comparator's version of it is computed rather than asserted: if
+# the informal score changes the sign of the conclusion, that has to be a number in the artifact.
+inf0 = informal_old_mean(0.0)
+inf_ratio = (informal_old_mean(0.025) - inf0) / (informal_old_mean(0.05) - inf0)
+inf_shape = "super-linear (convex)" if inf_ratio < 0.5 else "sub-linear (concave)"
 print(f"\nscaling: shift(+0.025)/shift(+0.05) = {ratio * 100:.0f}%  "
       f"(50% = linear; <50% = super-linear/convex, >50% = sub-linear/concave) -> {shape}")
 print(f"The review states this effect is concave with ~70% retained on halving. The direction is")
-print(f"confirmed here ({ratio * 100:.0f}% > 50%), though the magnitude is weaker than ~70%. Note that")
-print("the SAME quantity computed with the informal GLUE score gives 45%, i.e. the opposite")
-print("direction: the flat informal weighting inverts the curvature as well as shrinking the shift.")
-print("This is the third place where the informal score reverses a conclusion (see Steps 3 and 5c).")
+print(f"confirmed here ({ratio * 100:.0f}% > 50%), though the magnitude is weaker than ~70%.")
+print(f"The SAME quantity under the informal GLUE comparator is {inf_ratio * 100:.0f}% -> "
+      f"{inf_shape}: the flat weighting changes the curvature as well as shrinking the shift, which")
+print("is why the primary rule has to be the formal one (see Steps 3 and 5c for the same effect).")
 asym = {}
 for mag in (0.025, 0.05, 0.10):
     pos, neg = shift_at(mag), shift_at(-mag)
@@ -148,13 +173,19 @@ for mag, a in asym.items():
 print("Asymmetry is expected and is caused by censoring: a negative offset drives observations")
 print("onto the sensor floor, where they carry different information than an unclipped value.")
 
-report = {"bias_node": BIAS_NODE, "threshold": thr, "n_noise": N_NOISE,
-          "weighting": "formal_censored", "symmetry_check": asym,
+report = {**B.weighting_provenance(comparators=[]),
+          "bias_node": BIAS_NODE, "n_noise": N_NOISE,
+          "symmetry_check": asym,
           "baseline_old_sd": base_sd, "rows": rows,
           "offsets_swept": OFFSETS,
-          "offset_sign_limitation": "non-negative offsets only; zero-censoring makes negative "
-                                    "offsets non-symmetric (see Step 9)",
-          "shift025_over_shift050": ratio, "shift_scaling": shape}
+          "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric, "
+                          "so the negative arm is measured rather than mirrored (see Step 9)",
+          "location_note": "node 15 is one monitor, not the worst case; Step 8c sweeps all six and "
+                           "finds a larger displacement at monitor 231 (average zone)",
+          "shift025_over_shift050": ratio, "shift_scaling": shape,
+          "informal_comparator_curvature": {"threshold": thr,
+                                            "shift025_over_shift050": inf_ratio,
+                                            "shift_scaling": inf_shape}}
 
 
 def _jsafe(o):
@@ -176,12 +207,12 @@ offs = [r["offset"] for r in rows]
 means = [r["old_mean_med"] for r in rows]
 sds = [r["old_sd_med"] for r in rows]
 ax.errorbar(offs, means, yerr=sds, marker="o", capsize=4, color="steelblue",
-            label="GLUE old mean ± behavioural SD")
+            label="posterior mean ± posterior SD (formal censored)")
 ax.axhline(TRUE["old"], color="red", ls="--", lw=1.5, label="true k_w,old = -1.0")
 ax.set_xlabel("systematic bias at node 15 (mg/L)")
-ax.set_ylabel("GLUE behavioural mean of k_w,old (m/day)")
+ax.set_ylabel("posterior mean of k_w,old (m/day)")
 ax.set_title("Step 8 — a systematic sensor bias pushes the calibrated coefficient\n"
-             f"(only the coefficient that node informs; shift is {shape}, "
+             f"(formal censored likelihood; shift is {shape}, "
              f"shift(0.025)/shift(0.05) = {ratio * 100:.0f}%)")
 ax.legend()
 ax.grid(alpha=0.3)

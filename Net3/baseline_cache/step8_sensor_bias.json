@@ -1,8 +1,8 @@
 {
+  "primary_weighting": "formal_censored",
+  "comparators": [],
   "bias_node": "15",
-  "threshold": 0.107,
   "n_noise": 30,
-  "weighting": "formal_censored",
   "symmetry_check": {
     "0.025": {
       "positive": 0.11740048660584934,
@@ -182,7 +182,13 @@
     0.05,
     0.1
   ],
-  "offset_sign_limitation": "non-negative offsets only; zero-censoring makes negative offsets non-symmetric (see Step 9)",
+  "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric, so the negative arm is measured rather than mirrored (see Step 9)",
+  "location_note": "node 15 is one monitor, not the worst case; Step 8c sweeps all six and finds a larger displacement at monitor 231 (average zone)",
   "shift025_over_shift050": 0.5304773549397219,
-  "shift_scaling": "sub-linear (concave)"
+  "shift_scaling": "sub-linear (concave)",
+  "informal_comparator_curvature": {
+    "threshold": 0.107,
+    "shift025_over_shift050": 0.4517486815079345,
+    "shift_scaling": "super-linear (convex)"
+  }
 }

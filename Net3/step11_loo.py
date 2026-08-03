@@ -9,6 +9,12 @@ different answers.
   B  leave-one-ZONE-out      drop BOTH monitors of a zone; that zone becomes unobserved entirely
   C  unmonitored junctions   predict at junctions that never enter any calibration, against the truth
 
+PRIMARY: formal censored likelihood. COMPARATOR: informal GLUE, whose threshold is rescaled to the
+number of monitors actually used so that dropping a monitor does not also loosen the acceptance band.
+Both are reported at every level, because the coverage of a predictive band is exactly the quantity
+an inflated parameter spread distorts: the informal score buys coverage by being wide, which looks
+like a well-calibrated model and is not one.
+
 Reuses the cached candidate predictions (no EPANET); 30 noise realisations, median [IQR].
 
 Two predictive quantities that must not be confused:
@@ -39,26 +45,28 @@ C_all = cache["C_all"].astype(np.float64)
 mon_pos = list(cache["mon_pos"])
 truth_full = cache["truth_all"][:, mon_pos]               # (73, 6)
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
-C_mon = C_all[:, :, mon_pos]                              # (2000, 49, 6)
+C_mon = C_all[:, :, mon_pos]                              # (N_MC, 49, 6)
 NMON = len(B.MONITOR_NODES)
 Z = 1.645
+PRIMARY = B.PRIMARY_WEIGHTING
+SCHEMES = [PRIMARY, "informal_glue"]
 
 
 def thr_for(nmon):
+    """The comparator's acceptance band for a subset of monitors.
+
+    It has to be rescaled: the band is the sampling spread of the objective, which depends on the
+    number of residuals, so keeping 0.107 while dropping a monitor would quietly widen the set as
+    well as removing information and confound the two.
+    """
     return sigma * (1.0 + Z / np.sqrt(2.0 * nmon * C_mon.shape[1]))
 
 
-def calibrate(obs, cols, scheme="informal"):
-    """Weights from a monitor subset. Both schemes are available because the coverage of a
-    predictive band is exactly the kind of quantity the informal score's inflated spread distorts."""
-    if scheme == "formal":
-        w, _ = B.weights_from_loglik(B.log_censored(C_mon[:, :, cols], obs[:, cols]))
-        return w
-    rmse = np.sqrt(((C_mon[:, :, cols] - obs[:, cols][None]) ** 2).mean(axis=(1, 2)))
-    w = np.exp(-0.5 * (rmse / sigma) ** 2) * (rmse < thr_for(len(cols)))
-    if w.sum() == 0:
-        return None
-    return w / w.sum()
+def calibrate(obs, cols, scheme=PRIMARY):
+    """Weights from a monitor subset under one weighting scheme; None if the scheme accepts nothing."""
+    w, _ = B.all_weightings(C_mon[:, :, cols], obs[:, cols], threshold=thr_for(len(cols)),
+                            schemes=[scheme])[scheme]
+    return w
 
 
 def q(a):
@@ -68,65 +76,78 @@ def q(a):
 SEEDS = list(range(42, 72))
 all_cols = list(range(NMON))
 
-# ---- full-6-monitor reference (median over noise) ----
-full = {z: [] for z in ZKEYS}
+# ---- full-6-monitor reference (median over noise), per scheme ----
+full = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
 for seed in SEEDS:
     rng = np.random.default_rng(seed)
     obs = np.clip(truth_full + rng.normal(0, sigma, truth_full.shape), 0, None)[B.WARMUP_H:]
-    w = calibrate(obs, all_cols)
-    for z in ZKEYS:
-        full[z].append(float(w @ S[z]))
-print("=== Step 11: leave-one-monitor-out validation (30 noise, median) ===")
-print(f"full-6 reference: old {np.median(full['old']):.3f}  avg {np.median(full['average']):.3f}  "
-      f"new {np.median(full['new']):.3f}\n")
-
-print(f"{'held-out':>12} | {'k_old':>7} {'k_avg':>7} {'k_new':>7} | {'pred RMSE@m':>11} | {'90% cov':>7}")
-report = {"sigma": sigma, "noise_floor": sigma, "full6": {z: float(np.median(full[z])) for z in ZKEYS},
-          "rows": []}
-example = {}
-for m in range(NMON):
-    node = B.MONITOR_NODES[m]
-    cols = [c for c in all_cols if c != m]
-    kw = {z: [] for z in ZKEYS}
-    pred_rmse, cover = [], []
-    for seed in SEEDS:
-        rng = np.random.default_rng(seed)
-        obs = np.clip(truth_full + rng.normal(0, sigma, truth_full.shape), 0, None)[B.WARMUP_H:]
-        w = calibrate(obs, cols)
+    for s in SCHEMES:
+        w = calibrate(obs, all_cols, s)
         if w is None:
             continue
         for z in ZKEYS:
-            kw[z].append(float(w @ S[z]))
-        pm = w @ C_mon[:, :, m]                                   # predicted mean trajectory at held-out m
-        pv = w @ (C_mon[:, :, m] - pm[None]) ** 2                 # ensemble variance
-        psd = np.sqrt(pv + sigma ** 2)                            # + observation noise
-        lo, hi = pm - Z * psd, pm + Z * psd
-        o = obs[:, m]
-        pred_rmse.append(float(np.sqrt(((pm - o) ** 2).mean())))
-        cover.append(float(((o >= lo) & (o <= hi)).mean()))
-        if seed == 42:
-            example[node] = {"t": np.arange(B.WARMUP_H, B.DURATION_H + 1), "pm": pm, "lo": lo, "hi": hi, "obs": o}
-    row = {"node": node, "zone": ZONE_OF[node],
-           "k_old": q(kw["old"]), "k_avg": q(kw["average"]), "k_new": q(kw["new"]),
-           "pred_rmse": q(pred_rmse), "coverage90": q(cover)}
-    report["rows"].append(row)
-    print(f"{node+' ('+ZONE_OF[node]+')':>12} | {row['k_old'][0]:7.3f} {row['k_avg'][0]:7.3f} "
-          f"{row['k_new'][0]:7.3f} | {row['pred_rmse'][0]:11.3f} | {row['coverage90'][0]:6.2f}")
+            full[s][z].append(float(w @ S[z]))
+print("=== Step 11: leave-one-monitor-out validation (30 noise, median) ===")
+for s in SCHEMES:
+    print(f"full-6 reference [{s}]: " +
+          "  ".join(f"{z} {np.median(full[s][z]):.3f}" for z in ZKEYS))
+
+report = {**B.weighting_provenance(comparators=["informal_glue"]),
+          "sigma": sigma, "noise_floor": sigma,
+          "full6": {s: {z: float(np.median(full[s][z])) for z in ZKEYS} for s in SCHEMES},
+          "rows": []}
+example = {}
+for s in SCHEMES:
+    tag = "PRIMARY" if s == PRIMARY else "comparator"
+    print(f"\n--- A: leave-one-monitor-out, {s} ({tag}) ---")
+    print(f"{'held-out':>12} | {'k_old':>7} {'k_avg':>7} {'k_new':>7} | {'pred RMSE@m':>11} | "
+          f"{'90% cov':>7}")
+    for m in range(NMON):
+        node = B.MONITOR_NODES[m]
+        cols = [c for c in all_cols if c != m]
+        kw = {z: [] for z in ZKEYS}
+        pred_rmse, cover = [], []
+        for seed in SEEDS:
+            rng = np.random.default_rng(seed)
+            obs = np.clip(truth_full + rng.normal(0, sigma, truth_full.shape), 0, None)[B.WARMUP_H:]
+            w = calibrate(obs, cols, s)
+            if w is None:
+                continue
+            for z in ZKEYS:
+                kw[z].append(float(w @ S[z]))
+            pm = w @ C_mon[:, :, m]                        # predicted mean at the held-out monitor
+            pv = w @ (C_mon[:, :, m] - pm[None]) ** 2      # ensemble variance
+            psd = np.sqrt(pv + sigma ** 2)                 # + observation noise
+            lo, hi = pm - Z * psd, pm + Z * psd
+            o = obs[:, m]
+            pred_rmse.append(float(np.sqrt(((pm - o) ** 2).mean())))
+            cover.append(float(((o >= lo) & (o <= hi)).mean()))
+            if seed == 42 and s == PRIMARY:
+                example[node] = {"t": np.arange(B.WARMUP_H, B.DURATION_H + 1), "pm": pm,
+                                 "lo": lo, "hi": hi, "obs": o}
+        row = {"scheme": s, "node": node, "zone": ZONE_OF[node],
+               "k_old": q(kw["old"]), "k_avg": q(kw["average"]), "k_new": q(kw["new"]),
+               "pred_rmse": q(pred_rmse), "coverage90": q(cover)}
+        report["rows"].append(row)
+        print(f"{node + ' (' + ZONE_OF[node] + ')':>12} | {row['k_old'][0]:7.3f} "
+              f"{row['k_avg'][0]:7.3f} {row['k_new'][0]:7.3f} | {row['pred_rmse'][0]:11.3f} | "
+              f"{row['coverage90'][0]:6.2f}")
 
 print(f"\nnoise floor σ = {sigma}; pred RMSE ≈ σ ⇒ the held-out monitor is predicted as well as noise "
       f"allows.\nBut its zone was still observed by the partner monitor, so this is the easy case.")
+print("Compare the two coverage columns: the comparator reaches nominal coverage with a much wider")
+print("band, so coverage alone cannot tell a calibrated model from an over-dispersed one.")
 
 # ================= B: leave-one-ZONE-out =================
 # Dropping both monitors of a zone removes that zone from the observations entirely. This is the
 # test that speaks to the actual claim, and it is the one the draft was missing.
 ZONE_COLS = {z: [i for i, n in enumerate(B.MONITOR_NODES) if ZONE_OF[n] == z] for z in ZKEYS}
 print(f"\n=== B: leave-one-ZONE-out (both monitors of a zone dropped) ===")
-print("Both weightings are run: informal for continuity with test A, formal so that test D — which")
-print("uses the formal scheme — differs from this one only in the truth being heterogeneous.")
-print(f"{'scheme':>9} {'zone dropped':>13} {'mons':>9} | {'k_old':>8} {'k_avg':>8} {'k_new':>8} | "
+print("Both weightings are run, so this differs from test D only in the truth being homogeneous.")
+print(f"{'scheme':>16} {'zone dropped':>13} {'mons':>9} | {'k_old':>8} {'k_avg':>8} {'k_new':>8} | "
       f"{'own coef err':>12} {'own SD ret':>10} | {'pred RMSE':>9} {'90% cov':>7}")
 zone_rows = []
-for scheme in ("informal", "formal"):
+for scheme in SCHEMES:
     for z in ZKEYS:
         drop = ZONE_COLS[z]
         cols = [c for c in all_cols if c not in drop]
@@ -158,7 +179,7 @@ for scheme in ("informal", "formal"):
                "own_sd_retained": q(sd_ret), "pred_rmse": q(pred_rmse_z),
                "coverage90": q(cover_z)}
         zone_rows.append(row)
-        print(f"{scheme:>9} {z:>13} {','.join(row['monitors_dropped']):>9} | {row['k_old'][0]:8.3f} "
+        print(f"{scheme:>16} {z:>13} {','.join(row['monitors_dropped']):>9} | {row['k_old'][0]:8.3f} "
               f"{row['k_avg'][0]:8.3f} {row['k_new'][0]:8.3f} | {row['own_coef_error']:+12.3f} "
               f"{row['own_sd_retained'][0] * 100:9.0f}% | {row['pred_rmse'][0]:9.3f} "
               f"{row['coverage90'][0]:6.2f}")
@@ -193,7 +214,7 @@ print(f"\n=== C: {VAL_N} unmonitored junctions, predicted against the noise-free
 print(f"{'weighting':>10} | {'90% cov (normal)':>17} | {'90% cov (quantile)':>19} | "
       f"{'mean |err|/|truth|':>18}")
 unmon = {}
-for scheme in ("informal", "formal"):
+for scheme in SCHEMES:
     norm_cov, quant_cov, rel_err = [], [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
@@ -266,7 +287,7 @@ for z in ZKEYS:
         arith_z = float(np.array([kwp[p] for p in zone_pipes[z]]).mean())
         rr = np.random.default_rng(B.NOISE_SEED + f)
         ob = np.clip(t_mon + rr.normal(0, sigma, t_mon.shape), 0, None)[B.WARMUP_H:]
-        wz = calibrate(ob, cols, "formal")
+        wz = calibrate(ob, cols, PRIMARY)
         m = float(wz @ S[z])
         errs.append(m - arith_z)
         sdr.append(float(np.sqrt(wz @ (S[z] - m) ** 2) / prior_sd_z))
@@ -307,17 +328,19 @@ import matplotlib.pyplot as plt
 
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 4.8))
 
-nodes = [r["node"] for r in report["rows"]]
-rmses = [r["pred_rmse"][0] for r in report["rows"]]
-errlo = [r["pred_rmse"][0] - r["pred_rmse"][1] for r in report["rows"]]
-errhi = [r["pred_rmse"][2] - r["pred_rmse"][0] for r in report["rows"]]
+prim_rows = [r for r in report["rows"] if r["scheme"] == PRIMARY]
+nodes = [r["node"] for r in prim_rows]
+rmses = [r["pred_rmse"][0] for r in prim_rows]
+errlo = [r["pred_rmse"][0] - r["pred_rmse"][1] for r in prim_rows]
+errhi = [r["pred_rmse"][2] - r["pred_rmse"][0] for r in prim_rows]
 cols = ["firebrick" if ZONE_OF[n] == "old" else ("goldenrod" if ZONE_OF[n] == "average" else "steelblue")
         for n in nodes]
 axA.bar([f"{n}\n({ZONE_OF[n]})" for n in nodes], rmses, yerr=[errlo, errhi], color=cols, capsize=3,
         error_kw={"ecolor": "0.3"})
 axA.axhline(sigma, color="k", ls="--", lw=1.3, label=f"noise floor σ = {sigma}")
 axA.set_ylabel("held-out prediction RMSE (mg/L)")
-axA.set_title("(a) LOO out-of-sample prediction error vs noise floor\n(median; bars = IQR over 30 noise)")
+axA.set_title("(a) LOO out-of-sample prediction error vs noise floor\n"
+              "(formal censored weighting; median, bars = IQR over 30 noise)")
 axA.legend(fontsize=8)
 axA.grid(alpha=0.3, axis="y")
 

@@ -1,7 +1,9 @@
-"""Step 12: operational temperature / ageing scenario projection of the GLUE ensemble.
+"""Step 12: operational temperature / ageing scenario projection of the calibrated ensemble.
 
-Transplants the supervisor's WSP risk-scenario framework onto THIS project's three-zone
-GLUE calibration (not the homogeneous Gaussian posterior of the enclosed notebook).
+Transplants the supervisor's WSP risk-scenario framework onto THIS project's three-zone calibration
+(not the homogeneous Gaussian posterior of the enclosed notebook). The ensemble is weighted by the
+PRIMARY formal censored likelihood; the informal GLUE score plays no part in any number here, so the
+word GLUE does not describe this step's weights.
 
 Pipeline
 --------
@@ -16,7 +18,7 @@ Pipeline
 Three sources of scenario uncertainty are propagated jointly, with COMMON RANDOM NUMBERS
 (one draw per behavioural member, reused across every scenario and dose) so that scenario
 differences are physical rather than Monte-Carlo noise:
-  1. kinetic coefficients          -- the GLUE behavioural ensemble itself
+  1. kinetic coefficients          -- the formal-likelihood-weighted ensemble itself
   2. activation energies           -- Ea_bulk ~ N(45, 8^2), Ea_wall ~ N(35, 10^2) kJ/mol
   3. water temperature actually reached -- dT ~ N(0, 1^2) degC added to the scenario mean
 
@@ -473,7 +475,7 @@ for key, r in results.items():
         "net_mean_E_deficit": round(float(r["Abar"].mean()), 4),
     })
 summary_df = pd.DataFrame(summary_rows)
-print("Scenario risk summary (GLUE behavioural ensemble; network means are unweighted "
+print("Scenario risk summary (formal censored-likelihood ensemble; network means are unweighted "
       "arithmetic means over all 92 junctions):\n")
 print(summary_df.to_string(index=False))
 print(f"\nreference (T = T_ref exactly, cached): P_min>0.5 nodes "
@@ -577,8 +579,8 @@ for ax, key in zip(axes.ravel(), ["A_baseline", "B_warm", "C_heatwave", "D_heat_
     ax.axis("off")
 fig.colorbar(sc, ax=axes.ravel().tolist(), shrink=0.85,
              label=rf"$P_{{\min}}$: P(min C over {B.WARMUP_H}–{B.DURATION_H} h < {C_CRIT} mg/L)")
-fig.suptitle("Step 12 — GLUE-propagated window-breach probability under temperature "
-             "and ageing-stress scenarios", y=0.98)
+fig.suptitle("Step 12 — posterior-propagated window-breach probability under temperature and "
+             "ageing-stress scenarios (formal censored likelihood)", y=0.98)
 fig.savefig(os.path.join(FIGDIR, "step12_scenario_maps.png"), dpi=140, bbox_inches="tight")
 plt.close(fig)
 
@@ -649,10 +651,13 @@ print("figures -> figures/step12_{scenario_maps,ageing_delta,summary}.png")
 
 # ============================== json ==============================
 report = {
-    "description": "Step 12 operational temperature/ageing scenario projection of the "
-                   "three-zone GLUE ensemble",
-    "threshold": B.RMSE_THR,
-    "n_behavioural": int(n_beh),
+    **B.weighting_provenance(comparators=[]),
+    "description": "Step 12 operational temperature/ageing scenario projection of the three-zone "
+                   "posterior ensemble, weighted by the primary formal censored likelihood",
+    "informal_threshold_reference_only": B.RMSE_THR,
+    "n_retained_draws": int(n_beh),
+    "retention_rule": "draws whose formal censored relative weight exceeds WEIGHT_FLOOR; this is a "
+                      "numerical truncation of a likelihood, NOT a behavioural acceptance threshold",
     "C_CRIT": C_CRIT,
     "assessment_window_h": [B.WARMUP_H, B.DURATION_H],
     "T_window_intervals": int(T_WINDOW),
@@ -667,7 +672,7 @@ report = {
         "demand_at_risk": "sum of base demand over junctions with P_min > 0.5 "
                           "(zero-demand nodes contribute 0)",
         "median_over_nodes_of_mean_window_min_mgl":
-            "per junction take the GLUE-weighted mean of the per-member window minimum, "
+            "per junction take the likelihood-weighted mean of the per-member window minimum, "
             "then the median of those 92 node values (NOT a pooled member-node median)",
         "likelihood_bands_on_P_min": {
             "rare": "P_min < 0.05", "unlikely": "0.05 <= P_min < 0.20",
@@ -718,7 +723,7 @@ report = {
     "ageing_sensitivity": alpha_rows,
     "sigma_convention": "observation sigma = 0.1 mg/L is one standard deviation",
     "product_statement": (
-        "GLUE calibration-conditioned scenario projection from the network model; not a "
+        "calibration-conditioned scenario projection from the network model; not a "
         "sensor nowcast, not a spatial measurement, and not a statement that water is safe"
     ),
     "consequence_terciles_L_s": [q1, q2],
