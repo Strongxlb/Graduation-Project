@@ -17,6 +17,7 @@ import time
 import numpy as np
 from scipy.linalg import block_diag
 import wq_common as B
+import provenance
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ZKEYS = ["old", "average", "new"]
@@ -36,9 +37,9 @@ go, ga, gn = grids["old"], grids["average"], grids["new"]
 
 # ---- residual grid e[i,j,k,:] = (sim − obs), node-major (node0 h0..48, node1 ...) ----
 RES_CACHE = os.path.join(HERE, "baseline_cache", "step7c_resid_grid.npy")
-if os.path.exists(RES_CACHE):
-    E = np.load(RES_CACHE)
-    print("loaded cached residual grid", E.shape)
+E = provenance.load_keyed_array(RES_CACHE, ng=NG)
+if E is not None:
+    print("loaded cached residual grid", E.shape, "(configuration matches)")
 else:
     E = np.empty((NG, NG, NG, NT * NMON), dtype=np.float64)
     t0 = time.time()
@@ -50,7 +51,7 @@ else:
                 E[i, j, k] = (sim - obs).T.ravel()               # node-major
         if (i + 1) % 3 == 0:
             print(f"  grid slice {i+1}/{NG} ({time.time()-t0:.0f}s)", flush=True)
-    np.save(RES_CACHE, E)
+    provenance.save_keyed_array(RES_CACHE, E, ng=NG)
     print(f"built residual grid in {time.time()-t0:.0f}s")
 
 # ---- AR(1) covariance and its inverse ----

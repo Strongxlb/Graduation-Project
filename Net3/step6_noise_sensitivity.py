@@ -61,7 +61,8 @@ rows = []
 for sigma in SIGMAS:
     thr = B.threshold_for_sigma(sigma)
     per = {z: {"sd_ret": [], "sd": []} for z in ZKEYS}
-    ret, band = [], []
+    ret, band, ess, accepted = [], [], [], []
+    n_empty = 0
     for seed in NOISE_SEEDS:
         rng = np.random.default_rng(seed)
         obs = np.clip(truth_mon + rng.normal(0, sigma, truth_mon.shape), 0, None)[B.WARMUP_H:]
@@ -70,8 +71,14 @@ for sigma in SIGMAS:
         beh = rmse < thr
         w = L * beh
         if w.sum() == 0:
+            # A realisation with an empty behavioural set used to be skipped silently, which makes
+            # the reported median a median over the realisations that happened to sample a good
+            # parameter set — a selection bias that grows as sigma shrinks. Now it is counted.
+            n_empty += 1
             continue
         w = w / w.sum()
+        ess.append(float(1.0 / np.sum(w ** 2)))
+        accepted.append(int(beh.sum()))
         ret.append(float(beh.mean()))
         for z in ZKEYS:
             m = np.sum(w * S[z])
@@ -83,9 +90,18 @@ for sigma in SIGMAS:
         lo = np.array([weighted_quantile(C_all[bidx, t, kk], wb, 0.05) for t in range(C_all.shape[1])])
         hi = np.array([weighted_quantile(C_all[bidx, t, kk], wb, 0.95) for t in range(C_all.shape[1])])
         band.append(float(np.mean(hi - lo)))
+    n_valid = len(ret)
     row = {"sigma": sigma, "threshold": thr,
            "retention_med": med_iqr(ret)[0],
-           "band_node15_med": med_iqr(band)[0]}
+           "band_node15_med": med_iqr(band)[0],
+           # sampling-adequacy diagnostics: without these the row cannot be quoted quantitatively
+           "n_valid": n_valid, "n_realisations": len(NOISE_SEEDS), "n_empty": n_empty,
+           "accepted_med": float(np.median(accepted)), "accepted_min": int(np.min(accepted)),
+           "ess_med": float(np.median(ess)), "ess_min": float(np.min(ess)),
+           # Flag on ESS, not on the accepted count: a 5-95% interval needs roughly 100 effective
+           # members before each tail is resolved by more than a handful of them.
+           "sampling_limited": bool(n_empty > 0 or np.median(ess) < 100),
+           "sampling_limited_criterion": "n_empty > 0 or median ESS < 100"}
     for z in ZKEYS:
         m, lo, hi = med_iqr(per[z]["sd_ret"])
         sm = med_iqr(per[z]["sd"])[0]
@@ -94,14 +110,19 @@ for sigma in SIGMAS:
 
 # ---- report ----
 print("=== Step 6: noise / sensor-accuracy sensitivity (three-zone, threshold scales with σ) ===")
-print(f"{'σ':>5} {'thr':>6} {'ret':>5} {'band15':>7} | "
+print(f"{'σ':>5} {'thr':>6} {'ret':>5} {'band15':>7} {'valid':>6} {'accpt':>6} {'ESS':>7} | "
       f"{'old SDret':>18} {'avg SDret':>18} {'new SDret':>18}")
 for r in rows:
     def f(z):
         s = r[z]
         return f"{s['sd_ret_med']*100:4.0f}% [{s['sd_ret_iqr'][0]*100:.0f}-{s['sd_ret_iqr'][1]*100:.0f}]"
+    flag = " <- sampling-limited" if r["sampling_limited"] else ""
     print(f"{r['sigma']:>5} {r['threshold']:>6.3f} {r['retention_med']*100:>4.0f}% "
-          f"{r['band_node15_med']:>7.3f} | {f('old'):>18} {f('average'):>18} {f('new'):>18}")
+          f"{r['band_node15_med']:>7.3f} {r['n_valid']:>3}/{r['n_realisations']:<2} "
+          f"{r['accepted_med']:>6.0f} {r['ess_med']:>7.1f} | "
+          f"{f('old'):>18} {f('average'):>18} {f('new'):>18}{flag}")
+print("valid = realisations with a non-empty behavioural set (the rest are excluded, which biases")
+print("the median upward); accept / ESS = median accepted count and effective sample size.")
 
 
 def _jsafe(o):

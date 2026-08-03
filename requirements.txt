@@ -1,25 +1,17 @@
-# Core scientific stack
-numpy>=1.24
-pandas>=2.0
-scipy>=1.10
-matplotlib>=3.7
+# pip-only mirror of environment.yml, for a venv instead of conda.
+# Pins match the environment that produced Net3/baseline_cache/ (see cache_manifest.json).
+# Requires Python 3.12 or newer: wntr's EPANET loader uses importlib.resources above 3.11 and
+# pkg_resources at or below it, so older Pythons additionally need setuptools<81.
 
-# Water network modelling
-wntr>=1.1.0
+# Numerical stack — pinned, results-affecting
+numpy==2.4.2
+scipy==1.17.1
+pandas==2.3.3
+matplotlib==3.10.8
 
-# Notebooks (optional but useful for exploration)
-jupyterlab>=4.0
+# Water network modelling (wheel ships the EPANET binary)
+wntr==1.4.0
+
+# Notebooks (exploration only; the pipeline is plain scripts)
+jupyterlab>=4.5
 ipywidgets>=8.0
-
-# Sampling / sensitivity / uncertainty (used from Week 5 onward)
-SALib>=1.4
-pyDOE2>=1.3
-
-# Bayesian / MCMC calibration (Week 8+; uncomment when needed)
-# emcee>=3.1
-# pymc>=5.0
-# arviz>=0.16
-
-# Code quality (optional)
-ruff>=0.1
-black>=24.0

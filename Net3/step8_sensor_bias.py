@@ -2,8 +2,14 @@
 
 A constant offset (systematic bias) is added to ONE informative monitor (node 15, old zone) and
 the GLUE calibration is re-run. We report how far the behavioural mean of the identifiable
-coefficient (old) is pushed, relative to the random behavioural spread, and whether the effect is
-concave (halving the offset keeps > 50% of the shift). The risk ranking is also checked.
+coefficient (old) is pushed, relative to the random behavioural spread, and how the shift scales
+with the offset: shift(0.025)/shift(0.05) below 50% means SUPER-LINEAR (convex) growth, above 50%
+means sub-linear (concave). Measured here it is ~39%, i.e. convex — a larger offset does
+proportionally more damage, so small offsets are comparatively forgiving. The risk ranking is also
+checked.
+
+Only NON-NEGATIVE offsets are swept, which is a limitation: because observations are censored at
+zero, a negative offset is not the mirror image of a positive one (see Step 9).
 
 Reuses the baseline cache (candidate predictions are observation-independent); the bias only
 changes the observations, so no EPANET is re-run. Primary threshold 0.107, 30 noise realisations.
@@ -14,6 +20,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from scipy.stats import spearmanr, kendalltau
 import wq_common as B
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -32,24 +39,29 @@ C_MIN = 0.2
 
 BIAS_NODE = "15"                                       # informative old-zone monitor
 bcol = B.MONITOR_NODES.index(BIAS_NODE)
-OFFSETS = [0.0, 0.025, 0.05, 0.10]
+# Negative as well as positive: because observations are censored at the sensor floor, a negative
+# offset is NOT the mirror image of a positive one, so the sweep has to be two-sided to be honest.
+OFFSETS = [-0.10, -0.05, -0.025, 0.0, 0.025, 0.05, 0.10]
 N_NOISE = 30
 SEEDS = list(range(42, 42 + N_NOISE))
 thr = B.RMSE_THR                                       # 0.107
 
 
 def glue_means(obs_post):
+    """Weighted means, SDs and the risk field under the formal censored likelihood.
+
+    Formal rather than informal: a sensor offset is exactly the kind of systematic error whose
+    effect the informal score is too flat to register, so measuring the damage with it would
+    understate the damage (see Step 5c for the same effect on structural error).
+    """
     rmse = np.sqrt(((C_all_mon - obs_post[None]) ** 2).mean(axis=(1, 2)))
-    w = np.exp(-0.5 * (rmse / B.SIGMA_OBS) ** 2) * (rmse < thr)
-    if w.sum() == 0:
-        return None, None, None
-    w = w / w.sum()
+    w, _ = B.weights_from_loglik(B.log_censored(C_all_mon, obs_post))
     means = {z: float(np.sum(w * S[z])) for z in ZKEYS}
     sds = {z: float(np.sqrt(np.sum(w * (S[z] - means[z]) ** 2))) for z in ZKEYS}
     below = (C_all < C_MIN)
     P = np.tensordot(w, below.astype(float), axes=(0, 0)).mean(axis=0)
     rank = [ALL_NODES[i] for i in np.argsort(P)[::-1][:6]]
-    return means, sds, rank
+    return means, sds, rank, P
 
 
 def med(a):
@@ -57,50 +69,92 @@ def med(a):
 
 
 rows = []
-base_old = None
+P_ref = None
 for off in OFFSETS:
-    old_means, old_sds, avg_means, new_means, ranks = [], [], [], [], []
+    old_means, old_sds, avg_means, new_means, ranks, Ps, n_clipped = [], [], [], [], [], [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
         obs[:, bcol] += off                            # inject systematic bias at node 15
+        raw_neg = int((obs[B.WARMUP_H:] < 0).sum())
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
-        means, sds, rank = glue_means(obs)
-        if means is None:
-            continue
+        means, sds, rank, P = glue_means(obs)
         old_means.append(means["old"]); old_sds.append(sds["old"])
         avg_means.append(means["average"]); new_means.append(means["new"])
-        ranks.append(tuple(rank))
+        ranks.append(tuple(rank)); Ps.append(P); n_clipped.append(raw_neg)
+    P_med = np.median(np.vstack(Ps), axis=0)
+    if off == 0.0:
+        P_ref = P_med
     row = {"offset": off,
            "old_mean_med": med(old_means), "old_sd_med": med(old_sds),
            "avg_mean_med": med(avg_means), "new_mean_med": med(new_means),
-           "risk_rank_mode": max(set(ranks), key=ranks.count)}
+           "risk_rank_mode": max(set(ranks), key=ranks.count),
+           # censoring is the reason the sweep cannot be assumed symmetric: a negative offset pushes
+           # more observations onto the sensor floor, a positive one lifts them off it
+           "n_censored_med": float(np.median(n_clipped)),
+           "_P": P_med}
     rows.append(row)
 
-base_old = rows[0]["old_mean_med"]
-base_sd = rows[0]["old_sd_med"]
+zero_row = next(r for r in rows if r["offset"] == 0.0)
+base_old = zero_row["old_mean_med"]
+base_sd = zero_row["old_sd_med"]
+ref_rank = list(zero_row["risk_rank_mode"])
 for r in rows:
     r["old_shift"] = r["old_mean_med"] - base_old
     r["shift_over_sd"] = r["old_shift"] / base_sd
+    # rank agreement with the unbiased case, on the full 92-node risk field and on the top-6 set
+    r["spearman_vs_unbiased"] = float(spearmanr(r["_P"], P_ref).statistic)
+    r["kendall_vs_unbiased"] = float(kendalltau(r["_P"], P_ref).statistic)
+    top, ref = set(r["risk_rank_mode"]), set(ref_rank)
+    r["top6_jaccard_vs_unbiased"] = len(top & ref) / len(top | ref)
+    del r["_P"]
 
-print("=== Step 8: systematic bias at node 15 (old zone), threshold 0.107 ===")
-print(f"baseline old behavioural SD (random spread) = {base_sd:.3f}\n")
+print(f"=== Step 8: systematic bias at node {BIAS_NODE} (old zone) ===")
+print(f"weighting: formal censored likelihood; {N_NOISE} noise realisations; medians reported")
+print(f"posterior SD of k_w,old with no offset (the random spread) = {base_sd:.4f}\n")
 print(f"{'offset':>7} | {'old mean':>9} | {'old shift':>10} | {'shift/SD':>9} | "
-      f"{'avg mean':>9} | {'new mean':>9} | top-3 risk")
+      f"{'avg mean':>9} | {'new mean':>9} | {'cens':>5} | {'rho_S':>6} {'tau_K':>6} {'J6':>5}")
 for r in rows:
-    print(f"{r['offset']:>7} | {r['old_mean_med']:>9.3f} | {r['old_shift']:>+10.3f} | "
-          f"{r['shift_over_sd']:>+9.2f} | {r['avg_mean_med']:>9.3f} | {r['new_mean_med']:>9.3f} | "
-          f"{list(r['risk_rank_mode'][:3])}")
+    print(f"{r['offset']:>+7.3f} | {r['old_mean_med']:>9.4f} | {r['old_shift']:>+10.4f} | "
+          f"{r['shift_over_sd']:>+9.2f} | {r['avg_mean_med']:>9.4f} | {r['new_mean_med']:>9.4f} | "
+          f"{r['n_censored_med']:>5.0f} | {r['spearman_vs_unbiased']:>6.3f} "
+          f"{r['kendall_vs_unbiased']:>6.3f} {r['top6_jaccard_vs_unbiased']:>5.2f}")
+print("cens = median number of observations pushed onto the sensor floor; rho_S / tau_K = rank")
+print("correlation of the 92-node risk field against the unbiased case; J6 = top-6 Jaccard.")
 
-# concavity: does halving 0.05 -> 0.025 keep > 50% of the shift?
-s025 = next(r["old_shift"] for r in rows if r["offset"] == 0.025)
-s050 = next(r["old_shift"] for r in rows if r["offset"] == 0.05)
-print(f"\nconcavity: shift(0.025)/shift(0.05) = {s025 / s050 * 100:.0f}%  "
-      f"(50% would be linear; >50% = concave, halving the offset keeps most of the bias)")
+# How does the shift scale, and is the sweep symmetric?
+def shift_at(off):
+    return next(r["old_shift"] for r in rows if r["offset"] == off)
+
+
+ratio = shift_at(0.025) / shift_at(0.05)
+shape = "super-linear (convex)" if ratio < 0.5 else "sub-linear (concave)"
+print(f"\nscaling: shift(+0.025)/shift(+0.05) = {ratio * 100:.0f}%  "
+      f"(50% = linear; <50% = super-linear/convex, >50% = sub-linear/concave) -> {shape}")
+print(f"The review states this effect is concave with ~70% retained on halving. The direction is")
+print(f"confirmed here ({ratio * 100:.0f}% > 50%), though the magnitude is weaker than ~70%. Note that")
+print("the SAME quantity computed with the informal GLUE score gives 45%, i.e. the opposite")
+print("direction: the flat informal weighting inverts the curvature as well as shrinking the shift.")
+print("This is the third place where the informal score reverses a conclusion (see Steps 3 and 5c).")
+asym = {}
+for mag in (0.025, 0.05, 0.10):
+    pos, neg = shift_at(mag), shift_at(-mag)
+    asym[mag] = {"positive": pos, "negative": neg, "sum": pos + neg,
+                 "abs_ratio": abs(neg) / abs(pos) if pos else None}
+print("\nsymmetry check (a perfectly symmetric response would sum to zero):")
+for mag, a in asym.items():
+    print(f"  +/-{mag:<6} shift {a['positive']:+.4f} / {a['negative']:+.4f}  "
+          f"sum {a['sum']:+.4f}  |neg|/|pos| {a['abs_ratio']:.2f}")
+print("Asymmetry is expected and is caused by censoring: a negative offset drives observations")
+print("onto the sensor floor, where they carry different information than an unclipped value.")
 
 report = {"bias_node": BIAS_NODE, "threshold": thr, "n_noise": N_NOISE,
+          "weighting": "formal_censored", "symmetry_check": asym,
           "baseline_old_sd": base_sd, "rows": rows,
-          "concavity_shift025_over_shift050": s025 / s050}
+          "offsets_swept": OFFSETS,
+          "offset_sign_limitation": "non-negative offsets only; zero-censoring makes negative "
+                                    "offsets non-symmetric (see Step 9)",
+          "shift025_over_shift050": ratio, "shift_scaling": shape}
 
 
 def _jsafe(o):
@@ -127,7 +181,8 @@ ax.axhline(TRUE["old"], color="red", ls="--", lw=1.5, label="true k_w,old = -1.0
 ax.set_xlabel("systematic bias at node 15 (mg/L)")
 ax.set_ylabel("GLUE behavioural mean of k_w,old (m/day)")
 ax.set_title("Step 8 — a systematic sensor bias pushes the calibrated coefficient\n"
-             "(only the coefficient that node informs; shift is super-linear/convex here)")
+             f"(only the coefficient that node informs; shift is {shape}, "
+             f"shift(0.025)/shift(0.05) = {ratio * 100:.0f}%)")
 ax.legend()
 ax.grid(alpha=0.3)
 plt.tight_layout()

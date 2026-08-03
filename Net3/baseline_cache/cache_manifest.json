@@ -1,0 +1,67 @@
+{
+  "generated_utc": "2026-08-03T22:14:45+00:00",
+  "git": {
+    "commit": "973083b016bfe707c876299b30227d8d54776c6d",
+    "dirty": true
+  },
+  "net3_inp": "models/net3_frozen/Net3.inp",
+  "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
+  "config": {
+    "monitor_nodes": [
+      "107",
+      "113",
+      "15",
+      "145",
+      "209",
+      "231"
+    ],
+    "inlet_mgl": 1.0,
+    "tank_init_mgl": 0.5,
+    "duration_h": 168,
+    "warmup_h": 120,
+    "hydraulic_timestep_s": 3600,
+    "report_timestep_s": 3600,
+    "quality_timestep_s": 300,
+    "kb_fixed": -0.5,
+    "kw_true": [
+      -1.0,
+      -0.1,
+      -0.05
+    ],
+    "prior": {
+      "old": [
+        -1.5,
+        -0.2
+      ],
+      "avg": [
+        -0.2,
+        -0.04
+      ],
+      "new": [
+        -0.1,
+        -0.005
+      ]
+    },
+    "n_mc": 8192,
+    "sigma_obs": 0.1,
+    "rmse_thr_primary": 0.107,
+    "rmse_thr_draft": 0.12,
+    "n_resid": 294,
+    "noise_seed": 42,
+    "sample_seed": 0,
+    "zone_rule": {
+      "y_low": 10.0,
+      "x_mid": 26.0,
+      "cross_zone": "weaker (newer) side wins"
+    }
+  },
+  "config_sha256": "ef24a5edb651986296266d0cda1c6657daae60f6e8d36c48e683e2792f23f574",
+  "python": "3.13.12",
+  "python_minor": "3.13",
+  "numpy": "2.4.2",
+  "scipy": "1.17.1",
+  "wntr": "1.4.0",
+  "conda_env": "water-supply",
+  "sys_prefix": "/opt/anaconda3/envs/water-supply",
+  "pandas": "2.3.3"
+}

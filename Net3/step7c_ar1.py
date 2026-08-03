@@ -74,6 +74,39 @@ for j, z in enumerate(ZKEYS):
     print(f"{z:>8} | {crlb_indep[j]:10.3f} | {crlb_ar1[j]:10.3f} | {wf:8.2f}x | "
           f"{crlb_indep[j]/PRIOR_SD[z]:16.2f} | {crlb_ar1[j]/PRIOR_SD[z]:16.2f}")
 
+# ---- sweep over rho: rho is ASSUMED, not estimated, so its influence must be shown ----
+# The baseline observations are generated iid, so no value of rho is supported by this data set.
+# What can be reported honestly is how sensitive the intervals are to the assumption.
+RHO_SWEEP = [0.0, 0.2, 0.4, 0.6, 0.8]
+sweep = []
+print(f"\n=== sensitivity to the ASSUMED autocorrelation (rho is not estimated here) ===")
+print(f"{'rho':>5} {'N_eff':>7} | " + " | ".join(f"{z} CRLB (x indep)" for z in ZKEYS))
+for rho in RHO_SWEEP:
+    blk = SIGMA ** 2 * rho ** np.abs(tt[:, None] - tt[None, :])
+    Sig = block_diag(*[blk for _ in range(NMON)])
+    crlb = np.sqrt(np.diag(np.linalg.inv(J.T @ np.linalg.inv(Sig) @ J)))
+    row = {"rho": rho, "n_eff": float(NT * NMON * (1 - rho) / (1 + rho)),
+           "ess_factor": float(np.sqrt((1 + rho) / (1 - rho))) if rho < 1 else None,
+           "coef": {z: {"crlb": float(crlb[j]),
+                        "widening_vs_indep": float(crlb[j] / crlb_indep[j]),
+                        "crlb_over_prior": float(crlb[j] / PRIOR_SD[z])}
+                    for j, z in enumerate(ZKEYS)}}
+    sweep.append(row)
+    print(f"{rho:>5.1f} {row['n_eff']:>7.0f} | " +
+          " | ".join(f"{crlb[j]:.4f} ({crlb[j] / crlb_indep[j]:.2f}x)" for j in range(3)))
+
+worst = sweep[-1]["coef"]
+print(f"\nAcross the tested range the CRLB inflates by up to "
+      f"{max(v['widening_vs_indep'] for v in worst.values()):.1f}x, and at rho = 0.8 the ratio to "
+      f"the prior SD reaches {max(v['crlb_over_prior'] for v in worst.values()):.2f}.")
+print("So every interval in this project is a FLOOR whose height depends on an assumption that the")
+print("synthetic data cannot test. Estimating rho needs real monitoring residuals (ACF/PACF or a")
+print("likelihood in which rho is a free parameter); until then the thesis must write 'if the errors")
+print("had AR(1) structure with rho = X' and never 'the errors are autocorrelated with rho = X'.")
+
+report["rho_sweep"] = sweep
+report["rho_is_assumed"] = ("the baseline observations are generated iid, so this is an "
+                            "assumed-covariance sensitivity analysis, not an estimate of rho")
 with open(os.path.join(HERE, "baseline_cache", "step7c_ar1.json"), "w") as f:
     json.dump(report, f, indent=2)
 print("\nsaved step7c_ar1.json")

@@ -1,15 +1,15 @@
 {
   "description": "Step 12 operational temperature/ageing scenario projection of the three-zone GLUE ensemble",
   "threshold": 0.107,
-  "n_behavioural": 1126,
+  "n_behavioural": 2196,
   "C_CRIT": 0.2,
   "assessment_window_h": [
-    24,
-    72
+    120,
+    168
   ],
   "T_window_intervals": 48,
   "definitions": {
-    "P_min": "sum_i w_i * 1[min_t C_i(t) < C_crit] over t = 24..72 h (48-hour window minimum, NOT a 24-hour daily minimum)",
+    "P_min": "sum_i w_i * 1[min_t C_i(t) < C_crit] over t = 120..168 h (48-hour window minimum, NOT a 24-hour daily minimum)",
     "P_bar": "E[D]/T_window, the Step-10 time-averaged below-threshold probability",
     "E_duration_h": "weighted expected hours below C_crit, trapezoid over 48 intervals",
     "E_deficit": "weighted expected cumulative deficit, mg/L*h",
@@ -46,19 +46,30 @@
       "high": "7 <= score <= 9",
       "very high": "score >= 10"
     },
-    "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), normalised by its maximum; forced to 0 at zero-demand nodes"
+    "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), normalised by its maximum; forced to 0 at zero-demand nodes. This ranks where MEASUREMENT would reduce uncertainty most, so a node with P_min = 1 scores 0: it is confidently at risk, not low priority. Intervention priority is the separate risk_score column; the two must not be merged."
   },
   "uncertainty_sources": {
-    "kinetics": "GLUE behavioural ensemble (1126 members, weights at threshold 0.107)",
+    "kinetics": "formal censored-likelihood weights over 2196 retained draws (ESS 156.7); informal GLUE is a comparator, not the primary",
     "Ea_bulk_J_per_mol": {
       "mean": 45000.0,
-      "sd": 8000.0
+      "sd": 8000.0,
+      "drawn_min": 17592.964736200032,
+      "drawn_max": 72051.22763305799,
+      "truncated_at": 5000.0
     },
     "Ea_wall_J_per_mol": {
       "mean": 35000.0,
-      "sd": 10000.0
+      "sd": 10000.0,
+      "drawn_min": 5103.177575996382,
+      "drawn_max": 70240.68733746296,
+      "truncated_at": 5000.0
     },
-    "water_temperature_C": "dT ~ N(0, 1.0^2) added to the scenario mean",
+    "water_temperature_span_C": [
+      8.477577557839687,
+      23.501353202146824
+    ],
+    "water_temperature_C": "dT ~ N(0, 1.0^2) added to the scenario mean, truncated to [-4.0, +4.0] degC so every scenario stays inside the 8.0-24.0 degC validity range",
+    "water_temperature_draws_resampled": 0,
     "common_random_numbers": true
   },
   "T_ref_C": 12.0,
@@ -92,34 +103,34 @@
       "ageing_set": "mild",
       "alpha_avg": 1.15,
       "alpha_old": 1.4,
-      "P_min_gt_0.5_nodes": 31,
-      "demand_at_risk_L_s": 49.5,
+      "P_min_gt_0.5_nodes": 30,
+      "demand_at_risk_L_s": 49.4,
       "high_or_very_high": 15,
       "indeterminate": 4,
-      "net_mean_E_duration_h": 5.676,
-      "net_mean_E_deficit": 0.518
+      "net_mean_E_duration_h": 5.515,
+      "net_mean_E_deficit": 0.55
     },
     {
       "ageing_set": "central",
       "alpha_avg": 1.35,
       "alpha_old": 1.85,
-      "P_min_gt_0.5_nodes": 32,
-      "demand_at_risk_L_s": 49.5,
-      "high_or_very_high": 16,
+      "P_min_gt_0.5_nodes": 31,
+      "demand_at_risk_L_s": 49.4,
+      "high_or_very_high": 15,
       "indeterminate": 4,
-      "net_mean_E_duration_h": 6.032,
-      "net_mean_E_deficit": 0.548
+      "net_mean_E_duration_h": 5.912,
+      "net_mean_E_deficit": 0.579
     },
     {
       "ageing_set": "severe",
       "alpha_avg": 1.5,
       "alpha_old": 2.2,
-      "P_min_gt_0.5_nodes": 32,
-      "demand_at_risk_L_s": 49.5,
+      "P_min_gt_0.5_nodes": 31,
+      "demand_at_risk_L_s": 49.4,
       "high_or_very_high": 16,
       "indeterminate": 4,
-      "net_mean_E_duration_h": 6.266,
-      "net_mean_E_deficit": 0.569
+      "net_mean_E_duration_h": 6.178,
+      "net_mean_E_deficit": 0.599
     }
   ],
   "sigma_convention": "observation sigma = 0.1 mg/L is one standard deviation",
@@ -131,122 +142,125 @@
   "scenario_summary": [
     {
       "scenario": "A. Baseline 12 \u00b0C",
-      "mean_kb": -0.501,
-      "mean_kw_old": -1.045,
-      "P_min_gt_0.5_nodes": 22,
-      "demand_at_risk_L_s": 36.4,
-      "pct_demand_at_risk": 18.9,
+      "mean_kb": -0.504,
+      "mean_kw_old": -0.994,
+      "P_min_gt_0.5_nodes": 21,
+      "demand_at_risk_L_s": 36.3,
+      "pct_demand_at_risk": 18.8,
       "high_or_very_high": 10,
-      "indeterminate": 8,
-      "net_mean_P_bar": 0.0546,
-      "net_mean_E_duration_h": 2.621,
-      "net_mean_E_deficit": 0.221
+      "indeterminate": 0,
+      "net_mean_P_bar": 0.0708,
+      "net_mean_E_duration_h": 3.398,
+      "net_mean_E_deficit": 0.2216
     },
     {
       "scenario": "B. Warm season 16 \u00b0C",
-      "mean_kb": -0.652,
-      "mean_kw_old": -1.285,
-      "P_min_gt_0.5_nodes": 29,
-      "demand_at_risk_L_s": 45.2,
-      "pct_demand_at_risk": 23.5,
+      "mean_kb": -0.655,
+      "mean_kw_old": -1.222,
+      "P_min_gt_0.5_nodes": 28,
+      "demand_at_risk_L_s": 45.0,
+      "pct_demand_at_risk": 23.4,
       "high_or_very_high": 13,
       "indeterminate": 8,
-      "net_mean_P_bar": 0.082,
-      "net_mean_E_duration_h": 3.935,
-      "net_mean_E_deficit": 0.3278
+      "net_mean_P_bar": 0.0884,
+      "net_mean_E_duration_h": 4.245,
+      "net_mean_E_deficit": 0.3645
     },
     {
       "scenario": "C. Heatwave 20 \u00b0C",
-      "mean_kb": -0.845,
-      "mean_kw_old": -1.575,
-      "P_min_gt_0.5_nodes": 30,
-      "demand_at_risk_L_s": 48.0,
-      "pct_demand_at_risk": 24.9,
+      "mean_kb": -0.848,
+      "mean_kw_old": -1.501,
+      "P_min_gt_0.5_nodes": 29,
+      "demand_at_risk_L_s": 47.8,
+      "pct_demand_at_risk": 24.8,
       "high_or_very_high": 14,
       "indeterminate": 4,
-      "net_mean_P_bar": 0.1118,
-      "net_mean_E_duration_h": 5.364,
-      "net_mean_E_deficit": 0.4873
+      "net_mean_P_bar": 0.1087,
+      "net_mean_E_duration_h": 5.218,
+      "net_mean_E_deficit": 0.5218
     },
     {
       "scenario": "D. Heatwave 20 \u00b0C + ageing stress",
-      "mean_kb": -0.845,
-      "mean_kw_old": -2.914,
-      "P_min_gt_0.5_nodes": 32,
-      "demand_at_risk_L_s": 49.5,
-      "pct_demand_at_risk": 25.7,
-      "high_or_very_high": 16,
+      "mean_kb": -0.848,
+      "mean_kw_old": -2.777,
+      "P_min_gt_0.5_nodes": 31,
+      "demand_at_risk_L_s": 49.4,
+      "pct_demand_at_risk": 25.6,
+      "high_or_very_high": 15,
       "indeterminate": 4,
-      "net_mean_P_bar": 0.1257,
-      "net_mean_E_duration_h": 6.032,
-      "net_mean_E_deficit": 0.548
+      "net_mean_P_bar": 0.1232,
+      "net_mean_E_duration_h": 5.912,
+      "net_mean_E_deficit": 0.579
     }
   ],
   "reference_at_T_ref_exact": {
-    "P_min_gt_0.5_nodes": 22,
-    "demand_at_risk_L_s": 36.4,
-    "net_mean_E_deficit": 0.2193
+    "P_min_gt_0.5_nodes": 21,
+    "demand_at_risk_L_s": 36.3,
+    "net_mean_E_deficit": 0.2181
   },
   "dosing_heatwave": [
     {
       "inlet_dose_mgl": 1.0,
-      "P_min_gt_0.5_nodes": 30,
-      "demand_at_risk_L_s": 48.0,
-      "pct_demand_at_risk": 24.9,
-      "net_mean_P_min": 0.3317,
-      "net_mean_E_duration_h": 5.364,
-      "net_mean_E_deficit": 0.4873,
-      "median_over_nodes_of_mean_window_min_mgl": 0.46
+      "P_min_gt_0.5_nodes": 29,
+      "demand_at_risk_L_s": 47.8,
+      "pct_demand_at_risk": 24.8,
+      "net_mean_P_min": 0.3246,
+      "net_mean_E_duration_h": 5.218,
+      "net_mean_E_deficit": 0.5218,
+      "median_over_nodes_of_mean_window_min_mgl": 0.463
     },
     {
       "inlet_dose_mgl": 1.15,
-      "P_min_gt_0.5_nodes": 29,
-      "demand_at_risk_L_s": 45.2,
-      "pct_demand_at_risk": 23.5,
-      "net_mean_P_min": 0.3174,
-      "net_mean_E_duration_h": 4.587,
-      "net_mean_E_deficit": 0.411,
-      "median_over_nodes_of_mean_window_min_mgl": 0.529
+      "P_min_gt_0.5_nodes": 28,
+      "demand_at_risk_L_s": 45.0,
+      "pct_demand_at_risk": 23.4,
+      "net_mean_P_min": 0.3112,
+      "net_mean_E_duration_h": 4.628,
+      "net_mean_E_deficit": 0.4527,
+      "median_over_nodes_of_mean_window_min_mgl": 0.532
     },
     {
       "inlet_dose_mgl": 1.3,
-      "P_min_gt_0.5_nodes": 29,
-      "demand_at_risk_L_s": 45.2,
-      "pct_demand_at_risk": 23.5,
-      "net_mean_P_min": 0.2989,
-      "net_mean_E_duration_h": 3.955,
-      "net_mean_E_deficit": 0.3532,
-      "median_over_nodes_of_mean_window_min_mgl": 0.598
+      "P_min_gt_0.5_nodes": 28,
+      "demand_at_risk_L_s": 45.0,
+      "pct_demand_at_risk": 23.4,
+      "net_mean_P_min": 0.2915,
+      "net_mean_E_duration_h": 4.288,
+      "net_mean_E_deficit": 0.3957,
+      "median_over_nodes_of_mean_window_min_mgl": 0.601
     }
   ],
   "dosing_boundary": "reservoir source quality AND tank initial quality both scaled by dose",
   "dosing_linearity_check": {
-    "max_abs_err_mgL": 2.2798776626586914e-06,
+    "max_abs_err_mgL": 1.4215707778930664e-05,
     "conditions": "holds under fixed hydraulics and demands, first-order bulk and wall kinetics, and proportional scaling of ALL source and initial chlorine concentrations; a dose factor r is then equivalent to evaluating the unscaled field against C_crit / r"
   },
   "dosing_paired_warmup_test": {
-    "design": "identical member subset, weights and scenario draws; only the simulation horizon differs, so the contrast isolates warm-up length",
+    "design": "identical member subset, weights and scenario draws; only the simulation horizon differs, so the contrast isolates warm-up length. 'long' is the CURRENT configuration justified by Step 0; 'short' is the draft setting, so the rows measure what the draft's warm-up cost rather than testing the current one",
     "short": {
       "duration_h": 72,
-      "warmup_h": 24
+      "warmup_h": 24,
+      "role": "draft comparator"
     },
     "long": {
       "duration_h": 168,
-      "warmup_h": 120
+      "warmup_h": 120,
+      "role": "current baseline"
     },
-    "n_members": 141,
+    "n_members": 275,
     "subset_stride": 8,
     "rows": [
       {
         "inlet_dose_mgl": 1.0,
-        "short_P_min_gt_0.5_nodes": 30,
-        "long_P_min_gt_0.5_nodes": 30,
-        "short_demand_at_risk_L_s": 48.0,
-        "long_demand_at_risk_L_s": 49.4,
-        "short_net_mean_E_duration_h": 5.367,
-        "long_net_mean_E_duration_h": 5.409,
-        "short_net_mean_E_deficit": 0.4854,
-        "long_net_mean_E_deficit": 0.533
+        "short_P_min_gt_0.5_nodes": 31,
+        "long_P_min_gt_0.5_nodes": 31,
+        "short_demand_at_risk_L_s": 49.5,
+        "long_demand_at_risk_L_s": 49.5,
+        "short_net_mean_E_duration_h": 5.37,
+        "long_net_mean_E_duration_h": 5.389,
+        "short_net_mean_E_deficit": 0.5052,
+        "long_net_mean_E_deficit": 0.5484,
+        "long_minus_short_rel_E_deficit": 0.0856
       },
       {
         "inlet_dose_mgl": 1.15,
@@ -254,10 +268,11 @@
         "long_P_min_gt_0.5_nodes": 29,
         "short_demand_at_risk_L_s": 45.2,
         "long_demand_at_risk_L_s": 47.8,
-        "short_net_mean_E_duration_h": 4.583,
-        "long_net_mean_E_duration_h": 4.798,
-        "short_net_mean_E_deficit": 0.4089,
-        "long_net_mean_E_deficit": 0.4601
+        "short_net_mean_E_duration_h": 4.655,
+        "long_net_mean_E_duration_h": 4.788,
+        "short_net_mean_E_deficit": 0.4306,
+        "long_net_mean_E_deficit": 0.4789,
+        "long_minus_short_rel_E_deficit": 0.1121
       },
       {
         "inlet_dose_mgl": 1.3,
@@ -265,34 +280,35 @@
         "long_P_min_gt_0.5_nodes": 28,
         "short_demand_at_risk_L_s": 45.2,
         "long_demand_at_risk_L_s": 45.0,
-        "short_net_mean_E_duration_h": 3.939,
-        "long_net_mean_E_duration_h": 4.391,
-        "short_net_mean_E_deficit": 0.3512,
-        "long_net_mean_E_deficit": 0.4005
+        "short_net_mean_E_duration_h": 4.04,
+        "long_net_mean_E_duration_h": 4.369,
+        "short_net_mean_E_deficit": 0.3736,
+        "long_net_mean_E_deficit": 0.422,
+        "long_minus_short_rel_E_deficit": 0.1297
       }
     ]
   },
-  "baseline_demand_at_risk_L_s": 36.41818496993601,
+  "baseline_demand_at_risk_L_s": 36.25415045929601,
   "dosing_restores_baseline": false,
-  "n_escalating_consumer_nodes": 8,
-  "escalating_demand_L_s": 21.799999999999997,
+  "n_escalating_consumer_nodes": 7,
+  "escalating_demand_L_s": 18.92,
   "top_escalating": [
     {
       "node": "215",
       "P_min_baseline": 0.0,
-      "P_min_heatwave": 0.075,
-      "P_min_heat_ageing": 0.237,
-      "dP_ageing": 0.162,
+      "P_min_heatwave": 0.023,
+      "P_min_heat_ageing": 0.114,
+      "dP_ageing": 0.091,
       "demand_L_s": 5.82,
       "band_current": "low",
-      "band_heat_ageing": "high",
+      "band_heat_ageing": "medium",
       "monitored": false
     },
     {
       "node": "177",
-      "P_min_baseline": 0.002,
-      "P_min_heatwave": 0.998,
-      "P_min_heat_ageing": 0.998,
+      "P_min_baseline": 0.0,
+      "P_min_heatwave": 1.0,
+      "P_min_heat_ageing": 1.0,
       "dP_ageing": 0.0,
       "demand_L_s": 3.67,
       "band_current": "low",
@@ -300,22 +316,11 @@
       "monitored": false
     },
     {
-      "node": "125",
-      "P_min_baseline": 0.54,
-      "P_min_heatwave": 1.0,
-      "P_min_heat_ageing": 1.0,
-      "dP_ageing": 0.0,
-      "demand_L_s": 2.88,
-      "band_current": "high",
-      "band_heat_ageing": "very high",
-      "monitored": false
-    },
-    {
       "node": "239",
       "P_min_baseline": 0.0,
-      "P_min_heatwave": 0.74,
-      "P_min_heat_ageing": 0.879,
-      "dP_ageing": 0.14,
+      "P_min_heatwave": 0.832,
+      "P_min_heat_ageing": 0.986,
+      "dP_ageing": 0.155,
       "demand_L_s": 2.81,
       "band_current": "low",
       "band_heat_ageing": "very high",
@@ -323,21 +328,21 @@
     },
     {
       "node": "219",
-      "P_min_baseline": 0.155,
-      "P_min_heatwave": 0.984,
+      "P_min_baseline": 0.011,
+      "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
-      "dP_ageing": 0.016,
+      "dP_ageing": 0.0,
       "demand_L_s": 2.61,
-      "band_current": "medium",
+      "band_current": "low",
       "band_heat_ageing": "very high",
       "monitored": false
     },
     {
       "node": "217",
       "P_min_baseline": 0.0,
-      "P_min_heatwave": 0.481,
-      "P_min_heat_ageing": 0.711,
-      "dP_ageing": 0.23,
+      "P_min_heatwave": 0.403,
+      "P_min_heat_ageing": 0.748,
+      "dP_ageing": 0.346,
       "demand_L_s": 1.53,
       "band_current": "low",
       "band_heat_ageing": "high",
@@ -345,21 +350,21 @@
     },
     {
       "node": "225",
-      "P_min_baseline": 0.207,
-      "P_min_heatwave": 0.993,
+      "P_min_baseline": 0.03,
+      "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
-      "dP_ageing": 0.007,
+      "dP_ageing": 0.0,
       "demand_L_s": 1.44,
-      "band_current": "medium",
+      "band_current": "low",
       "band_heat_ageing": "very high",
       "monitored": false
     },
     {
       "node": "231",
-      "P_min_baseline": 0.072,
-      "P_min_heatwave": 0.983,
-      "P_min_heat_ageing": 0.998,
-      "dP_ageing": 0.015,
+      "P_min_baseline": 0.001,
+      "P_min_heatwave": 1.0,
+      "P_min_heat_ageing": 1.0,
+      "dP_ageing": 0.0,
       "demand_L_s": 1.04,
       "band_current": "low",
       "band_heat_ageing": "medium",
@@ -369,73 +374,73 @@
   "top_ageing_delta": [
     {
       "node": "249",
-      "dP_min": 0.281,
-      "P_C": 0.264,
-      "P_D": 0.545,
+      "dP_min": 0.41,
+      "P_C": 0.122,
+      "P_D": 0.533,
       "demand_L_s": 0.0
     },
     {
       "node": "217",
-      "dP_min": 0.23,
-      "P_C": 0.481,
-      "P_D": 0.711,
+      "dP_min": 0.346,
+      "P_C": 0.403,
+      "P_D": 0.748,
       "demand_L_s": 1.53
     },
     {
-      "node": "215",
-      "dP_min": 0.162,
-      "P_C": 0.075,
-      "P_D": 0.237,
-      "demand_L_s": 5.82
-    },
-    {
       "node": "239",
-      "dP_min": 0.14,
-      "P_C": 0.74,
-      "P_D": 0.879,
+      "dP_min": 0.155,
+      "P_C": 0.832,
+      "P_D": 0.986,
       "demand_L_s": 2.81
     },
     {
+      "node": "215",
+      "dP_min": 0.091,
+      "P_C": 0.023,
+      "P_D": 0.114,
+      "demand_L_s": 5.82
+    },
+    {
+      "node": "166",
+      "dP_min": 0.008,
+      "P_C": 0.483,
+      "P_D": 0.492,
+      "demand_L_s": 0.16
+    },
+    {
+      "node": "237",
+      "dP_min": 0.001,
+      "P_C": 0.0,
+      "P_D": 0.001,
+      "demand_L_s": 0.98
+    },
+    {
+      "node": "231",
+      "dP_min": 0.0,
+      "P_C": 1.0,
+      "P_D": 1.0,
+      "demand_L_s": 1.04
+    },
+    {
       "node": "219",
-      "dP_min": 0.016,
-      "P_C": 0.984,
+      "dP_min": 0.0,
+      "P_C": 1.0,
       "P_D": 1.0,
       "demand_L_s": 2.61
     },
     {
-      "node": "231",
-      "dP_min": 0.015,
-      "P_C": 0.983,
-      "P_D": 0.998,
-      "demand_L_s": 1.04
-    },
-    {
-      "node": "237",
-      "dP_min": 0.01,
-      "P_C": 0.002,
-      "P_D": 0.011,
-      "demand_L_s": 0.98
-    },
-    {
-      "node": "225",
-      "dP_min": 0.007,
-      "P_C": 0.993,
+      "node": "40",
+      "dP_min": 0.0,
+      "P_C": 1.0,
       "P_D": 1.0,
-      "demand_L_s": 1.44
+      "demand_L_s": 0.0
     },
     {
       "node": "229",
-      "dP_min": 0.007,
-      "P_C": 0.001,
-      "P_D": 0.008,
-      "demand_L_s": 4.05
-    },
-    {
-      "node": "211",
-      "dP_min": 0.002,
+      "dP_min": 0.0,
       "P_C": 0.0,
-      "P_D": 0.002,
-      "demand_L_s": 0.55
+      "P_D": 0.0,
+      "demand_L_s": 4.05
     }
   ],
   "review_triggers": [
@@ -447,5 +452,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 185.4
+  "runtime_s": 611.5
 }

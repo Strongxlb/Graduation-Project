@@ -99,6 +99,11 @@ def _jsafe(o):
     return str(o)
 
 
+# shift of each coefficient relative to the reference k_b, which is what the log tabulates
+ref = next(r for r in rows if r["kb"] == B.KB_FIXED)
+for r in rows:
+    r["shift_vs_kb_ref"] = {k: r[k] - ref[k] for k in ("old", "avg", "new")}
+
 with open(os.path.join(HERE, "baseline_cache", "step8b_kb_sensitivity.json"), "w") as f:
     json.dump(report, f, indent=2, default=_jsafe)
 

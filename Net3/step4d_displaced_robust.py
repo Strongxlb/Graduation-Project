@@ -2,8 +2,11 @@
 
 Two displacement designs, each keeping prior width fixed and the truth inside the range:
   DOWN    : all three midpoints set to  truth - 1 prior SD  (into the strong-decay regime)
-  UP_OLD  : old midpoint set to  truth + 1 prior SD  (weaker/steep side; upper bound capped
-            at -0.005 to stay non-positive); avg/new kept at their baseline (centred) priors.
+  OLDUP   : old midpoint set to  truth + 1 prior SD  (weaker/steep side; upper bound capped
+            at -0.005 to stay non-positive); avg/new displaced DOWN as above.
+
+Both designs displace all three coefficients, so gap_closed is well defined for every group;
+only the DIRECTION of the old displacement differs between them.
 
 For each design the 2000 forward simulations are run ONCE (monitors only) and cached; then the
 gap-closing statistic is recomputed over N_NOISE independent noisy observation sets and two

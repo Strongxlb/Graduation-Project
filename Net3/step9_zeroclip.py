@@ -18,6 +18,7 @@ import json
 import numpy as np
 from scipy.special import log_ndtr
 import wq_common as B
+import provenance
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIGDIR = os.path.join(HERE, "figures")
@@ -39,10 +40,13 @@ idx15 = ALL_NODES.index("15")
 
 # ---------- 1) count clipped zeros in the ACTUAL calibration data ----------
 full_zero = (noisy == 0.0)
-cal_zero = full_zero[B.WARMUP_H:]                          # (49, 6) = the 294 calibration points
+cal_zero = full_zero[B.WARMUP_H:]                          # the N_RESID calibration points
+n_mon = len(B.MONITOR_NODES)
 print("=== Step 9 (L=0): clipped-zero census ===")
-print(f"full record  : {int(full_zero.sum())} / {full_zero.size}  (6 monitors x 73 h)")
-print(f"calibration  : {int(cal_zero.sum())} / {cal_zero.size}  (6 monitors x 49 post-warm-up h)")
+print(f"full record  : {int(full_zero.sum())} / {full_zero.size}  "
+      f"({n_mon} monitors x {full_zero.shape[0]} h)")
+print(f"calibration  : {int(cal_zero.sum())} / {cal_zero.size}  "
+      f"({n_mon} monitors x {cal_zero.shape[0]} post-warm-up h)")
 zeros_by_node = {}
 for j, node in enumerate(B.MONITOR_NODES):
     zeros_by_node[node] = int(cal_zero[:, j].sum())
@@ -112,7 +116,9 @@ report["top3"] = {"naive": list(rank_n), "cens": list(rank_c)}
 # ---------- 3) old profile curve at L=0 (baseline seed 42) via the residual grid ----------
 NG = 21
 go = np.linspace(*B.PRIOR["old"], NG)
-E = np.load(os.path.join(HERE, "baseline_cache", "step7c_resid_grid.npy"))   # (21,21,21,294) node-major
+E = provenance.require_keyed_array(
+    os.path.join(HERE, "baseline_cache", "step7c_resid_grid.npy"),
+    "the residual grid written by step7c_profile_ar1.py", ng=NG)   # (NG,NG,NG,N_RESID) node-major
 obs_flat = noisy[B.WARMUP_H:].T.ravel()                    # node-major, matches E build
 zmask_flat = (obs_flat == 0.0)
 mu = E + obs_flat[None, None, None, :]                     # sim, node-major
@@ -150,7 +156,7 @@ axA.bar([f"{n}\n({ZONE_OF[n]})" for n in B.MONITOR_NODES],
         [zeros_by_node[n] for n in B.MONITOR_NODES],
         color=["firebrick" if ZONE_OF[n] == "old" else ("goldenrod" if ZONE_OF[n] == "average" else "steelblue")
                for n in B.MONITOR_NODES])
-axA.set_ylabel("clipped-to-zero hours (of 49)")
+axA.set_ylabel(f"clipped-to-zero hours (of {cal_zero.shape[0]})")
 axA.set_title(f"(a) Zero-clipping census: {int(cal_zero.sum())}/{cal_zero.size} calibration points\n"
               "(all in the low-chlorine old zone)")
 axA.grid(alpha=0.3, axis="y")

@@ -148,6 +148,9 @@ node_modules/
 Net3/temp.*
 
 # ------------------------------------------------------------
-# Large regenerable residual grid (rebuild via step7c)
+# Large regenerable likelihood grids over the prior box, and the sidecars recording which
+# configuration built them. Rebuild via step7b / step7c; they are machine-local intermediates.
 # ------------------------------------------------------------
 Net3/baseline_cache/step7c_resid_grid.npy
+Net3/baseline_cache/step7b_rmse_grid.npy
+Net3/baseline_cache/*.npy.key.json

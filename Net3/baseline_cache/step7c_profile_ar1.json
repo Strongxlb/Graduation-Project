@@ -5,28 +5,28 @@
   "coef": {
     "old": {
       "indep": {
-        "lo": -1.175,
+        "lo": -1.1099999999999999,
         "hi": -0.85,
         "open_low": false,
         "open_high": false,
-        "half_width": 0.16250000000000003
+        "half_width": 0.12999999999999995
       },
       "ar1": {
         "lo": -1.24,
-        "hi": -0.7849999999999999,
+        "hi": -0.72,
         "open_low": false,
         "open_high": false,
-        "half_width": 0.22750000000000004
+        "half_width": 0.26
       },
-      "widening": 1.4
+      "widening": 2.000000000000001
     },
     "average": {
       "indep": {
-        "lo": -0.128,
-        "hi": -0.08000000000000002,
+        "lo": -0.136,
+        "hi": -0.08800000000000001,
         "open_low": false,
         "open_high": false,
-        "half_width": 0.023999999999999994
+        "half_width": 0.024
       },
       "ar1": {
         "lo": -0.14400000000000002,
@@ -35,24 +35,24 @@
         "open_high": false,
         "half_width": 0.036000000000000004
       },
-      "widening": 1.5000000000000007
+      "widening": 1.5000000000000002
     },
     "new": {
       "indep": {
-        "lo": -0.06675,
-        "hi": -0.038250000000000006,
-        "open_low": false,
-        "open_high": false,
-        "half_width": 0.014249999999999999
-      },
-      "ar1": {
-        "lo": -0.07150000000000001,
+        "lo": -0.05725000000000001,
         "hi": -0.0335,
         "open_low": false,
         "open_high": false,
-        "half_width": 0.019000000000000003
+        "half_width": 0.011875000000000004
       },
-      "widening": 1.3333333333333337
+      "ar1": {
+        "lo": -0.06675,
+        "hi": -0.02875000000000001,
+        "open_low": false,
+        "open_high": false,
+        "half_width": 0.018999999999999996
+      },
+      "widening": 1.5999999999999992
     }
   }
 }

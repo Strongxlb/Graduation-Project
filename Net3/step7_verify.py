@@ -4,6 +4,12 @@
     Jacobian magnitudes are physical (not a bug).
 (b) Compare CRLB with kb FIXED vs kb MARGINALISED (kb trades off with kw): marginalising kb should
     inflate the kw CRLBs toward the pessimistic (GLUE-like) view.
+(c) Report the two quantities that are easy to confuse, separately:
+      - Jacobian-column cosine, F_ij / sqrt(F_ii F_jj): how COLLINEAR two sensitivity directions
+        are. This is a property of the design, and it is NOT a parameter correlation;
+      - estimator correlation, normalised from Cov(theta_hat) ~ sigma^2 (J'J)^-1: how the two
+        ESTIMATES co-vary. For two parameters the two differ in SIGN, so they must not be
+        interchanged.
 """
 import numpy as np
 import wq_common as B
@@ -56,15 +62,23 @@ crlb_fixed = sigma * np.sqrt(np.diag(np.linalg.inv(J3.T @ J3)))
 # kb MARGINALISED: 4x4 inverse, take kw diagonals
 crlb_marg = sigma * np.sqrt(np.diag(np.linalg.inv(J4.T @ J4)))[:3]
 
-# correlation of each kw with kb (from the 4x4 normalised information)
+# collinearity of the sensitivity directions (design property) — NOT a parameter correlation
 F4 = J4.T @ J4
-D = np.sqrt(np.diag(F4))
-corr = F4 / np.outer(D, D)
+d = np.sqrt(np.diag(F4))
+jac_cos = F4 / np.outer(d, d)
+
+# correlation of the ESTIMATORS, from the inverse Fisher covariance
+cov4 = sigma ** 2 * np.linalg.inv(F4)
+s4 = np.sqrt(np.diag(cov4))
+par_corr = cov4 / np.outer(s4, s4)
 
 print("\n=== CRLB (σ=0.10): kb fixed vs kb marginalised ===")
 print(f"{'coef':>8} | {'priorSD':>8} | {'CRLB(kb fixed)':>14} | {'CRLB(kb marg)':>14} | "
-      f"{'inflation':>9} | corr(kw,kb)")
+      f"{'inflation':>9} | {'cos(J_kw,J_kb)':>14} | corr(kw_hat,kb_hat)")
 for j, z in enumerate(["old", "average", "new"]):
     infl = crlb_marg[j] / crlb_fixed[j]
     print(f"{z:>8} | {PRIOR_SD[z]:8.3f} | {crlb_fixed[j]:14.3f} | {crlb_marg[j]:14.3f} | "
-          f"{infl:9.1f}x | {corr[j,3]:+.3f}")
+          f"{infl:9.1f}x | {jac_cos[j, 3]:+14.3f} | {par_corr[j, 3]:+.3f}")
+print("cos(J_kw,J_kb) measures how collinear the two sensitivity directions are (design property);")
+print("corr(kw_hat,kb_hat) is the correlation of the estimates. They are different quantities and")
+print("generally carry opposite signs — do not report the first one as a parameter correlation.")

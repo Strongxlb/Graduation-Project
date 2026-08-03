@@ -34,7 +34,7 @@ JITTER = 0.20
 JITTER_SEED = 12345
 C_MIN = 0.2
 
-wn0 = wntr.network.WaterNetworkModel(B.PRACTICE_INP)
+wn0 = wntr.network.WaterNetworkModel(B.NET3_INP)
 ALL_NODES = wn0.junction_name_list
 mon_pos = [ALL_NODES.index(m) for m in B.MONITOR_NODES]
 PIPE_LEN = {p: wn0.get_link(p).length for p in wn0.pipe_name_list}

@@ -7,13 +7,44 @@ against exactly the same synthetic truth, monitoring array, seeds and priors.
 
 sigma = 0.1 mg/L is interpreted as ONE standard deviation of the Gaussian
 observation error.
+
+The network file is read from a FROZEN copy under models/net3_frozen/ rather than from the
+installed WNTR package, so that upgrading WNTR cannot silently change the model. The SHA-256 is
+checked on import; a mismatch is a hard error, because every cached result is tied to this file.
 """
+import hashlib
 import os
 import numpy as np
 import wntr
 
-PRACTICE_INP = os.path.join(os.path.dirname(wntr.__file__),
-                            "library", "networks", "Net3.inp")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+NET3_INP = os.path.join(REPO_ROOT, "models", "net3_frozen", "Net3.inp")
+NET3_INP_SHA256 = "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52"
+
+
+def sha256_of(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 16), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _check_net3_inp():
+    if not os.path.exists(NET3_INP):
+        raise RuntimeError(
+            f"frozen network file missing: {NET3_INP}\n"
+            "It is the provenance anchor for every cached result; restore it from git rather "
+            "than falling back to the installed WNTR copy.")
+    got = sha256_of(NET3_INP)
+    if got != NET3_INP_SHA256:
+        raise RuntimeError(
+            f"frozen network file changed:\n  expected {NET3_INP_SHA256}\n  got      {got}\n"
+            "Every cached result in baseline_cache/ was produced against the expected file.")
+    return got
+
+
+_check_net3_inp()
 
 # ---- monitoring array: two nodes per zone (new 107/113 | old 15/145 | average 209/231) ----
 MONITOR_NODES = ["107", "113", "15", "145", "209", "231"]
@@ -24,8 +55,13 @@ TANK_INIT_MGL = 0.5
 SECONDS_PER_DAY = 24 * 3600
 
 # ---- simulation timing ----
-DURATION_H = 72
-WARMUP_H = 24
+# Set by the Step 0 convergence test, not by convention. The chlorine field first becomes
+# cyclostationary to within 0.005 mg/L at the monitors after a 120 h warm-up; 120 + 48 = 168 h is
+# also exactly the model horizon, because pump 10 runs on absolute-time controls enumerated only to
+# 159 h. The assessment window stays 48 h, so N_RESID is unchanged at 294 and every quantity derived
+# from N (the behavioural threshold, the objective sampling sd, the profile cut-offs) carries over.
+DURATION_H = 168
+WARMUP_H = 120
 HYDRAULIC_TIMESTEP_S = 3600
 REPORT_TIMESTEP_S = 3600
 QUALITY_TIMESTEP_S = 300
@@ -36,17 +72,42 @@ KW_OLD_TRUE, KW_AVG_TRUE, KW_NEW_TRUE = -1.0, -0.1, -0.05
 
 # ---- GLUE configuration ----
 PRIOR = {"old": (-1.5, -0.2), "avg": (-0.2, -0.04), "new": (-0.10, -0.005)}
-N_MC = 2000
+# Sobol rather than pseudo-random: a scrambled Sobol set fills the 3-D prior box more evenly, and
+# because every leading 2^k subset is itself balanced, the sampling-convergence diagnostic can
+# compare 1024/2048/4096/8192 draws exactly rather than by ad-hoc thinning. 8192 = 2^13 is needed
+# because the formal likelihood is far sharper than the informal score: at 2000 prior draws its
+# effective sample size is only ~37.
+N_MC_LOG2 = 13
+N_MC = 2 ** N_MC_LOG2    # 8192
 SIGMA_OBS = 0.1          # one standard deviation of the Gaussian observation error (mg/L)
 # Behavioural thresholds. The draft used 0.12; the revised analysis uses a principled
 # ~95% acceptance band tied to the sampling distribution of the RMSE objective (see below).
 RMSE_THR_DRAFT = 0.12    # original (loose) draft threshold, kept as a comparator
 RMSE_THR = 0.107         # PRIMARY: one-sided 95% acceptance band at sigma = 0.1 mg/L
 NOISE_SEED = 42          # seed for the baseline noisy observation set
-SAMPLE_SEED = 0          # seed for the 2000 uniform-prior parameter draws
+SAMPLE_SEED = 0          # seed for the Sobol scramble of the prior draws
 
-# number of residuals per GLUE evaluation: monitors x post-warm-up hours
+# number of residuals per candidate evaluation: monitors x post-warm-up hours
 N_RESID = len(MONITOR_NODES) * ((DURATION_H - WARMUP_H) + 1)   # 6 x 49 = 294
+
+
+def prior_draws(n=None, seed=None):
+    """Scrambled-Sobol draws from the uniform prior box, returned as a dict of arrays.
+
+    Leading 2^k subsets of a Sobol sequence are themselves balanced, so `prior_draws(n)[:m]` is a
+    valid smaller design for m a power of two — that is what the sampling-convergence check uses.
+    """
+    from scipy.stats import qmc
+    n = N_MC if n is None else n
+    seed = SAMPLE_SEED if seed is None else seed
+    m = int(np.log2(n))
+    if 2 ** m != n:
+        raise ValueError(f"Sobol designs must be a power of two, got {n}")
+    u = qmc.Sobol(d=3, scramble=True, seed=seed).random_base2(m)     # (n, 3) in [0, 1)
+    lo = np.array([PRIOR["old"][0], PRIOR["avg"][0], PRIOR["new"][0]])
+    hi = np.array([PRIOR["old"][1], PRIOR["avg"][1], PRIOR["new"][1]])
+    x = qmc.scale(u, lo, hi)
+    return {"old": x[:, 0], "avg": x[:, 1], "new": x[:, 2]}
 
 
 def threshold_for_sigma(sigma, z=1.645):
@@ -55,8 +116,122 @@ def threshold_for_sigma(sigma, z=1.645):
     The RMSE at the truth has mean ~ sigma and sampling sd ~ sigma / sqrt(2 N_RESID); the
     threshold accepts parameter sets whose RMSE is within z sampling-sd of the noise floor.
     Default z = 1.645 gives a ~95% one-sided band (0.107 mg/L at sigma = 0.1).
+
+    This is a statement about the sampling distribution of the objective AT THE TRUTH (~95% of noise
+    realisations there would be accepted), NOT a 95% credible interval for the parameters.
     """
     return float(sigma * (1.0 + z / (2.0 * N_RESID) ** 0.5))
+
+
+def objective_sampling_sd(sigma=None, n_resid=None):
+    """sd of the RMSE objective at the truth: SSE/sigma^2 ~ chi2(N) => sd(RMSE) ~ sigma/sqrt(2N)."""
+    sigma = SIGMA_OBS if sigma is None else sigma
+    n_resid = N_RESID if n_resid is None else n_resid
+    return float(sigma / np.sqrt(2.0 * n_resid))
+
+
+# ==================== likelihoods and weighting schemes ====================
+# Three weightings are kept side by side deliberately. The formal ones are the primary analysis;
+# the informal GLUE score is retained as a COMPARATOR because the draft used it and because the
+# contrast is itself a result (Stedinger 2008; Mantovan & Todini 2006).
+#
+#   formal censored  PRIMARY. Gaussian density on uncensored points, Phi(-mu/sigma) on points the
+#                    sensor floor clipped to zero. Nests the iid case when nothing is clipped.
+#   formal iid       Gaussian on every point, treating a clipped zero as an exact measurement.
+#   informal GLUE    exp(-0.5 (RMSE/sigma)^2) x 1[RMSE < threshold]. NOT a Gaussian likelihood: it
+#                    drops the factor N, i.e. it is a Gaussian with sigma_eff = sigma*sqrt(N)
+#                    = 1.7 mg/L at the baseline, 17x the sensor noise and larger than the inlet
+#                    concentration, which is why it is nearly flat inside the behavioural set.
+
+WEIGHTINGS = ("formal_censored", "formal_iid", "informal_glue")
+PRIMARY_WEIGHTING = "formal_censored"
+
+
+def _sum_over_data_axes(a):
+    """Sum every axis except the leading candidate axis."""
+    a = np.asarray(a)
+    return a.reshape(a.shape[0], -1).sum(axis=1)
+
+
+def log_gaussian(pred, obs, sigma=None):
+    """Formal iid Gaussian log-likelihood per candidate, up to an additive constant.
+
+    pred: (N, ...) candidate predictions; obs: (...) observations broadcast against them.
+    """
+    sigma = SIGMA_OBS if sigma is None else sigma
+    resid = np.asarray(pred, dtype=np.float64) - np.asarray(obs, dtype=np.float64)[None]
+    return -0.5 * _sum_over_data_axes((resid / sigma) ** 2)
+
+
+def log_censored(pred, obs, sigma=None, floor=0.0):
+    """Formal censored Gaussian log-likelihood per candidate, up to an additive constant.
+
+    Observations equal to `floor` are treated as left-censored ("at most the floor") and contribute
+    log Phi((floor - mu)/sigma) instead of a squared residual. Treating them as exact zeros instead
+    is the naive alternative and is what log_gaussian does; Step 9 compares the two.
+    """
+    from scipy.special import log_ndtr
+    sigma = SIGMA_OBS if sigma is None else sigma
+    pred = np.asarray(pred, dtype=np.float64)
+    obs = np.asarray(obs, dtype=np.float64)
+    censored = (obs <= floor)[None]
+    resid = pred - obs[None]
+    dens = -0.5 * (resid / sigma) ** 2
+    tail = log_ndtr((floor - pred) / sigma)
+    return _sum_over_data_axes(np.where(censored, tail, dens))
+
+
+def glue_score(rmse, sigma=None):
+    """The informal GLUE score of the draft, as a LOG score so it composes with the formal ones.
+
+    Returned as a log so every scheme can go through weights_from_loglik; the value is
+    -0.5 (RMSE/sigma)^2, which is the formal Gaussian log-likelihood DIVIDED BY N.
+    """
+    sigma = SIGMA_OBS if sigma is None else sigma
+    return -0.5 * (np.asarray(rmse, dtype=np.float64) / sigma) ** 2
+
+
+def weights_from_loglik(loglik, mask=None):
+    """Normalised weights plus the diagnostics needed to judge whether they are usable.
+
+    mask: optional boolean acceptance mask (the behavioural filter of the informal scheme). The
+    formal schemes take no threshold; a hard cut-off is part of the GLUE comparator, not of a
+    likelihood.
+    """
+    loglik = np.asarray(loglik, dtype=np.float64)
+    w = np.exp(loglik - loglik.max())
+    if mask is not None:
+        w = w * np.asarray(mask, dtype=np.float64)
+    total = w.sum()
+    if total <= 0:
+        raise ValueError("all weights are zero: no candidate is acceptable")
+    w = w / total
+    nz = w > 0
+    ess = float(1.0 / np.sum(w ** 2))
+    entropy = float(-np.sum(w[nz] * np.log2(w[nz])))
+    return w, {
+        "n_candidates": int(w.size),
+        "n_nonzero": int(nz.sum()),
+        "ess": ess,
+        "ess_frac": ess / w.size,
+        "max_weight": float(w.max()),
+        "entropy_bits": entropy,
+        "entropy_bits_if_uniform": float(np.log2(w.size)),
+    }
+
+
+def weighted_mean_sd(w, x):
+    m = float(np.sum(w * x))
+    return m, float(np.sqrt(np.sum(w * (np.asarray(x) - m) ** 2)))
+
+
+def weighted_quantile(x, w, q):
+    """Weighted quantile with Hazen plotting positions (matches the convention used in Step 10)."""
+    x = np.asarray(x, dtype=np.float64)
+    o = np.argsort(x)
+    xs, ws = x[o], np.asarray(w, dtype=np.float64)[o]
+    cw = (np.cumsum(ws) - 0.5 * ws) / ws.sum()
+    return np.interp(np.atleast_1d(q), cw, xs)
 
 # ---- three contiguous zones by node coordinates ----
 ZONE_Y_LOW = 10.0
@@ -75,7 +250,7 @@ def zone_of(x, y):
     return "new" if x <= ZONE_X_MID else "old"
 
 
-def assign_materials_zones(inp_file=PRACTICE_INP):
+def assign_materials_zones(inp_file=NET3_INP):
     """Assign each pipe to a zone; a cross-zone pipe is given the weaker (newer) side."""
     wn = wntr.network.WaterNetworkModel(inp_file)
     mat = {}
@@ -101,18 +276,16 @@ def make_kw_hook(kw_old, kw_avg, kw_new, material=None):
     return _hook
 
 
-def simulate_chlorine(kb_per_day, kw_per_day, monitor_nodes=None, inp_file=PRACTICE_INP,
-                      inlet_mgl=INLET_CHLORINE_MGL, tank_mgl=TANK_INIT_MGL,
-                      duration_hours=DURATION_H, bulk_order=1, wall_order=1, pre_run=None):
-    """Single chlorine simulation. Returns a DataFrame (index = hours, cols = nodes)."""
-    if monitor_nodes is None:
-        monitor_nodes = MONITOR_NODES
+def build_model(kb_per_day, kw_per_day, inp_file=NET3_INP, inlet_mgl=INLET_CHLORINE_MGL,
+                tank_mgl=TANK_INIT_MGL, duration_hours=DURATION_H, bulk_order=1, wall_order=1,
+                quality="CHEMICAL", pre_run=None):
+    """The one place the baseline model is configured; both callers below use it."""
     wn = wntr.network.WaterNetworkModel(inp_file)
     wn.options.time.duration = duration_hours * 3600
     wn.options.time.hydraulic_timestep = HYDRAULIC_TIMESTEP_S
     wn.options.time.report_timestep = REPORT_TIMESTEP_S
     wn.options.time.quality_timestep = QUALITY_TIMESTEP_S
-    wn.options.quality.parameter = "CHEMICAL"
+    wn.options.quality.parameter = quality
     wn.options.quality.chemical_name = "Chlorine"
     wn.options.quality.inpfile_units = "mg/L"
     wn.options.reaction.bulk_order = bulk_order
@@ -125,6 +298,24 @@ def simulate_chlorine(kb_per_day, kw_per_day, monitor_nodes=None, inp_file=PRACT
         wn.get_node(t).initial_quality = tank_mgl
     if pre_run is not None:
         pre_run(wn)
+    return wn
+
+
+def run_model(wn):
+    """Run and return (results, hours index). Use when link or head results are needed too."""
+    res = wntr.sim.EpanetSimulator(wn).run_sim()
+    return res, np.asarray(res.node["quality"].index, dtype=float) / 3600.0
+
+
+def simulate_chlorine(kb_per_day, kw_per_day, monitor_nodes=None, inp_file=NET3_INP,
+                      inlet_mgl=INLET_CHLORINE_MGL, tank_mgl=TANK_INIT_MGL,
+                      duration_hours=DURATION_H, bulk_order=1, wall_order=1, pre_run=None):
+    """Single chlorine simulation. Returns a DataFrame (index = hours, cols = nodes)."""
+    if monitor_nodes is None:
+        monitor_nodes = MONITOR_NODES
+    wn = build_model(kb_per_day, kw_per_day, inp_file=inp_file, inlet_mgl=inlet_mgl,
+                     tank_mgl=tank_mgl, duration_hours=duration_hours, bulk_order=bulk_order,
+                     wall_order=wall_order, quality="CHEMICAL", pre_run=pre_run)
     res = wntr.sim.EpanetSimulator(wn).run_sim()
     q = res.node["quality"][monitor_nodes]
     q.index = q.index / 3600.0
@@ -132,5 +323,5 @@ def simulate_chlorine(kb_per_day, kw_per_day, monitor_nodes=None, inp_file=PRACT
     return q
 
 
-def all_junctions(inp_file=PRACTICE_INP):
+def all_junctions(inp_file=NET3_INP):
     return wntr.network.WaterNetworkModel(inp_file).junction_name_list

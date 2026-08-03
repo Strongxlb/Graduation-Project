@@ -5,83 +5,237 @@
     "average": 0.046188021535170064,
     "new": 0.027424137786507225
   },
-  "glue_sd_0.107": {
-    "old": 0.2591615001527686,
-    "average": 0.042213855138063236,
-    "new": 0.024341055920550737
+  "fd_step_convergence": {
+    "old": {
+      "default_step": 0.02,
+      "rows": [
+        {
+          "step": 0.005,
+          "step_over_truth": 0.005,
+          "crlb": 0.09481681138277054,
+          "rel_change_vs_previous": null
+        },
+        {
+          "step": 0.01,
+          "step_over_truth": 0.01,
+          "crlb": 0.09481396526098251,
+          "rel_change_vs_previous": 3.001705954375211e-05
+        },
+        {
+          "step": 0.02,
+          "step_over_truth": 0.02,
+          "crlb": 0.09473208338022232,
+          "rel_change_vs_previous": 0.0008636057027615607
+        },
+        {
+          "step": 0.04,
+          "step_over_truth": 0.04,
+          "crlb": 0.09472265094518661,
+          "rel_change_vs_previous": 9.956959547707811e-05
+        }
+      ],
+      "crlb_spread_over_sweep": 0.0009940646365398376
+    },
+    "average": {
+      "default_step": 0.02,
+      "rows": [
+        {
+          "step": 0.002,
+          "step_over_truth": 0.02,
+          "crlb": 0.01353394240140915,
+          "rel_change_vs_previous": null
+        },
+        {
+          "step": 0.005,
+          "step_over_truth": 0.049999999999999996,
+          "crlb": 0.013508892618119717,
+          "rel_change_vs_previous": 0.0018508859211578965
+        },
+        {
+          "step": 0.01,
+          "step_over_truth": 0.09999999999999999,
+          "crlb": 0.01348716951906681,
+          "rel_change_vs_previous": 0.0016080591594800353
+        },
+        {
+          "step": 0.02,
+          "step_over_truth": 0.19999999999999998,
+          "crlb": 0.013399693183600903,
+          "rel_change_vs_previous": 0.006485892925411463
+        }
+      ],
+      "crlb_spread_over_sweep": 0.010018827742455105
+    },
+    "new": {
+      "default_step": 0.02,
+      "rows": [
+        {
+          "step": 0.001,
+          "step_over_truth": 0.02,
+          "crlb": 0.008029036223888397,
+          "rel_change_vs_previous": null
+        },
+        {
+          "step": 0.0025,
+          "step_over_truth": 0.049999999999999996,
+          "crlb": 0.007954801432788372,
+          "rel_change_vs_previous": 0.009245791472494602
+        },
+        {
+          "step": 0.005,
+          "step_over_truth": 0.09999999999999999,
+          "crlb": 0.007953834719955921,
+          "rel_change_vs_previous": 0.00012152569979662076
+        },
+        {
+          "step": 0.01,
+          "step_over_truth": 0.19999999999999998,
+          "crlb": 0.007938358001410961,
+          "rel_change_vs_previous": 0.001945818425156176
+        }
+      ],
+      "crlb_spread_over_sweep": 0.011422793285629007
+    }
   },
+  "fisher_geometry": {
+    "note": "a condition number on the unnormalised matrix mixes units; the prior-scaled form is the dimensionless one",
+    "eigenvalues_raw": [
+      24056.191955685652,
+      5189.477665378551,
+      111.36887401642963
+    ],
+    "condition_number_raw": 216.00462578203653,
+    "eigenvalues_prior_scaled": [
+      24.70718935148481,
+      16.609183358933436,
+      7.655487922929649
+    ],
+    "condition_number_prior_scaled": 3.2273827090082734,
+    "sloppiest_direction_prior_sd_units": {
+      "old": -0.30130809476893367,
+      "average": -0.6583415674062847,
+      "new": 0.6897824386368153
+    }
+  },
+  "ensemble_sd_by_scheme": {
+    "formal_censored": {
+      "old": 0.09380132722771606,
+      "average": 0.014158618960044042,
+      "new": 0.007763176179366474
+    },
+    "formal_iid": {
+      "old": 0.09204021650366974,
+      "average": 0.01411739298584134,
+      "new": 0.007762360694871042
+    },
+    "informal_glue": {
+      "old": 0.2667853615733704,
+      "average": 0.042404164211306765,
+      "new": 0.024188948713502578
+    }
+  },
+  "ensemble_diagnostics": {
+    "formal_censored": {
+      "n_candidates": 8192,
+      "n_nonzero": 8192,
+      "ess": 156.70072738144714,
+      "ess_frac": 0.01912850676043056,
+      "max_weight": 0.017795531321543677,
+      "entropy_bits": 7.972558203635468,
+      "entropy_bits_if_uniform": 13.0
+    },
+    "formal_iid": {
+      "n_candidates": 8192,
+      "n_nonzero": 8192,
+      "ess": 153.52000226946816,
+      "ess_frac": 0.018740234652034688,
+      "max_weight": 0.018108768911911,
+      "entropy_bits": 7.940658465359671,
+      "entropy_bits_if_uniform": 13.0
+    },
+    "informal_glue": {
+      "n_candidates": 8192,
+      "n_nonzero": 4786,
+      "ess": 4782.9101963652465,
+      "ess_frac": 0.583851342329742,
+      "max_weight": 0.00021992204694238986,
+      "entropy_bits": 12.224138452700037,
+      "entropy_bits_if_uniform": 13.0
+    }
+  },
+  "comparability_note": "the CRLB is a bound for an efficient estimator under the correct likelihood, so only the formal schemes are like-for-like; the informal GLUE SD is listed as a comparator, not as a benchmark",
   "cases": {
     "A: kw only": {
-      "condition_number": 211.04544692857098,
+      "condition_number": 216.0046257820364,
       "eigenvalues": [
-        24161.95814090019,
-        5214.586419025198,
-        114.48699080003315
+        24056.19195568565,
+        5189.477665378558,
+        111.36887401642966
       ],
       "coef": {
         "old": {
-          "crlb": 0.09341732951811468,
-          "crlb_over_prior": 0.24892855543504377,
+          "crlb": 0.09471638970943906,
+          "crlb_over_prior": 0.25239015274806526,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.01336132889568863,
-          "crlb_over_prior": 0.2892812562996358,
+          "crlb": 0.01339597225195894,
+          "crlb_over_prior": 0.2900313069646969,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.007902621829679114,
-          "crlb_over_prior": 0.28816300046330834,
+          "crlb": 0.007924010121503356,
+          "crlb_over_prior": 0.2889429080028178,
           "identifiable": true
         }
       }
     },
     "B: kw+kb": {
-      "condition_number": 102.59809589651493,
+      "condition_number": 101.62919451782751,
       "eigenvalues": [
-        7824.097912295778,
-        2069.9620204419957,
-        76.25967951868732
+        7807.286569794958,
+        1996.3902229723335,
+        76.82129733327194
       ],
       "coef": {
         "old": {
-          "crlb": 0.11359751640193455,
-          "crlb_over_prior": 0.30270256926429157,
+          "crlb": 0.11322716776492621,
+          "crlb_over_prior": 0.3017157036399649,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.02455406627352393,
-          "crlb_over_prior": 0.5316111289769606,
+          "crlb": 0.02466700548125694,
+          "crlb_over_prior": 0.5340563345514625,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.014720817677267017,
-          "crlb_over_prior": 0.5367832451786219,
+          "crlb": 0.014743147905132354,
+          "crlb_over_prior": 0.5375974996882504,
           "identifiable": true
         }
       }
     },
     "C: kw+kb+6 offsets": {
-      "condition_number": 110.88784104737591,
+      "condition_number": 88.8542060134999,
       "eigenvalues": [
-        1424.0767664033751,
-        89.31999790755921,
-        12.842497003751296
+        1408.6448527122377,
+        94.92541333584578,
+        15.853440325584788
       ],
       "coef": {
         "old": {
-          "crlb": 0.2785781232401953,
-          "crlb_over_prior": 0.7423253281987731,
+          "crlb": 0.25071335813428763,
+          "crlb_over_prior": 0.6680742683458432,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.10608261053500312,
-          "crlb_over_prior": 2.2967558905770855,
+          "crlb": 0.10287362623239392,
+          "crlb_over_prior": 2.227279342416959,
           "identifiable": false
         },
         "new": {
-          "crlb": 0.030084823955003642,
-          "crlb_over_prior": 1.0970198658280328,
+          "crlb": 0.029700323906631777,
+          "crlb_over_prior": 1.0829993685797643,
           "identifiable": false
         }
       }
@@ -89,19 +243,19 @@
   },
   "crlbC_vs_sigma": {
     "0.05": {
-      "old": 0.13928906162009766,
-      "average": 0.05304130526750156,
-      "new": 0.015042411977501821
+      "old": 0.12535667906714382,
+      "average": 0.05143681311619696,
+      "new": 0.014850161953315889
     },
     "0.10": {
-      "old": 0.2785781232401953,
-      "average": 0.10608261053500312,
-      "new": 0.030084823955003642
+      "old": 0.25071335813428763,
+      "average": 0.10287362623239392,
+      "new": 0.029700323906631777
     },
     "0.15": {
-      "old": 0.4178671848602929,
-      "average": 0.15912391580250468,
-      "new": 0.04512723593250546
+      "old": 0.3760700372014314,
+      "average": 0.15431043934859087,
+      "new": 0.04455048585994766
     }
   }
 }

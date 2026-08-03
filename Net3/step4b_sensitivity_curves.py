@@ -4,10 +4,18 @@ For each coefficient, sweep it across (and a little beyond) its prior range whil
 the other two at their TRUE values, and compute the monitored RMSE against the baseline
 noisy observations. This visualises the shape of the GLUE objective:
   - old  : an asymmetric valley (steep on the weak side, flat/saturated on the strong side)
-  - avg  : nearly flat across its whole prior (objective insensitive)
-  - new  : nearly flat across its whole prior (objective insensitive)
+  - avg  : a shallow valley, small on the mg/L scale of the threshold
+  - new  : a shallow valley, small on the mg/L scale of the threshold
 
-Cheap (~200 monitor-only EPANET runs). Outputs a figure + a JSON summary.
+"Shallow" is reported against BOTH reference scales, because they disagree and the choice drives
+the identifiability claim:
+  - the behavioural threshold band (thr - noise floor ~ 0.009 mg/L), on which avg/new look flat;
+  - the sampling SD of the objective itself, sigma/sqrt(2N) = 0.0041 mg/L, on which the avg/new
+    swings are still ~1.7 and ~2.2 SD and therefore NOT beyond detection.
+The second scale is the one a formal likelihood uses, which is why the formal profile of Step 7b
+constrains avg/new while the informal GLUE score of Step 1 does not.
+
+Cheap (~240 monitor-only EPANET runs). Outputs a figure + a JSON summary.
 """
 import os
 import json
@@ -33,6 +41,9 @@ truth_sim = B.simulate_chlorine(
     pre_run=B.make_kw_hook(TRUE["old"], TRUE["avg"], TRUE["new"]),
 ).values[B.WARMUP_H:]
 NOISE_FLOOR = float(np.sqrt(((truth_sim - obs_glue) ** 2).mean()))
+
+# sampling SD of the RMSE objective at the truth: SSE/sigma^2 ~ chi2(N) => sd(RMSE) ~ sigma/sqrt(2N)
+OBJ_SAMPLING_SD = B.SIGMA_OBS / np.sqrt(2.0 * B.N_RESID)
 
 
 def rmse_for(kw_old, kw_avg, kw_new):
@@ -60,6 +71,7 @@ for g in ["old", "avg", "new"]:
         rmse[i] = rmse_for(kw["old"], kw["avg"], kw["new"])
     a, b = PRIOR[g]
     in_prior = (xs >= min(a, b)) & (xs <= max(a, b))
+    swing = float(rmse[in_prior].max() - rmse[in_prior].min())
     results[g] = {
         "x": xs.tolist(),
         "rmse": rmse.tolist(),
@@ -67,7 +79,8 @@ for g in ["old", "avg", "new"]:
         "truth": TRUE[g],
         "prior_rmse_min": float(rmse[in_prior].min()),
         "prior_rmse_max": float(rmse[in_prior].max()),
-        "prior_rmse_swing": float(rmse[in_prior].max() - rmse[in_prior].min()),
+        "prior_rmse_swing": swing,
+        "prior_rmse_swing_in_sampling_sd": swing / OBJ_SAMPLING_SD,
     }
 
 # ---- figure ----
@@ -80,17 +93,22 @@ for ax, g in zip(axes, ["old", "avg", "new"]):
     ax.plot(xs, rmse, color="steelblue", lw=2)
     ax.axvspan(min(a, b), max(a, b), color="0.85", label="prior range")
     ax.axvline(results[g]["truth"], color="red", lw=2, label="true value")
-    ax.axhline(B.RMSE_THR, color="crimson", ls="--", lw=1, label="threshold 0.12")
-    ax.axhline(0.107, color="darkorange", ls=":", lw=1, label="threshold 0.107")
+    ax.axhline(B.RMSE_THR_DRAFT, color="crimson", ls="--", lw=1,
+               label=f"draft threshold {B.RMSE_THR_DRAFT}")
+    ax.axhline(B.RMSE_THR, color="darkorange", ls=":", lw=1,
+               label=f"primary threshold {B.RMSE_THR}")
     ax.axhline(NOISE_FLOOR, color="green", ls="-.", lw=1, label="noise floor")
     ax.set_xlabel(f"{labels[g]} (m/day)")
     ax.set_ylabel("monitored RMSE (mg/L)")
-    ax.set_title(f"{labels[g]}: RMSE swing over prior = "
-                 f"{results[g]['prior_rmse_swing']:.3f} mg/L")
+    ax.set_title(f"{labels[g]}: RMSE swing over prior\n"
+                 f"{results[g]['prior_rmse_swing']:.3f} mg/L = "
+                 f"{results[g]['prior_rmse_swing_in_sampling_sd']:.1f} x objective sampling SD",
+                 fontsize=10)
     ax.grid(alpha=0.3)
 axes[0].legend(fontsize=7, loc="upper center")
-fig.suptitle("Single-parameter objective: old is an asymmetric valley; avg/new are flat "
-             "(other two held at truth)", y=1.02)
+fig.suptitle("Single-parameter objective (other two held at truth): old is a deep asymmetric "
+             "valley; avg/new are shallow\non the threshold scale but still a few objective "
+             "sampling SD deep", y=1.04)
 plt.tight_layout()
 figpath = os.path.join(FIGDIR, "step4b_sensitivity_curves.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")
@@ -99,16 +117,22 @@ summary = {
     "hold_others_at": "true values",
     "observations": "baseline noisy (seed 42)",
     "noise_floor_rmse": NOISE_FLOOR,
-    "threshold": B.RMSE_THR,
+    "threshold_primary": B.RMSE_THR,
+    "threshold_draft": B.RMSE_THR_DRAFT,
+    "objective_sampling_sd": float(OBJ_SAMPLING_SD),
     "prior_rmse_swing": {g: results[g]["prior_rmse_swing"] for g in ["old", "avg", "new"]},
+    "prior_rmse_swing_in_sampling_sd": {g: results[g]["prior_rmse_swing_in_sampling_sd"]
+                                        for g in ["old", "avg", "new"]},
     "figure": os.path.relpath(figpath, HERE),
 }
 with open(os.path.join(HERE, "baseline_cache", "step4b_sensitivity.json"), "w") as f:
     json.dump({"summary": summary, "sweeps": results}, f, indent=2)
 
 print("noise floor RMSE =", round(NOISE_FLOOR, 4))
+print(f"objective sampling SD = sigma/sqrt(2N) = {OBJ_SAMPLING_SD:.4f} mg/L (N = {B.N_RESID})")
 print("RMSE swing across each prior (others at truth):")
 for g in ["old", "avg", "new"]:
     print(f"  {labels[g]:>9}: min {results[g]['prior_rmse_min']:.4f} -> "
-          f"max {results[g]['prior_rmse_max']:.4f}  (swing {results[g]['prior_rmse_swing']:.4f} mg/L)")
+          f"max {results[g]['prior_rmse_max']:.4f}  (swing {results[g]['prior_rmse_swing']:.4f} mg/L "
+          f"= {results[g]['prior_rmse_swing_in_sampling_sd']:.1f} x sampling SD)")
 print("figure saved to", figpath)

@@ -5,7 +5,7 @@ GLUE calibration (not the homogeneous Gaussian posterior of the enclosed noteboo
 
 Pipeline
 --------
-  GLUE behavioural ensemble (threshold 0.107, 1126/2000)
+  the calibrated kinetics ensemble, weighted by the formal censored likelihood (Step 1)
     -> Arrhenius temperature scaling of k_b and the three zonal k_w
     -> optional illustrative ageing-reactivity multipliers on the three zones
     -> network-wide chlorine prediction
@@ -24,7 +24,7 @@ Two probability definitions are reported and kept DISTINCT (they are not interch
   P_min  = sum_i w_i * 1[ min_t C_i(t) < C_crit ]   window-breach probability
   P_bar  = E[D] / T_window                          time-averaged below-threshold
                                                      probability (the Step-10 quantity)
-The assessment window is t = 24..72 h (48 one-hour intervals), so P_min is a 48-hour
+The assessment window is the post-warm-up record (48 one-hour intervals), so P_min is a 48-hour
 window minimum -- systematically higher than a 24-hour "daily minimum" and therefore not
 directly comparable with the supervisor's notebook figures.
 
@@ -231,14 +231,23 @@ RMSE = cache["RMSE"].astype(np.float64)
 C_all = cache["C_all"].astype(np.float64)
 ALL_NODES = [str(n) for n in cache["all_nodes"]]
 
-w_raw = np.exp(-0.5 * (RMSE / B.SIGMA_OBS) ** 2) * (RMSE < B.RMSE_THR)
-idx = np.where(w_raw > 0)[0]
-w = w_raw[idx] / w_raw[idx].sum()
+# Weighting: the formal censored likelihood is primary. It carries no threshold, so the "ensemble"
+# is every draw with non-negligible weight rather than a behavioural set; members whose weight is
+# below WEIGHT_FLOOR of the maximum are dropped only to keep the scenario runs affordable, and the
+# discarded mass is reported so the truncation is auditable.
+WEIGHT_FLOOR = 1e-6
+w_full, w_diag = B.weights_from_loglik(cache["loglik_censored"])
+keep = w_full >= WEIGHT_FLOOR * w_full.max()
+idx = np.where(keep)[0]
+w = w_full[idx] / w_full[idx].sum()
 n_beh = len(idx)
+w_mass_dropped = float(1.0 - w_full[idx].sum())
 T_WINDOW = C_all.shape[1] - 1
 
-print(f"behavioural ensemble at RMSE < {B.RMSE_THR}: {n_beh}/{len(RMSE)}")
-print(f"assessment window: {C_all.shape[1]} points = {T_WINDOW} h (t = 24..72)")
+print(f"kinetics ensemble: {n_beh}/{len(RMSE)} draws retained above a {WEIGHT_FLOOR:g} relative "
+      f"weight floor; ESS {w_diag['ess']:.1f}; discarded weight mass {w_mass_dropped:.2e}")
+print(f"assessment window: {C_all.shape[1]} points = {T_WINDOW} h "
+      f"(t = {B.WARMUP_H}..{B.DURATION_H})")
 print(f"T_ref = {T_REF_C} °C, water-T uncertainty SD = {T_SD_C} °C, clip guard {CLIP_LO} m/day")
 print(f"ageing stress (central) = {ALPHA_ZONE}")
 
@@ -252,22 +261,46 @@ def draw_truncated_ea(mean, sd, n):
     return truncnorm.rvs(a, np.inf, loc=mean, scale=sd, size=n, random_state=rng)
 
 
+T_MEAN_LO = min(s["T"] for s in SCENARIO_DEF.values())
+T_MEAN_HI = max(s["T"] for s in SCENARIO_DEF.values())
+# dT bounds that keep EVERY scenario mean inside the stated validity range (here ±4 °C = ±4 SD)
+DT_LO, DT_HI = T_VALID_C[0] - T_MEAN_LO, T_VALID_C[1] - T_MEAN_HI
+
+
+def draw_truncated_dT(sd, n, lo, hi):
+    """Water-temperature offset, truncated so no draw can leave the stated validity range.
+
+    Out-of-range draws are RESAMPLED rather than the distribution being replaced, so a run in
+    which nothing falls outside (the case at the current seed and ensemble size) is bit-identical
+    to an untruncated normal. Truncation matters once the ensemble grows: at ±4 SD the expected
+    number of rejected draws is ~0.07 for 1000 members but ~1.3 for 20000.
+    """
+    d = rng.normal(0.0, sd, n)
+    bad = (d < lo) | (d > hi)
+    n_resampled = int(bad.sum())
+    while bad.any():
+        d[bad] = rng.normal(0.0, sd, int(bad.sum()))
+        bad = (d < lo) | (d > hi)
+    return d, n_resampled
+
+
 ea_b = draw_truncated_ea(EA_BULK_MEAN, EA_BULK_SD, n_beh)
 ea_w = draw_truncated_ea(EA_WALL_MEAN, EA_WALL_SD, n_beh)
-dT = rng.normal(0.0, T_SD_C, n_beh)          # common random numbers across all scenarios
+dT, n_dT_resampled = draw_truncated_dT(T_SD_C, n_beh, DT_LO, DT_HI)   # common random numbers
 
 assert ea_b.min() >= EA_MIN and ea_w.min() >= EA_MIN, "non-physical activation energy drawn"
-T_lo = min(s["T"] for s in SCENARIO_DEF.values()) + float(dT.min())
-T_hi = max(s["T"] for s in SCENARIO_DEF.values()) + float(dT.max())
+T_lo = T_MEAN_LO + float(dT.min())
+T_hi = T_MEAN_HI + float(dT.max())
 assert T_VALID_C[0] <= T_lo and T_hi <= T_VALID_C[1], (
     f"sampled water temperature {T_lo:.2f}–{T_hi:.2f} °C leaves the stated "
     f"{T_VALID_C[0]}–{T_VALID_C[1]} °C validity range")
 print(f"Ea draws (kJ/mol): bulk {ea_b.min()/1000:.1f}–{ea_b.max()/1000:.1f}, "
       f"wall {ea_w.min()/1000:.1f}–{ea_w.max()/1000:.1f} (truncated at {EA_MIN/1000:.0f})")
 print(f"sampled water temperature spans {T_lo:.2f}–{T_hi:.2f} °C, "
-      f"inside the {T_VALID_C[0]}–{T_VALID_C[1]} °C validity range")
+      f"inside the {T_VALID_C[0]}–{T_VALID_C[1]} °C validity range "
+      f"(dT truncated to [{DT_LO:+.1f}, {DT_HI:+.1f}] °C, {n_dT_resampled} draw(s) resampled)")
 
-wn0 = wntr.network.WaterNetworkModel(B.PRACTICE_INP)
+wn0 = wntr.network.WaterNetworkModel(B.NET3_INP)
 DEMAND = base_demand_L_s(wn0, ALL_NODES)
 CONSEQUENCE, q1, q2 = consequence_from_demand(DEMAND)
 DEM = DEMAND.values
@@ -353,7 +386,7 @@ print()
 print("=== corrective dosing under heatwave (control-measure evaluation) ===")
 SUB_STRIDE = 8
 sub = np.arange(0, n_beh, SUB_STRIDE)
-w_sub = w_raw[idx][sub] / w_raw[idx][sub].sum()
+w_sub = w[sub] / w[sub].sum()
 dose_results = {}
 dose_C_sub = {}          # short-horizon trajectories of the SAME subset, for the paired test
 for dose in DOSES:
@@ -384,21 +417,25 @@ lin_err = float(np.max(np.abs(C13 - 1.3 * C1)))
 print(f"  linearity check max|C(1.3) - 1.3*C(1.0)| = {lin_err:.2e} mg/L "
       "(first-order kinetics scale with the source regime)")
 
-# Paired warm-up test: IDENTICAL members, weights and scenario draws; only the simulation
-# horizon changes, so any difference is attributable to warm-up length alone.
-LONG_DUR, LONG_WARM = 168, 120
+# Paired warm-up test: IDENTICAL members, weights and scenario draws; only the simulation horizon
+# changes, so any difference is attributable to warm-up length alone. The roles are now reversed
+# relative to the earlier version of this script: the CURRENT configuration is the long one that
+# Step 0 justified, and the comparator is the SHORT 72 h / 24 h setting the draft used. The test is
+# therefore a measurement of what the draft's warm-up cost, not a check on the current one.
+SHORT_DUR, SHORT_WARM = 72, 24
 paired_rows = []
 print(f"  paired warm-up test on {len(sub)} identical members "
-      f"({B.DURATION_H} h / {B.WARMUP_H} h warm-up  vs  {LONG_DUR} h / {LONG_WARM} h)")
+      f"(draft {SHORT_DUR} h / {SHORT_WARM} h warm-up  vs  current "
+      f"{B.DURATION_H} h / {B.WARMUP_H} h)")
 for dose in DOSES:
-    met_s = metrics_from_C(dose_C_sub[dose], w_sub, T_WINDOW)
-    C_l, _, _, n_clip = run_ensemble(idx, S_old, S_avg, S_new, ea_b, ea_w, dT, T_mean=20.0,
+    met_l = metrics_from_C(dose_C_sub[dose], w_sub, T_WINDOW)          # current configuration
+    C_s, _, _, n_clip = run_ensemble(idx, S_old, S_avg, S_new, ea_b, ea_w, dT, T_mean=20.0,
                                      alpha=ALPHA_NONE, inlet=dose, nodes=ALL_NODES,
-                                     tank_mgl=B.TANK_INIT_MGL * dose, duration_h=LONG_DUR,
-                                     warmup_h=LONG_WARM, members=sub, quiet=True)
+                                     tank_mgl=B.TANK_INIT_MGL * dose, duration_h=SHORT_DUR,
+                                     warmup_h=SHORT_WARM, members=sub, quiet=True)
     assert n_clip == 0
-    met_l = metrics_from_C(C_l, w_sub, LONG_DUR - LONG_WARM)
-    del C_l
+    met_s = metrics_from_C(C_s, w_sub, SHORT_DUR - SHORT_WARM)
+    del C_s
     at_s, at_l = met_s["P_min"] > 0.5, met_l["P_min"] > 0.5
     paired_rows.append({
         "inlet_dose_mgl": dose,
@@ -410,6 +447,8 @@ for dose in DOSES:
         "long_net_mean_E_duration_h": round(float(met_l["Dbar"].mean()), 3),
         "short_net_mean_E_deficit": round(float(met_s["Abar"].mean()), 4),
         "long_net_mean_E_deficit": round(float(met_l["Abar"].mean()), 4),
+        "long_minus_short_rel_E_deficit": round(
+            float(met_l["Abar"].mean() / met_s["Abar"].mean() - 1.0), 4),
     })
 del dose_C_sub
 print(f"\ntotal runtime {time.time() - t_all:.1f}s\n")
@@ -497,7 +536,9 @@ if len(esc_df):
     print(esc_df.head(12).to_string(index=False))
 
 # ---- risk register ----
-unc = P_A * (1.0 - P_A)
+# P_A is a weighted indicator average, so floating-point summation can put it a few ULP outside
+# [0, 1]; clip before P(1-P) or a certain node reports a negative-zero sampling priority.
+unc = np.clip(P_A, 0.0, 1.0) * (1.0 - np.clip(P_A, 0.0, 1.0))
 prio_raw = CONSEQUENCE.values * unc
 prio = np.where(DEM > 0, prio_raw / (prio_raw.max() + 1e-12), 0.0)
 
@@ -535,7 +576,7 @@ for ax, key in zip(axes.ravel(), ["A_baseline", "B_warm", "C_heatwave", "D_heat_
     ax.set_aspect("equal")
     ax.axis("off")
 fig.colorbar(sc, ax=axes.ravel().tolist(), shrink=0.85,
-             label=r"$P_{\min}$: P(min C over 24–72 h < 0.2 mg/L)")
+             label=rf"$P_{{\min}}$: P(min C over {B.WARMUP_H}–{B.DURATION_H} h < {C_CRIT} mg/L)")
 fig.suptitle("Step 12 — GLUE-propagated window-breach probability under temperature "
              "and ageing-stress scenarios", y=0.98)
 fig.savefig(os.path.join(FIGDIR, "step12_scenario_maps.png"), dpi=140, bbox_inches="tight")
@@ -616,10 +657,10 @@ report = {
     "assessment_window_h": [B.WARMUP_H, B.DURATION_H],
     "T_window_intervals": int(T_WINDOW),
     "definitions": {
-        "P_min": "sum_i w_i * 1[min_t C_i(t) < C_crit] over t = 24..72 h "
-                 "(48-hour window minimum, NOT a 24-hour daily minimum)",
+        "P_min": f"sum_i w_i * 1[min_t C_i(t) < C_crit] over t = {B.WARMUP_H}..{B.DURATION_H} h "
+                 f"({T_WINDOW}-hour window minimum, NOT a 24-hour daily minimum)",
         "P_bar": "E[D]/T_window, the Step-10 time-averaged below-threshold probability",
-        "E_duration_h": "weighted expected hours below C_crit, trapezoid over 48 intervals",
+        "E_duration_h": f"weighted expected hours below C_crit, trapezoid over {T_WINDOW} intervals",
         "E_deficit": "weighted expected cumulative deficit, mg/L*h",
         "network_mean": "unweighted arithmetic mean over all 92 junctions",
         "indeterminate": "0.05 < P_min < 0.95",
@@ -645,13 +686,28 @@ report = {
                               "medium": "4 <= score <= 6", "high": "7 <= score <= 9",
                               "very high": "score >= 10"},
         "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), "
-                             "normalised by its maximum; forced to 0 at zero-demand nodes",
+                             "normalised by its maximum; forced to 0 at zero-demand nodes. This "
+                             "ranks where MEASUREMENT would reduce uncertainty most, so a node "
+                             "with P_min = 1 scores 0: it is confidently at risk, not low "
+                             "priority. Intervention priority is the separate risk_score column; "
+                             "the two must not be merged.",
     },
     "uncertainty_sources": {
-        "kinetics": "GLUE behavioural ensemble (1126 members, weights at threshold 0.107)",
-        "Ea_bulk_J_per_mol": {"mean": EA_BULK_MEAN, "sd": EA_BULK_SD},
-        "Ea_wall_J_per_mol": {"mean": EA_WALL_MEAN, "sd": EA_WALL_SD},
-        "water_temperature_C": f"dT ~ N(0, {T_SD_C}^2) added to the scenario mean",
+        "kinetics": f"formal censored-likelihood weights over {n_beh} retained draws "
+                    f"(ESS {w_diag['ess']:.1f}); informal GLUE is a comparator, not the primary",
+        # the drawn ranges, not just the parameters: the log quotes them as evidence that no draw
+        # is non-physical, which is only checkable if they are stored
+        "Ea_bulk_J_per_mol": {"mean": EA_BULK_MEAN, "sd": EA_BULK_SD,
+                              "drawn_min": float(ea_b.min()), "drawn_max": float(ea_b.max()),
+                              "truncated_at": EA_MIN},
+        "Ea_wall_J_per_mol": {"mean": EA_WALL_MEAN, "sd": EA_WALL_SD,
+                              "drawn_min": float(ea_w.min()), "drawn_max": float(ea_w.max()),
+                              "truncated_at": EA_MIN},
+        "water_temperature_span_C": [T_lo, T_hi],
+        "water_temperature_C": f"dT ~ N(0, {T_SD_C}^2) added to the scenario mean, truncated to "
+                               f"[{DT_LO:+.1f}, {DT_HI:+.1f}] degC so every scenario stays inside "
+                               f"the {T_VALID_C[0]}-{T_VALID_C[1]} degC validity range",
+        "water_temperature_draws_resampled": n_dT_resampled,
         "common_random_numbers": True,
     },
     "T_ref_C": T_REF_C,
@@ -683,9 +739,11 @@ report = {
     },
     "dosing_paired_warmup_test": {
         "design": "identical member subset, weights and scenario draws; only the simulation "
-                  "horizon differs, so the contrast isolates warm-up length",
-        "short": {"duration_h": B.DURATION_H, "warmup_h": B.WARMUP_H},
-        "long": {"duration_h": LONG_DUR, "warmup_h": LONG_WARM},
+                  "horizon differs, so the contrast isolates warm-up length. 'long' is the CURRENT "
+                  "configuration justified by Step 0; 'short' is the draft setting, so the rows "
+                  "measure what the draft's warm-up cost rather than testing the current one",
+        "short": {"duration_h": SHORT_DUR, "warmup_h": SHORT_WARM, "role": "draft comparator"},
+        "long": {"duration_h": B.DURATION_H, "warmup_h": B.WARMUP_H, "role": "current baseline"},
         "n_members": int(len(sub)), "subset_stride": SUB_STRIDE, "rows": paired_rows,
     },
     "baseline_demand_at_risk_L_s": base_at_risk,
