@@ -679,7 +679,7 @@ ax.scatter([kw_hat], [kb_hat], marker='o', s=200, facecolors='none',
            edgecolors='yellow', linewidths=2.5, zorder=11,
            label=f'Optimal grid ({kb_hat:.2f}, {kw_hat:.2f})')
 
-ax.set_xlabel('k_w (/day)'); ax.set_ylabel('k_b (/day)')
+ax.set_xlabel('k_w (m/day)'); ax.set_ylabel('k_b (/day)')
 ax.set_title('Brute-force calibration: log₁₀(SSE)')
 ax.legend(); plt.colorbar(cf, ax=ax, label='log₁₀ SSE')
 plt.tight_layout(); plt.show()

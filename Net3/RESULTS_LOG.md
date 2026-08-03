@@ -36,6 +36,12 @@ Every number in this log is produced by a script; nothing is hand-entered.
 | `step7b_profile.py`              | profile likelihood (re-optimise others; ΔNLL 95% intervals)                                     | `figures/step7b_profile.png`, `step7b_profile.json` |
 | `step8_sensor_bias.py`           | systematic sensor bias at node 15 (GLUE, empirical)                                             | `figures/step8_sensor_bias.png`, `step8_sensor_bias.json` |
 | `step8b_kb_sensitivity.py`       | GLUE at k_b ± 20% — bulk–wall compensation (Priority-2 #5)                                       | `figures/step8b_kb_sensitivity.png`, `step8b_kb_sensitivity.json` |
+| `step7c_ar1.py`                  | AR(1) covariance Fisher/CRLB (per-coefficient widening)                                          | `baseline_cache/step7c_ar1.json` |
+| `step7c_profile_ar1.py`          | AR(1) profile likelihood (rebuilds 21³ residual grid)                                            | `baseline_cache/step7c_resid_grid.npy`, `step7c_profile_ar1.json` |
+| `step8c_bias_bynode.py`          | sensor-bias location sweep across all six monitors                                              | `baseline_cache/step8c_bias_bynode.json` |
+| `step9_zeroclip.py`              | zero-floor censoring (L=0): naive-exact-0 vs censored likelihood                                 | `figures/step9_zeroclip.png`, `step9_zeroclip.json` |
+| `step10_risk_metrics.py`         | risk duration/depth (trapezoid, 48 h) + water-age corroboration                                 | `figures/step10_risk_metrics.png`, `step10_risk_metrics.json` |
+| `step11_loo.py`                  | leave-one-monitor-out predictive validation                                                     | `figures/step11_loo.png`, `step11_loo.json` |
 
 
 Run from the `Net3/` directory (conda env `water-supply`):
@@ -739,11 +745,43 @@ Findings:
    operational notebook; here old's posterior is wide because it is only one-sidedly identified, so
    a small bias is a small fraction of the spread.)
 5. **Empirical counterpart to Step 7 Case C.** Fisher showed per-monitor offsets *absorb* the signal
-   (avg/new → unidentifiable); this GLUE run shows a real offset *biases* the one identifiable
-   coefficient. At the ±0.1 class the systematic term is a first-order error source, but in this
+   (avg/new → unidentifiable); this GLUE run shows a real offset *biases* the most robustly informed
+   coefficient (old). At the ±0.1 class the systematic term is a first-order error source, but in this
    information-poor array it biases only the locally-sensed coefficient and leaves the risk ranking
    intact. (A real bias would be estimable/correctable via reference sampling — the operational
    notebook's QA step; this quantifies the *uncorrected* impact.)
+
+**Why node 15, and does the location matter? (bias-location sweep, `step8c_bias_bynode.py`).** The
+same offset was injected at each of the six monitors in turn (two per zone: new 107/113, old 15/145,
+average 209/231; threshold 0.107, 30 noise). Δ = shift of each coefficient's behavioural mean from
+the unbiased baseline (means old −1.040 / avg −0.119 / new −0.052; SDs 0.260 / 0.042 / 0.024).
+
+| offset | biased node (zone) | Δold | Δavg | Δnew | own-coef shift/SD | risk top-3 |
+|---|---|---|---|---|---|---|
+| +0.05 | 107 (new) | -0.014 | -0.001 | +0.008 | +0.35 | same |
+| +0.05 | 113 (new) | -0.019 | -0.003 | +0.009 | +0.37 | same |
+| +0.05 | **15 (old)** | **+0.133** | +0.002 | +0.000 | +0.51 | same |
+| +0.05 | 145 (old) | +0.085 | +0.001 | +0.003 | +0.33 | same |
+| +0.05 | 209 (avg) | -0.022 | +0.009 | +0.008 | +0.21 | same |
+| +0.05 | 231 (avg) | -0.004 | +0.024 | +0.002 | +0.57 | same |
+| +0.10 | **15 (old)** | **+0.364** | +0.008 | -0.001 | +1.40 | same |
+| +0.10 | 145 (old) | +0.278 | +0.004 | +0.007 | +1.07 | same |
+| +0.10 | 231 (avg) | +0.002 | +0.052 | +0.003 | +1.23 | same |
+
+Findings (location does matter, predictably):
+
+1. **A bias mainly corrupts the coefficient of its own zone.** The shift is concentrated in Δ(own
+   zone); cross-zone leakage is small. So node 15 was chosen deliberately — old is the *only*
+   robustly identifiable coefficient (Step 7) and the physically dominant one, so biasing an old
+   monitor is the meaningful worst case.
+2. **In absolute terms the old monitors do the most damage** (Δold +0.13 → +0.36), an order of
+   magnitude larger than the avg/new coefficient shifts (≤0.05), because avg/new barely respond to
+   the data (prior-dominated) and are physically small. **But normalised by their tiny SDs the
+   relative corruption is comparable or larger** (node 231 → 1.23 SD at +0.10).
+3. **The two monitors within a zone differ** (15 > 145; 231 > 209) — different local sensitivity /
+   information content, so *which* sensor drifts, not just which zone, changes the magnitude.
+4. **The risk ranking is robust at every node and offset** ("same"): the operational product is
+   insensitive to a single-sensor bias regardless of location.
 
 ---
 
@@ -778,4 +816,222 @@ Findings:
    freed) is mirrored here by the larger relative shift of avg/new; the effect is modest at ±20% and
    does not overturn the identifiability gradient or the risk map. This closes Priority-2 #5 and
    gives Case B its empirical counterpart (as Step 8 does for Case C).
+
+---
+
+## Step 9 — sensitivity to zero-floor censoring (zero-clipped observations, L = 0)
+
+The draft generates observations as `C_obs = max(0, C_true + ε)` — a hard lower bound at **L = 0** —
+then calibrates with unweighted RMSE that treats every clipped `0` as an *exact* measurement. The
+statistically consistent treatment of a clipped point is *left-censored*: the latent reading
+`Y* = μ + ε` was only observed to be `Y* ≤ 0`, so it should contribute `Φ(−μ/σ)` to the likelihood,
+not `(0 − μ)²`. This is the robustness check the review asked for — performed **on the same data at
+L = 0** (`step9_zeroclip.py`).
+
+**Tobit-type censored Gaussian likelihood (L = 0)** — a censored Gaussian on the nonlinear WNTR
+predictions (hence "Tobit-*type*", not a classical linear Tobit regression):
+
+```
+uncensored (obs > 0):  Gaussian    →  −½·((obs − μ)/σ)²
+clipped-0  (obs = 0):  P(Y* ≤ 0)   →  log Φ(−μ/σ)          [scipy log_ndtr]
+```
+
+Since σ is fixed, minimising the Gaussian NLL orders the parameters identically to minimising
+SSE/RMSE, so the "naive" arm is the formal-Gaussian counterpart of the draft's RMSE treatment.
+
+**Clipped-zero census (the actual calibration data):**
+
+| scope | clipped zeros | note |
+|---|---|---|
+| full record (6 × 73 h) | **28 / 438** | reproduces the count in the review |
+| calibration (6 × 49 post-warm-up h) | **8 / 294** | the points actually used to fit |
+| by node | 15 (old): 5, 145 (old): 3 | **all 8 in the old zone**; new/avg: 0 |
+
+**Naive-exact-0 vs censored-at-0 (median [IQR] over 30 noise realisations):**
+
+| coefficient | truth | naive median [IQR] | censored median [IQR] | Δ median |
+|---|---|---|---|---|
+| old | −1.0 | −1.009 [−1.051, −0.964] | −1.021 [−1.058, −0.977] | −0.012 |
+| average | −0.1 | −0.102 [−0.108, −0.095] | −0.102 [−0.108, −0.095] | −0.000 |
+| new | −0.05 | −0.050 [−0.055, −0.045] | −0.050 [−0.055, −0.045] | +0.000 |
+
+- node-15 fraction of hours below 0.2: naive `0.460` vs censored `0.462` (identical within noise);
+- high-risk top-3 — ranked by expected time-fraction below 0.2 mg/L under the **formal-likelihood-
+  weighted ensemble** (weights ∝ `exp(log L)` over all 2000 candidates): **131, 243, 15 — identical**
+  under both estimators. *(This weighting convention differs from the informal-GLUE risk map of Steps
+  8/10 — `exp(−½(RMSE/σ)²)·1[RMSE<0.107]` — so the absolute third node differs (15 here vs 141/166
+  there); it is not directly comparable in absolute terms. The only claim here is that naive and
+  censored give the **same** ranking, so the zero-handling does not move the risk hot-spots.)*
+- old profile 95% interval (baseline): naive `[−1.18, −0.85]` = censored `[−1.18, −0.85]` (curves overlap).
+
+![Zero-clipping census (8/294, all old zone) and the old profile at L=0: naive vs censored overlap](figures/step9_zeroclip.png)
+
+Findings:
+
+1. **Only 8 of 294 calibration points are clipped, and all lie in the old zone** — the low-chlorine
+   strong-decay zone (28/438 over the full record, matching the review). new/avg never clip.
+2. **At L = 0 the zero-clipping has a negligible effect.** naive-exact-0 and the censored likelihood
+   give the same k_w to within `0.012` (old) and `0.000` (avg/new), with overlapping IQRs, the same
+   node-15 risk, the same old profile interval and the same high-risk ranking. This is a **robustness
+   result**: the draft's `max(0, ·)` + unweighted-RMSE choice did *not* bias the main conclusions.
+3. **Why so small here — not a general equivalence.** Two reasons specific to this setup: (i)
+   clipping is rare (`8/294 ≈ 2.7%`, so 286 uncensored points dominate the likelihood); (ii) a
+   clipped-0 point sits where the true concentration is already ≈ 0, so "exactly 0" and "≤ 0"
+   constrain a near-0 model `μ` in almost the same direction. This is an **empirical** result of the
+   present experiment, **not** a theorem — exact-zero and censored likelihoods are *not* always
+   equivalent; they differed negligibly here only because censoring was infrequent and confined to
+   already low-residual conditions. A bias would appear if a larger fraction were censored, or if the
+   recorded limit were *well above* the true value — i.e. a positive reporting limit.
+4. **Reporting (≈ half a page).** State it as a robustness check: the zero-clipping is confined to
+   the old zone, small in number, and does not change the estimates, node-15 risk or the risk
+   ranking; the censored likelihood *confirms* the RMSE result rather than overturning it. (If a
+   future dataset clipped many more points, or used a positive reporting limit, a censoring-aware
+   likelihood would become necessary.)
+
+**Draft paper text (≈ half a page) — for Step 11:**
+
+> *Method.* Because the synthetic observations were constrained to be non-negative, observations
+> recorded at zero were treated as left-censored at the imposed boundary (`L = 0`). Positive
+> observations contributed a Gaussian density term, whereas zero-clipped observations contributed
+> the cumulative probability `P(Y* ≤ 0) = Φ(−μ(θ)/σ)`. This Tobit-type censored Gaussian likelihood
+> was compared with the baseline treatment in which zero observations were entered as exact values.
+>
+> *Results.* Eight of the 294 post-warm-up calibration observations were clipped to zero — five at
+> node 15 and three at node 145, all in the low-residual old zone (28 of 438 over the full record).
+> Across 30 independent noise realisations the median old-group estimate changed only from −1.009 to
+> −1.021 m/day when the censored likelihood replaced the exact-zero treatment, while the average- and
+> new-group estimates were unchanged; the profile interval and the low-chlorine summary were
+> effectively identical.
+>
+> *Discussion.* The zero-floor treatment therefore had negligible influence on the principal
+> calibration and risk conclusions in this synthetic experiment, reflecting the small number of
+> clipped observations and their occurrence under already low-residual conditions. A censoring-aware
+> likelihood would nevertheless become important if a larger fraction of observations were censored,
+> or if the instrument had a positive reporting limit.
+
+---
+
+## Step 10 — operational risk metrics (duration + depth) and water-age corroboration
+
+The risk map so far reduced to a single probability of being below the **selected operational
+low-chlorine threshold** `C_MIN = 0.2 mg/L` (a representative operational value adopted in this
+study, **not** a legal/compliance safety limit). A single probability conflates *how long* and *how
+far below* the threshold a node sits. From the behavioural ensemble (weights recomputed at the
+primary threshold 0.107) we therefore report the original probability re-expressed as a duration,
+**two** genuine severity metrics (minimum concentration, cumulative deficit) and **one**
+reaction-independent hydraulic diagnostic (water age) — i.e. *one operational re-expression + two
+severity metrics + one hydraulic diagnostic*, not "three new metrics" (`step10_risk_metrics.py`).
+
+**Time axis (corrected).** The post-warm-up record is `t = 24 … 72 h` = **49 reporting points but
+48 one-hour intervals**. Durations and deficits are **trapezoidally integrated over the 48 intervals**
+(max duration = 48 h), not summed over 49 points.
+
+```
+duration D_i,n  = ∫ 1[C<0.2] dt          (trapezoid, h;  max 48)   frac = D̄/48 ≈ original P(C<0.2)
+deficit  A_i,n  = ∫ max(0, 0.2−C) dt      (trapezoid, mg/L·h)       ← genuinely new (severity)
+min C    M_i,n  = min_t C_i,n(t)          (per-member min, THEN weighted = Method A)  ← genuinely new
+water age       = EPANET AGE run (reaction-independent; hydraulic diagnostic)
+```
+
+Each metric is a behavioural-weighted expectation `X̄_n = Σ_i w_i X_i,n`; 5–95 % bands are weighted
+ensemble quantiles (uncertainty is **not** collapsed). Ranked by expected cumulative deficit:
+
+| node | E[dur] h [5–95] | E[deficit] mg/L·h [5–95] | min C med [5–95] | mean age h |
+|---|---|---|---|---|
+| 243 | 33.1 [30.5, 35.0] | **5.78 [5.70, 5.88]** | 0.000 [0.00, 0.00] | 44.9 |
+| 131 | **47.5 [43.0, 48.0]** | 4.50 [4.18, 4.75] | 0.000 [0.00, 0.00] | 40.2 |
+| 166 | 10.3 [9.5, 10.5] | 1.90 [1.90, 1.91] | 0.000 [0.00, 0.00] | 34.1 |
+| 141 | 21.1 [20.0, 24.0] | 1.72 [1.25, 2.07] | 0.081 [0.07, 0.10] | 25.6 |
+| 145 | 12.3 [12.0, 14.0] | 1.49 [1.26, 1.65] | 0.036 [0.03, 0.05] | 17.8 |
+| 15 | 19.8 [8.0, 24.0] | 1.09 [0.50, 1.62] | 0.065 [0.05, 0.09] | 21.1 |
+| 139 | 21.3 [18.0, 22.0] | 1.01 [0.67, 1.27] | 0.123 [0.11, 0.14] | 26.4 |
+| 143 | 18.0 [7.0, 24.0] | 0.88 [0.44, 1.34] | 0.073 [0.06, 0.09] | 21.3 |
+
+**Water age ↔ risk (all n = 92 junctions):** Spearman `0.73` (p ≈ 1e-16, bootstrap 95 %
+`[0.63, 0.80]`) for duration and `0.73` for deficit; Pearson `0.74`. Spearman is the primary statistic
+(risk metrics are non-linear and many nodes are 0).
+
+![Risk associated with water age; top nodes' expected duration with 5-95% bands](figures/step10_risk_metrics.png)
+
+Findings:
+
+1. **Duration and depth give different internal rankings within a broadly overlapping hotspot
+   cluster.** By *persistence*, node **131** is worst (below 0.2 for ≈ 47.5 of 48 h); by *severity*
+   (cumulative deficit) node **243** is worst (deep *and* long, 5.78 mg/L·h); node **166** is a *deep
+   but short* risk (min C ≈ 0, only ≈ 10 h). The cluster {131, 243, 166, 141, 145, 15, 139, 143}
+   broadly overlaps across metrics, but the internal order changes with the metric — which is exactly
+   the point of reporting duration and depth separately, so we do **not** claim an identical ranking
+   throughout.
+2. **Ensemble uncertainty is real and reported.** The 5–95 % bands are tight for the two worst nodes
+   (243, 131) but wide for others (e.g. node 15: 8–24 h; node 143: 7–24 h) — parameter uncertainty
+   propagates into the *magnitude* of the node-level risk metrics.
+3. **Water age gives hydraulic corroboration of the spatial pattern.** Mean water age is strongly
+   *associated* with both duration and deficit (Spearman 0.73, n = 92, bootstrap [0.63, 0.80]); the
+   worst nodes also have the longest residence times. This is corroboration, **not** validation:
+   water age comes from the *same* hydraulic model (not an independent measurement), correlation is
+   not causation, and residual chlorine also depends on wall decay, source dosing and tank mixing.
+4. **Water-age magnitudes are window-dependent (not steady state).** In this 72-h run the age field
+   is still filling (age at `t = 24 h` equals the elapsed 24 h for the leading nodes, and keeps rising
+   to `t = 72`), so the *absolute* mean age depends on the averaging window (post-warm-up mean 44.9 /
+   40.2 h for 243/131; last-cycle mean 53.9 / 45.3 h) and differs from the draft's earlier single-
+   window figures (≈ 36.0 / 34.6 h). The **rank** association is the robust, window-insensitive
+   result — hence Spearman, not absolute ages, is reported as the finding. *(A longer run would be
+   needed for converged absolute water ages.)*
+5. **Interpretation, stated carefully.** The dominant decay term (old) is the *most robustly informed*
+   coefficient under the expanded realism analyses (Steps 4/7), and water age is reaction-independent;
+   so the leading hotspots are governed by residence time and the old-group decay rather than the
+   weakly-informed avg/new coefficients. Consequently **parameter uncertainty affected the *magnitude*
+   of the node-level risk metrics (see the 5–95 % bands) but did not materially change the leading
+   hotspot ranking under the tested perturbations** (threshold, k_b ±20 %, sensor bias, noise level).
+   We do **not** claim the uncertainty "does not propagate" — it does, into the magnitudes; what is
+   stable is the ordering of the top hotspots.
+
+---
+
+## Step 11 — leave-one-monitor-out (LOO) predictive validation
+
+The draft calibrated and evaluated on the same six monitors, with no out-of-sample check. LOO
+cross-validation fills that gap: hold out one monitor, calibrate GLUE on the other five, then
+(a) check the three k_w stay stable and (b) *predict* the held-out sensor and measure the
+out-of-sample error and predictive-band coverage (`step11_loo.py`; cache reused, 30 noise
+realisations, σ-scaled threshold for 5 monitors). Full-6 reference: old −1.041 / avg −0.119 /
+new −0.052.
+
+```
+held-out pred RMSE  = √[ mean_t (pred_mean_m(t) − obs_m(t))² ]     compared with the noise floor σ = 0.1
+90% predictive band = pred_mean ± 1.645·√(Var_ensemble + σ²)       (parameter + observation noise)
+coverage            = fraction of held-out hours inside the 90% band
+```
+
+| held-out (zone) | k_old | k_avg | k_new | pred RMSE @m | 90% coverage |
+|---|---|---|---|---|---|
+| 107 (new) | -1.039 | -0.118 | -0.052 | 0.096 | 0.92 |
+| 113 (new) | -1.039 | -0.118 | -0.052 | 0.098 | 0.92 |
+| **15 (old)** | **-0.986** | -0.117 | -0.052 | 0.097 | 0.94 |
+| **145 (old)** | **-1.010** | -0.116 | -0.051 | 0.093 | 0.94 |
+| 209 (avg) | -1.036 | -0.120 | -0.053 | 0.102 | 0.92 |
+| 231 (avg) | -1.041 | -0.120 | -0.052 | 0.100 | 0.92 |
+
+(medians over 30 noise realisations; noise floor σ = 0.1 mg/L.)
+
+![LOO out-of-sample prediction error ≈ noise floor; held-out node-15 band covers the data](figures/step11_loo.png)
+
+Findings:
+
+1. **Out-of-sample prediction is at the noise floor.** Every held-out monitor is predicted with
+   RMSE ≈ 0.093–0.102 mg/L ≈ σ = 0.1 — i.e. the five-monitor calibration predicts the *unseen* sensor
+   about as accurately as the measurement noise allows. No sign of over-fitting; the model
+   generalises spatially.
+2. **Uncertainty is well-calibrated.** The 90 % predictive band (parameter + observation-noise
+   variance) covers 92–94 % of held-out hours — close to the nominal 90 %, slightly conservative.
+   So the reported uncertainty is trustworthy out-of-sample, not just in-sample.
+3. **Parameter stability confirms where the information lives.** k_avg/k_new are unchanged by dropping
+   any monitor (they are prior-dominated). k_old moves perceptibly **only when an old-zone monitor is
+   removed** (−1.041 → −0.986 without node 15; → −1.010 without node 145), and is unaffected by
+   dropping new/avg monitors — exactly matching Fisher/profile, which locate old's information at
+   monitors 15/145. Even then old stays within ~0.05 of the full-6 value.
+4. **Validation summary.** LOO corroborates the whole picture: the risk-relevant predictions
+   generalise to unseen locations at the noise floor with well-calibrated bands, and the calibration
+   is robust to the monitor set, with old's (localised) information the only thing a single dropped
+   sensor can perceptibly weaken.
 

@@ -1,363 +1,199 @@
-# 三 DMA 一阶余氯衰减的不确定性感知校准 — Bristol Water Field Lab
+# 分组一阶余氯壁衰减的不确定性感知校准与可辨识性研究（EPANET Net3 合成三区案例）
 
-> 本 README 反映 **2026-05-25 导师邮件**确定的项目范围。
-> 中文版（本文件） ｜ English: [`README.en.md`](./README.en.md)
+> 本 README 为 **2026-08 修订版**，反映导师 2026-07-25 论文评审后的实际研究内容（见 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)）。
+> 中文版（本文件） ｜ English: [`README.en.md`](./README.en.md)（英文版尚未同步到本修订）
 > 配套执行计划：[`plan1.md`](./plan1.md) ｜ 文献清单：[`background/Literature/literature.md`](./background/Literature/literature.md)
+
+## 0. 一句话概括
+
+在 **EPANET Net3** 基准管网上，按管材/管龄把管道分为 **old / average / new 三个连续区**，用**已知的合成真值**生成含噪观测，系统研究一阶壁衰减系数 `k_w` 的**不确定性感知校准**与**可辨识性**：数据到底能约束哪些参数、GLUE 的诚实局限在哪、结构/系统/自相关/截断误差如何影响估计，以及**参数不确定性如何（不）传播到运营低余氯风险图**。全部实验可复现、可脚本重跑，结果记录在 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)。
 
 ## 1. 项目定位
 
-本项目是 Imperial College London CIVE70058 Research Dissertation - Environmental 的硕士毕业研究项目，模块规模为 30 ECTS / 60 CATS。项目最终产出包括：
+本项目是 Imperial College London **CIVE70058 Research Dissertation – Environmental**（30 ECTS / 60 CATS）的硕士毕业研究。最终产出：
 
-- Research paper：2026-08-21 12:00 前提交，论文形式接近技术/科学期刊论文，最高 12,000 words。
-- Research poster：2026-08-28 12:00 前提交，用图表化方式说明研究动机、方法、结果和结论。
-- 中期检查点：
-  - 2026-06-19：Supervisor checkpoint / progress report。
-  - 2026-07-03：Student checkpoint / reflection。
+- **Research paper**：2026-08-21 12:00 前提交，接近科学期刊论文，最高 12,000 words。
+- **Research poster**：2026-08-28 12:00 前提交。
+- 已完成的中期检查点：2026-06-19 supervisor checkpoint、2026-07-03 student checkpoint。
+- **当前阶段**：导师 2026-07-25 返回论文评审 + 修改版 Jupyter notebook；正在按评审意见完成**最终修订**（Priority 1 更正 + Priority 2 方法学补强），并把实验结果整合进正文。
 
-本仓库用于管理毕业设计期间的代码、模型、数据说明、结果图表和论文大纲。所有关键进展应通过 Git/GitHub 留痕，并在每周会议记录中同步。
+本仓库管理毕设期间的代码、模型、结果图表、文献笔记与论文草稿；所有关键进展经 Git 留痕。
 
 ## 2. 研究主题
 
-工作题目：**Uncertainty-aware calibration of first-order chlorine residual decay modelling in the Bristol Water Field Lab — a three-DMA comparative study**（基于 Bristol Water Field Lab 三个 DMA 的一阶余氯衰减不确定性感知校准）。
+工作题目（修订）：**Uncertainty-aware calibration and identifiability of grouped first-order chlorine wall-decay coefficients — a controlled EPANET Net3 three-zone study**。
 
-研究使用 Imperial College / Bristol Water Field Lab 现有 EPANET 模型与 10 个 free chlorine 在线监测点。3 个 DMA 入口的实测余氯作为时变 source boundary 输入 WNTR/EPANET；下游监测点用于校准与验证。重点关键词：
+核心不是「估一个数」，而是回答：**在真实可得的监测密度与测量噪声下，分区 `k_w` 到底能不能被辨识，以及这对运营风险意味着什么**。为此使用**合成真值**（synthetic truth）作为受控试验台——因为真值已知，才能严格评估可辨识性、区分「精确」与「无偏」、并做诚实的验证。关键词：
 
-- **EPANET / WNTR**：管网水力与水质模拟平台（EPANET 2.2 水质引擎 + WNTR Python wrapper）。
-- **First-order chlorine decay**：仅考虑 first-order bulk (`k_b`) + first-order wall (`k_w`) + 边界层 mass-transfer 项（Rossman 1994 / EPANET 2.2 Manual）。
-- **3-DMA comparative calibration**：管材、管龄异质 → `k_w` 异质 → 一个 `k_w` per DMA，再比较 cross-DMA 可迁移性。
-- **Ensemble-based uncertainty**：用 GLUE（Plan A）或 Bayesian MCMC / hierarchical partial pooling（Plan B）量化参数与预测的不确定性。
-- **Time-varying inlet boundary**：3 个入口监测器的实测余氯直接喂进 source pattern，**入口浓度不参与校准**。
-- **DPD / colorimetric / online sensor uncertainty**：测量误差进入 likelihood，避免对"完美观测值"过度自信。
+- **EPANET / WNTR**：EPANET 2.2 水质引擎 + WNTR Python wrapper（`wntr 1.4.0`）。
+- **First-order chlorine decay**：一阶 bulk (`k_b`) + 一阶 wall (`k_w`)（Rossman 1994 / EPANET 2.2 Manual）。
+- **分区 `k_w`（material/age zones）**：按节点坐标把 Net3 分为 old / average / new 三个连续区，每区一个 `k_w`——把「多 DMA 异质性」问题落到一个可控合成案例上。
+- **GLUE（informal likelihood）**：Beven & Binley 1992；本项目正面讨论其统计低效与阈值/先验依赖。
+- **正式可辨识性工具**：Fisher information / Cramér–Rao 下界（CRLB）、profile likelihood、AR(1) 协方差修正。
+- **测量误差进入 likelihood**：Gaussian 观测噪声、系统偏置、零截断（censored likelihood），避免对「完美观测」过度自信。
+- **运营风险传播**：节点低于工作阈值 `0.2 mg/L` 的时长/深度/累计缺口，并用 water age 做水力佐证。
 
 ## 3. 研究动机
 
-供水管网中的余氯浓度直接关系到饮用水微生物安全。传统余氯模型校准常以观测值作为确定值处理，但实际监测数据受传感器精度、DPD 比色法误差、采样位置、采样时间和模型结构误差影响。若忽略这些不确定性，校准结果可能给出过度自信的参数和错误的风险判断。
+供水管网余氯直接关系微生物安全。传统校准常把观测当作确定值、只报单点参数，容易给出**过度自信的参数**和**错误的风险判断**。两个被忽视的问题：
 
-更关键的是：**真实管网由多个 DMA 组成，管材与管龄各异**。一个 DMA 上校准出的 `k_w` 不一定能预测另一个 DMA——这是文献里反复指出（Hallam 2002, Maleki 2023）但很少正面回答的问题。本项目利用 Bristol Water Field Lab 3-DMA 的天然多区结构，将"估一个 `k_w`"升级为：
+1. **可辨识性**：真实网络中监测点稀疏、误差不小，**并非所有分区 `k_w` 都能从数据里辨识出来**。若不检验，"校准成功"可能只是**先验居中**（prior centring）的假象。
+2. **误差结构**：观测有系统偏置、时间自相关、以及在低余氯处的**零截断**（`C_obs = max(0, C_true+ε)`）；模型还有结构误差。这些都会让「拟合很好」与「参数正确」脱节（precise-but-biased）。
 
-1. **异质性问题**：3 个 DMA 的 `k_w` 之间差多少？是否有统计意义？
-2. **可迁移性问题**：在 DMA-A 上校准的模型迁移到 DMA-B / C 上时，预测可靠性下降多少？
-3. **不确定性是否改变结论**：当 `k_w` 带后验区间时，DMA 间的"差异"是真信号还是噪声？
-
-会议中提到 `0.2 mg/L` 可作为 free chlorine residual 的工作阈值示例。该阈值在当前阶段仅作为建模和结果展示的占位假设，最终论文前需要与导师确认是否采用。
+本项目用**已知真值的合成三区案例**把这两点讲透，并把结论一路推进到**运营风险图**：即便部分 `k_w` 辨识很差，风险热点是否仍稳健？`0.2 mg/L` 在本研究中是**选定的运营低余氯阈值示例**（representative operational threshold），不是法定/合规安全限。
 
 ## 4. 研究问题与目标
 
-### 4.1 研究问题
+### 4.1 研究问题（对应已完成实验）
 
-1. **基线问题**：基于现有 EPANET 模型 + WNTR `simulate_chlorine(kb, kw)`，能否复现 3 个 DMA 下游监测点的 free chlorine 时间序列？
-2. **决定性校准**：在统一 `k_b` + 每 DMA 一个 `k_w` 的框架下，最佳拟合参数是多少？
-3. **不确定性传播**：在显式建模 DPD / 在线传感器测量误差的前提下，参数后验/置信区间是什么？
-4. **DMA 间异质性**：3 个 `k_w` 的后验分布是否显著不同？这种差异是否与管材/管龄信息一致（Hallam 2002 / Maleki 2023）？
-5. **可迁移性**：从 DMA-A 学到的参数去预测 DMA-B / C 时，predictive RMSE 与覆盖率（CRPS）下降多少？
-6. **阈值判断**：在不确定性下，节点低于 `0.2 mg/L` 的概率分布如何随空间和时间变化？
+1. **基线复现**：能否复现三区下游监测点的余氯时序，并冻结一个可复现的 GLUE baseline？（Step 1）
+2. **可辨识性**：6 个监测点（每区 2 个）+ σ=0.1 噪声下，三个分区 `k_w` 分别能被约束到什么程度？（Step 2–4、7、7b）
+3. **阈值/先验依赖**：behavioural 阈值怎么定才有原则？结论对阈值/先验稳健吗？（Step 3、4）
+4. **误差来源敏感性**：结构误差、传感器系统偏置、`k_b` 误设（bulk–wall 补偿）、时间自相关 AR(1)、零截断，各自如何影响估计？（Step 5、7c、8、8b、9）
+5. **所需传感器精度**（导师邮件问题）：要得到有用的余氯预测，传感器 σ 需要多小？（Step 6）
+6. **风险传播与验证**：参数不确定性是否改变运营低余氯**风险热点排序**？风险图有无独立水力佐证？模型能否预测**未见**监测点？（Step 10、11）
 
 ### 4.2 总目标
 
-建立一个**可复现的、不确定性感知的、跨 DMA 比较**的 EPANET/WNTR 余氯校准工作流，输出每个 DMA 的 `k_w` 后验分布、跨 DMA 预测的可靠性指标、以及节点低于工作阈值的概率分布。
-
-### 4.3 具体任务
-
-- 完成文献综述：余氯衰减机理（A1/A2/A3/A4/A5/A6）、EPANET/WNTR（B1/B2/B3）、不确定性方法（E1/E3/E4/E5/E6/E7）、测量误差（D2/D3/D4/D5）、监管阈值（F1/F2）。
-- 基线仿真：基于导师提供的 Jupyter notebook 跑通 `simulate_chlorine(kb, kw)`，先用 Net3 练手，再切换到 Bristol 3-DMA 模型。
-- 数据组织：3 个入口监测 → time-varying source pattern；7 个下游监测 → 5 用于 calibration，2 用于 held-out validation（具体分配待 Week 5 确定）。
-- **确定性校准（baseline）**：weighted least squares 估 `(k_b, k_w_A, k_w_B, k_w_C)`，目标函数 NSE / RMSE / MAE。
-- **不确定性校准（Plan A）**：GLUE（Beven & Binley 1992，E6）—— Monte Carlo + likelihood 加权，得到参数与预测的 5–95% 区间。
-- **不确定性校准（Plan B）**：Bayesian hierarchical model（Gelman BDA，E7 Ch5）—— 3 个 `k_w` 共享族先验，partial pooling 借力；MCMC 用 `emcee` 或 `pymc`。
-- **cross-DMA 可迁移性评估**：在 DMA-A 上得到后验，分别对 DMA-B / C 做后验预测检查（PPC）。
-- 结果解释：每 DMA 的 `k_w` 后验小提琴图、跨 DMA 预测的 CRPS / 覆盖率对比图、节点低于阈值的概率热力图。
-- 论文写作：按 §7 结构整理。
+建立一个**可复现、不确定性感知、以可辨识性为核心**的分区 `k_w` 校准与风险评估工作流，诚实地界定 GLUE 能做什么、数据能约束什么，并把参数不确定性一路传播到运营风险决策与预测验证。
 
 ## 5. 范围边界
 
-### 5.1 范围内（导师邮件明确）
+### 5.1 范围内
 
-- 三个监测 DMA 的 EPANET 管网模型（**Bristol Water Field Lab 现有 `.inp` 文件**）。
-- **First-order** chlorine kinetics（bulk + wall + mass-transfer）。
-- 10 个 chlorine monitors 的连续观测：3 个用作 inlet boundary，7 个用作 calibration / validation。
-- 参数校准目标：`k_b`（可能跨 DMA 共享） + `k_w` per DMA（3 个）。
-- 不确定性方法：**ensemble-based**（GLUE 优先；Bayesian / hierarchical 进阶）。
-- DPD / online sensor 测量误差建模（D2/D3/D4/D5 参考）。
-- 结果图表、可复现实验流程、论文和 poster 所需材料。
+- **EPANET Net3 基准网**（WNTR 自带 `.inp`），按坐标分 old/average/new 三连续区。
+- **First-order** 动力学（bulk + wall）；`k_b` 固定为 `-0.5 day⁻¹`，估三个分区 `k_w`。
+- **合成真值** + Gaussian 观测噪声（σ=0.1 mg/L 为**一个标准差**）；6 个监测点（每区 2 个）。
+- **GLUE**（2000 组均匀先验）+ **正式可辨识性**（Fisher/CRLB、profile、AR(1)）。
+- 误差建模：系统偏置、`k_b` 误设、零截断（censored/Tobit-type likelihood）。
+- 运营风险：低于 `0.2 mg/L` 的时长/深度/累计缺口 + water age 佐证 + LOO 预测验证。
 
-### 5.2 范围外（导师邮件明确排除）
+### 5.2 范围外
 
-- **不做 hydraulic calibration**——节点需求与管段粗糙度信任既有 EPANET 模型。
-- **不做 multi-species modelling**（EPANET-MSX）——不考虑 TOC、DBP、生物膜耦合。
-- **不做 operational optimisation**——不优化传感器布点、不规划清管、不做 booster 优化。
-- 不开发新的硬件传感器、不做完整实验室水化学实验体系。
-- 不把 AI 工具输出直接作为论文内容提交；如使用 AI 进行代码辅助、语言润色或思路整理，需按 Imperial/CEE 要求披露和引用。
+- **不做水力校准**——需求与粗糙度信任既有模型。
+- **不做 multi-species**（EPANET-MSX）、不做 TOC/DBP/生物膜耦合。
+- **不做运营优化**（不优化布点/清管/加氯站）。
+- 不把真实 Bristol 3-DMA 现场数据纳入本修订（本研究以 Net3 合成受控案例为载体来论证方法；真值已知是可辨识性分析的前提）。
+- AI 工具仅用于代码辅助/语言润色/思路整理，按 Imperial/CEE 要求披露，不直接作为论文内容。
 
-### 5.3 待确定（Tuesday 2026-06-02 会议清单）
+## 6. 方法框架与关键设定
 
-- **数据交付时间与格式**：10 个监测点的实时数据何时拿到？CSV 还是 SCADA dump？采样频率？时间跨度？
-- **EPANET 模型获取**：`.inp` 文件在哪？管材、管径、管龄信息齐全度？
-- **`k_b` 共享假设**：3 个 DMA 是否共用同一 `k_b`（同一水源）？还是各自估？
-- **"ensemble-based method" 具体定义**：导师心目中是 GLUE / ensemble Kalman / approximate Bayesian 哪一种？
-- **WP（Work Package）正式结构**：WP5 = hierarchical Bayesian；WP1–WP4 如何对应？
-- 是否采用 `0.2 mg/L` 作为最终论文阈值：TBD，需与导师确认。
+### 6.1 冻结基线（Step 1）
 
-## 6. 方法框架
+- 合成真值：`k_b = -0.5 day⁻¹`（固定）；`k_w`：old `-1.0`、average `-0.1`、new `-0.05`（`m/day`）。
+- 监测点（每区 2 个）：new `107/113`、old `15/145`、average `209/231`。
+- 时序：72 h 仿真、24 h 预热 → **49 个报告点 = 48 h 窗口**；观测噪声 `σ = 0.1 mg/L`。
+- GLUE：2000 组均匀先验抽样，缓存**每组在全网 92 个节点的预测**，后续实验直接复用缓存、无需重跑 EPANET。
 
-### 6.1 基线建模
-
-1. 用 WNTR 读取 Bristol 3-DMA EPANET `.inp` 模型，确认 3 个 DMA 拓扑（入口节点 + 下游监测节点编号）。
-2. 把 3 个入口监测器的余氯时间序列写成 source pattern（time-varying boundary），喂给水质引擎。
-3. 跑 `simulate_chlorine(kb, kw)`：设 EPANET water-quality option `CHEMICAL`、`BULK ORDER 1`、`WALL ORDER 1`，给初始 `(k_b, k_w)` 试值（如 `k_b = -0.5/day`，`k_w = -0.15 m/day`）。
-4. 输出 7 个下游监测点的模拟浓度序列，肉眼对照实测，确认幅值/趋势合理。
-
-### 6.2 确定性校准（baseline）
-
-最小化模拟与观测的 weighted residual：
+先验范围（`m/day`）：
 
 ```
-J(k_b, k_w_A, k_w_B, k_w_C) = Σ_{节点 i, 时间 t} [ (y_obs - y_sim) / σ_i ]²
+old      : [-1.5,  -0.2 ]
+average  : [-0.2,  -0.04]
+new      : [-0.10, -0.005]
 ```
 
-其中 `σ_i` 从测量误差模型（DPD ±0.02 mg/L 或在线传感器 ±5% 满量程）来。输出单点估计 `(k_b^*, k_w^*)`，用 RMSE / MAE / NSE 评估。**这是 baseline，不是最终结果**。
+### 6.2 GLUE 与 behavioural 阈值（Step 2–3）
 
-### 6.3 不确定性感知校准
-
-#### Plan A — GLUE（Beven & Binley 1992，E6）
-
-1. 在先验范围内 LHS / 均匀抽样 `(k_b, k_w_A, k_w_B, k_w_C)` 共 `N ≈ 10⁴` 组。
-2. 对每组运行 `simulate_chlorine(kb, kw)`。
-3. 用 NSE 或 Gaussian likelihood 计算 likelihood weight；NSE < 阈值（如 0.6）的样本视为 non-behavioural 弃掉。
-4. 加权得到参数边缘分布 + 预测 5–95% 区间。
-
-#### Plan B — Bayesian hierarchical MCMC（Gelman BDA，E7 Ch5/Ch11）
+informal Gaussian 加权与行为阈值：
 
 ```
-k_w_d ~ Normal(μ_kw, τ_kw²)              # DMA d ∈ {A, B, C} 共享族先验
-μ_kw  ~ Normal(0.15, 0.10²)              # 来自 Hallam 2002 / Maleki 2023 范围
-τ_kw  ~ HalfNormal(0.05)                 # DMA 间异质性的尺度
-k_b   ~ LogNormal(log 0.5, 0.5²)         # 全网共享 (水源相同假设)
-y_obs ~ Normal(y_sim(k_b, k_w_d), σ_meas²)
+w_i ∝ exp[ -½ · (RMSEᵢ / σ)² ] · 1[ RMSEᵢ < RMSE_thr ]
+RMSE_thr = σ · (1 + z / √(2·N_resid))      # z=1.645 → 单侧 95% 带；σ=0.1, N_resid=294 → 0.107
 ```
 
-用 `emcee` 或 `pymc` 跑 ≥ 4 chains × 5,000 samples（含 warmup），监控 `R̂ < 1.05`、ESS > 1000。后验输出：每 DMA `k_w` 的 50% / 95% 区间 + `τ_kw` 后验（量化 DMA 间异质性）。
+主阈值 `0.107`（草稿曾用较松的 `0.12`，保留作对照）。
 
-### 6.4 跨 DMA 可迁移性评估
+### 6.3 可辨识性：正式工具（Step 7 / 7b / 7c）
 
-把 calibration 数据按 DMA 切分：
-- 在 DMA-A 数据上得到后验 → 对 DMA-B / C 做后验预测检查（posterior predictive check）。
-- 报告：每 DMA 后验预测 RMSE、CRPS、95% 区间覆盖率（calibration coverage）。
-- 异质性显著 ⇒ 单一 `k_w` 模型不可迁移 ⇒ 必须 per-DMA 校准；否则可考虑 pooled `k_w` 简化。
+- **Fisher / CRLB（先验，a priori）**：`F = Jᵀ J / σ²`，用 Schur 补做边际化，评估在给定灵敏度与噪声下的**理论最小方差**。
+- **Profile likelihood（后验/实用，a posteriori）**：固定一个系数、重优化其余，`ΔNLL ≤ 1.92` 给 95% 区间。
+- **AR(1) 自相关**：用协方差 `Σ[t,s]=σ²ρ^|t−s|` 重算 `F=JᵀΣ⁻¹J` 与 profile，量化区间膨胀（非机械地统一乘一个因子）。
 
-### 6.5 结果评价
+分两层解读：**(1) 受控 baseline 可辨识性**（Fisher A ↔ profile ↔ GLUE 同条件）；**(2) 现实性敏感性**（+`k_b`、+传感器偏置、AR(1)、截断）。
 
-核心评价内容包括：
+### 6.4 误差来源敏感性（Step 5 / 8 / 8b / 9）
 
-- 模型是否能复现 7 个下游监测点的余氯时间序列（hourly / sub-hourly 量级）。
-- `k_w` per DMA 是否显著不同（用 `τ_kw` 后验是否远离 0 判断）。
-- 跨 DMA 预测的可靠性（CRPS / 覆盖率）下降幅度。
-- 哪些节点或时段更容易低于 `0.2 mg/L` 阈值；阈值超限概率图。
-- 结果对 Bristol Water 运营的工程意义（如哪种管材最值得优先翻新）。
+结构误差（管级抖动 / 长度相关异质）、系统传感器偏置、`k_b ±20%`（bulk–wall 补偿）、零截断的 censored likelihood：
 
-## 7. 论文结构
-
-### 7.1 Introduction
-
-需要回答：
-
-- 为什么供水管网余氯建模重要？
-- 为什么测量不确定性会影响模型校准？
-- 本项目的研究问题、目标和贡献是什么？
-
-建议内容：
-
-- 背景：饮用水安全、消毒余氯、管网水质风险。
-- 问题：传统校准忽略观测误差，可能导致错误判断。
-- 贡献：建立 uncertainty-aware calibration 流程，并用 EPANET/WNTR 案例展示。
-
-### 7.2 Background / Literature Review
-
-需要回答：
-
-- 余氯在管网中如何衰减？
-- EPANET/WNTR 如何进行水质模拟？
-- 现有研究如何处理校准和不确定性？
-
-建议内容：
-
-- Chlorine decay：bulk decay、wall decay、水龄、温度、有机物和管壁影响。
-- Water quality modelling：EPANET 的水质传输和反应模型，WNTR 的 Python 工作流。
-- Calibration methods：最小二乘、优化算法、敏感性分析。
-- Uncertainty methods：sensor uncertainty、measurement error、Monte Carlo、probabilistic risk。
-
-### 7.3 Methodology
-
-需要回答：
-
-- 使用什么网络模型、数据和参数？
-- 如何运行仿真？
-- 如何做确定性校准和不确定性感知校准？
-
-建议内容：
-
-- 数据和模型来源。
-- 参数范围和校准变量。
-- 误差模型假设。
-- Monte Carlo 或概率分析流程。
-- 评价指标和图表输出。
-
-### 7.4 Results
-
-需要回答：
-
-- 模型运行和校准结果是什么？
-- 不确定性对结果产生了什么影响？
-
-建议图表：
-
-- 管网拓扑与传感器/采样节点。
-- 观测值与模拟值时间序列对比。
-- 校准前后误差指标。
-- 参数分布或敏感性结果。
-- 余氯预测区间。
-- 低于阈值概率的节点空间分布。
-
-### 7.5 Discussion
-
-需要回答：
-
-- 结果在工程上意味着什么？
-- 不确定性处理是否值得？
-- 方法有什么局限？
-
-建议讨论：
-
-- sensor uncertainty 对校准可信度的影响。
-- `0.2 mg/L` 阈值判断从确定性判断变成概率判断后的变化。
-- 数据质量、模型结构、参数可识别性和真实管网适用性的限制。
-
-### 7.6 Conclusion
-
-需要回答：
-
-- 本项目完成了什么？
-- 得到哪些主要结论？
-- 后续工作可以如何扩展？
-
-建议内容：
-
-- 回答每个研究问题。
-- 总结 uncertainty-aware calibration 的价值。
-- 提出未来工作：更多实测数据、在线传感器、贝叶斯校准、更复杂管网案例。
-
-## 8. 时间计划
-
-项目从 2026-05-15 左右开始，至 2026-08-21 research paper 提交约 13 周，poster 截止为 2026-08-28。
-
-| 阶段 | 时间 | 目标 | 产出 |
-| --- | --- | --- | --- |
-| Week 1 | 2026-05-15 至 2026-05-22 | 明确论文结构、研究问题和工具链 | README 大纲、文献清单、初步 Git/GitHub 仓库 |
-| Week 2 | 2026-05-23 至 2026-05-29 | 完成背景阅读和方法路线选择 | Introduction/Background 草稿，EPANET/WNTR 示例跑通 |
-| Week 3-4 | 2026-05-30 至 2026-06-12 | 建立或整理管网模型与数据格式 | 可运行 `.inp` 模型，数据 schema，baseline simulation |
-| Week 5 | 2026-06-13 至 2026-06-19 | 准备 supervisor checkpoint | 进度总结、问题清单、下一步校准方案 |
-| Week 6-7 | 2026-06-20 至 2026-07-03 | 完成确定性校准并准备 student checkpoint | baseline calibration，student reflection |
-| Week 8-9 | 2026-07-04 至 2026-07-17 | 加入 sensor uncertainty 和 Monte Carlo | 参数分布、预测区间、阈值概率结果 |
-| Week 10 | 2026-07-18 至 2026-07-24 | 完成主要结果图 | Results 图表和初步讨论 |
-| Week 11 | 2026-07-25 至 2026-07-31 | 集中写 Methodology / Results / Discussion | 论文主体初稿 |
-| Week 12 | 2026-08-01 至 2026-08-07 | 完成完整论文初稿 | Full draft 给导师反馈 |
-| Week 13 | 2026-08-08 至 2026-08-21 | 修改、校对、提交 research paper | 最终 research paper |
-| Poster | 2026-08-22 至 2026-08-28 | 制作和提交 poster | 最终 research poster |
-
-## 9. 工作流
-
-### 9.1 Git/GitHub
-
-- 使用 Git/GitHub 记录代码和文档变更。
-- 每个阶段至少提交一次有意义的 commit。
-- 不把大型原始数据、临时输出和隐私数据直接提交到仓库。
-- 代码、图表和论文草稿需要保持可追踪来源。
-
-### 9.2 建议目录结构
-
-```text
-codes/
-  README.md
-  background/          # 文献笔记、关键概念、公式整理
-  data/                # 数据说明、清洗脚本、小型示例数据
-  models/              # EPANET .inp 或模型配置
-  src/                 # Python/WNTR 分析代码
-  results/             # 图表、表格、统计输出
-  thesis/              # research paper 草稿和结构
-  meetings/            # 每周会议纪要
+```
+未截断 (obs>0): 高斯项       -½·((obs-μ)/σ)²
+截断  (obs=0):  P(Y*≤0)     log Φ(-μ/σ)      # scipy log_ndtr
 ```
 
-当前这些目录尚未全部建立，后续可按需要逐步创建。
+### 6.5 运营风险与验证（Step 6 / 10 / 11）
 
-### 9.3 云端共享文件夹
+- **所需精度扫描**：σ = 0.02 / 0.05 / 0.10 / 0.15，阈值随 σ 缩放。
+- **风险指标**（梯形积分于 48 h 窗口）：低于 `0.2 mg/L` 的**时长**、**最低浓度**、**累计缺口** `∫max(0,0.2−C)dt`；集合加权期望 + 5–95% 区间。
+- **water age**：独立于反应系数的水力诊断，做风险格局的**物理佐证**（Spearman 秩相关）。
+- **leave-one-monitor-out（LOO）**：留一个监测点、用其余 5 个校准再预测，检验样本外预测误差与带宽覆盖。
 
-建议云端共享文件夹按以下分类整理：
+复现方式见 §9 与 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md) 顶部「Files and how to reproduce」。
 
-- background：论文、报告、文献笔记。
-- data：原始数据、处理后数据、数据说明。
-- code：与 GitHub 仓库对应的代码备份或链接。
-- results：可直接进入论文的图表、表格与结果。
-- thesis：论文草稿、导师反馈、版本记录。
-- weekly meetings：每周会纪要、问题清单、行动项。
+## 7. 主要发现（Step 1–11 摘要）
 
-## 10. 每周会议模板
+> 完整数据、表格与图见 [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)；以下为要点。
 
-会议形式：weekly F2F 或 Teams，优先保持固定节奏。
+1. **只有主导的 old 系数被明显约束**：GLUE 下 old 后验明显收窄，average/new 基本停留在先验（弱信息）；草稿里「三个都恢复得不错」部分是**先验居中**造成的假象（Step 2、4）。
+2. **阈值/风险稳健**：原则化阈值 `0.107`（噪声底之上 95% 带）；收紧阈值主要让 old 变尖，风险热点排序对阈值稳健（Step 3）。
+3. **old 是单侧可辨识**：观测能从弱衰减一侧把 old 拉回真值附近，但强衰减侧约束很弱（Step 4/4b）。
+4. **结构误差 → precise-but-biased**：对称抖动下稳健；长度相关的区内异质会让 GLUE **精确但有偏**地追随长度加权均值（Step 5）。
+5. **所需精度**：σ ≲ 0.05 才能收紧决定风险图的低余氯节点；`±0.1` 只能恢复 old + 粗略风险格局；`±0.15` 基本回到先验（Step 6，回应导师邮件）。
+6. **正式 vs 非正式**：理想 baseline 下 Fisher（CRLB/prior 0.25/0.29/0.29）与 profile 都认为三者可辨识；GLUE 明显更宽、更依赖先验（informal likelihood 丢了 `N` 因子的统计低效）。现实性因素（`k_b`、传感器偏置、AR(1)）会显著削弱 average/new，唯 old 相对稳健（Step 7/7b/7c）。
+7. **系统误差**：node 15 注入 `+0.05` 偏置把 old 推移约 0.5 个 behavioural SD、`+0.10` 约 1.4 SD；`k_b ±20%` 通过 bulk–wall 补偿把 `k_w` 推 ∓0.03–0.04；两者都**不改变**风险热点排序（Step 8/8b）。
+8. **零截断（L=0）稳健性**：校准用的 294 点中仅 8 个被截到 0（全在 old 区；完整记录 28/438）；把 0 当精确值 vs censored likelihood，`k_w`、profile、node-15 风险、热点排序**几乎一致**——原处理未实质推偏结论（Step 9）。
+9. **风险图物理锚定**：时长/深度给出比单一概率更细的风险刻画；风险与 water age 的秩相关 `Spearman 0.73`（n=92, bootstrap `[0.63,0.80]`）——风险由**停留时间 + 可辨识的 old 衰减**主导（Step 10）。
+10. **样本外验证**：LOO 预测未见监测点的 RMSE ≈ 噪声底 `0.1`，90% 带覆盖 92–94%，参数稳定——**old 仅在拿掉 old 区监测点时才微变**，独立印证其信息定位（Step 11）。
+11. **总主线**：参数不确定性**确实传播**进风险指标的**数值**（见 5–95% 带），但在已测扰动（阈值、`k_b`、偏置、噪声）下**主要风险热点的排序稳定**。
 
-```markdown
-## Meeting YYYY-MM-DD
+## 8. 论文结构（对齐实际结果）
 
-### 1. 上周完成了什么？
-- 
+- **Introduction**：余氯安全、为什么测量不确定性会影响校准、分区 `k_w` 的可辨识性问题与本项目贡献。
+- **Background / Literature**：一阶余氯衰减、EPANET/WNTR 水质模拟、GLUE 与其批评（Mantovan & Todini 2006 / Stedinger 2008）、Fisher/CRLB 与 profile likelihood、测量误差与截断。
+- **Methodology**：Net3 三区设定、合成真值与噪声、GLUE + 阈值推导、Fisher/profile/AR(1)、误差敏感性（结构/偏置/`k_b`/截断）、风险指标与 LOO。
+- **Results**：Step 1–11（可辨识性 → 误差敏感性 → 所需精度 → 风险与验证）。
+- **Discussion**：GLUE 的保守性与统计低效、可辨识性梯度、precise-but-biased、所需传感器精度对水安全计划的意义、局限（AR(1) 使理想区间偏乐观、水龄未达稳态等）。
+- **Conclusion**：回答每个研究问题；uncertainty-aware calibration 的价值；未来工作（真实多 DMA 数据、贝叶斯分层、更长仿真达稳态水龄、更密集集合）。
 
-### 2. 遇到了什么问题？
-- 
+## 9. 复现方式
 
-### 3. 我建议如何解决？
-- 
+代码在 [`Net3/`](Net3/)，conda 环境 `water-supply`（`numpy 2.4.2`, `wntr 1.4.0`）。核心文件：
 
-### 4. 导师反馈
-- 
+- [`Net3/wq_common.py`](Net3/wq_common.py)：冻结的三区 baseline 配置 + WNTR/EPANET 助手（监测点、分区、种子、先验、时序）。
+- `Net3/step1_freeze_baseline.py`：建合成真值 + 含噪观测 + 2000 组 GLUE，缓存所有预测。
+- `Net3/step3 … step11_*.py`：阈值、位移先验、结构误差、噪声扫描、Fisher/profile/AR(1)、传感器偏置、`k_b`、censored、风险指标、LOO。
+- [`Net3/RESULTS_LOG.md`](Net3/RESULTS_LOG.md)：**所有实验的方法、表格、图与结论**（每个数字都由脚本产生，顶部有完整文件清单与运行命令）。
+- `Net3/baseline_cache/`：缓存（`baseline.npz` 等），使后续实验无需重跑 EPANET。
 
-### 5. 下周计划
-- 
+典型运行（`Net3/` 目录下）：
 
-### 6. 需要导师确认的事项
-- 
+```
+export MPLCONFIGDIR=/tmp/mpl
+python step1_freeze_baseline.py        # ~40 s（2000 次 EPANET）
+python step7b_profile.py               # 建 21³ 网格
+python step10_risk_metrics.py          # 风险指标 + water age
+python step11_loo.py                   # 留一验证
 ```
 
-每次会议前应准备三件事：
+## 10. 时间计划（修订，2026-08）
 
-1. 上周实际完成内容。
-2. 当前最阻碍进展的问题。
-3. 自己提出的解决方案，而不是只带问题去会议。
+| 阶段 | 状态 |
+| --- | --- |
+| 基线复现 + GLUE（Step 1–2） | ✅ 完成 |
+| 可辨识性 + 阈值/位移先验（Step 3–4） | ✅ 完成 |
+| 误差敏感性（结构/噪声/Fisher/偏置/`k_b`/截断，Step 5–9） | ✅ 完成 |
+| 风险指标 + water age + LOO 验证（Step 10–11） | ✅ 完成 |
+| **重写 Results / Discussion / Conclusion（Step 12）** | ⏳ 进行中 |
+| 图表统一/单位/压缩篇幅/Word 格式（Step 13） | ⏳ 待做 |
+| Research paper 提交 | 截止 2026-08-21 |
+| Research poster 提交 | 截止 2026-08-28 |
 
-## 11. 当前优先事项（2026-05-25 更新）
+## 11. 工作流
 
-### 已确认 ✓
-
-- [x] 项目正式题目与范围：3-DMA + first-order + ensemble-based + 排除水力 / MSX / 运营优化（2026-05-25 supervisor email）
-- [x] 文献清单 v1 完成（A1–A6 / B1–B4 / C1–C6 / D1–D5 / E1–E7 / F1–F2）
-- [x] 6 篇核心论文精读笔记入库（A1 / A2 / A3 / A4 / C1 / C2 / C5 / D2 / E1 / E3 / E5 / F2）
-
-### Tuesday 2026-06-02 会议前必做
-
-- [ ] **跑通导师 Jupyter notebook** `simulate_chlorine(kb, kw)`（Net3 练手）
-- [ ] **下载并速读** B1 Klise 2017（WNTR 论文）+ B2 EPANET 2.2 Manual（仅水质章节）+ A6 Vasconcelos 1997
-- [ ] **整理给导师的问题清单**（在 `meetings/2026-06-02.md` 预填）：数据格式、`.inp` 文件、`k_b` 共享假设、"ensemble-based" 具体定义、WP 结构、阈值定义
-
-### Week 3–4（06-02 → 06-12）
-
-- [ ] 拿到 Bristol 3-DMA `.inp` + 10 个监测点数据
-- [ ] 把 `simulate_chlorine` 从 Net3 切到真实模型并跑通
-- [ ] 实现 inlet → time-varying source pattern 的数据管线
-- [ ] baseline 确定性校准（WLS）
-
-### Week 5+（M1 之后）
-
-- [ ] Plan A 跑通：GLUE Monte Carlo + likelihood 加权
-- [ ] Plan B 跑通：Bayesian hierarchical MCMC（`emcee` 或 `pymc`）
-- [ ] 跨 DMA 可迁移性评估（后验预测检查）
+- **Git/GitHub**：每阶段至少一次有意义 commit；不提交大型原始数据/临时输出/隐私数据；代码、图表、草稿保持可追溯。
+- **结果留痕**：所有数值由脚本生成并写入 `RESULTS_LOG.md` 与 `baseline_cache/`，杜绝手工填数。
+- **建议目录**：`background/`（文献）｜`Net3/`（代码+缓存+结果）｜`thesis/`（论文草稿与图）｜`meetings/`（会议纪要）。
 
 ## 12. AI 工具使用提醒
 
-Imperial/CEE 允许在未被明确禁止时使用 generative AI 工具，但提交内容必须体现自己的理解、判断和表达。若使用 AI 工具进行代码生成、语法检查、语言润色、图表说明或思路整理，需要在最终提交材料中按学院要求披露用途并适当引用。所有 AI 生成内容都必须经过人工核查，不能替代文献阅读、模型判断或结果解释。
+Imperial/CEE 允许在未被明确禁止时使用 generative AI，但提交内容必须体现自己的理解、判断与表达。若用 AI 做代码生成、语法检查、语言润色、图表说明或思路整理，需在最终材料中按学院要求披露用途并适当引用；所有 AI 产出都须经人工核查，不能替代文献阅读、模型判断或结果解释。
