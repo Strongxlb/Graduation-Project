@@ -229,6 +229,36 @@ crlbC_unit, _ = marginal(cases["C: kw+kb+6 offsets"], 1.0)
 report["crlbC_vs_sigma"] = {f"{s:.2f}": {z: float(s * crlbC_unit[j]) for j, z in enumerate(ZKEYS)}
                             for s in [0.05, 0.10, 0.15]}
 
+# ---- k_b confounding: two quantities that are easy to confuse and carry opposite signs ----
+# The Jacobian-column cosine F_ij / sqrt(F_ii F_jj) says how collinear two SENSITIVITY DIRECTIONS
+# are: a property of the experimental design. The estimator correlation, normalised from
+# Cov(theta_hat) ~ sigma^2 (J'J)^-1, says how the two ESTIMATES co-vary. For a pair of parameters the
+# two generally carry OPPOSITE SIGNS, and it is the negative estimator correlation that carries the
+# bulk-wall compensation story Step 8b measures empirically. step7_verify.py prints the same two
+# columns side by side; they are recorded here so the log can quote them against an artifact.
+idxB = cases["B: kw+kb"]
+FB = JtJ[np.ix_(idxB, idxB)]
+dB = np.sqrt(np.diag(FB))
+jac_cos = FB / np.outer(dB, dB)
+covB = SIGMA ** 2 * np.linalg.pinv(FB)
+sB = np.sqrt(np.diag(covB))
+par_corr = covB / np.outer(sB, sB)
+crlbA_kb, _ = marginal(cases["A: kw only"], SIGMA)
+crlbB_kb, _ = marginal(idxB, SIGMA)
+report["kb_confounding"] = {
+    "note": "jacobian_cosine_with_kb is a design collinearity; estimator_correlation_with_kb is how "
+            "the estimates co-vary. They differ in sign and must not be interchanged: only the "
+            "second is a parameter correlation.",
+    "by_coef": {z: {"jacobian_cosine_with_kb": float(jac_cos[j, 3]),
+                    "estimator_correlation_with_kb": float(par_corr[j, 3]),
+                    "crlb_inflation_when_kb_freed": float(crlbB_kb[j] / crlbA_kb[j])}
+                for j, z in enumerate(ZKEYS)}}
+print("\nk_b confounding (design collinearity vs estimator correlation — opposite signs):")
+print(f"{'coef':>8} | {'cos(J_kw,J_kb)':>14} | {'corr(kw_hat,kb_hat)':>19} | CRLB inflation when k_b freed")
+for j, z in enumerate(ZKEYS):
+    print(f"{z:>8} | {jac_cos[j, 3]:+14.3f} | {par_corr[j, 3]:+19.3f} | "
+          f"{crlbB_kb[j] / crlbA_kb[j]:.2f}x")
+
 
 def _jsafe(o):
     if isinstance(o, np.floating):

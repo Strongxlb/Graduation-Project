@@ -86,6 +86,7 @@ SECTIONS = {
     "Step 8": ["step8_sensor_bias.json", "step8c_bias_bynode.json"],
     "Step 8b": ["step8b_kb_sensitivity.json"],
     "Step 8c": ["step8c_bias_bynode.json"],
+    "Step 8d": ["step8d_sensor_drift.json"],
     "Step 9": ["step9_zeroclip.json"],
     "Step 10": ["step10_risk_metrics.json"],
     "Step 11": ["step11_loo.json"],
@@ -122,6 +123,7 @@ FIGURE_SOURCE = {
     "step7b_profile.png": "step7b_profile.json",
     "step8_sensor_bias.png": "step8_sensor_bias.json",
     "step8b_kb_sensitivity.png": "step8b_kb_sensitivity.json",
+    "step8d_sensor_drift.png": "step8d_sensor_drift.json",
     "step9_zeroclip.png": "step9_zeroclip.json",
     "step10_risk_metrics.png": "step10_risk_metrics.json",
     "step11_loo.png": "step11_loo.json",
@@ -177,6 +179,11 @@ CLAIMS = [
     # --- sensor bias: displacement in posterior-SD units, primary rule ---
     ("RESULTS_LOG.md", r"\+0\.10 mg/L at node 15 moves[^\n]{0,60}?([0-9.]+)\s*posterior SD",
      "step8_sensor_bias.json", "rows[6]/shift_over_sd", 1),
+    # --- sensor drift: the ratio that decides whether a drift needs its own analysis at all ---
+    ("RESULTS_LOG.md", r"the ratio reaches\s+\*\*([0-9.]+)\*\*\s+at D = \+0\.10",
+     "step8d_sensor_drift.json", "equivalence/231/+0.100/drift_over_const_mean", 1),
+    ("RESULTS_LOG.md", r"\| 15 \(old\) \| −0\.100 \| −([0-9.]+) \|",
+     "step8d_sensor_drift.json", "rows[0]/own_shift_over_sd", -1),
     # --- sensor accuracy: the answer that changed when the primary rule changed ---
     ("RESULTS_LOG.md", r"σ = 0\.10[^\n]{0,90}?retains\s+([0-9.]+)\s*/\s*[0-9.]+\s*/\s*[0-9.]+\s*% of the prior",
      "step6_noise_sensitivity.json",

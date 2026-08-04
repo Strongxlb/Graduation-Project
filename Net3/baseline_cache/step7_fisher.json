@@ -1,4 +1,9 @@
 {
+  "primary_weighting": "formal_censored",
+  "comparators": [
+    "formal_iid",
+    "informal_glue"
+  ],
   "sigma": 0.1,
   "prior_sd": {
     "old": 0.37527767497325676,
@@ -278,6 +283,26 @@
       "old": 0.3763916432202278,
       "average": 0.15537179230616585,
       "new": 0.044847987929639746
+    }
+  },
+  "kb_confounding": {
+    "note": "jacobian_cosine_with_kb is a design collinearity; estimator_correlation_with_kb is how the estimates co-vary. They differ in sign and must not be interchanged: only the second is a parameter correlation.",
+    "by_coef": {
+      "old": {
+        "jacobian_cosine_with_kb": 0.3328115331825429,
+        "estimator_correlation_with_kb": -0.5467274369903502,
+        "crlb_inflation_when_kb_freed": 1.1942998822123592
+      },
+      "average": {
+        "jacobian_cosine_with_kb": 0.769536789942605,
+        "estimator_correlation_with_kb": -0.8385767292746111,
+        "crlb_inflation_when_kb_freed": 1.8355915474518811
+      },
+      "new": {
+        "jacobian_cosine_with_kb": 0.8308584557275637,
+        "estimator_correlation_with_kb": -0.8420656430697129,
+        "crlb_inflation_when_kb_freed": 1.8539974845121399
+      }
     }
   }
 }

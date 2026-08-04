@@ -136,7 +136,12 @@ def risk_band(score):
 
 
 def base_demand_L_s(wn, nodes):
-    """Net3 base demand is CFS in the .inp; x1000 gives L/s."""
+    """Base demand in L/s.
+
+    WNTR parses the .inp and stores every demand internally in SI base units (m^3/s) regardless of
+    the file's own unit declaration, so x1000 converts to L/s. The frozen Net3.inp declares
+    `Units GPM` -- the conversion here is from WNTR's internal m^3/s, NOT from the file's units.
+    """
     return pd.Series({n: 1000.0 * sum(ts.base_value
                                       for ts in wn.get_node(n).demand_timeseries_list)
                       for n in nodes})
@@ -685,7 +690,8 @@ report = {
                                "moderate (tercile1 < d <= tercile2)": 2,
                                "major (d > tercile2)": 3},
         "consequence_terciles": "1/3 and 2/3 quantiles of base demand over the 59 junctions "
-                                "with non-zero base demand (Net3 CFS x 1000 -> L/s)",
+                                "with non-zero base demand (WNTR stores demand internally in "
+                                "m^3/s, so x1000 -> L/s; the .inp itself declares GPM)",
         "risk_score": "likelihood score x consequence score, range 0-15",
         "risk_band_mapping": {"not applicable": "score = 0", "low": "1 <= score <= 3",
                               "medium": "4 <= score <= 6", "high": "7 <= score <= 9",

@@ -1,11 +1,24 @@
 {
-  "generated_utc": "2026-08-03T23:48:40+00:00",
+  "generated_utc": "2026-08-04T00:49:12+00:00",
   "git": {
-    "commit": "e5bfaa54e590239da14616d5e028a5bf861530b2",
-    "dirty": false,
-    "dirty_files": [],
-    "tree_sha256": "9435ebe31c59561cb8a4797ff8812fe3146210d26d4934a0f2ce7cfbc6a57ef1",
-    "uncommitted_diff_sha256": null
+    "commit": "fdc98793cf4a00da95a5df6087d72953a7c80ef0",
+    "dirty": true,
+    "dirty_files": [
+      "Net3/Figures/step8d_sensor_drift.png",
+      "Net3/RESULTS_LOG.md",
+      "Net3/baseline_cache/step12_scenarios.json",
+      "Net3/baseline_cache/step7_fisher.json",
+      "Net3/baseline_cache/step8d_sensor_drift.json",
+      "Net3/step12_scenarios.py",
+      "Net3/step7_fisher.py",
+      "Net3/step8d_sensor_drift.py",
+      "Net3/validate_artifacts.py",
+      "README.en.md",
+      "README.md",
+      "REVISION_RESPONSE_MATRIX.md"
+    ],
+    "tree_sha256": "c01dcda54d205347b55a161810170df7b05a2d054fcc1133d3be53538ce1169a",
+    "uncommitted_diff_sha256": "1cde2eb480d7a4661e569abea11fc3a52a8aa1110d261e3808342058b3d63daa"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -67,7 +80,7 @@
       "step0_warmup_convergence.py": "95e4821582d226e6e7096c45d8ebeb26130b45321ad5339cf6e0e4885b5b785a",
       "step10_risk_metrics.py": "a40ea3c7db2fa0ad9456431652a7039fd9d23183104ae6030b11a49de3b915d0",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
-      "step12_scenarios.py": "2b83d808b4bd88fbd0692e460eb352543cc55e5c7eb2f40f7258e37506161eb6",
+      "step12_scenarios.py": "90f9626c08ac0cd9dec7418ff49c158df4f1a8a0cc4fcbea277918128fb60502",
       "step13_known_answer.py": "4f9cb424982ff0cbe929d5e59a424e61c005d28d8fd7e0463c61d79d3da70fd5",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
       "step1_freeze_baseline.py": "cb7edf1b943a8feb2ce83e9631b747181f39694dfcf02c7a85c1603e7adc1833",
@@ -79,7 +92,7 @@
       "step5c_jitter_sweep.py": "453c3ab8391a8f0f45c5ad4c14cb9764cf2114c2d391ef926d62983a45240657",
       "step5d_structured.py": "f520631ebebbdcc1314b0d4c5ddac63378ddefe704ab46ca72882aa71884baaf",
       "step6_noise_sensitivity.py": "c6355a601f9a619b50a77357ab61dfa5dc261f47a270be8833ea632d70711ec8",
-      "step7_fisher.py": "afd56575dab1b44bd271555e2f66489b84db0d4642eeba8dd7152f656fee7879",
+      "step7_fisher.py": "ef637ff8e6049ee6255f825412b041a6baaf18c70ef91cdf6f11c2844b4a920f",
       "step7_verify.py": "3ffafc40ff22d4218753dae01f3ba77eb87634facbf387994ec6d4cde858109f",
       "step7b_profile.py": "faca5625e0f54b7ae1b09de41b0b0fd326ab4cc4b433238d412dc68912e35fab",
       "step7c_ar1.py": "7592ae96f7de7e953ee15dc4e8a4259462342113106070f7c7df0d7df58ea001",
@@ -87,9 +100,10 @@
       "step8_sensor_bias.py": "de4b56dcb96860374aa111adbf206536e11aa1163aec7a50d7146081e41a519b",
       "step8b_kb_sensitivity.py": "77a76803488c394353f62ca0be90e80a31dda3b0bb36eb609d6fde0d52b9d902",
       "step8c_bias_bynode.py": "c6ebddd7bb5086c1910f165ad885718d5ec05db88fea97cad97d9be222bcfcdc",
+      "step8d_sensor_drift.py": "13adb4e975dc50a6dbcc3a3cf7b504ebb01533bf1e3e978496640a8022025e33",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "34a095079d9a01a855723ef23fb39b2b8733fbb064c416c7d5d15f728cd05fb3"
+    "step_scripts_combined_sha256": "760ecfffb4d19d1d5c56658ebe84e674d320def98b92405ce47add7c34f1b240"
   },
   "critical_fields": [
     "config_sha256",
