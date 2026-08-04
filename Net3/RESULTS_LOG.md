@@ -1894,14 +1894,27 @@ Findings:
    construction, not merely under-converged here. **The rank association with chlorine risk is the
    relevant result; the absolute magnitudes remain sensitive to the selected horizon** — which is why
    Spearman, and not absolute age, is what this step reports as a finding.
-5. **Interpretation, stated carefully.** The dominant decay term (old) is the *most robustly informed*
-  coefficient under the expanded realism analyses (Steps 4/7), and water age is reaction-independent;
-   so the leading hotspots are governed by residence time and the old-group decay rather than the
-   weakly-informed avg/new coefficients. Consequently **parameter uncertainty affected the *magnitude*
-   of the node-level risk metrics (see the 5–95 % bands) but did not materially change the leading
-   hotspot ranking under the tested perturbations** (threshold, k_b ±20 %, sensor bias, noise level).
-   We do **not** claim the uncertainty "does not propagate" — it does, into the magnitudes; what is
-   stable is the ordering of the top hotspots.
+5. **Interpretation, stated carefully — robustness depends on the perturbation AND on the decision
+   scale.** The dominant decay term (old) is the *most robustly informed* coefficient under the
+   expanded realism analyses (Steps 4/7), and water age is reaction-independent, so the leading
+   hotspots are governed by residence time and the old-group decay rather than the weakly-informed
+   avg/new coefficients. That buys less than the earlier version of this paragraph claimed:
+
+   - **Robust.** The broad risk pattern is essentially unchanged between the formal and informal
+     weighting schemes (network-mean `E[A]` differs by 1.2%, eight of ten hot-spots shared), and it
+     stays strongly rank-correlated under every single-sensor bias tested — Spearman ≥ 0.999 across
+     all 24 arms of Step 8c, with the top-6 set intact at every negative offset.
+   - **Not robust.** Fixing `k_b` 20% above or below its true value **materially changes the leading
+     node set**: top-6 Jaccard falls to 0.50 at both signs, top-3 to 0.20, the reference 4th-ranked
+     node drops to 20th and a node ranked 12th rises to 2nd (Step 8b). `k_b` must therefore **not**
+     appear in any list of perturbations under which the hot-spot ranking is stable.
+
+   The defensible summary is: *parameter uncertainty affects the magnitude of the node-level risk
+   metrics (see the 5–95% bands); the broad spatial pattern is robust to the weighting scheme and to
+   single-sensor bias; but the exact high-priority shortlist is sensitive to bulk-decay
+   misspecification.* We do **not** claim the uncertainty "does not propagate" — it does, into the
+   magnitudes — and we no longer claim the top-hotspot ordering is stable across all tested
+   perturbations, because it is not.
 
 
 

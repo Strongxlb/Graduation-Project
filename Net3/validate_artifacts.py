@@ -232,7 +232,9 @@ FORBIDDEN = [
     # be caught by a number check, because both are sentences ABOUT numbers that are themselves
     # current. A line quoting one of them as superseded is exempt via the SUPERSEDED marker.
     (r"(?i)risk (product|map|ranking)[^\n]{0,30}insensitive to[^\n]{0,25}k_b|"
-     r"top nodes[^\n]{0,40}unchanged at every k_b",
+     r"top nodes[^\n]{0,40}unchanged at every k_b|"
+     # the same claim in list form: k_b enumerated among the perturbations the ranking survives
+     r"\bthreshold,\s*`?k_b`?\s*±\s*20",
      "k_b ±20% retains only four of the six hot-spots (Jaccard 0.50); what stays correlated is the "
      "full-network ordering, not the operational shortlist (Step 8b)"),
     # "baseline GLUE" named a configuration and an inference rule at once. Once the primary rule
