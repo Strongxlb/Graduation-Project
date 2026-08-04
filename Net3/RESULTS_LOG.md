@@ -971,9 +971,16 @@ Findings:
    it is 1.8, i.e. essentially one member carries the posterior. Their "SD retained" figures of 13% and
    4% are therefore **not** measurements of what such a sensor would buy — with so few effective
    members the posterior width is *under*-estimated. Both rows are flagged `sampling_limited` in the
-   artifact on the same ESS criterion the figure shades. Quantifying σ ≤ 0.05 properly needs a
-   likelihood-adapted design (importance, sequential or adaptive sampling), not more uniform draws:
-   ESS stays a roughly constant fraction of the library, so brute force does not fix it.
+   artifact on the same ESS criterion the figure shades. Quantifying σ ≤ 0.05 properly is best done
+   with a **likelihood-adapted design** (importance, sequential or adaptive sampling). More uniform
+   draws would work too, but inefficiently, and it is worth being exact about which: because the ESS
+   fraction is roughly constant, absolute ESS scales **linearly** with the library, so reaching the
+   ESS ≈ 100 criterion needs about a **fivefold** library at σ = 0.05 and about a **fifty-fivefold**
+   one at σ = 0.02. At the measured cost of the present library that is on the order of tens of
+   minutes and a few hundred MB for the first, and hours and several GB for the second — expensive
+   and wasteful rather than impossible. The earlier wording, that "brute force does not fix it", was
+   too strong: uniform sampling does fix it, at a cost that rises with the sharpness of the
+   likelihood, which is exactly the argument for adapting the sampler to it instead.
 4. **The comparator's minimum ESS is the diagnostic that matters, not its median.** At σ = 0.05 its
   median ESS is 699 but its worst realisation is 32, and 7% of realisations fall below 100. A row
    summarised only by its median would look comfortably resolved while one realisation in fourteen was

@@ -60,10 +60,11 @@ long-form record and must still be read.
 | **Change made** | Three structural-error experiments: uncorrelated per-pipe jitter at ±20% (5a), a magnitude sweep with a **`jitter = 0` control** (5c), and length-correlated within-zone heterogeneity that separates the arithmetic from a length-weighted target (5d). Grid quantisation quantified explicitly (5e): the old-zone grid step is 0.2170 m/day, half-step 0.1085, so the grid fit cannot resolve the biases being discussed and only the weighted mean can. |
 | **Code** | `step5_structural_error.py`, `step5c_jitter_sweep.py`, `step5d_structured.py` |
 | **Artifact** | `step5_structural_error.json`, `step5c_jitter_sweep.json`, `step5d_structured.json` |
-| **Status** | **partly closed** |
+| **Status** | **closed, stronger** — the comment's core experiment is done several ways; what remains is research extension, not an unanswered part of the comment |
 | **What changed beyond the comment** | Two measurement errors in our own first attempt were found and corrected. (i) There was no `jitter = 0` control, so the reported bias mixed structural error with the realisation's noise; with the control, the structural *increment* is what can be attributed. (ii) The structural residual has a **grid-resolution floor** of 0.0055 mg/L at zero heterogeneity, so "the residual is 7% of the noise floor" overstated it about fivefold — the true structural part at ±20% is 1.3%. Most importantly, measuring with the formal likelihood **reverses the sign of the conclusion**: the old-zone structural increment is −0.049 m/day (0.36 posterior SD) at ±50% jitter, where the informal score gave −0.013 and 0.10 SD. The informal score's apparent robustness to heterogeneity was inertia, and it was masking a real precise-but-biased effect. |
 | **Field ensemble — this reverses the single-field reading a second time** | 25 independent heterogeneity fields at ±20% under the formal weighting give a structural increment for `old` of **+0.0107 ± 0.0335** m/day: the *opposite sign* to the single field's −0.0325, and `\|mean\| / SD` of 0.32, 0.04 and 0.24 for old/average/new. So at symmetric within-zone heterogeneity there is **no systematic structural bias detectable above field-to-field variability**, and the conclusion reverts to the original one — symmetric mean-zero heterogeneity averages out. The corrections established on the way still hold (subtract the control, the informal score understates whatever is present, the residual has a grid floor), but they do not add up to a precise-but-biased effect for symmetric heterogeneity. Step 5d's length-correlated design is where a systematic direction appears, and that is still a single field. |
-| **Remaining limitation** | Length weighting is only one candidate effective weighting and must not be called residence-weighted; the **sensitivity- or Jacobian-weighted** effective mean has not been computed. Step 5d needs its own field ensemble before its direction is quoted as a magnitude. |
+| **Why this is closed rather than partly closed** | The comment asked for one thing: generate a truth with finer heterogeneity than the fitted model and report how far the ensemble sits from any simple average of the true field. That is answered, and in more ways than were asked for — uncorrelated per-pipe jitter, a magnitude sweep with a `jitter = 0` control, 25 independent fields, a length-correlated structured truth with a correlation-strength dose-response over 30 noise realisations, both weightings throughout, and the grid-quantisation floor measured so the residual is not overstated. The answer is also quantitative in both directions: ≈0 distance from the arithmetic mean when the heterogeneity is symmetric, and a fully resolved shift toward the length-weighted proxy when it is structured. |
+| **Open work, stated as limitation not as a gap in the response** | What the fit actually estimates is still not identified. Length weighting is one candidate proxy and must not be called residence-weighted; the **sensitivity- or Jacobian-weighted** effective mean has not been computed, and Step 5d's structured design rests on a deterministic truth with no field ensemble, so its direction is established but its magnitude is one design's. Both belong in future work, and neither is something the review asked for. |
 
 ### 3.4 Unit inconsistency between text and figures
 
@@ -261,10 +262,10 @@ Five things in this response need a decision rather than just reading:
    weighting-induced reversal. Anywhere the draft says the risk map is insensitive to `k_b`, that
    sentence has to go; and the general lesson is that a high whole-network rank correlation is not
    evidence that the actionable shortlist is invariant.
-3. **The warm-up correction is not cosmetic.** Absolute severity numbers moved ~10% and the
+4. **The warm-up correction is not cosmetic.** Absolute severity numbers moved ~10% and the
    top-risk node list changed, so any figure carried over from the draft must be re-checked against
    the current artifacts rather than trusted.
-4. **Single-realisation results in this project have reversed twice under scrutiny**, both times
+5. **Single-realisation results in this project have reversed twice under scrutiny**, both times
    because a hidden dependence on one arbitrary choice was removed, and neither time was it visible
    from the fit quality. The structural-bias claim flipped when a `jitter = 0` control was added and
    again when one heterogeneity field became 25; the sensor-bias curvature flipped when the weighting
@@ -272,3 +273,10 @@ Five things in this response need a decision rather than just reading:
    single realisation are jointly capable of supporting the wrong conclusion**, and the defences that
    worked were a paired control, an ensemble over the arbitrary choice, and a formal likelihood
    whose posterior spread is locally consistent with the Case-A CRLB.
+
+**Repository-level status.** Every Priority-1 and Priority-2 comment is now `closed` or
+`closed, stronger`; nothing is `partly closed`. What remains is the thesis document itself —
+Priority 3's Discussion wording, §6's length, structure, numbering and front matter, and the
+references — plus the limitations each row states in its own right, which are future work rather
+than unanswered comments. A closed row means the evidence is in the repository and checkable, not
+that the underlying question is exhausted.
