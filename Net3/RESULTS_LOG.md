@@ -1345,7 +1345,11 @@ Findings:
   sweep — the bias corrupts `old`, not the others.
 3. **The risk field is far more robust than the parameter.** At ±0.10, where `k_w,old` has moved
   almost 4 posterior SD, the 92-node risk ranking still has Spearman 0.999 and Kendall ≥ 0.988
-   against the unbiased case. The top-6 set is *unchanged* for every negative offset and loses one
+   against the unbiased case, and this holds on **both** risk metrics (`P_bar` ≥ 0.9993, `E[A]`
+   ≥ 0.9996). The leading set is more robust on the deficit metric Step 10 publishes: ranked by
+   `E[A]` the top-6 is unchanged at every offset except +0.10 (Jaccard 0.71), whereas ranked by
+   `P_bar` it already loses a node at +0.05. On `P_bar` the top-6 set is *unchanged* for every
+   negative offset and loses one
    node at +0.05 and +0.10 (Jaccard 0.71). So an uncorrected sensor bias wrecks the coefficient while
    leaving the operational prioritisation nearly intact — which is reassuring operationally and a
    warning against reading the coefficient as physical.
@@ -1385,8 +1389,14 @@ Own-coefficient shift in posterior SD (the coefficient of the biased monitor's o
 | 231 (average)      | average  | **−5.94** | −3.25 | +2.72 | +4.22 | 0.74 (new)                | 1.00 throughout           |
 
 Across all 24 formal rows the 92-node risk ranking stays at Spearman **≥ 0.999** against the
-unbiased case (minimum 0.9993), so the columns above are the whole risk story: the full-network
-ordering never moves, only the top-6 membership does.
+unbiased case on both metrics (minimum 0.9993 on `P_bar`, 0.9995 on `E[A]`), so the full-network
+ordering never moves and only the leading set can.
+
+The Jaccard column above is `P_bar`. **On `E[A]`, the metric Step 10's headline table is ranked by,
+the top-6 is unchanged in 23 of the 24 arms** — the single exception is node 15 at +0.10, which
+loses one node (Jaccard 0.71). So the shortlist is markedly more robust to sensor bias when ranked
+by depth-weighted severity than when ranked by duration, and the four "0.71 pos" entries below are a
+`P_bar` phenomenon.
 
 Findings (location matters, and not the way the earlier informal table suggested):
 
@@ -1412,7 +1422,9 @@ Findings (location matters, and not the way the earlier informal table suggested
    `|neg|/|pos| = 0.99` that Step 8's own sweep records at that magnitude. Bias results must be
    quoted with their sign.
 5. **The risk product is robust in ordering but not in its top-6 membership.** Spearman never falls
-  below 0.999, and every *negative* offset leaves the top-6 set intact; the *positive* offsets at
+  below 0.999 on either metric, and on `E[A]` only one of the 24 arms changes the leading set at
+   all (node 15, +0.10). On `P_bar`: every *negative* offset leaves the top-6 set intact; the
+   *positive* offsets at
    the four new/old monitors, and +0.10 at 209, each replace one hot-spot (Jaccard 0.71). Only
    node 231 leaves the set untouched at every offset. So a single drifting sensor can reorder the
    margin of the hot-spot list without disturbing the network-scale pattern.
@@ -1534,9 +1546,11 @@ Findings:
     realisations, so they inherit whatever the median smooths away; per-realisation rank stability is
     not reported. The near-ties at `P_bar` ranks 4–6 mean the *rank* of those three nodes carries
     little information in the first place — an argument for quoting the risk value alongside the rank
-    whenever a shortlist is published. The other sensor-error steps (8, 8c, 8d) report `P_bar` only;
-    their rank claims have not been recomputed on `E[A]`, and given the difference found here that is
-    a gap, not a formality.
+    whenever a shortlist is published. Steps 8, 8c and 8d now report both metrics as well, and the
+    gap that opened here closes in the reassuring direction: on `E[A]` the sensor-error family barely
+    touches the leading set (23 of 24 arms unchanged in Step 8c; no drift arm at all in Step 8d),
+    so **`k_b` misspecification is the only perturbation tested in this log that moves the
+    deficit-ranked shortlist**, and even then by one boundary exchange at one sign.
 
 
 ---
@@ -1617,7 +1631,10 @@ Findings:
   mean-equivalent (residual +0.15 to +0.25 SD toward the unbiased value); for positive `D` it does
    *more* (−0.11 to −0.19 SD). Same asymmetry, same cause, as Steps 8 and 8c.
 4. **The risk product behaves exactly as under constant bias.** Spearman against the unbiased case is
-  ≥ 0.999 in all 24 arms; the top-6 set is unchanged everywhere except node 15 at +0.10 drift
+  ≥ 0.999 in all 24 arms on both metrics. **On `E[A]` no drift arm changes the leading set at all** —
+   the only 0.71 in the whole table is the end-equivalent *constant* control at node 15, +0.10 — so a
+   drifting sensor of this size does not touch the shortlist Step 10 publishes. On `P_bar`
+   the top-6 set is unchanged everywhere except node 15 at +0.10 drift
    (Jaccard 0.71) — one node replaced, the same margin effect the positive constant offsets produce.
 5. **What this does and does not model.** Only a *linear* ramp within the assessment window is
   tested, with a drift that starts at zero. A drift already part-developed at the start of the

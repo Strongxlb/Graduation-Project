@@ -29,8 +29,10 @@ mon_pos = list(cache["mon_pos"])
 truth_mon = cache["truth_all"][:, mon_pos]
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
 C_all_mon = C_all[:, :, mon_pos]
-BELOW = (C_all < 0.2).astype(np.float64)
 C_MIN = 0.2
+BELOW = (C_all < C_MIN).astype(np.float64)
+# see step8/step8b: P_bar and E[A] can rank the leading nodes differently, so both are carried
+DEFC = np.trapezoid(np.clip(C_MIN - C_all, 0.0, None), dx=1.0, axis=1).astype(np.float64)
 OFFSETS = [-0.10, -0.05, 0.05, 0.10]
 SEEDS = list(range(42, 72))
 SCHEMES = [B.PRIMARY_WEIGHTING, "informal_glue"]
@@ -39,7 +41,7 @@ TOP_K = 6
 
 def run(bcol, off):
     """Median coefficient means/SDs, median risk field and censoring count over the noise seeds."""
-    out = {s: {"means": {z: [] for z in ZKEYS}, "sds": {z: [] for z in ZKEYS}, "P": []}
+    out = {s: {"means": {z: [] for z in ZKEYS}, "sds": {z: [] for z in ZKEYS}, "P": [], "A": []}
            for s in SCHEMES}
     n_clipped = []
     for seed in SEEDS:
@@ -59,13 +61,16 @@ def run(bcol, off):
                 out[s]["means"][z].append(m)
                 out[s]["sds"][z].append(sd)
             out[s]["P"].append(np.tensordot(w, BELOW, axes=(0, 0)).mean(axis=0))
+            out[s]["A"].append(np.tensordot(w, DEFC, axes=(0, 0)))
     res = {}
     for s in SCHEMES:
         P_med = np.median(np.vstack(out[s]["P"]), axis=0)
+        A_med = np.median(np.vstack(out[s]["A"]), axis=0)
         res[s] = {"means": {z: float(np.median(out[s]["means"][z])) for z in ZKEYS},
                   "sds": {z: float(np.median(out[s]["sds"][z])) for z in ZKEYS},
-                  "P": P_med,
-                  "top": [ALL_NODES[i] for i in np.argsort(P_med)[::-1][:TOP_K]]}
+                  "P": P_med, "A": A_med,
+                  "top": [ALL_NODES[i] for i in np.argsort(P_med)[::-1][:TOP_K]],
+                  "top_deficit": [ALL_NODES[i] for i in np.argsort(A_med)[::-1][:TOP_K]]}
     return res, float(np.median(n_clipped))
 
 
@@ -84,6 +89,11 @@ report = {**B.weighting_provenance(comparators=["informal_glue"]),
           "informal_threshold": B.RMSE_THR, "offsets": OFFSETS, "n_noise": len(SEEDS),
           "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric",
           "risk_ranking_basis": f"median risk field over the {len(SEEDS)} noise realisations",
+          "risk_metric": {
+              "P_bar": "expected fraction of the 48 h window below 0.2 mg/L (risk_* columns)",
+              "E_A": "expected cumulative deficit in mg/L*h (deficit_* columns); this is the metric "
+                     "Step 10's headline top-10 is ranked by, and Step 8b showed the two can "
+                     "disagree about which nodes lead"},
           "baseline": {s: {"means": base[s]["means"], "sds": base[s]["sds"],
                            f"top{TOP_K}": base[s]["top"]} for s in SCHEMES},
           "baseline_censored_med": base_clip, "rows": []}
@@ -104,13 +114,19 @@ for s in SCHEMES:
             rho = float(spearmanr(r["P"], base[s]["P"]).statistic)
             jac = (len(set(r["top"]) & set(base[s]["top"]))
                    / len(set(r["top"]) | set(base[s]["top"])))
+            rho_A = float(spearmanr(r["A"], base[s]["A"]).statistic)
+            jac_A = (len(set(r["top_deficit"]) & set(base[s]["top_deficit"]))
+                     / len(set(r["top_deficit"]) | set(base[s]["top_deficit"])))
             report["rows"].append({
                 "scheme": s, "node": node, "zone": own, "offset": off,
                 "d_old": d["old"], "d_avg": d["average"], "d_new": d["new"],
                 "d_old_over_sd": dsd["old"], "d_avg_over_sd": dsd["average"],
                 "d_new_over_sd": dsd["new"], "own_shift_over_sd": dsd[own],
                 "n_censored_med": clip, "risk_spearman_vs_unbiased": rho,
-                f"risk_top{TOP_K}_jaccard_vs_unbiased": jac, f"top{TOP_K}": r["top"]})
+                f"risk_top{TOP_K}_jaccard_vs_unbiased": jac, f"top{TOP_K}": r["top"],
+                "deficit_spearman_vs_unbiased": rho_A,
+                f"deficit_top{TOP_K}_jaccard_vs_unbiased": jac_A,
+                f"deficit_top{TOP_K}": r["top_deficit"]})
             print(f"{node:>5} {own:>8} {off:>+7.3f} | {dsd['old']:>+8.2f} {dsd['average']:>+8.2f} "
                   f"{dsd['new']:>+8.2f} | {dsd[own]:>+7.2f} | {clip:>5.0f} {rho:>6.3f} {jac:>5.2f}")
     print()
@@ -123,6 +139,9 @@ report["summary"] = {
                               "value": worst["own_shift_over_sd"]},
     "min_risk_spearman": min(r["risk_spearman_vs_unbiased"] for r in prim),
     f"min_risk_top{TOP_K}_jaccard": min(r[f"risk_top{TOP_K}_jaccard_vs_unbiased"] for r in prim),
+    "min_deficit_spearman": min(r["deficit_spearman_vs_unbiased"] for r in prim),
+    f"min_deficit_top{TOP_K}_jaccard": min(r[f"deficit_top{TOP_K}_jaccard_vs_unbiased"]
+                                           for r in prim),
     "asymmetry_note": "compare the +0.05 and -0.05 rows of the same node: the censoring count "
                       "differs, so the two are not mirror images"}
 print(f"largest own-coefficient displacement under the primary rule: node {worst['node']} "

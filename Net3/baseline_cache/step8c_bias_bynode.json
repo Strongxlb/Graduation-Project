@@ -13,6 +13,10 @@
   "n_noise": 30,
   "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric",
   "risk_ranking_basis": "median risk field over the 30 noise realisations",
+  "risk_metric": {
+    "P_bar": "expected fraction of the 48 h window below 0.2 mg/L (risk_* columns)",
+    "E_A": "expected cumulative deficit in mg/L*h (deficit_* columns); this is the metric Step 10's headline top-10 is ranked by, and Step 8b showed the two can disagree about which nodes lead"
+  },
   "baseline": {
     "formal_censored": {
       "means": {
@@ -79,6 +83,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999224525668199,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -101,6 +115,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -127,6 +151,16 @@
         "143",
         "129",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995864136897068,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "15",
+        "145",
+        "143"
       ]
     },
     {
@@ -151,6 +185,16 @@
         "129",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996122628341,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "15",
+        "145",
+        "143"
       ]
     },
     {
@@ -173,6 +217,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997156594116734,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -199,6 +253,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995347154009201,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -221,6 +285,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999224525668199,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -247,6 +321,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999224525668199,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -271,6 +355,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996122628341,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -293,6 +387,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997932068448532,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -319,6 +423,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -343,6 +457,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -367,6 +491,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -391,6 +525,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -415,6 +559,16 @@
         "143",
         "127",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -439,6 +593,16 @@
         "143",
         "127",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -463,6 +627,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999224525668199,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -485,6 +659,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -511,6 +695,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997156594116734,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -535,6 +729,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996639611228866,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -559,6 +763,16 @@
         "127",
         "141",
         "15"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997156594116734,
+      "deficit_top6_jaccard_vs_unbiased": 0.7142857142857143,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "129"
       ]
     },
     {
@@ -583,6 +797,16 @@
         "139",
         "127",
         "141"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998707542780332,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -607,6 +831,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998449051336399,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -629,6 +863,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995864136897068,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -655,6 +899,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.96845109156106,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -677,6 +931,16 @@
         "129",
         "141",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9844340281743872,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -703,6 +967,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997415085560666,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -727,6 +1001,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998449051336399,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -749,6 +1033,16 @@
         "129",
         "141",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -775,6 +1069,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -797,6 +1101,16 @@
         "129",
         "141",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998449051336399,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -823,6 +1137,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998449051336399,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -847,6 +1171,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999741508556065,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -871,6 +1205,16 @@
         "15",
         "143",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999224525668199,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -893,6 +1237,16 @@
         "129",
         "141",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998707542780332,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -919,6 +1273,16 @@
         "15",
         "127",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999741508556065,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -942,6 +1306,16 @@
         "141",
         "15",
         "127",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999999999999998,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
         "143"
       ]
     },
@@ -967,6 +1341,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999999999999998,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -991,6 +1375,16 @@
         "127",
         "139",
         "15"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999741508556065,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1015,6 +1409,16 @@
         "127",
         "15",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999741508556065,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1038,6 +1442,16 @@
         "141",
         "15",
         "127",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9846965299151409,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
         "143"
       ]
     },
@@ -1063,6 +1477,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9845390288706887,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1087,6 +1511,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9846177793929146,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1111,6 +1545,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9846177793929146,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1135,6 +1579,16 @@
         "127",
         "141",
         "15"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998707542780332,
+      "deficit_top6_jaccard_vs_unbiased": 0.7142857142857143,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "129"
       ]
     },
     {
@@ -1159,6 +1613,16 @@
         "141",
         "127",
         "15"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9846702797410655,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1183,6 +1647,16 @@
         "15",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9518876387733827,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1207,6 +1681,16 @@
         "15",
         "127",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.951643272615902,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     }
   ],
@@ -1219,6 +1703,8 @@
     },
     "min_risk_spearman": 0.9993278788113794,
     "min_risk_top6_jaccard": 0.7142857142857143,
+    "min_deficit_spearman": 0.9995347154009201,
+    "min_deficit_top6_jaccard": 0.7142857142857143,
     "asymmetry_note": "compare the +0.05 and -0.05 rows of the same node: the censoring count differs, so the two are not mirror images"
   }
 }

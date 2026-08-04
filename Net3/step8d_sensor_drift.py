@@ -60,6 +60,11 @@ truth_mon = cache["truth_all"][:, mon_pos]              # (169, 6) full record
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
 C_all_mon = C_all[:, :, mon_pos]
 C_MIN = 0.2
+# Two risk metrics: P_bar (how long below the threshold) and E[A] (how long AND how far below).
+# Step 10's headline top-10 is ranked by E[A], and Step 8b showed the two can disagree about which
+# nodes lead, so a rank claim made only on P_bar is not a claim about the published list.
+BELOW = (C_all < C_MIN).astype(np.float64)
+DEFC = np.trapezoid(np.clip(C_MIN - C_all, 0.0, None), dx=1.0, axis=1).astype(np.float64)
 
 DRIFT_NODES = ["15", "231"]
 MAGNITUDES = [-0.10, -0.05, 0.05, 0.10]
@@ -86,7 +91,7 @@ def evaluate(node, kind, D):
     prof = None if node is None else offset_profile(kind, D)
     means_by_z = {z: [] for z in ZKEYS}
     sds_by_z = {z: [] for z in ZKEYS}
-    ranks, Ps, n_clipped = [], [], []
+    ranks, Ps, As, n_clipped = [], [], [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
@@ -100,10 +105,12 @@ def evaluate(node, kind, D):
             m, sd = B.weighted_mean_sd(w, S[z])
             means_by_z[z].append(m)
             sds_by_z[z].append(sd)
-        P = np.tensordot(w, (C_all < C_MIN).astype(float), axes=(0, 0)).mean(axis=0)
+        P = np.tensordot(w, BELOW, axes=(0, 0)).mean(axis=0)
         Ps.append(P)
+        As.append(np.tensordot(w, DEFC, axes=(0, 0)))
         ranks.append(tuple(ALL_NODES[i] for i in np.argsort(P)[::-1][:6]))
     P_med = np.median(np.vstack(Ps), axis=0)
+    A_med = np.median(np.vstack(As), axis=0)
     # The leading set is read off the SAME median field the Spearman uses. The modal set over the
     # per-realisation orderings answers a different question ("which ordering occurs most often")
     # and is kept as its own field rather than mixed in: reporting one of them under a metadata line
@@ -113,7 +120,8 @@ def evaluate(node, kind, D):
             "n_censored_med": float(np.median(n_clipped)),
             "top6": [str(ALL_NODES[i]) for i in np.argsort(P_med)[::-1][:6]],
             "modal_top6_across_realisations": [str(x) for x in max(set(ranks), key=ranks.count)],
-            "_P": P_med}
+            "deficit_top6": [str(ALL_NODES[i]) for i in np.argsort(A_med)[::-1][:6]],
+            "_P": P_med, "_A": A_med}
 
 
 print("=== Step 8d: sensor DRIFT (time-varying offset) vs its constant-bias controls ===")
@@ -122,6 +130,7 @@ print(f"drift = linear ramp 0 -> D across the {TN - 1} h window (mean offset D/2
 
 base = evaluate(None, None, 0.0)
 P_ref, ref_top6 = base["_P"], set(base["top6"])
+A_ref, ref_top6_A = base["_A"], set(base["deficit_top6"])
 print("unbiased baseline: " + ", ".join(
     f"{z} {base['means'][z]:+.4f} (SD {base['sds'][z]:.4f})" for z in ZKEYS))
 print()
@@ -149,7 +158,12 @@ for node in DRIFT_NODES:
                    "risk_top6_jaccard_vs_unbiased":
                        len(set(r["top6"]) & ref_top6) / len(set(r["top6"]) | ref_top6),
                    "top6": r["top6"],
-                   "modal_top6_across_realisations": r["modal_top6_across_realisations"]}
+                   "modal_top6_across_realisations": r["modal_top6_across_realisations"],
+                   "deficit_spearman_vs_unbiased": float(spearmanr(r["_A"], A_ref).statistic),
+                   "deficit_top6_jaccard_vs_unbiased":
+                       len(set(r["deficit_top6"]) & ref_top6_A)
+                       / len(set(r["deficit_top6"]) | ref_top6_A),
+                   "deficit_top6": r["deficit_top6"]}
             rows.append(row)
             print(f"{D:>+7.3f} | {kind:>11} | {r['means'][own]:>+9.4f} | {shift:>+8.4f} | "
                   f"{row['own_shift_over_sd']:>+8.2f} | {r['n_censored_med']:>5.0f} | "
@@ -202,6 +216,10 @@ report = {**B.weighting_provenance(comparators=[]),
           "arms": {"drift": "linear ramp 0 -> D",
                    "const_mean": "constant bias at D/2, the mean-equivalent control",
                    "const_end": "constant bias at D, the end-equivalent control"},
+          "risk_metric": {
+              "P_bar": "expected fraction of the 48 h window below 0.2 mg/L (risk_* fields)",
+              "E_A": "expected cumulative deficit in mg/L*h (deficit_* fields); the metric Step 10's "
+                     "headline top-10 is ranked by"},
           "risk_ranking_basis": "median risk field over the 30 noise realisations; the top-6 "
                                 "set and the Spearman are read off the SAME field, and the "
                                 "modal per-realisation ordering is reported separately as "

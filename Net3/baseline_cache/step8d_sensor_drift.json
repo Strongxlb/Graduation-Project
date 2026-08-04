@@ -19,6 +19,10 @@
     "const_mean": "constant bias at D/2, the mean-equivalent control",
     "const_end": "constant bias at D, the end-equivalent control"
   },
+  "risk_metric": {
+    "P_bar": "expected fraction of the 48 h window below 0.2 mg/L (risk_* fields)",
+    "E_A": "expected cumulative deficit in mg/L*h (deficit_* fields); the metric Step 10's headline top-10 is ranked by"
+  },
   "risk_ranking_basis": "median risk field over the 30 noise realisations; the top-6 set and the Spearman are read off the SAME field, and the modal per-realisation ordering is reported separately as modal_top6_across_realisations",
   "baseline": {
     "means": {
@@ -154,6 +158,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996122628341,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -196,6 +210,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996122628341,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -242,6 +266,16 @@
         "143",
         "129",
         "127"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995864136897068,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "15",
+        "145",
+        "143"
       ]
     },
     {
@@ -284,6 +318,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -330,6 +374,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -372,6 +426,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9996122628341,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -418,6 +482,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999999999999998,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -462,6 +536,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999999999999998,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -506,6 +590,16 @@
         "127",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -547,9 +641,19 @@
         "131",
         "129",
         "15",
-        "143",
         "139",
-        "127"
+        "127",
+        "141"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -594,6 +698,16 @@
         "127",
         "143",
         "139"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -638,6 +752,16 @@
         "139",
         "141",
         "15"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9997156594116734,
+      "deficit_top6_jaccard_vs_unbiased": 0.7142857142857143,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "129"
       ]
     },
     {
@@ -682,6 +806,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -724,6 +858,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -770,6 +914,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995347154009201,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -812,6 +966,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -858,6 +1022,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -900,6 +1074,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998190559892466,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -946,6 +1130,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -990,6 +1184,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9999483017112132,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1032,6 +1236,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]
@@ -1078,6 +1292,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1122,6 +1346,16 @@
         "127",
         "15",
         "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9998966034224265,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
+        "15",
+        "143"
       ]
     },
     {
@@ -1164,6 +1398,16 @@
         "141",
         "129",
         "127",
+        "15",
+        "143"
+      ],
+      "deficit_spearman_vs_unbiased": 0.9995864136897068,
+      "deficit_top6_jaccard_vs_unbiased": 1.0,
+      "deficit_top6": [
+        "131",
+        "141",
+        "139",
+        "145",
         "15",
         "143"
       ]

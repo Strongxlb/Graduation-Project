@@ -40,6 +40,11 @@ truth_mon = cache["truth_all"][:, mon_pos]            # (73, 6)
 S = {"old": cache["S_old"], "average": cache["S_avg"], "new": cache["S_new"]}
 C_all_mon = C_all[:, :, mon_pos]
 C_MIN = 0.2
+# Two risk metrics, precomputed once. Step 10's headline top-10 is ranked by the cumulative deficit,
+# so a rank claim made only on P_bar is not a claim about the list the risk chapter publishes; Step
+# 8b found the two can disagree about which nodes lead.
+BELOW = (C_all < C_MIN).astype(np.float64)
+DEFC = np.trapezoid(np.clip(C_MIN - C_all, 0.0, None), dx=1.0, axis=1).astype(np.float64)
 
 BIAS_NODE = "15"                                       # informative old-zone monitor
 bcol = B.MONITOR_NODES.index(BIAS_NODE)
@@ -62,10 +67,11 @@ def posterior_means(obs_post):
                             schemes=[B.PRIMARY_WEIGHTING])[B.PRIMARY_WEIGHTING]
     means = {z: float(np.sum(w * S[z])) for z in ZKEYS}
     sds = {z: float(np.sqrt(np.sum(w * (S[z] - means[z]) ** 2))) for z in ZKEYS}
-    below = (C_all < C_MIN)
-    P = np.tensordot(w, below.astype(float), axes=(0, 0)).mean(axis=0)
+    P = np.tensordot(w, BELOW, axes=(0, 0)).mean(axis=0)          # P_bar: how LONG below C_MIN
+    A = np.tensordot(w, DEFC, axes=(0, 0))                        # E[A]: how long AND how far below
     rank = [ALL_NODES[i] for i in np.argsort(P)[::-1][:6]]
-    return means, sds, rank, P
+    rank_A = [ALL_NODES[i] for i in np.argsort(A)[::-1][:6]]
+    return means, sds, rank, P, rank_A, A
 
 
 def med(a):
@@ -76,19 +82,21 @@ rows = []
 P_ref = None
 for off in OFFSETS:
     old_means, old_sds, avg_means, new_means, ranks, Ps, n_clipped = [], [], [], [], [], [], []
+    As = []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
         obs[:, bcol] += off                            # inject systematic bias at node 15
         raw_neg = int((obs[B.WARMUP_H:] < 0).sum())
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
-        means, sds, rank, P = posterior_means(obs)
+        means, sds, rank, P, rank_A, A = posterior_means(obs)
         old_means.append(means["old"]); old_sds.append(sds["old"])
         avg_means.append(means["average"]); new_means.append(means["new"])
-        ranks.append(tuple(rank)); Ps.append(P); n_clipped.append(raw_neg)
+        ranks.append(tuple(rank)); Ps.append(P); As.append(A); n_clipped.append(raw_neg)
     P_med = np.median(np.vstack(Ps), axis=0)
+    A_med = np.median(np.vstack(As), axis=0)
     if off == 0.0:
-        P_ref = P_med
+        P_ref, A_ref = P_med, A_med
     # The leading set is read off the SAME median field the Spearman uses, so the two rank columns
     # of one table share a basis. The modal per-realisation ordering is a different statistic and is
     # kept beside it rather than substituted for it.
@@ -100,13 +108,15 @@ for off in OFFSETS:
            # censoring is the reason the sweep cannot be assumed symmetric: a negative offset pushes
            # more observations onto the sensor floor, a positive one lifts them off it
            "n_censored_med": float(np.median(n_clipped)),
-           "_P": P_med}
+           "deficit_top6": [str(ALL_NODES[i]) for i in np.argsort(A_med)[::-1][:6]],
+           "_P": P_med, "_A": A_med}
     rows.append(row)
 
 zero_row = next(r for r in rows if r["offset"] == 0.0)
 base_old = zero_row["old_mean_med"]
 base_sd = zero_row["old_sd_med"]
 ref_rank = list(zero_row["risk_top6"])
+ref_rank_A = list(zero_row["deficit_top6"])
 for r in rows:
     r["old_shift"] = r["old_mean_med"] - base_old
     r["shift_over_sd"] = r["old_shift"] / base_sd
@@ -115,7 +125,11 @@ for r in rows:
     r["kendall_vs_unbiased"] = float(kendalltau(r["_P"], P_ref).statistic)
     top, ref = set(r["risk_top6"]), set(ref_rank)
     r["top6_jaccard_vs_unbiased"] = len(top & ref) / len(top | ref)
-    del r["_P"]
+    # the same two comparisons on the cumulative-deficit field Step 10 ranks by
+    r["deficit_spearman_vs_unbiased"] = float(spearmanr(r["_A"], A_ref).statistic)
+    topA, refA = set(r["deficit_top6"]), set(ref_rank_A)
+    r["deficit_top6_jaccard_vs_unbiased"] = len(topA & refA) / len(topA | refA)
+    del r["_P"], r["_A"]
 
 print(f"=== Step 8: systematic bias at node {BIAS_NODE} (old zone) ===")
 print(f"weighting: formal censored likelihood; {N_NOISE} noise realisations; medians reported")
@@ -179,6 +193,12 @@ print("onto the sensor floor, where they carry different information than an unc
 
 report = {**B.weighting_provenance(comparators=[]),
           "bias_node": BIAS_NODE, "n_noise": N_NOISE,
+          "risk_metric": {
+              "P_bar": "expected fraction of the 48 h window below 0.2 mg/L (risk_top6, "
+                       "spearman_vs_unbiased, kendall_vs_unbiased, top6_jaccard_vs_unbiased)",
+              "E_A": "expected cumulative deficit in mg/L*h (deficit_* fields); this is the metric "
+                     "Step 10's headline top-10 is ranked by, and Step 8b showed the two metrics "
+                     "can disagree about which nodes lead"},
           "risk_ranking_basis": "median risk field over the noise realisations; the top-6 set and "
                                 "the Spearman/Kendall columns share that field, and the modal "
                                 "per-realisation ordering is reported separately as risk_rank_mode",
