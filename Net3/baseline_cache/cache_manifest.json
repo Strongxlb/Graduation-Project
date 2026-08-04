@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-08-04T17:15:30+00:00",
+  "generated_utc": "2026-08-04T17:20:41+00:00",
   "git": {
-    "commit": "aadaba1c9d5fc758df5b9a7c145e0c19ab7da116",
+    "commit": "9de4c9ce20e5637909e24f800be7b060714dc56d",
     "dirty": false,
     "dirty_files": [],
-    "tree_sha256": "aef25c091d25910b24300a1c1fbbf3d987f15cf8b821a2a48c78f958d0167b0f",
+    "tree_sha256": "629ae7b544ffd5fb468541177eabd90fd3afb15a9d35a6cf3b6071991895246e",
     "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
@@ -65,7 +65,7 @@
     "provenance_sha256": "9d5c0cab07788ca406ca408a85d7002a40f5770b05f1117ad3d2bd133ebff873",
     "step_scripts_sha256": {
       "step0_warmup_convergence.py": "91bc137f2295f516cef82cc60565e4f0e3dea949103f0a3b53cdaa6ae8940ba3",
-      "step10_risk_metrics.py": "c6d494d24095ee68e2514fab640fa8fafbd165ea35cd3efb9b7013314411f769",
+      "step10_risk_metrics.py": "9d797b9ae93064c4426bd289d4e35077af3d672e68d7784365488a6a94db5ec0",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
       "step12_scenarios.py": "90f9626c08ac0cd9dec7418ff49c158df4f1a8a0cc4fcbea277918128fb60502",
       "step13_known_answer.py": "4f9cb424982ff0cbe929d5e59a424e61c005d28d8fd7e0463c61d79d3da70fd5",
@@ -90,7 +90,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "757c89239091795c0bdac4c801666cb41a3a1219d0e502866ebe53a6adea7f7f"
+    "step_scripts_combined_sha256": "f2a480a905ef45023c4a506718e43cb2a1557a738771c53129e8e1e46fbfee86"
   },
   "critical_fields": [
     "config_sha256",
