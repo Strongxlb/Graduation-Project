@@ -205,9 +205,9 @@ libraries are git-ignored; rebuild them with the step that writes them. The smal
 ## Step 0 — how long must the warm-up be? (pre-declared convergence test)
 
 The draft discarded the first 24 h and assessed 24–72 h, but that value was never justified: the
-tanks start at an assumed 0.5 mg/L, the high-risk junctions have mean water ages of 34–45 h (Step
-10), and the Step 12 paired test already moved the continuous severity metrics by 10–14% when the
-warm-up went to 120 h. This step decides the question with criteria fixed *before* the numbers were
+tanks start at an assumed 0.5 mg/L, the leading-risk junctions have mean water ages of 30–70 h over
+the assessed window (Step 10), and the Step 12 paired test moves the continuous severity metrics by
++8.6% to +13.0% between the draft's horizon and the current one. This step decides the question with criteria fixed *before* the numbers were
 seen — and finds that **no warm-up available in this model satisfies all of them**, which is why the
 answer is a defensible compromise rather than a convergence result.
 
@@ -261,7 +261,7 @@ system, not a longer warm-up. The test therefore has 7 cycles and cannot certify
    concentration differences still move the integral, because the deficit integrates a
    threshold crossing. The relative change halves each cycle and would reach the 2% criterion at
    about cycle 6, i.e. a 144–168 h warm-up — but the model horizon cannot supply that cycle, so it
-   stays an extrapolation. This is the same effect Step 12's paired test measured as +9.8% to +14%,
+   stays an extrapolation. This is the same effect Step 12's paired test measures as +8.6% to +13.0%,
    now with its cause identified: **the 24 h window sits on the descending limb of the transient,
    not on the plateau.**
 3. **Water age is horizon-dependent and cannot be converged in this model at all.** The p95
@@ -821,6 +821,8 @@ tested at once. The statistic is the fraction of the arithmetic → length-weigh
 means the fit sits on the arithmetic mean, 1 on the length-weighted value.
 
 
+**Primary — formal censored likelihood:**
+
 | `CORR` | gap (old) | old: median [5, 95]        | average              | new                  |
 | ------ | --------- | -------------------------- | -------------------- | -------------------- |
 | 0.00   | 0.0000    | control — targets coincide | control              | control              |
@@ -828,9 +830,28 @@ means the fit sits on the arithmetic mean, 1 on the length-weighted value.
 | 0.50   | −0.2404   | +0.86 [+0.12, +1.46]       | +1.12 [−0.07, +2.43] | +0.92 [−0.03, +1.78] |
 | 0.75   | −0.3606   | +0.74 [+0.23, +1.06]       | +1.07 [+0.22, +1.93] | +0.89 [+0.26, +1.46] |
 
+**Comparator — informal GLUE** (medians only; the same runs, the same gaps):
 
-**Finding, and it is stronger than the single draw suggested.** The median shift fraction is
-**0.74–1.26** at every correlation level and in every zone: the fitted coefficient tracks the length-weighted proxy approximately fully, not partially. The single-realisation 60% / 146% / 45% sits inside these intervals, so it was a noisy draw of a quantity whose median is near 1.
+| `CORR` | old  | average | new  |
+| ------ | ---- | ------- | ---- |
+| 0.25   | +0.65 | +2.00  | +0.89 |
+| 0.50   | +0.43 | +1.22  | +0.78 |
+| 0.75   | +0.34 | +0.97  | +0.72 |
+
+
+**Finding, and it is stronger than the single draw suggested — under the primary rule.** The median
+shift fraction is **0.74–1.26** at every correlation level and in every zone: the fitted coefficient
+tracks the length-weighted proxy approximately fully, not partially. The single-realisation
+60% / 146% / 45% sits inside these intervals, so it was a noisy draw of a quantity whose median is
+near 1.
+
+**The comparator does not reproduce this, and the difference is a factor of two for `old`.** Under
+the informal score the old-zone median falls from +0.65 to +0.34 as `CORR` grows, i.e. it reads as
+"the fit tracks only a third of the gap" exactly where the formal rule reads "essentially all of
+it", and the direction with `CORR` is opposite. This is the same inertia as Steps 3, 5c, 8 and 8b:
+a score that is nearly flat inside its behavioural set cannot follow a systematic displacement. The
+statement "the fit tracks the length-weighted proxy" is therefore a **formal-likelihood** statement
+and must be quoted as one.
 
 The intervals also behave as a real effect should. They narrow as `CORR` grows — [−0.29, +2.47] at 0.25 against [+0.23, +1.06] at 0.75 — because the gap in the denominator grows while the noise on the numerator does not. At `CORR = 0.75` all three intervals **exclude zero**, so at sufficient correlation the conclusion is resolved: the fit is inconsistent with sitting on the arithmetic mean and consistent with tracking the length-weighted value. At `CORR = 0.25` it is not resolved, which is the honest limit of what this design can detect.
 
