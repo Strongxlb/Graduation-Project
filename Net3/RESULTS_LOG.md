@@ -20,6 +20,20 @@ measurements; used to isolate what the censoring correction is worth (Steps 9 an
 draft used it and because the contrast is itself a result. It is *not* a Gaussian likelihood: it
 drops the factor `N = 294`, which makes it equivalent to assuming `σ_eff = σ√N = 1.71 mg/L`.
 
+**Naming the ensembles.** A weighting rule and the ensemble it produces are different things, and
+conflating them is how a sentence ends up ambiguous between "the baseline configuration" and "the
+informal rule". Two names are used throughout and only these two:
+
+- the **formal likelihood-weighted ensemble** — the 8192 draws weighted by the censored likelihood;
+  every headline parameter, risk and scenario number comes from it;
+- the **informal GLUE behavioural ensemble** — the same draws under the informal score and its
+  threshold; a comparator, and never the source of a headline number.
+
+The bare phrase **"baseline GLUE" is not used**: it named a configuration (`k_b` fixed, unbiased
+sensors) and an inference rule (the informal score) at once, and since the primary rule became the
+formal likelihood those two meanings have come apart. Where the *configuration* is meant, write
+"the baseline model"; where the *rule* is meant, name the rule.
+
 Every artifact in `baseline_cache/` carries a `primary_weighting` (or `weighting`) field, and
 `validate_artifacts.py` fails if one does not, so no table in this log can be read under the wrong
 rule by accident. Two sections are **deliberately and wholly informal**, because their subject is the
@@ -930,17 +944,22 @@ sensor units. This replaces the imported foundation-notebook noise sweep flagged
 the model, sensitivities and the assumed noise level, not any realised observation set, so it
 *predicts* identifiability before calibration. Profile likelihood (Step 7b) uses the *observed*
 data, so it is a *practical / a-posteriori* identifiability check (formal-likelihood validation),
-not a prediction. GLUE is the *global behavioural* result. The like-for-like chain at the baseline
-model (k_b fixed, no bias) is **Fisher Case A ↔ profile likelihood ↔ baseline GLUE**; Cases B/C are
-expanded-model (realism) predictions.
+not a prediction. **Naming, used strictly from here on:** the **formal likelihood-weighted ensemble**
+is the primary empirical result and the **informal GLUE behavioural ensemble** is the comparator.
+The bare phrase "baseline GLUE" is not used, because it named a configuration and an inference rule
+at the same time and the two have since come apart. At the baseline model (k_b fixed, no bias) the
+like-for-like chain therefore has four legs: **Fisher Case A → formal profile likelihood → formal
+likelihood-weighted ensemble → informal GLUE behavioural ensemble**, the last as comparator only.
+Cases B/C are expanded-model (realism) predictions.
 
 **Two-layer reading (paper structure) — keep them separate; do NOT merge them to argue that the
-baseline GLUE is "realistic".**
+informal GLUE behavioural ensemble is "realistic".**
 
 - *Layer 1 — controlled-baseline identifiability* (identical conditions: k_b fixed, unbiased
 sensors, independent Gaussian noise, only three k_w): Fisher **Case A** (a-priori prediction) ↔
-formal **profile likelihood** (a-posteriori validation) ↔ **baseline GLUE** (behavioural
-reference). Cleanest conclusion: *the data carry information about all three; the formal
+formal **profile likelihood** (a-posteriori validation) ↔ the **formal likelihood-weighted
+ensemble** (primary empirical result) ↔ the **informal GLUE behavioural ensemble** (comparator).
+Cleanest conclusion: *the data carry information about all three; the formal
 likelihood extracts it; informal GLUE is substantially broader and more prior-sensitive.*
 - *Layer 2 — realism sensitivity*: Case **B** (+k_b), Case **C** (+6 monitor offsets), **AR(1)**
 (Step 7c) and censored likelihood (Step 9) each *separately* relax one baseline assumption.
@@ -1014,8 +1033,9 @@ inefficiency of the score. Only the formal rows are like-for-like with a CRLB.
 
 Fisher/CRLB with nuisance parameters
 
-**Case A is the like-for-like benchmark** for the baseline GLUE (both fix k_b and assume no sensor
-bias). Cases B and C are **realism sensitivity analyses**, not descriptions of the baseline GLUE.
+**Case A is the like-for-like benchmark** for *both* baseline ensembles — the formal
+likelihood-weighted one and the informal GLUE comparator alike, since both fix k_b and assume no
+sensor bias. Cases B and C are **realism sensitivity analyses**, not descriptions of either.
 
 Findings:
 
@@ -1039,9 +1059,9 @@ Findings:
 4. **Realism sensitivity (B, C).** Admitting k_b uncertainty (B) inflates the avg/new CRLB 1.8–1.9×
   against 1.2× for old; adding per-monitor bias (C) pushes **avg (2.24) and new (1.09) above
    their prior → practically unidentifiable**, while **old retains limited identifiability (0.67)**.
-   Case C thus reproduces a *qualitatively similar* gradient to GLUE — but under an **expanded
-   nuisance model the baseline GLUE did not use**, so it corroborates the robustness of the gradient
-   rather than "confirming" the baseline run.
+   Case C thus reproduces a *qualitatively similar* gradient to the informal GLUE comparator — but
+   under an **expanded nuisance model neither baseline ensemble used**, so it corroborates the
+   robustness of the gradient rather than "confirming" either baseline run.
    **Two quantities are easy to confuse here and they carry opposite signs** (`step7_verify.py`
    prints both side by side). The Jacobian-column cosine `F_ij/√(F_ii F_jj)` — how collinear two
    *sensitivity directions* are, a property of the design — is **+0.333 / +0.770 / +0.831** for
@@ -1120,7 +1140,8 @@ AR(1) covariance and censoring). Its breadth comes from the informal likelihood 
 real-world identifiability" (unsupported — the nuisance terms are absent from the baseline run); or
 "the formal analysis converged to the GLUE result" (Case C is a *different, expanded* model). **Do
 write:** Case C produced a *qualitatively similar* identifiability gradient (old partial, avg/new
-weak), corroborating the robustness of the gradient rather than confirming the baseline GLUE.
+weak), corroborating the robustness of the gradient rather than confirming the informal GLUE
+ensemble.
 
 ---
 

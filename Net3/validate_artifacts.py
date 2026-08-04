@@ -235,6 +235,12 @@ FORBIDDEN = [
      r"top nodes[^\n]{0,40}unchanged at every k_b",
      "k_b ±20% retains only four of the six hot-spots (Jaccard 0.50); what stays correlated is the "
      "full-network ordering, not the operational shortlist (Step 8b)"),
+    # "baseline GLUE" named a configuration and an inference rule at once. Once the primary rule
+    # became the formal likelihood the two meanings came apart, and the phrase silently asserted that
+    # the headline ensemble is the informal one. Name the rule, or say "the baseline model".
+    (r"(?i)\bbaseline GLUE\b",
+     "ambiguous: say 'the formal likelihood-weighted ensemble', 'the informal GLUE behavioural "
+     "ensemble', or 'the baseline model' if the configuration is what is meant"),
     (r"(?i)instability[^\n]{0,30}concentrated around the (prioritisation|priority) boundary|"
      r"(highest-ranked|leading|core) nodes remained common across all cases",
      "refuted by the depth check: Jaccard is WORSE at k=3 (0.20) than at k=6, reference ranks 3 and "
@@ -251,7 +257,7 @@ FORBIDDEN_DOCS = ["RESULTS_LOG.md", "README.md", "README.en.md", "REVISION_RESPO
 REJECTS = re.compile(r"(?i)(\bdo not write\b|\bmust not be\b|\bmust \*\*not\*\* be\b|"
                      r"\bthe earlier response said\b|\banywhere the draft says\b|"
                      r"\bthat sentence has to go\b|\bwas tested and\b|\brefuted\b|"
-                     r"\bwas wrong\b|\bis false\b)")
+                     r"\bwas wrong\b|\bis false\b|\bis not used\b)")
 
 # Numbers that legitimately appear as prose constants anywhere in the log.
 CONSTANTS = {
