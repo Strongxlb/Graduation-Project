@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-08-04T16:55:37+00:00",
+  "generated_utc": "2026-08-04T17:03:48+00:00",
   "git": {
-    "commit": "c7b9e270f42deb49e33545604c7c18999374ec1d",
+    "commit": "c27997723e25b959e6cd14e6c319b85a458c7fa1",
     "dirty": false,
     "dirty_files": [],
-    "tree_sha256": "993fa2b81d5fce724dab388bcda262c526b6d242518c7ce40d581d561580f3be",
+    "tree_sha256": "5c6138cd6dea2b13bf7e9bc70c8251afcf1846d2609b91992e9d0bc236df04e2",
     "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
@@ -85,12 +85,12 @@
       "step7c_ar1.py": "7592ae96f7de7e953ee15dc4e8a4259462342113106070f7c7df0d7df58ea001",
       "step7c_profile_ar1.py": "baf9e19f77e7ffa1d3814f4eab54da8d631faaf009dd8be1704c5db64de6ba53",
       "step8_sensor_bias.py": "cc0246e517c3e61d74ec6cbc1b5a667cb80d20c70e7a0e98be0f0276a2b104e4",
-      "step8b_kb_sensitivity.py": "f0f09db6e734299967024a3979072acb6dc2fd27f1737817e4c2491dc56d16c7",
+      "step8b_kb_sensitivity.py": "725900a52dfb3a76b2c6399209775d13424dd8d7c999c8fbfb78b5e2073ae5af",
       "step8c_bias_bynode.py": "c6ebddd7bb5086c1910f165ad885718d5ec05db88fea97cad97d9be222bcfcdc",
       "step8d_sensor_drift.py": "4a039bffea41e539ef9f7b5fc397d1f67d4f9018a76f72dc37c7aba077ccc66f",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "76b1529644d1504e1a5d2fc46e2f4cbb9696872d786fa59faa1eefa0361d3e33"
+    "step_scripts_combined_sha256": "a9d487c3a1114ac26465ab3bff2149f9061238f1f7171cd2d5802a524152e0db"
   },
   "critical_fields": [
     "config_sha256",
