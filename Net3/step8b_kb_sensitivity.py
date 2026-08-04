@@ -78,10 +78,17 @@ for kb in KBS:
     Call = preds[kb].astype(np.float64)
     Cmon = Call[:, :, mon_pos]
     below = (Call < C_MIN).astype(np.float64)
+    # TWO risk metrics, because they rank differently and the k_b conclusion is load-bearing.
+    #   P_bar = expected fraction of the window below C_MIN  -> "how long"
+    #   E[A]  = expected cumulative deficit, trapezoid in h  -> "how long AND how far below"
+    # Step 10's headline top-10 is ranked by E[A], so a statement about "the hot-spot list" that
+    # rested only on P_bar would not be about the list the risk chapter actually publishes.
+    defc = np.trapezoid(np.clip(C_MIN - Call, 0.0, None), dx=1.0, axis=1)   # (N_MC, nodes), mg/L·h
     acc = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
     sd_acc = {s: {z: [] for z in ZKEYS} for s in SCHEMES}
     ess_acc = {s: [] for s in SCHEMES}
     P_acc = {s: [] for s in SCHEMES}
+    A_acc = {s: [] for s in SCHEMES}
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
@@ -98,16 +105,20 @@ for kb in KBS:
             # the risk field per realisation, so the ranking below is a median over the noise
             # rather than whatever one arbitrary seed happened to give
             P_acc[s].append(np.tensordot(w, below, axes=(0, 0)).mean(axis=0))
+            A_acc[s].append(np.tensordot(w, defc, axes=(0, 0)))
     row = {"kb": kb, "by_scheme": {}}
     for s in SCHEMES:
         P_med = np.median(np.vstack(P_acc[s]), axis=0)
+        A_med = np.median(np.vstack(A_acc[s]), axis=0)
         order = np.argsort(P_med)[::-1]
+        order_A = np.argsort(A_med)[::-1]
         row["by_scheme"][s] = {
             **{JKEY[z]: med(acc[s][z]) for z in ZKEYS},
             **{JKEY[z] + "_sd": med(sd_acc[s][z]) for z in ZKEYS},
             "ess_med": med(ess_acc[s]),
             f"risk_top{TOP_K}": [ALL_NODES[i] for i in order[:TOP_K]],
-            "_P": P_med}
+            f"deficit_top{TOP_K}": [ALL_NODES[i] for i in order_A[:TOP_K]],
+            "_P": P_med, "_A": A_med}
     rows.append(row)
 
 # shift of each coefficient relative to the reference k_b, which is what the log tabulates
@@ -121,6 +132,10 @@ for r in rows:
         a["risk_spearman_vs_kb_ref"] = float(spearmanr(a["_P"], b["_P"]).statistic)
         top, reftop = set(a[f"risk_top{TOP_K}"]), set(b[f"risk_top{TOP_K}"])
         a[f"risk_top{TOP_K}_jaccard_vs_kb_ref"] = len(top & reftop) / len(top | reftop)
+        # the same two comparisons on the deficit field Step 10 actually ranks by
+        a["deficit_spearman_vs_kb_ref"] = float(spearmanr(a["_A"], b["_A"]).statistic)
+        topA, refA = set(a[f"deficit_top{TOP_K}"]), set(b[f"deficit_top{TOP_K}"])
+        a[f"deficit_top{TOP_K}_jaccard_vs_kb_ref"] = len(topA & refA) / len(topA | refA)
 
 # ---- how deep does the reordering go? -----------------------------------------------------------
 # TOP_K = 6 is a chosen cut-off, so a Jaccard computed only there cannot distinguish "the leading
@@ -139,9 +154,31 @@ def ranks_of(P):
     return r
 
 
+def depth_diagnostics(Pa, Pb):
+    """top-k Jaccard at several k, rank changes, and where each entering node came from."""
+    ra, rb = ranks_of(Pa), ranks_of(Pb)
+    oa, ob = np.argsort(Pa)[::-1], np.argsort(Pb)[::-1]
+    d = np.abs(ra - rb)
+    return {
+        "topk_jaccard_vs_kb_ref": {
+            f"top{k}": len(set(oa[:k]) & set(ob[:k])) / len(set(oa[:k]) | set(ob[:k]))
+            for k in TOP_KS},
+        "entered_top6": [{"node": str(ALL_NODES[i]), "rank_here": int(ra[i]),
+                          "reference_rank": int(rb[i])}
+                         for i in oa[:TOP_K] if i not in set(ob[:TOP_K])],
+        "left_top6": [{"node": str(ALL_NODES[i]), "reference_rank": int(rb[i]),
+                       "rank_here": int(ra[i])}
+                      for i in ob[:TOP_K] if i not in set(oa[:TOP_K])],
+        "rank_change": {"max_over_92": int(d.max()), "median_over_92": float(np.median(d)),
+                        "max_within_reference_top15": int(d[ob[:15]].max())}}
+
+
 for r in rows:
     for s in SCHEMES:
         a, b = r["by_scheme"][s], ref["by_scheme"][s]
+        # both metrics get the same treatment; a depth claim made on P_bar is not a depth claim
+        # about the list Step 10 publishes
+        a["depth_deficit"] = depth_diagnostics(a["_A"], b["_A"])
         Pa, Pb = a["_P"], b["_P"]
         ra, rb = ranks_of(Pa), ranks_of(Pb)
         oa, ob = np.argsort(Pa)[::-1], np.argsort(Pb)[::-1]
@@ -181,6 +218,21 @@ for s in SCHEMES:
     b = ref["by_scheme"][s]
     print(f"      posterior SD at the true k_b: " +
           ", ".join(f"{JKEY[z]} {b[JKEY[z] + '_sd']:.4f}" for z in ZKEYS))
+print("\n--- the same comparison on the two risk metrics (PRIMARY scheme) ---")
+print("P_bar = expected fraction of the window below 0.2; E[A] = expected cumulative deficit,")
+print("which is what Step 10's headline top-10 is ranked by.")
+print(f"{'k_b':>5} | {'rho(P_bar)':>10} {'J6(P_bar)':>9} | {'rho(E[A])':>10} {'J6(E[A])':>9}")
+for r in rows:
+    a = r["by_scheme"][B.PRIMARY_WEIGHTING]
+    print(f"{r['kb']:>5} | {a['risk_spearman_vs_kb_ref']:>10.3f} "
+          f"{a[f'risk_top{TOP_K}_jaccard_vs_kb_ref']:>9.2f} | "
+          f"{a['deficit_spearman_vs_kb_ref']:>10.3f} "
+          f"{a[f'deficit_top{TOP_K}_jaccard_vs_kb_ref']:>9.2f}")
+for r in rows:
+    a = r["by_scheme"][B.PRIMARY_WEIGHTING]
+    print(f"  k_b={r['kb']}: P_bar top6 {a[f'risk_top{TOP_K}']}")
+    print(f"  k_b={r['kb']}: E[A]  top6 {a[f'deficit_top{TOP_K}']}")
+
 print("\nshift/SD = displacement of the coefficient caused by the wrong k_b, in units of that")
 print(f"coefficient's own posterior SD at the true k_b; rho_risk / J{TOP_K} compare the 92-node risk")
 print("field and its leading set against the correctly specified case.")
@@ -211,10 +263,18 @@ print("genuine reshuffle of the leading nodes. Read this together with the spaci
 for r in rows:
     for s in SCHEMES:
         del r["by_scheme"][s]["_P"]
+        del r["by_scheme"][s]["_A"]
 report = {**B.weighting_provenance(comparators=["informal_glue"]),
           "kbs": KBS, "kb_true": B.KB_FIXED, "n_noise": N_NOISE,
           "informal_threshold": B.RMSE_THR,
           "risk_ranking_basis": f"median risk field over the {N_NOISE} noise realisations",
+          "risk_metric": {
+              "P_bar": "likelihood-weighted expected fraction of the 48 h window below 0.2 mg/L "
+                       "(risk_top6, risk_spearman_*): how LONG a node sits below the threshold",
+              "E_A": "likelihood-weighted expected cumulative deficit, trapezoid over the 48 h "
+                     "window in mg/L*h (deficit_top6, deficit_spearman_*): how long AND how far "
+                     "below. This is the metric Step 10's headline top-10 is ranked by, so a claim "
+                     "about 'the hot-spot list' has to be made on it and not on P_bar alone."},
           "topk_note": "TOP_K = 6 is a chosen cut-off; the same comparison is reported at k = 3, 5, "
                        "6, 10, 15, together with per-node rank changes and the reference rank of "
                        "every node that enters the leading set, so a cut-off effect can be told "

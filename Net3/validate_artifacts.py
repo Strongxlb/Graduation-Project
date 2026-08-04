@@ -243,10 +243,14 @@ FORBIDDEN = [
     (r"(?i)\bbaseline GLUE\b",
      "ambiguous: say 'the formal likelihood-weighted ensemble', 'the informal GLUE behavioural "
      "ensemble', or 'the baseline model' if the configuration is what is meant"),
-    (r"(?i)instability[^\n]{0,30}concentrated around the (prioritisation|priority) boundary|"
-     r"(highest-ranked|leading|core) nodes remained common across all cases",
-     "refuted by the depth check: Jaccard is WORSE at k=3 (0.20) than at k=6, reference ranks 3 and "
-     "4 fall to 8th and 20th, and rank 12 rises to 2nd (Step 8b finding 8)"),
+    # Narrowed after the two risk metrics were computed separately. "The turnover is a boundary
+    # effect" is FALSE on P_bar (Jaccard worse at k=3 than k=6; reference rank 4 falls to 20th) and
+    # TRUE on E[A] (at -0.6 the only change is a 6th/7th swap, nothing changes at -0.4). So the
+    # forbidden thing is not the claim, it is making it WITHOUT NAMING THE METRIC.
+    (r"(?i)(instability|turnover)[^\n]{0,40}(concentrated around|confined to)[^\n]{0,30}"
+     r"(prioritisation|priority) boundary(?![^\n]{0,80}(P_bar|E\[A\]|deficit|metric))",
+     "name the metric: this is true on the cumulative-deficit ranking E[A] and false on the "
+     "time-averaged P_bar, where the reordering reaches rank 20 (Step 8b findings 4-5)"),
 ]
 # Documents where FORBIDDEN is enforced. The response matrix is included because that is where the
 # over-claims lived.
@@ -259,7 +263,8 @@ FORBIDDEN_DOCS = ["RESULTS_LOG.md", "README.md", "README.en.md", "REVISION_RESPO
 REJECTS = re.compile(r"(?i)(\bdo not write\b|\bmust not be\b|\bmust \*\*not\*\* be\b|"
                      r"\bthe earlier response said\b|\banywhere the draft says\b|"
                      r"\bthat sentence has to go\b|\bwas tested and\b|\brefuted\b|"
-                     r"\bwas wrong\b|\bis false\b|\bis not used\b)")
+                     r"\bwas wrong\b|\bis false\b|\bis not used\b|"
+                     r"\bnot sayable\b|\bwithout naming the metric\b)")
 
 # Numbers that legitimately appear as prose constants anywhere in the log.
 CONSTANTS = {

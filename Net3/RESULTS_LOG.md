@@ -1468,73 +1468,76 @@ Findings:
 3. **The ordering across zones matches Fisher Case B.** Marginalising `k_b` inflates the CRLB by
   1.2× for `old` but 1.8× for `average` and `new` (Step 7), and it is `average`/`new` that move
    most here. The weakly-informed coefficients are the ones that absorb a bulk-decay error.
-4. **The broad spatial pattern survives; the operational shortlist does not.** Spearman over all
-  92 junctions stays high (0.976 at −0.4, 0.933 at −0.6). But the **top-6 Jaccard falls to 0.50 at
-   both ±20%**: solving `x/(12−x) = 0.5` gives `x = 4`, so **four of the six reference hot-spots are
-   retained and two are replaced** (at −0.4 the set becomes `131, 15, 143, 141, 139, 153`; at −0.6
-   `131, 243, 20, 141, 127, 129`, against `131, 141, 129, 127, 15, 143` at the true `k_b`). Jaccard
-   compares set **membership**, not the order within the set, so this is a statement about who is on
-   the shortlist and not about who is first on it. The two indices are not in conflict: Spearman is
-   dominated by the 86 low- and mid-risk junctions whose relative order barely moves (median rank
-   change 1.0 place), while the leading nodes move a great deal — and finding 8 shows those moves are
-   *not* confined to the 6th/7th boundary.
-5. **The sensitivity is present under both weightings, so it is not a weighting artefact.** The
-  informal comparator gives the *same* 0.50 at both ±20%. What the formal rule changes is the
-   **parameter** displacement — 1.4–1.6 SD against 0.28–0.40 SD — not the hot-spot conclusion. This
-   must not be presented as another case of the informal score reversing a result; it is a case of
-   the informal score understating a magnitude.
-6. **Why the earlier "ranking robust" claim was wrong — and it was not mainly the weighting.** The
-  superseded version of this section asserted "Top nodes (131, 243, 141, …) are unchanged at every
-   k_b" directly beneath its own table, which listed `131, 141, 139` / `131, 129, 141` /
-   `131, 243, 20` for the three `k_b` values. Those three sets are visibly different, and the quoted
-   node list matches none of the rows. **The primary defect was a summary sentence that did not
-   follow from the table above it**; the informal weighting and the single-seed ranking made it
-   easier to miss, but they are not what made it false.
-7. **What to write.** `k_b` misspecification of ±20% substantially shifts the average/new
-  coefficients and **changes which nodes occupy the top-k operational shortlist**, while leaving the
-   full-network risk ordering broadly rank-correlated. A high whole-network Spearman must therefore
-   **not** be quoted as evidence that the actionable hot-spot list is invariant. This closes
-   Priority-2 #5 and gives Fisher Case B its empirical counterpart, as Step 8 does for Case C.
-8. **Depth check — the turnover is NOT confined to the top-six cut-off.** `6` is a chosen cut-off, so
-   the comparison was repeated at `k = 3, 5, 6, 10, 15`, and every node entering or leaving the
-   leading set was traced to its rank in the correctly specified field.
+4. **Two risk metrics, and they do not agree — the claim has to name one.** The step8-family risk
+   field is `P_bar`, the likelihood-weighted expected **fraction of the window below 0.2 mg/L**
+   ("how long"). Step 10's headline top-10 is ranked by `E[A]`, the expected **cumulative deficit**
+   ("how long *and* how far below"). Both are now computed here from the same cached predictions:
 
-| `k_b` | top-3 | top-5 | top-6 | top-10 | top-15 | median \|Δrank\| (92 nodes) | max \|Δrank\| (ref top-15) |
+| `k_b` | ρ(P_bar) | top-6 J(P_bar) | ρ(E[A]) | top-6 J(E[A]) |
+|---|---|---|---|---|
+| −0.4 | 0.976 | **0.50** | 0.980 | **1.00** |
+| −0.6 | 0.933 | **0.50** | 0.935 | **0.71** |
+
+   The network-scale rank correlation is the same to three decimals on either metric. The **leading
+   set is not**: on `P_bar` it loses two of six at both signs; on `E[A]` it is **unchanged** at
+   −0.4 and loses **one** node at −0.6.
+
+5. **On `E[A]` the change is a boundary swap, and on `P_bar` it is not.** Depth diagnostics on both:
+
+| metric | `k_b` | top-3 | top-5 | top-6 | top-10 | top-15 | max \|Δrank\| in ref top-15 |
 |---|---|---|---|---|---|---|---|
-| −0.4 | **0.20** | 0.43 | 0.50 | 0.54 | 0.67 | 1.0 | 16 |
-| −0.6 | **0.20** | 0.43 | 0.50 | 0.82 | 0.875 | 1.0 | 10 |
+| P_bar | −0.4 | **0.20** | 0.43 | 0.50 | 0.54 | 0.67 | 16 |
+| P_bar | −0.6 | **0.20** | 0.43 | 0.50 | 0.82 | 0.875 | 10 |
+| E[A] | −0.4 | 0.50 | **1.00** | **1.00** | 0.67 | 0.67 | 11 |
+| E[A] | −0.6 | **1.00** | **1.00** | 0.71 | 0.67 | 0.76 | 7 |
 
-   The Jaccard is **worse at k = 3 (0.20, one of three shared) than at k = 6 (0.50)** — the opposite
-   of what a cut-off artefact gives, which would tighten as `k` moves away from the boundary.
-   Tracing the movers confirms it: at `k_b = −0.4` the reference **third**-ranked node (129) falls to
-   eighth and the **fourth** (127) to **twentieth**, while 139 and 153 enter from seventh and ninth;
-   at `k_b = −0.6` the reference **twelfth**-ranked node (243) rises to **second** and node 20 from
-   eighth to third, while the reference fifth and sixth (15, 143) drop just outside to seventh and
-   eighth. **The perturbation therefore changes the leading risk ordering well beyond a simple
-   sixth/seventh-place exchange.** Only node 131 is common to every leading set, and it cannot move:
-   its expected fraction of hours below `0.2 mg/L` is `1.0000`, i.e. below threshold for the whole
-   window and saturated at the top of the scale.
+   On `E[A]` at −0.6 the *only* change to the leading set is node **143 (rank 6) leaving and node 129
+   (rank 7) entering** — a pure sixth/seventh-place exchange, with top-3 and top-5 identical. At −0.4
+   no node enters or leaves at all. So on the metric Step 10 publishes, the turnover **is** confined
+   to the prioritisation boundary and the leading core is retained.
+   On `P_bar` the same perturbation does something different: Jaccard is *worse* at k = 3 (0.20, one
+   of three shared) than at k = 6, the reference 3rd node (129) falls to 8th and the 4th (127) to
+   **20th**, and at −0.6 node 243 rises from 12th to 2nd. That is not a boundary effect.
+   **An earlier version of this section asserted the P_bar reading as if it held generally. It does
+   not; it holds for `P_bar`.**
 
-9. **A cut-off plateau does exist, but it explains only part of the turnover.** The reference profile
-   is nearly tied across ranks 4–6 — `0.4699` (127), `0.4696` (15), `0.4694` (143), a spread of
-   0.0005 — against a gap of 0.0204 down to rank 7 (139, `0.4490`). Those three *are* interchangeable
-   under any small perturbation, and that part is a genuine cut-off effect. It does not account for
-   127 falling to twentieth (which needs its risk to drop below ≈0.26), for 129 falling from third to
-   eighth, or for 243 rising from twelfth to second. **Do not write that the instability is confined
-   to the prioritisation boundary while a stable core is retained** — this check was run precisely to
-   test that sentence, and it fails.
+6. **Why the two metrics differ, mechanically.** `P_bar` counts hours below the threshold and is
+   therefore nearly saturated for the deepest nodes and highly sensitive to shallow, long excursions;
+   `E[A]` weights by depth, so a node that dips just below 0.2 for many hours scores low. Changing
+   `k_b` moves the whole concentration field slightly, which reshuffles the many nodes sitting near
+   the threshold — visible in `P_bar`, largely invisible in `E[A]`, where the leaders are separated
+   by their depth. Node 131 leads both metrics under every `k_b` and cannot move on `P_bar`: it is
+   below the threshold for the entire window (`P_bar = 1.0000`, saturated).
 
-10. **What is stable is the bulk of the network, not the leading nodes.** The median rank change over
-    all 92 junctions is **1.0** place, which is why Spearman stays at 0.976 / 0.933: the 86 low- and
-    mid-risk junctions barely move and dominate the statistic, while the large moves sit exactly
-    where the operational decision is made. The two directions are not equivalent at depth either —
-    top-10 Jaccard is 0.54 at `k_b = −0.4` against 0.82 at `−0.6`.
+7. **A cut-off plateau exists on `P_bar` and explains part of its turnover.** The reference `P_bar`
+   profile is nearly tied across ranks 4–6 — `0.4699` (127), `0.4696` (15), `0.4694` (143), a spread
+   of 0.0005 — against a gap of 0.0204 down to rank 7 (139, `0.4490`). Those three are
+   interchangeable under any small perturbation. It does not account for 127 falling to 20th, for 129
+   falling from 3rd to 8th, or for 243 rising from 12th to 2nd.
 
-11. **Caveats on this diagnostic.** The ranking comes from the median risk field over the 30
-    realisations, so it inherits whatever the median smooths away; per-realisation rank stability is
-    not reported. And the near-ties at ranks 4–6 mean the *rank* of those three nodes carries little
-    information in the first place — an argument for quoting the risk value alongside the rank
-    whenever a shortlist is published.
+8. **What is stable on both metrics is the bulk of the network.** The median rank change over all 92
+   junctions is 1.0 place, which is why Spearman stays at 0.976 / 0.933 (`P_bar`) and 0.980 / 0.935
+   (`E[A]`) while the leading sets move: the 86 low- and mid-risk junctions barely move and dominate
+   the statistic.
+
+9. **What to write.** `k_b` misspecification of ±20% shifts the average and new coefficients by
+   1.4–1.6 posterior SD and leaves the **network-scale** risk ordering broadly rank-correlated on
+   both metrics. Its effect on the **operational shortlist depends on the metric**: on the
+   time-averaged low-chlorine probability `P_bar` the top-6 loses two of six at both signs and the
+   reordering reaches well beyond the cut-off; on the cumulative-deficit ranking `E[A]` that Step 10
+   publishes, the top-6 is unchanged at −0.4 and loses one node at −0.6 in a sixth/seventh-place
+   exchange. Neither the claim that the risk product is insensitive to bulk-decay misspecification,
+   nor the claim that bulk-decay misspecification changes the hot-spot list, is sayable without
+   naming the metric it is ranked by.
+
+10. **Caveats on this diagnostic.** Both rankings come from the median risk field over the 30
+    realisations, so they inherit whatever the median smooths away; per-realisation rank stability is
+    not reported. The near-ties at `P_bar` ranks 4–6 mean the *rank* of those three nodes carries
+    little information in the first place — an argument for quoting the risk value alongside the rank
+    whenever a shortlist is published. The other sensor-error steps (8, 8c, 8d) report `P_bar` only;
+    their rank claims have not been recomputed on `E[A]`, and given the difference found here that is
+    a gap, not a formality.
+
 
 ---
 
@@ -1904,17 +1907,20 @@ Findings:
      weighting schemes (network-mean `E[A]` differs by 1.2%, eight of ten hot-spots shared), and it
      stays strongly rank-correlated under every single-sensor bias tested — Spearman ≥ 0.999 across
      all 24 arms of Step 8c, with the top-6 set intact at every negative offset.
-   - **Not robust.** Fixing `k_b` 20% above or below its true value **materially changes the leading
-     node set**: top-6 Jaccard falls to 0.50 at both signs, top-3 to 0.20, the reference 4th-ranked
-     node drops to 20th and a node ranked 12th rises to 2nd (Step 8b). `k_b` must therefore **not**
-     appear in any list of perturbations under which the hot-spot ranking is stable.
+   - **Metric-dependent, and this table's metric is the milder one.** Fixing `k_b` 20% off its true
+     value changes the leading set **on the time-averaged probability `P_bar`** — top-6 Jaccard 0.50
+     at both signs, top-3 0.20, the reference 4th-ranked node dropping to 20th. **On the cumulative
+     deficit `E[A]`, which is what the top-10 table above is ranked by, it does much less**: the
+     top-6 is *unchanged* at `k_b = −0.4` and loses one node at `−0.6`, in a sixth/seventh-place
+     exchange (143 out, 129 in), with top-3 and top-5 identical (Step 8b findings 4–5).
 
    The defensible summary is: *parameter uncertainty affects the magnitude of the node-level risk
    metrics (see the 5–95% bands); the broad spatial pattern is robust to the weighting scheme and to
-   single-sensor bias; but the exact high-priority shortlist is sensitive to bulk-decay
-   misspecification.* We do **not** claim the uncertainty "does not propagate" — it does, into the
-   magnitudes — and we no longer claim the top-hotspot ordering is stable across all tested
-   perturbations, because it is not.
+   single-sensor bias; the deficit-ranked shortlist reported here is robust to `k_b` ±20% apart from
+   one boundary exchange; and the duration-ranked shortlist is not.* We do **not** claim the
+   uncertainty "does not propagate" — it does, into the magnitudes — and no statement about the
+   stability of "the hot-spot ranking" is meaningful in this project without naming the metric it is
+   ranked by.
 
 
 
