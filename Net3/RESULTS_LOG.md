@@ -789,49 +789,23 @@ means the fit sits on the arithmetic mean, 1 on the length-weighted value.
 
 
 **Finding, and it is stronger than the single draw suggested.** The median shift fraction is
-**0.74–1.26** at every correlation level and in every zone: the fitted coefficient tracks the
-length-weighted proxy approximately fully, not partially. The single-realisation 60% / 146% / 45%
-sits inside these intervals, so it was a noisy draw of a quantity whose median is near 1.
+**0.74–1.26** at every correlation level and in every zone: the fitted coefficient tracks the length-weighted proxy approximately fully, not partially. The single-realisation 60% / 146% / 45% sits inside these intervals, so it was a noisy draw of a quantity whose median is near 1.
 
-The intervals also behave as a real effect should. They narrow as `CORR` grows — [−0.29, +2.47] at
-0.25 against [+0.23, +1.06] at 0.75 — because the gap in the denominator grows while the noise on the
-numerator does not. At `CORR = 0.75` all three intervals **exclude zero**, so at sufficient
-correlation the conclusion is resolved: the fit is inconsistent with sitting on the arithmetic mean
-and consistent with tracking the length-weighted value. At `CORR = 0.25` it is not resolved, which is
-the honest limit of what this design can detect.
+The intervals also behave as a real effect should. They narrow as `CORR` grows — [−0.29, +2.47] at 0.25 against [+0.23, +1.06] at 0.75 — because the gap in the denominator grows while the noise on the numerator does not. At `CORR = 0.75` all three intervals **exclude zero**, so at sufficient correlation the conclusion is resolved: the fit is inconsistent with sitting on the arithmetic mean and consistent with tracking the length-weighted value. At `CORR = 0.25` it is not resolved, which is the honest limit of what this design can detect.
 
-Note the contrast with Step 5c, and it is the point of having both: symmetric heterogeneity produced
-no detectable bias across 25 fields, while length-**correlated** heterogeneity of the same magnitude
-produces a fully resolved one. **Structure in the heterogeneity, not heterogeneity as such, is what
-breaks the averaging-out.** The structure tested here is a synthetic *pipe-length* correlation, used
-because it cleanly separates the two candidate targets; it is **not** a flow-path, residence-time or
-Jacobian weighting, and this design cannot say which attribute a real network would correlate with.
+Note the contrast with Step 5c, and it is the point of having both: symmetric heterogeneity produced no detectable bias across 25 fields, while length-**correlated** heterogeneity of the same magnitude produces a fully resolved one. **Structure in the heterogeneity, not heterogeneity as such, is what breaks the averaging-out.** The structure tested here is a synthetic *pipe-length* correlation, used because it cleanly separates the two candidate targets; it is **not** a flow-path, residence-time or Jacobian weighting, and this design cannot say which attribute a real network would correlate with.
 
-**Length-weighted must not be called residence-weighted, and this bounds the claim.** The reaction
-weight of a pipe depends on its flow, direction, diameter, residence time and on how strongly the six
-monitors see it. Length is one proxy among those; it happens to separate the two candidate targets in
-this design, which is what makes the design useful, and nothing here shows it is the *right* target.
+**Length-weighted must not be called residence-weighted, and this bounds the claim.** The reaction weight of a pipe depends on its flow, direction, diameter, residence time and on how strongly the six monitors see it. Length is one proxy among those; it happens to separate the two candidate targets in this design, which is what makes the design useful, and nothing here shows it is the *right* target.
 So the two statements available differ in strength and only the weaker one is supported:
 
-- **Supported:** structured heterogeneity makes the homogeneous estimate move off the arithmetic mean,
-in the direction of a length-weighted proxy, by a fraction of the gap whose median is near 1 and
-whose interval excludes zero at `CORR = 0.75`.
-- **Not supported:** that homogeneous fitting *recovers* the residence-weighted or effective
-coefficient. Establishing what the fit actually estimates needs a sensitivity- or Jacobian-weighted
-effective mean, which this step does not compute. That is open work, not a result.
+- **Supported:** structured heterogeneity makes the homogeneous estimate move off the arithmetic mean, in the direction of a length-weighted proxy, by a fraction of the gap whose median is near 1 and whose interval excludes zero at `CORR = 0.75`.
+- **Not supported:** that homogeneous fitting *recovers* the residence-weighted or effective coefficient. Establishing what the fit actually estimates needs a sensitivity- or Jacobian-weighted effective mean, which this step does not compute. That is open work, not a result.
 
-**Honest caveat on magnitude.** Under the primary rule the old-zone offset of −0.1444 is 1.29
-posterior SD (0.1123), so the structural shift is now comparable with the posterior width rather than
-buried inside it — a stronger and more concerning result than the 0.26 SD the informal comparator
-gave. What the step demonstrates is still the *mechanism*: the fit stays precise (RMSE at the noise
-floor) while the coefficient is pulled away from the field's simple average. Note also that the grid
-fit is a coarse instrument here: the old-zone grid step is 0.2170 m/day (half-step 0.1085), larger
-than the shift being measured, so `grid_fit` cannot resolve it and only the weighted mean can.
+**Honest caveat on magnitude.** Under the primary rule the old-zone offset of −0.1444 is 1.29 posterior SD (0.1123), so the structural shift is now comparable with the posterior width rather than buried inside it — a stronger and more concerning result than the 0.26 SD the informal comparator gave. What the step demonstrates is still the *mechanism*: the fit stays precise (RMSE at the noise floor) while the coefficient is pulled away from the field's simple average. Note also that the grid fit is a coarse instrument here: the old-zone grid step is 0.2170 m/day (half-step 0.1085), larger than the shift being measured, so `grid_fit` cannot resolve it and only the weighted mean can.
 
 ### Step 5e — grid-search recovery is "centred on the answer" (§3.3, second half)
 
-The 7×7×7 grid ranges are chosen around the true values, so the nearest grid node to each truth is
-close by construction:
+The 7×7×7 grid ranges are chosen around the true values, so the nearest grid node to each truth is close by construction:
 
 
 | coeff | grid step | nearest node to truth | distance | half-step |
@@ -857,17 +831,9 @@ Fix for the draft: present the grid only as an implementation/plausibility check
 
 ### Step 5 — overall
 
-- **Uncorrelated within-zone heterogeneity (±20–50%, Step 5c)**: the grouped model is **robust**. The
-posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk
-ranking is preserved. Across 25 independent fields at ±20% the structural increment is
-`+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
-- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at
-the noise floor while the coefficient moves toward a length-weighted proxy — 60% of the gap for old
-under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an
-identified effective coefficient.
-- **Grid search (Step 5e)**: recovery to the nearest grid node is guaranteed by the grid being centred
-on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid
-placement; only a weighted ensemble can speak to identifiability.
+- **Uncorrelated within-zone heterogeneity (±20–50%, Step 5c)**: the grouped model is **robust**. The posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk ranking is preserved. Across 25 independent fields at ±20% the structural increment is `+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
+- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at the noise floor while the coefficient moves toward a length-weighted proxy — 60% of the gap for old under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an identified effective coefficient.
+- **Grid search (Step 5e)**: recovery to the nearest grid node is guaranteed by the grid being centred on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid placement; only a weighted ensemble can speak to identifiability.
 - Directly answers §3.3 ("report how far the behavioural ensemble sits from any simple average of the
 true field"): the distance is ≈0 when heterogeneity is uncorrelated and a clear, resolved shift
 toward the length-weighted proxy when it is correlated. **Structure in the heterogeneity, not
@@ -1458,8 +1424,9 @@ Findings:
    `131, 243, 20, 141, 127, 129`, against `131, 141, 129, 127, 15, 143` at the true `k_b`). Jaccard
    compares set **membership**, not the order within the set, so this is a statement about who is on
    the shortlist and not about who is first on it. The two indices are not in conflict: Spearman is
-   dominated by the 86 low- and mid-risk junctions whose relative order barely moves, while the
-   top-6 changes as soon as a few nodes swap across the 6th/7th boundary.
+   dominated by the 86 low- and mid-risk junctions whose relative order barely moves (median rank
+   change 1.0 place), while the leading nodes move a great deal — and finding 8 shows those moves are
+   *not* confined to the 6th/7th boundary.
 5. **The sensitivity is present under both weightings, so it is not a weighting artefact.** The
   informal comparator gives the *same* 0.50 at both ±20%. What the formal rule changes is the
    **parameter** displacement — 1.4–1.6 SD against 0.28–0.40 SD — not the hot-spot conclusion. This
@@ -1477,13 +1444,46 @@ Findings:
    full-network risk ordering broadly rank-correlated. A high whole-network Spearman must therefore
    **not** be quoted as evidence that the actionable hot-spot list is invariant. This closes
    Priority-2 #5 and gives Fisher Case B its empirical counterpart, as Step 8 does for Case C.
-8. **Open — is the instability at the boundary or in the core?** `6` is a chosen cut-off. Whether the
-  two replacements are nodes sitting close to the 6th/7th risk boundary (a cut-off artefact, with a
-   stable high-risk core) or a genuine reshuffle of the leading nodes is **not** established here:
-   this step stores only the top-6 set, not per-node rank changes or the risk gaps around rank 6.
-   Reporting top-5/10/15 Jaccard, absolute rank changes and the deficit spacing near the boundary
-   would settle it, and that has not been run. Until it is, the claim stands at "the shortlist is
-   sensitive", with no assertion about where within the shortlist.
+8. **Depth check — the turnover is NOT confined to the top-six cut-off.** `6` is a chosen cut-off, so
+   the comparison was repeated at `k = 3, 5, 6, 10, 15`, and every node entering or leaving the
+   leading set was traced to its rank in the correctly specified field.
+
+| `k_b` | top-3 | top-5 | top-6 | top-10 | top-15 | median \|Δrank\| (92 nodes) | max \|Δrank\| (ref top-15) |
+|---|---|---|---|---|---|---|---|
+| −0.4 | **0.20** | 0.43 | 0.50 | 0.54 | 0.67 | 1.0 | 16 |
+| −0.6 | **0.20** | 0.43 | 0.50 | 0.82 | 0.875 | 1.0 | 10 |
+
+   The Jaccard is **worse at k = 3 (0.20, one of three shared) than at k = 6 (0.50)** — the opposite
+   of what a cut-off artefact gives, which would tighten as `k` moves away from the boundary.
+   Tracing the movers confirms it: at `k_b = −0.4` the reference **third**-ranked node (129) falls to
+   eighth and the **fourth** (127) to **twentieth**, while 139 and 153 enter from seventh and ninth;
+   at `k_b = −0.6` the reference **twelfth**-ranked node (243) rises to **second** and node 20 from
+   eighth to third, while the reference fifth and sixth (15, 143) drop just outside to seventh and
+   eighth. **The perturbation therefore changes the leading risk ordering well beyond a simple
+   sixth/seventh-place exchange.** Only node 131 is common to every leading set, and it cannot move:
+   its expected fraction of hours below `0.2 mg/L` is `1.0000`, i.e. below threshold for the whole
+   window and saturated at the top of the scale.
+
+9. **A cut-off plateau does exist, but it explains only part of the turnover.** The reference profile
+   is nearly tied across ranks 4–6 — `0.4699` (127), `0.4696` (15), `0.4694` (143), a spread of
+   0.0005 — against a gap of 0.0204 down to rank 7 (139, `0.4490`). Those three *are* interchangeable
+   under any small perturbation, and that part is a genuine cut-off effect. It does not account for
+   127 falling to twentieth (which needs its risk to drop below ≈0.26), for 129 falling from third to
+   eighth, or for 243 rising from twelfth to second. **Do not write that the instability is confined
+   to the prioritisation boundary while a stable core is retained** — this check was run precisely to
+   test that sentence, and it fails.
+
+10. **What is stable is the bulk of the network, not the leading nodes.** The median rank change over
+    all 92 junctions is **1.0** place, which is why Spearman stays at 0.976 / 0.933: the 86 low- and
+    mid-risk junctions barely move and dominate the statistic, while the large moves sit exactly
+    where the operational decision is made. The two directions are not equivalent at depth either —
+    top-10 Jaccard is 0.54 at `k_b = −0.4` against 0.82 at `−0.6`.
+
+11. **Caveats on this diagnostic.** The ranking comes from the median risk field over the 30
+    realisations, so it inherits whatever the median smooths away; per-realisation rank stability is
+    not reported. And the near-ties at ranks 4–6 mean the *rank* of those three nodes carries little
+    information in the first place — an argument for quoting the risk value alongside the rank
+    whenever a shortlist is published.
 
 ---
 

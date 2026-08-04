@@ -228,10 +228,30 @@ FORBIDDEN = [
      "120 h is a finite-horizon pragmatic choice; the deficit and water-age criteria never pass"),
     (r"(?i)all numbers are checked|every number is verified|7/7 checks passing",
      "the validator covers a subset of numbers and establishes no semantic consistency"),
+    # Step 8b: two readings that were written, tested against the artifact, and refuted. Neither can
+    # be caught by a number check, because both are sentences ABOUT numbers that are themselves
+    # current. A line quoting one of them as superseded is exempt via the SUPERSEDED marker.
+    (r"(?i)risk (product|map|ranking)[^\n]{0,30}insensitive to[^\n]{0,25}k_b|"
+     r"top nodes[^\n]{0,40}unchanged at every k_b",
+     "k_b ±20% retains only four of the six hot-spots (Jaccard 0.50); what stays correlated is the "
+     "full-network ordering, not the operational shortlist (Step 8b)"),
+    (r"(?i)instability[^\n]{0,30}concentrated around the (prioritisation|priority) boundary|"
+     r"(highest-ranked|leading|core) nodes remained common across all cases",
+     "refuted by the depth check: Jaccard is WORSE at k=3 (0.20) than at k=6, reference ranks 3 and "
+     "4 fall to 8th and 20th, and rank 12 rises to 2nd (Step 8b finding 8)"),
 ]
 # Documents where FORBIDDEN is enforced. The response matrix is included because that is where the
 # over-claims lived.
 FORBIDDEN_DOCS = ["RESULTS_LOG.md", "README.md", "README.en.md", "REVISION_RESPONSE_MATRIX.md"]
+
+# check_forbidden only. A sentence that REJECTS a wording necessarily contains that wording, so the
+# register would flag the very lines that do the rejecting. These markers identify a rejection and
+# exempt the line. Kept separate from SUPERSEDED, which also exempts numbers from the value check and
+# must not be widened for a text-only purpose.
+REJECTS = re.compile(r"(?i)(\bdo not write\b|\bmust not be\b|\bmust \*\*not\*\* be\b|"
+                     r"\bthe earlier response said\b|\banywhere the draft says\b|"
+                     r"\bthat sentence has to go\b|\bwas tested and\b|\brefuted\b|"
+                     r"\bwas wrong\b|\bis false\b)")
 
 # Numbers that legitimately appear as prose constants anywhere in the log.
 CONSTANTS = {
@@ -637,7 +657,7 @@ def check_forbidden():
         if text is None:
             continue
         for i, line in enumerate(text.splitlines(), 1):
-            if SUPERSEDED.search(line):
+            if SUPERSEDED.search(line) or REJECTS.search(line):
                 continue
             for rx, why in FORBIDDEN:
                 if re.search(rx, line):
