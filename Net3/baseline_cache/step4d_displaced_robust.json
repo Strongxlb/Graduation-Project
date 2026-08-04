@@ -4,6 +4,11 @@
     "informal_glue@0.107",
     "informal_glue@0.12"
   ],
+  "upper_cap_m_per_day": -0.005,
+  "upper_cap_shift_applied": {
+    "old": 0.030277674973256726
+  },
+  "upper_cap_note": "the OLDUP design displaces upward by one prior SD; if that would put the window above the cap it is shifted down, which changes the design. A non-zero shift here means the reported OLDUP prior is NOT simply truth + 1 prior SD.",
   "n_noise": 30,
   "informal_thresholds": [
     0.107,

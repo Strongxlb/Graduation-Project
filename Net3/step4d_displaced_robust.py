@@ -67,13 +67,26 @@ def down_range(orig, truth):
     return (mid - w / 2, mid + w / 2)
 
 
-def up_range(orig, truth, cap=UPPER_CAP):
+CAP_ACTIVATIONS = {}                   # group -> how far the cap had to shift the window, m/day
+
+
+def up_range(orig, truth, cap=UPPER_CAP, group=None):
+    """Displace upward by one prior SD, then shift down if that would go non-negative.
+
+    The shift is a GUARD: it silently changes the design when it binds, so how much it moved and
+    for which group is recorded in CAP_ACTIVATIONS and written to the artifact. A guard whose
+    activation is not in the record cannot be audited from the artifact alone.
+    """
     a, b = orig
     w = b - a
     mid = truth + w / np.sqrt(12)
     lo, hi = mid - w / 2, mid + w / 2
+    if group is not None:
+        CAP_ACTIVATIONS[group] = 0.0
     if hi > cap:                       # shift the window down to keep it non-positive
         shift = hi - cap
+        if group is not None:
+            CAP_ACTIVATIONS[group] = float(shift)
         lo, hi = lo - shift, hi - shift
     return (lo, hi)
 
@@ -148,7 +161,7 @@ def med_iqr(a):
 
 # ---- designs (both displace all three so every gap-closed is valid) ----
 PRIORS_DOWN = {g: down_range(B.PRIOR[g], TRUE[g]) for g in GROUPS}
-PRIORS_OLDUP = {"old": up_range(B.PRIOR["old"], TRUE["old"]),
+PRIORS_OLDUP = {"old": up_range(B.PRIOR["old"], TRUE["old"], group="old"),
                 "avg": down_range(B.PRIOR["avg"], TRUE["avg"]),
                 "new": down_range(B.PRIOR["new"], TRUE["new"])}
 DESIGNS = [("DOWN", PRIORS_DOWN), ("OLDUP", PRIORS_OLDUP)]
@@ -159,6 +172,14 @@ for name, pr in DESIGNS:
         assert a <= TRUE[g] <= b, f"{name}/{g} truth not in range"
 
 report = {**B.weighting_provenance(comparators=COMPARATORS),
+          # the upward-displacement guard, and whether it bound: a cap that silently moved the
+          # design has to be visible in the artifact, not only in the resulting prior box
+          "upper_cap_m_per_day": UPPER_CAP,
+          "upper_cap_shift_applied": CAP_ACTIVATIONS,
+          "upper_cap_note": "the OLDUP design displaces upward by one prior SD; if that would put "
+                            "the window above the cap it is shifted down, which changes the design. "
+                            "A non-zero shift here means the reported OLDUP prior is NOT simply "
+                            "truth + 1 prior SD.",
           "n_noise": N_NOISE, "informal_thresholds": THRESHOLDS,
           "sampler": "scrambled Sobol from the displaced box, same seed as the baseline",
           "designs": {}}

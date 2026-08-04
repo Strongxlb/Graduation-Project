@@ -581,8 +581,14 @@ coefficients (width fixed, truth kept inside), so every gap-closed value is mean
 designs differ only in old's direction:
 
 - **DOWN**: old / avg / new midpoints all set to `truth − 1 prior SD` (strong-decay side).
-- **OLDUP**: old midpoint set to `truth + 1 prior SD` (weak/steep side, upper bound capped at
-−0.005 to stay non-positive); avg / new displaced down as in DOWN.
+- **OLDUP**: old displaced toward the weak/steep side, nominally to `truth + 1 prior SD`, with the
+upper bound capped at −0.005 to stay non-positive; avg / new displaced down as in DOWN.
+**The cap binds here, and by enough to matter**: the window had to be shifted down by
+**0.0303 m/day**, giving an OLDUP old prior of `[-1.305, -0.005]`. Its midpoint therefore sits about
+**0.92** prior SD above the truth rather than the intended 1.0, so the displacement actually tested
+is a little smaller than the design nominally specifies. The shift is recorded in the artifact
+(`upper_cap_shift_applied`) so the realised design can be reconstructed from it — a guard that moves
+the design and leaves no trace is not auditable.
 
 Each design: 8192 scrambled-Sobol forward runs cached once (keyed on the design box, so editing a
 design invalidates only its own library), then the gap-closing statistic recomputed over 30

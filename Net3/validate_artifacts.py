@@ -461,6 +461,59 @@ def check_figure_freshness():
     return problems, []
 
 
+# A NUMERICAL GUARD is a constant that silently changes a result when it binds: a clip, a floor, a
+# cap, a truncation. Its danger is asymmetric — while inert it is invisible and harmless, and the
+# moment it binds it alters the answer with no other symptom. Step 12's CLIP_LO was active for 46.8%
+# of members before anyone noticed; step12's WEIGHT_FLOOR and step4d's UPPER_CAP each shipped without
+# their activation in the artifact. So every guard must record HOW MUCH IT ACTED, in the artifact,
+# not on stdout.
+#   script -> {constant: substring that must appear in one of the artifact's keys}
+GUARDS = {
+    "step12_scenarios.py": {"CLIP_LO": "clipped_draws",
+                            "WEIGHT_FLOOR": "discarded_weight_mass",
+                            "EA_MIN": "truncated_at"},
+    "step4d_displaced_robust.py": {"UPPER_CAP": "upper_cap_shift_applied"},
+    "step6_noise_sensitivity.py": {"ESS_MIN": "sampling_limited"},
+    "step13_known_answer.py": {"TOL_REL": "tolerance"},
+}
+# Constants matching this but absent from GUARDS are reported: a new guard must be registered, which
+# is the only way the check can cover code that does not exist yet.
+GUARD_NAME = re.compile(r"^(?!.*(?:C_MIN|THRESHOLDS|REPORT_STEPS|GRID_FLOOR|NOISE_FLOOR))"
+                        r"[A-Z][A-Z0-9_]*(?:FLOOR|CLIP|CAP|GUARD|LIMIT|TOL|TOL_REL|_MIN|_MAX)\b")
+
+
+def check_guards():
+    """Every numerical guard must record its activation in the artifact it feeds."""
+    problems, notes = [], []
+    for script, entries in GUARDS.items():
+        arts = [a for label, ps in SECTIONS.items() for a in ps
+                if label.replace("Step ", "step").replace(" ", "") == script.split("_")[0]]
+        pool = ""
+        for a in set(arts):
+            full = os.path.join(CACHE, a)
+            if os.path.exists(full):
+                pool += open(full).read()
+        if not pool:
+            notes.append(f"{script}: no artifact found to check its guards against")
+            continue
+        for const, key in entries.items():
+            if key not in pool:
+                problems.append(f"{script}: guard {const} does not record its activation "
+                                f"(no key containing {key!r} in the artifact) — an inert guard and a "
+                                f"binding one are indistinguishable from the record")
+    # discovery: a guard-shaped constant that nobody registered
+    for f in sorted(os.listdir(HERE)):
+        if not re.fullmatch(r"step\w+\.py", f):
+            continue
+        for line in open(os.path.join(HERE, f)):
+            m = re.match(r"([A-Z][A-Z0-9_]*)\s*=", line)
+            if m and GUARD_NAME.match(m.group(1)) and m.group(1) not in GUARDS.get(f, {}):
+                notes.append(f"{f}: {m.group(1)} looks like a guard but is not in GUARDS — register "
+                             f"it with the artifact key that records its activation, or confirm it "
+                             f"cannot bind")
+    return problems, notes
+
+
 def check_reproduce_list():
     """Every step script must appear in the log's run block.
 
@@ -721,6 +774,7 @@ def main(verbose=False):
         ("figure freshness", lambda: check_figure_freshness()),
         ("section numbering", lambda: check_numbering(sections)),
         ("every step script is reproducible", lambda: check_reproduce_list()),
+        ("numerical guards record their activation", lambda: check_guards()),
         ("log numbers vs artifacts", lambda: check_log_numbers(sections, verbose)),
         ("units and paths", lambda: check_text_rules(text)),
         ("environment claims", lambda: check_env_claims(text)),
