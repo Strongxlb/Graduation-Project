@@ -1991,13 +1991,18 @@ LOO out-of-sample prediction error ≈ noise floor; held-out node-15 band covers
 
 Findings:
 
-1. **Out-of-sample prediction is at the noise floor.** Every held-out monitor is predicted with
-  RMSE ≈ 0.093–0.102 mg/L ≈ σ = 0.1 — i.e. the five-monitor calibration predicts the *unseen* sensor
-   about as accurately as the measurement noise allows. No sign of over-fitting; the model
-   generalises spatially.
-2. **Uncertainty is well-calibrated.** The 90 % predictive band (parameter + observation-noise
-  variance) covers 92–94 % of held-out hours — close to the nominal 90 %, slightly conservative.
-   So the reported uncertainty is trustworthy out-of-sample, not just in-sample.
+1. **Out-of-sample prediction is at the noise floor.** Under the **formal primary** every held-out
+   monitor is predicted with RMSE **0.092–0.103** mg/L ≈ σ = 0.1 (informal comparator 0.091–0.102) —
+   i.e. the five-monitor calibration predicts the *unseen* sensor about as accurately as the
+   measurement noise allows. No sign of over-fitting; the model generalises spatially. The two
+   weightings agree here, which is worth noting given how often they do not: prediction is the one
+   thing the informal score does about as well, because it is not being asked to extract parameter
+   information.
+2. **Uncertainty is close to nominal, and "conservative" overstates it.** The 90 % predictive band
+   (parameter + observation-noise variance) covers **0.90–0.94** of held-out hours under both rules.
+   The average sits slightly above nominal, but the minimum is **exactly** 0.90 (monitor 113), so
+   the band is well-calibrated rather than systematically conservative — the genuinely conservative
+   case is Step 11c's unmonitored junctions, which over-cover at 1.00.
 3. **Parameter stability confirms where the information lives — but the two weightings disagree on
    the sign, and the primary is the one to quote.** Under both rules `k_old` moves perceptibly **only
    when an old-zone monitor is removed** and barely at all when a new/avg monitor is dropped, which
@@ -2056,7 +2061,7 @@ monitor (2.12 against 0.19 mg/L per m/day for `old`) because the new-zone pipes 
 network. Spatial borrowing exists, but only for the zone the water passes through first.
 
 The decisive observation is the pair of right-hand columns: **prediction quality is unchanged**.
-Held-out RMSE is still ≈0.10 mg/L and coverage still 0.92–0.96, even for the zone whose coefficient
+Held-out RMSE is still ≈0.10 mg/L and coverage still 0.90–0.96 (formal; 0.92–0.96 informal), even for the zone whose coefficient
 carries a +0.150 error and has learned nothing. So **predictive success is not evidence of parameter
 identifiability**, and the LOO result of Step 11a cannot be read as validating the coefficients.
 Prediction survives because the prior is centred near the truth — the same artefact the review
@@ -2393,12 +2398,18 @@ altering the assumed age profile; calibration record exceeding its approved age.
 1. **Temperature escalates risk materially but does not flatten the network.** `P_min>0.5`
   nodes rise 21 → 28 → 29 from 12 → 16 → 20 °C; demand at risk 18.8 % → 24.8 %; network-mean
    `E[A]` more than doubles (0.222 → 0.522 mg/L·h).
-2. **Ageing at the same temperature adds a spatially selective increment** (29 → 31 nodes;
-  `E[A]` 0.487 → 0.548), concentrated where old/average pipes control the supply path. The
-   hot-spot set is robust across the tested `α` range (31–32 nodes, 49.5 L/s), while the
-   severity magnitude scales with `α` — report it as a stress range, not as a measured effect.
-3. **The escalating nodes are almost all unmonitored** (7 of 8), which is an argument for
-  information-led monitoring design rather than for more monitoring in general.
+2. **Ageing at the same temperature adds a spatially selective increment** (`P_min>0.5` nodes
+   29 → 31; network-mean `E[A]` 0.5218 → 0.579 mg/L·h), concentrated where old/average pipes
+   control the supply path. The **`P_min`-classified set** is robust across the tested `α` range
+   (30 / 31 / 31 nodes, 49.4 L/s at all three), while the severity magnitude scales with `α`
+   (`E[A]` 0.550 → 0.579 → 0.599) — report it as a stress range, not as a measured effect.
+   *"Set" here means the nodes classified `P_min > 0.5`, which is a breach-probability
+   classification and not the `E[A]`-ranked hot-spot list of Step 10; the two are different
+   products and Step 8b showed metrics of this kind can disagree.*
+3. **The escalating nodes are almost all unmonitored** (**6 of the 7**, the exception being
+   monitored node 231), which is an argument for information-led monitoring design rather than for
+   more monitoring in general. Escalation is a change of `P_min` risk band between scenarios A
+   and D, so this too is a breach-probability statement.
 4. **Source dosing is an incomplete control.** +30 % inlet dose improves every continuous
   metric but does not return demand-at-risk to baseline. Under the idealisation of fixed
    hydraulics, first-order kinetics and proportional source scaling, dosing by `r` is exactly
