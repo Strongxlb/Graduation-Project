@@ -1892,7 +1892,7 @@ Findings:
    and depth separately.
 2. **Ensemble uncertainty is much tighter than under the informal score.** With the formal weighting
   the 5–95 % bands collapse to a fraction of their previous width (node 15: 22.0 [22.0, 22.0] h,
-   where the informal ensemble gave 8–24 h). That is the same efficiency gain seen in the parameters,
+   where the informal ensemble gives 14–24 h). That is the same efficiency gain seen in the parameters,
    propagated into the risk metrics: the earlier wide bands were mostly the weighting's inertia, not
    irreducible parameter uncertainty.
 3. **Water age gives hydraulic corroboration of the spatial pattern.** Mean water age is strongly
@@ -2524,8 +2524,8 @@ Headline calibration (old / average / new): empirical SD / CRLB ≈ 1.04 / 1.06 
 
 
 **Comparator — informal GLUE** (threshold 0.107): bias/emp. SD up to −1.76 (`average`); within-run SD
-is **~4.6–4.7×** the formal width; cov90 ≈ 0.98–0.99. High coverage is bought by width, not by
-accuracy.
+is **~2.6–2.9×** the formal width (0.2489 / 0.0393 / 0.0226 against 0.0960 / 0.0137 / 0.0079 m/day
+for old / average / new); cov90 ≈ 0.98–0.99. High coverage is bought by width, not by accuracy.
 
 Repeated-noise calibration
 

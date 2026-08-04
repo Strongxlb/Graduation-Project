@@ -194,9 +194,15 @@ for sname, ws in weights.items():
     if primary_top is None:
         primary_top = top_s
     jac = len(set(top_s) & set(primary_top)) / len(set(top_s) | set(primary_top))
+    # Per-node 5-95% duration bands for the two schemes, not just the network means: the claim that
+    # the formal rule tightens the risk bands is a NODE-level claim and needs a node-level number.
+    j15 = ALL_NODES.index("15")
+    band15 = B.weighted_quantile(D[:, j15], ws, [0.05, 0.95])
     xs[sname] = {"ess": diags[sname]["ess"],
                  "net_mean_E_duration_h": float(dbar_s.mean()),
                  "net_mean_E_deficit": float(abar_s.mean()),
+                 "node15_E_duration_h": float(dbar_s[j15]),
+                 "node15_duration_5_95": [float(band15[0]), float(band15[1])],
                  f"top{TOP_K}": top_s,
                  f"top{TOP_K}_jaccard_vs_primary": jac}
     print(f"{sname:>16} {diags[sname]['ess']:8.1f} | {dbar_s.mean():15.3f} {abar_s.mean():13.4f} | "
