@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-08-04T17:28:42+00:00",
+  "generated_utc": "2026-08-04T17:41:32+00:00",
   "git": {
-    "commit": "4b0fa2c98c1c77ff649e8d65c10841cab5ee6769",
+    "commit": "76e8fb341bfe36f1d696d6f700deeae87104b713",
     "dirty": false,
     "dirty_files": [],
-    "tree_sha256": "5e17c71019c4971c876c9dd95da937033034bcd4d00e08c68f028302dd9a2fa8",
+    "tree_sha256": "809d3f70d1b8fccd95117c2c1cf989a39f0fb5017f932f9ca3dd1d0b204abcb4",
     "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
@@ -67,7 +67,7 @@
       "step0_warmup_convergence.py": "91bc137f2295f516cef82cc60565e4f0e3dea949103f0a3b53cdaa6ae8940ba3",
       "step10_risk_metrics.py": "9d797b9ae93064c4426bd289d4e35077af3d672e68d7784365488a6a94db5ec0",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
-      "step12_scenarios.py": "90f9626c08ac0cd9dec7418ff49c158df4f1a8a0cc4fcbea277918128fb60502",
+      "step12_scenarios.py": "7f6be00b6dda631709644012cb7bf8f7d3d04acb86b43c9c38b94da1569c11c0",
       "step13_known_answer.py": "4f9cb424982ff0cbe929d5e59a424e61c005d28d8fd7e0463c61d79d3da70fd5",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
       "step1_freeze_baseline.py": "cb7edf1b943a8feb2ce83e9631b747181f39694dfcf02c7a85c1603e7adc1833",
@@ -90,7 +90,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "f2a480a905ef45023c4a506718e43cb2a1557a738771c53129e8e1e46fbfee86"
+    "step_scripts_combined_sha256": "b088c28833a40e5ec22eb21d7eee0ddc6e5ce5ab618f16960e2dc6ba4b129647"
   },
   "critical_fields": [
     "config_sha256",
