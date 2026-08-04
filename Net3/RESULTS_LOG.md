@@ -143,24 +143,51 @@ conda activate water-supply
 cd Net3
 export MPLCONFIGDIR=../.mplcache
 python step0_warmup_convergence.py      # warm-up convergence test (decides WARMUP_H)
-python step1_freeze_baseline.py         # ~280 s (8192 EPANET runs, all nodes)
+python step1_freeze_baseline.py         # ~280 s (8192 EPANET runs, all nodes) — builds the cache
 python step3_threshold_sensitivity.py   # instant (cache only)
 python step4_displaced_prior.py         # ~350 s (8192 EPANET runs, monitors only)
+python step4b_sensitivity_curves.py     # single-parameter RMSE curves (re-simulates a sweep)
 python step4d_displaced_robust.py       # ~620 s first run, instant afterwards (prediction library cached)
+python step5_structural_error.py        # heterogeneous truth re-simulated; candidates reused
+python step5c_jitter_sweep.py           # jitter sweep + 25-field ensemble (one truth run per field)
+python step5d_structured.py             # length-correlated truth + correlation-strength dose
 python step6_noise_sensitivity.py       # ~20 s (cache only)
 python step7_fisher.py                  # ~5 s   (~80 EPANET runs)
+python step7_verify.py                  # Jacobian sanity check; prints only, writes no artifact
 python step7b_profile.py                # ~250 s given the cached 21³ grid; ~15 min if it must rebuild
+python step7c_ar1.py                    # AR(1) Fisher/CRLB (reuses the Jacobian)
+python step7c_profile_ar1.py            # AR(1) profile; rebuilds the 21³ residual grid if unkeyed
 python step8_sensor_bias.py             # ~20 s (cache only)
 python step8b_kb_sensitivity.py         # ~620 s first run, instant afterwards
 python step8c_bias_bynode.py            # ~100 s (cache only)
+python step8d_sensor_drift.py           # ~12 min (cache only; 25 arms × 30 realisations)
+python step9_zeroclip.py                # censored vs naive-zero comparison (cache only)
 python step10_risk_metrics.py           # ~6 s   (+ report-step sensitivity runs)
 python step11_loo.py                    # ~70 s
-python step12_scenarios.py              # ~10 min
+python step12_scenarios.py              # ~9 min
 python step13_known_answer.py           # analytic known-answer test
 python step14_repeated_noise.py         # ~10 s (cache only, 100 noise realisations)
 python provenance.py                    # refresh baseline_cache/cache_manifest.json
 python validate_artifacts.py            # cross-check the documents against the artifacts
 ```
+
+Every `step*.py` in this directory appears above; `validate_artifacts.py` fails if one does not, so
+a new step cannot be added without also becoming reproducible. Timings are indicative and were
+measured on the development machine; only the ones marked with a number were actually timed.
+
+**Provenance of a release.** `provenance.py` records the git commit and whether the tree was dirty
+when it ran. Running it *before* committing therefore always records `dirty: true` — the manifest
+then describes a working tree that no longer exists. For a state meant to be cited, commit first,
+then run `provenance.py` on the clean tree and commit the manifest by itself:
+
+```
+git commit -am "…"                                   # code, artifacts and documents
+cd Net3 && python provenance.py                      # now records dirty: false
+git add baseline_cache/cache_manifest.json && git commit -m "chore(net3): record clean provenance"
+```
+
+The manifest then names the commit whose code and artifacts produced the results; the manifest's own
+commit is one later, which is unavoidable and is not a discrepancy.
 
 Two step scripts must not run at the same time **from the same directory**: WNTR writes its EPANET
 scratch files as `temp.inp|rpt|bin` in the working directory, so concurrent runs overwrite each

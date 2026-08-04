@@ -454,6 +454,21 @@ def check_figure_freshness():
     return problems, []
 
 
+def check_reproduce_list():
+    """Every step script must appear in the log's run block.
+
+    The list has drifted twice: a step is added, its row goes into the file table, and the command
+    that actually runs it is forgotten — so the log documents an experiment that the stated procedure
+    never performs. Checking it is one set difference.
+    """
+    text = read_doc("RESULTS_LOG.md")
+    if text is None:
+        return ["RESULTS_LOG.md missing"], []
+    scripts = {f for f in os.listdir(HERE) if re.fullmatch(r"step\w+\.py", f)}
+    missing = sorted(s for s in scripts if f"python {s}" not in text)
+    return [f"{s} is never run by the documented procedure" for s in missing], []
+
+
 def check_numbering(sections):
     problems = []
     scripts = os.listdir(HERE)
@@ -698,6 +713,7 @@ def main(verbose=False):
         ("forbidden / superseded wording", lambda: check_forbidden()),
         ("figure freshness", lambda: check_figure_freshness()),
         ("section numbering", lambda: check_numbering(sections)),
+        ("every step script is reproducible", lambda: check_reproduce_list()),
         ("log numbers vs artifacts", lambda: check_log_numbers(sections, verbose)),
         ("units and paths", lambda: check_text_rules(text)),
         ("environment claims", lambda: check_env_claims(text)),
