@@ -32,7 +32,8 @@
   },
   "kb_fixed": -0.5,
   "C_MIN": 0.2,
-  "baseline_warmup_h": 24,
+  "draft_warmup_h": 24,
+  "current_warmup_h": 120,
   "recommended_warmup_h": null,
   "implied_config": {
     "proposed_warmup_h": 120,

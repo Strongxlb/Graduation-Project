@@ -1,9 +1,12 @@
 """Step 0: is the 24 h warm-up long enough? Decide it by a pre-declared convergence test.
 
-The baseline discards the first WARMUP_H hours and assesses 24-72 h, but that 24 h was never
-justified. It has to be: the tanks start at an assumed 0.5 mg/L, several high-risk junctions have a
-mean water age of 34-45 h, and the Step 12 paired test already showed the continuous severity
-metrics moving by 10-14% when the warm-up was extended to 120 h.
+This is the step that SET the current configuration, so it is written from the position before that
+decision. The draft's configuration -- now superseded -- was a 72 h run discarding the first 24 h and
+assessing 24-72 h, and that 24 h was never justified. It had to be: the tanks start at an assumed
+0.5 mg/L, several high-risk junctions have mean water ages of tens of hours, and the Step 12 paired
+test already showed the continuous severity metrics moving by 10-14% when the warm-up was extended.
+The answer below is 120 h, which is why wq_common now carries WARMUP_H = 120 and DURATION_H = 168
+and every other step assesses 120-168 h.
 
 Method. Demands and the pump schedule in Net3 are 24 h periodic, so the correct notion of "warmed
 up" is CYCLOSTATIONARY: the field over one diurnal cycle repeats in the next. Each parameter set is
@@ -35,6 +38,12 @@ FIGDIR = os.path.join(HERE, "figures")
 os.makedirs(FIGDIR, exist_ok=True)
 
 HORIZON_H = 168               # the model's ceiling; see the docstring
+# The warm-up this test was posed against. It is HISTORY, not configuration: the draft used 24 h,
+# this test rejected it, and wq_common.WARMUP_H was then raised to the answer. Reading B.WARMUP_H
+# here instead would make the step describe its own conclusion as its premise — after the config was
+# updated the artifact would say "the baseline warm-up is 120 h" and the verdict would compare 120
+# against 120, erasing the question the step exists to answer.
+DRAFT_WARMUP_H = 24
 CYCLE_H = 24                  # demand and pump-schedule period
 N_CYCLES = HORIZON_H // CYCLE_H
 C_MIN = 0.2
@@ -240,10 +249,10 @@ if recommended is None:
     print("residual drift has to be carried as a stated limitation rather than assumed away.")
 else:
     print(f"\nVERDICT: cyclostationary from hour {recommended} -> recommended warm-up "
-          f"{recommended} h (baseline uses {B.WARMUP_H} h).")
-    if recommended > B.WARMUP_H:
-        print(f"The baseline warm-up is too short by {recommended - B.WARMUP_H} h; the cache must "
-              "be rebuilt before the numbers are final.")
+          f"{recommended} h (the draft used {DRAFT_WARMUP_H} h; the project now runs {B.WARMUP_H} h).")
+    if recommended > DRAFT_WARMUP_H:
+        print(f"The draft warm-up was too short by {recommended - DRAFT_WARMUP_H} h, which is why "
+              f"wq_common now carries WARMUP_H = {B.WARMUP_H}.")
 
 # ---- what the calibration configuration should therefore be ----
 CHEM_KEYS = ["monitor_max_dC", "network_p95_dC", "tank_max_dC"]
@@ -286,7 +295,9 @@ report = {
     "tolerances": TOL, "top_k": TOP_K,
     "param_sets": {k: list(v) for k, v in PARAM_SETS.items()},
     "kb_fixed": B.KB_FIXED, "C_MIN": C_MIN,
-    "baseline_warmup_h": B.WARMUP_H,
+    # kept distinct on purpose: the value under test, and the value the project now runs with
+    "draft_warmup_h": DRAFT_WARMUP_H,
+    "current_warmup_h": B.WARMUP_H,
     "recommended_warmup_h": recommended,
     "implied_config": config,
     "per_criterion": per_criterion,
@@ -310,7 +321,8 @@ for name, c in colors.items():
                 alpha=0.45, label=f"{name} network p95")
 ax.axhline(TOL["monitor_max_dC"], color="k", ls=":", lw=1,
            label=f"monitor tol {TOL['monitor_max_dC']}")
-ax.axvline(B.WARMUP_H, color="crimson", lw=1.5, label=f"baseline warm-up {B.WARMUP_H} h")
+ax.axvline(DRAFT_WARMUP_H, color="crimson", lw=1.5, label=f"draft warm-up {DRAFT_WARMUP_H} h")
+ax.axvline(B.WARMUP_H, color="seagreen", lw=1.5, ls="--", label=f"adopted {B.WARMUP_H} h")
 ax.set_xlabel("cycle start (h) — compared with the next 24 h cycle")
 ax.set_ylabel("max |ΔC| between successive cycles (mg/L)")
 ax.set_title("(a) chlorine cyclostationarity", fontsize=10)
@@ -324,7 +336,8 @@ ax.semilogy(starts, [max(r["sets"][n]["tank_max_dLevel"] for n in colors) for r 
             "s-", color="tab:brown", label="tank level, max (m)")
 ax.axhline(TOL["age_p95_dAge"], color="tab:purple", ls=":", lw=1, label="age tol 1.0 h")
 ax.axhline(TOL["tank_max_dLevel"], color="tab:brown", ls=":", lw=1, label="level tol 0.05 m")
-ax.axvline(B.WARMUP_H, color="crimson", lw=1.5)
+ax.axvline(DRAFT_WARMUP_H, color="crimson", lw=1.5)
+ax.axvline(B.WARMUP_H, color="seagreen", lw=1.5, ls="--")
 ax.set_xlabel("cycle start (h)")
 ax.set_ylabel("difference between successive cycles")
 ax.set_title("(b) water age and the hydraulic driver", fontsize=10)
@@ -336,7 +349,8 @@ ax = axes[2]
 for name, c in colors.items():
     ax.plot(starts[1:], [rec["sets"][name]["net_mean_deficit"] for rec in rows[1:]], "o-",
             color=c, label=name)
-ax.axvline(B.WARMUP_H, color="crimson", lw=1.5, label=f"baseline warm-up {B.WARMUP_H} h")
+ax.axvline(DRAFT_WARMUP_H, color="crimson", lw=1.5, label=f"draft warm-up {DRAFT_WARMUP_H} h")
+ax.axvline(B.WARMUP_H, color="seagreen", lw=1.5, ls="--", label=f"adopted {B.WARMUP_H} h")
 if proposed_warmup is not None:
     ax.axvline(proposed_warmup, color="seagreen", lw=1.5, ls="--",
                label=f"proposed {proposed_warmup} h")

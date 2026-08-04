@@ -82,12 +82,14 @@ wn.options.time.hydraulic_timestep = B.HYDRAULIC_TIMESTEP_S
 wn.options.time.report_timestep = B.REPORT_TIMESTEP_S
 wn.options.time.quality_timestep = B.QUALITY_TIMESTEP_S
 wn.options.quality.parameter = "AGE"
-age_df = wntr.sim.EpanetSimulator(wn).run_sim().node["quality"][ALL_NODES] / 3600.0   # (73, 92) hours
-age_full = age_df.values                                   # 0..72
-age_post = age_full[B.WARMUP_H:]                           # 24..72 (49 rows)
-mean_age_post = age_post.mean(axis=0)                      # post-warm-up mean (primary)
-mean_age_last24 = age_full[B.DURATION_H - 24:].mean(axis=0)  # last diurnal cycle (48..72)
-final_age = age_full[-1]                                   # steady-ish final hour (t=72)
+age_df = wntr.sim.EpanetSimulator(wn).run_sim().node["quality"][ALL_NODES] / 3600.0   # (169, 92) h
+age_full = age_df.values                        # hourly reporting from 0 to 168 h
+age_post = age_full[B.WARMUP_H:]                # post-warm-up window: 120..168 h, 49 reporting points
+mean_age_post = age_post.mean(axis=0)           # primary definition: mean over the 120-168 h window
+mean_age_last24 = age_full[B.DURATION_H - 24:].mean(axis=0)   # last 24 h interval: 144..168 h
+# NOT a steady-state age: Step 0 shows the age field is still filling at 168 h and would need ~600 h,
+# which the model's 168 h horizon cannot supply. The window is a choice and is recorded as one.
+final_age = age_full[-1]                        # single final reporting hour, t = 168 h
 
 T_A, T_B, T_C = B.WARMUP_H, (B.WARMUP_H + B.DURATION_H) // 2, B.DURATION_H
 print("\nwater-age window diagnostics for the leading nodes:")

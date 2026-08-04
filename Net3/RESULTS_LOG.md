@@ -1820,18 +1820,19 @@ Findings:
    worst nodes also have the longest residence times. This is corroboration, **not** validation:
    water age comes from the *same* hydraulic model (not an independent measurement), correlation is
    not causation, and residual chlorine also depends on wall decay, source dosing and tank mixing.
-4. **Water-age magnitudes are window-dependent (not steady state).** In this 72-h run the age field
-  is still filling (age at `t = 24 h` equals the elapsed 24 h for the leading nodes, and keeps rising
-   to `t = 72`), so the *absolute* mean age depends on the averaging window (post-warm-up mean 44.9 /
-   40.2 h for 243/131; last-cycle mean 53.9 / 45.3 h) and differs from the draft's earlier single-
-   window figures (≈ 36.0 / 34.6 h). The **rank** association is the robust, window-insensitive
-   result — hence Spearman, not absolute ages, is reported as the finding. **Step 0 settles what
-   this parenthetical used to leave open: a longer run does not fix it.** The cycle-to-cycle change
-   in the age field is still 12.8 h at a 120–144 h warm-up and decays by only ~12% per cycle, so the
-   crossing extrapolates to ≈600 h — far beyond the 168 h the model permits. Absolute water ages in
-   Net3 are therefore horizon-dependent by construction, not merely under-converged here, and must
-   never be quoted as steady-state values. The three window definitions are stored in
-   `step10_risk_metrics.json` under `age_windows` so the choice is always explicit.
+4. **Water-age magnitudes are window-dependent, not steady state.** Water age remains
+   **horizon-dependent within the 168 h simulation**: the field is still filling at the high-age
+   nodes throughout the run. The ages in the table above are means over the fixed **120–168 h**
+   assessment window and **must not be interpreted as steady-state water ages** — the same nodes give
+   different numbers under the last-diurnal-cycle (144–168 h) and final-hour (`t = 168 h`)
+   definitions. All three are stored in `step10_risk_metrics.json` under `age_windows`, so the choice
+   is always explicit rather than implied. **Step 0 settles what this used to leave open: a longer
+   run does not fix it.** The cycle-to-cycle change in the age field is still 12.8 h at a 120–144 h
+   warm-up and decays by only ~12% per cycle, so the crossing extrapolates to ≈600 h — far beyond the
+   168 h the model permits. Absolute water ages in Net3 are therefore horizon-dependent by
+   construction, not merely under-converged here. **The rank association with chlorine risk is the
+   relevant result; the absolute magnitudes remain sensitive to the selected horizon** — which is why
+   Spearman, and not absolute age, is what this step reports as a finding.
 5. **Interpretation, stated carefully.** The dominant decay term (old) is the *most robustly informed*
   coefficient under the expanded realism analyses (Steps 4/7), and water age is reaction-independent;
    so the leading hotspots are governed by residence time and the old-group decay rather than the

@@ -1,15 +1,17 @@
 {
-  "generated_utc": "2026-08-04T11:48:02+00:00",
+  "generated_utc": "2026-08-04T11:55:20+00:00",
   "git": {
-    "commit": "75307e40649e5ee399d2c90f7c7227b2fbfa93fc",
+    "commit": "41724f2fa6060d4b8a69ae341fe6d0d08799c564",
     "dirty": true,
     "dirty_files": [
+      "Net3/Figures/step0_warmup_convergence.png",
       "Net3/RESULTS_LOG.md",
-      "Net3/validate_artifacts.py",
-      "REVISION_RESPONSE_MATRIX.md"
+      "Net3/baseline_cache/step0_warmup_convergence.json",
+      "Net3/step0_warmup_convergence.py",
+      "Net3/step10_risk_metrics.py"
     ],
-    "tree_sha256": "a8e8521aee8f8c6572ab22b70ef5dc6203a837cf31fe44f0a17f65288b3b892d",
-    "uncommitted_diff_sha256": "70ea13f5b4be948012eaee51632046a8ec30d952085e320743176f7905d9a609"
+    "tree_sha256": "0888c56890339d02d20d80acccf99abd3e8bab6ff36d5fbd88458d2e2e5e8851",
+    "uncommitted_diff_sha256": "b82d064a1eefa22776af00faf41d9634c5f86996e352f1e6db64c2af2bc3ec3f"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -68,8 +70,8 @@
     "wq_common_sha256": "9f5b456e235560c6d9ff1702da3b5996706a9acd55aa4ca4c2a84e229aa23263",
     "provenance_sha256": "9d5c0cab07788ca406ca408a85d7002a40f5770b05f1117ad3d2bd133ebff873",
     "step_scripts_sha256": {
-      "step0_warmup_convergence.py": "95e4821582d226e6e7096c45d8ebeb26130b45321ad5339cf6e0e4885b5b785a",
-      "step10_risk_metrics.py": "a40ea3c7db2fa0ad9456431652a7039fd9d23183104ae6030b11a49de3b915d0",
+      "step0_warmup_convergence.py": "91bc137f2295f516cef82cc60565e4f0e3dea949103f0a3b53cdaa6ae8940ba3",
+      "step10_risk_metrics.py": "c6d494d24095ee68e2514fab640fa8fafbd165ea35cd3efb9b7013314411f769",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
       "step12_scenarios.py": "90f9626c08ac0cd9dec7418ff49c158df4f1a8a0cc4fcbea277918128fb60502",
       "step13_known_answer.py": "4f9cb424982ff0cbe929d5e59a424e61c005d28d8fd7e0463c61d79d3da70fd5",
@@ -94,7 +96,7 @@
       "step8d_sensor_drift.py": "13adb4e975dc50a6dbcc3a3cf7b504ebb01533bf1e3e978496640a8022025e33",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "3df10dc265249fee5a8d6ca38fdb173f06f83ef1b7e9dda9b35a88aae4014f0d"
+    "step_scripts_combined_sha256": "560ec9f1e5aafc971f2818f599d17cfb6f752638531436b14ee5d26f011592ab"
   },
   "critical_fields": [
     "config_sha256",
