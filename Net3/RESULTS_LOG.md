@@ -1499,6 +1499,16 @@ Steps 8 and 8c model a **constant** bias. The review's comment is headed "system
 field failure. This step closes that half (`step8d_sensor_drift.py`; formal censored weighting,
 30 noise realisations, cache reused so no EPANET is re-run).
 
+**Ranking basis, stated because two are possible.** The top-6 set and the Spearman/Kendall columns
+are both read off the **median risk field over the 30 realisations**. The alternative — the modal
+top-6 *ordering* across realisations — answers a different question and is stored separately as
+`modal_top6_across_realisations`. Earlier versions of this step and of Step 8 computed the rank
+correlation from the median field but the Jaccard from the modal set, while declaring the median
+basis for both; that is fixed, and the two turn out to agree on the **set** in all 24 arms here (and
+all 7 in Step 8), differing only in the internal order of one arm. So no number in this section
+changed — but a table whose two rank columns rest on different bases is not defensible even when
+they happen to coincide.
+
 **Formula** — drift is a linear ramp across the assessment window:
 
 ```

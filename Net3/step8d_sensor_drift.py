@@ -103,11 +103,17 @@ def evaluate(node, kind, D):
         P = np.tensordot(w, (C_all < C_MIN).astype(float), axes=(0, 0)).mean(axis=0)
         Ps.append(P)
         ranks.append(tuple(ALL_NODES[i] for i in np.argsort(P)[::-1][:6]))
+    P_med = np.median(np.vstack(Ps), axis=0)
+    # The leading set is read off the SAME median field the Spearman uses. The modal set over the
+    # per-realisation orderings answers a different question ("which ordering occurs most often")
+    # and is kept as its own field rather than mixed in: reporting one of them under a metadata line
+    # that declares the other is how a single table ends up with two incompatible bases.
     return {"means": {z: float(np.median(means_by_z[z])) for z in ZKEYS},
             "sds": {z: float(np.median(sds_by_z[z])) for z in ZKEYS},
             "n_censored_med": float(np.median(n_clipped)),
-            "top6": list(max(set(ranks), key=ranks.count)),
-            "_P": np.median(np.vstack(Ps), axis=0)}
+            "top6": [str(ALL_NODES[i]) for i in np.argsort(P_med)[::-1][:6]],
+            "modal_top6_across_realisations": [str(x) for x in max(set(ranks), key=ranks.count)],
+            "_P": P_med}
 
 
 print("=== Step 8d: sensor DRIFT (time-varying offset) vs its constant-bias controls ===")
@@ -142,7 +148,8 @@ for node in DRIFT_NODES:
                    "risk_kendall_vs_unbiased": float(kendalltau(r["_P"], P_ref).statistic),
                    "risk_top6_jaccard_vs_unbiased":
                        len(set(r["top6"]) & ref_top6) / len(set(r["top6"]) | ref_top6),
-                   "top6": r["top6"]}
+                   "top6": r["top6"],
+                   "modal_top6_across_realisations": r["modal_top6_across_realisations"]}
             rows.append(row)
             print(f"{D:>+7.3f} | {kind:>11} | {r['means'][own]:>+9.4f} | {shift:>+8.4f} | "
                   f"{row['own_shift_over_sd']:>+8.2f} | {r['n_censored_med']:>5.0f} | "
@@ -195,7 +202,10 @@ report = {**B.weighting_provenance(comparators=[]),
           "arms": {"drift": "linear ramp 0 -> D",
                    "const_mean": "constant bias at D/2, the mean-equivalent control",
                    "const_end": "constant bias at D, the end-equivalent control"},
-          "risk_ranking_basis": "median risk field over the 30 noise realisations",
+          "risk_ranking_basis": "median risk field over the 30 noise realisations; the top-6 "
+                                "set and the Spearman are read off the SAME field, and the "
+                                "modal per-realisation ordering is reported separately as "
+                                "modal_top6_across_realisations",
           "baseline": {"means": base["means"], "sds": base["sds"],
                        "n_censored_med": base["n_censored_med"], "top6": base["top6"]},
           "equivalence": equivalence,

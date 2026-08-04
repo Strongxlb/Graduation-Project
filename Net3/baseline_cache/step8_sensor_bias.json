@@ -3,6 +3,7 @@
   "comparators": [],
   "bias_node": "15",
   "n_noise": 30,
+  "risk_ranking_basis": "median risk field over the noise realisations; the top-6 set and the Spearman/Kendall columns share that field, and the modal per-realisation ordering is reported separately as risk_rank_mode",
   "symmetry_check": {
     "0.025": {
       "positive": 0.11740048660584934,
@@ -31,6 +32,14 @@
       "old_sd_med": 0.05974069459436482,
       "avg_mean_med": -0.10171544613540862,
       "new_mean_med": -0.04983453439312455,
+      "risk_top6": [
+        "131",
+        "141",
+        "15",
+        "143",
+        "129",
+        "127"
+      ],
       "risk_rank_mode": [
         "131",
         "15",
@@ -52,6 +61,14 @@
       "old_sd_med": 0.1049194607236335,
       "avg_mean_med": -0.10327241455684974,
       "new_mean_med": -0.04934546544277443,
+      "risk_top6": [
+        "131",
+        "141",
+        "129",
+        "15",
+        "127",
+        "143"
+      ],
       "risk_rank_mode": [
         "131",
         "141",
@@ -73,6 +90,14 @@
       "old_sd_med": 0.10855451914224598,
       "avg_mean_med": -0.10328297258885419,
       "new_mean_med": -0.05003205981099525,
+      "risk_top6": [
+        "131",
+        "141",
+        "129",
+        "127",
+        "15",
+        "143"
+      ],
       "risk_rank_mode": [
         "131",
         "141",
@@ -94,6 +119,14 @@
       "old_sd_med": 0.10117113826904761,
       "avg_mean_med": -0.1027664365847395,
       "new_mean_med": -0.050945085865920864,
+      "risk_top6": [
+        "131",
+        "141",
+        "129",
+        "127",
+        "15",
+        "143"
+      ],
       "risk_rank_mode": [
         "131",
         "141",
@@ -115,6 +148,14 @@
       "old_sd_med": 0.08837846819651177,
       "avg_mean_med": -0.10201624523746564,
       "new_mean_med": -0.051894933071487535,
+      "risk_top6": [
+        "131",
+        "129",
+        "15",
+        "143",
+        "141",
+        "127"
+      ],
       "risk_rank_mode": [
         "131",
         "141",
@@ -136,6 +177,14 @@
       "old_sd_med": 0.07686822178155839,
       "avg_mean_med": -0.10125462888033718,
       "new_mean_med": -0.0529265035107491,
+      "risk_top6": [
+        "131",
+        "129",
+        "15",
+        "143",
+        "127",
+        "139"
+      ],
       "risk_rank_mode": [
         "131",
         "129",
@@ -157,6 +206,14 @@
       "old_sd_med": 0.0588946285533711,
       "avg_mean_med": -0.09934496913022929,
       "new_mean_med": -0.055050087468609246,
+      "risk_top6": [
+        "131",
+        "129",
+        "139",
+        "127",
+        "141",
+        "15"
+      ],
       "risk_rank_mode": [
         "131",
         "129",

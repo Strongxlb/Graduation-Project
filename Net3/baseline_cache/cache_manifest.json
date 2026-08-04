@@ -1,17 +1,17 @@
 {
-  "generated_utc": "2026-08-04T11:55:20+00:00",
+  "generated_utc": "2026-08-04T12:40:57+00:00",
   "git": {
-    "commit": "41724f2fa6060d4b8a69ae341fe6d0d08799c564",
+    "commit": "d731952bfcad10576e4d9bb9ae1c7f5fa4c49ad0",
     "dirty": true,
     "dirty_files": [
-      "Net3/Figures/step0_warmup_convergence.png",
       "Net3/RESULTS_LOG.md",
-      "Net3/baseline_cache/step0_warmup_convergence.json",
-      "Net3/step0_warmup_convergence.py",
-      "Net3/step10_risk_metrics.py"
+      "Net3/baseline_cache/step8_sensor_bias.json",
+      "Net3/baseline_cache/step8d_sensor_drift.json",
+      "Net3/step8_sensor_bias.py",
+      "Net3/step8d_sensor_drift.py"
     ],
-    "tree_sha256": "0888c56890339d02d20d80acccf99abd3e8bab6ff36d5fbd88458d2e2e5e8851",
-    "uncommitted_diff_sha256": "b82d064a1eefa22776af00faf41d9634c5f86996e352f1e6db64c2af2bc3ec3f"
+    "tree_sha256": "910fa790fd6c9872f3829c28512f9a649adb1a7b9a7abc04a95fc3335768a87d",
+    "uncommitted_diff_sha256": "ef21c15f64563570acc4b65b348fb393e78e75dec4062cfbefa84c3f2b1a3540"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -90,13 +90,13 @@
       "step7b_profile.py": "faca5625e0f54b7ae1b09de41b0b0fd326ab4cc4b433238d412dc68912e35fab",
       "step7c_ar1.py": "7592ae96f7de7e953ee15dc4e8a4259462342113106070f7c7df0d7df58ea001",
       "step7c_profile_ar1.py": "baf9e19f77e7ffa1d3814f4eab54da8d631faaf009dd8be1704c5db64de6ba53",
-      "step8_sensor_bias.py": "de4b56dcb96860374aa111adbf206536e11aa1163aec7a50d7146081e41a519b",
+      "step8_sensor_bias.py": "cc0246e517c3e61d74ec6cbc1b5a667cb80d20c70e7a0e98be0f0276a2b104e4",
       "step8b_kb_sensitivity.py": "f0f09db6e734299967024a3979072acb6dc2fd27f1737817e4c2491dc56d16c7",
       "step8c_bias_bynode.py": "c6ebddd7bb5086c1910f165ad885718d5ec05db88fea97cad97d9be222bcfcdc",
-      "step8d_sensor_drift.py": "13adb4e975dc50a6dbcc3a3cf7b504ebb01533bf1e3e978496640a8022025e33",
+      "step8d_sensor_drift.py": "4a039bffea41e539ef9f7b5fc397d1f67d4f9018a76f72dc37c7aba077ccc66f",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "560ec9f1e5aafc971f2818f599d17cfb6f752638531436b14ee5d26f011592ab"
+    "step_scripts_combined_sha256": "76b1529644d1504e1a5d2fc46e2f4cbb9696872d786fa59faa1eefa0361d3e33"
   },
   "critical_fields": [
     "config_sha256",

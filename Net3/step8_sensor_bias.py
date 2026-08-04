@@ -89,9 +89,13 @@ for off in OFFSETS:
     P_med = np.median(np.vstack(Ps), axis=0)
     if off == 0.0:
         P_ref = P_med
+    # The leading set is read off the SAME median field the Spearman uses, so the two rank columns
+    # of one table share a basis. The modal per-realisation ordering is a different statistic and is
+    # kept beside it rather than substituted for it.
     row = {"offset": off,
            "old_mean_med": med(old_means), "old_sd_med": med(old_sds),
            "avg_mean_med": med(avg_means), "new_mean_med": med(new_means),
+           "risk_top6": [str(ALL_NODES[i]) for i in np.argsort(P_med)[::-1][:6]],
            "risk_rank_mode": max(set(ranks), key=ranks.count),
            # censoring is the reason the sweep cannot be assumed symmetric: a negative offset pushes
            # more observations onto the sensor floor, a positive one lifts them off it
@@ -102,14 +106,14 @@ for off in OFFSETS:
 zero_row = next(r for r in rows if r["offset"] == 0.0)
 base_old = zero_row["old_mean_med"]
 base_sd = zero_row["old_sd_med"]
-ref_rank = list(zero_row["risk_rank_mode"])
+ref_rank = list(zero_row["risk_top6"])
 for r in rows:
     r["old_shift"] = r["old_mean_med"] - base_old
     r["shift_over_sd"] = r["old_shift"] / base_sd
     # rank agreement with the unbiased case, on the full 92-node risk field and on the top-6 set
     r["spearman_vs_unbiased"] = float(spearmanr(r["_P"], P_ref).statistic)
     r["kendall_vs_unbiased"] = float(kendalltau(r["_P"], P_ref).statistic)
-    top, ref = set(r["risk_rank_mode"]), set(ref_rank)
+    top, ref = set(r["risk_top6"]), set(ref_rank)
     r["top6_jaccard_vs_unbiased"] = len(top & ref) / len(top | ref)
     del r["_P"]
 
@@ -175,6 +179,9 @@ print("onto the sensor floor, where they carry different information than an unc
 
 report = {**B.weighting_provenance(comparators=[]),
           "bias_node": BIAS_NODE, "n_noise": N_NOISE,
+          "risk_ranking_basis": "median risk field over the noise realisations; the top-6 set and "
+                                "the Spearman/Kendall columns share that field, and the modal "
+                                "per-realisation ordering is reported separately as risk_rank_mode",
           "symmetry_check": asym,
           "baseline_old_sd": base_sd, "rows": rows,
           "offsets_swept": OFFSETS,
