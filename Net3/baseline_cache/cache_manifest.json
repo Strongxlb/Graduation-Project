@@ -1,17 +1,11 @@
 {
-  "generated_utc": "2026-08-04T12:40:57+00:00",
+  "generated_utc": "2026-08-04T13:29:16+00:00",
   "git": {
-    "commit": "d731952bfcad10576e4d9bb9ae1c7f5fa4c49ad0",
-    "dirty": true,
-    "dirty_files": [
-      "Net3/RESULTS_LOG.md",
-      "Net3/baseline_cache/step8_sensor_bias.json",
-      "Net3/baseline_cache/step8d_sensor_drift.json",
-      "Net3/step8_sensor_bias.py",
-      "Net3/step8d_sensor_drift.py"
-    ],
-    "tree_sha256": "910fa790fd6c9872f3829c28512f9a649adb1a7b9a7abc04a95fc3335768a87d",
-    "uncommitted_diff_sha256": "ef21c15f64563570acc4b65b348fb393e78e75dec4062cfbefa84c3f2b1a3540"
+    "commit": "c845d693610766a3cd8f04726e319cb53b3f0844",
+    "dirty": false,
+    "dirty_files": [],
+    "tree_sha256": "03fb4b377da7dacdbc0019aaafbcb947cd17ecf55560f2338bbbf2a5d819f7b0",
+    "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
