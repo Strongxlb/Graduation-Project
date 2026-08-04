@@ -790,9 +790,9 @@ structural error at all; subtract it before reading any shift as structural.
 | ------- | ----------- | --------------- | ------------- | ------------------- | -------------------- | ----------- | ----------- | ----------- |
 | old     | -1.000      | **-1.2404**     | -0.2404       | **formal censored** | **-1.1444 ± 0.1123** | **-0.1444** | +0.0124     | **60%**     |
 | old     |             |                 |               | informal GLUE       | -1.0666 ± 0.2549     | -0.0666     | -0.0115     | 28%         |
-| average | -0.100      | -0.1238         | -0.0238       | **formal censored** | **-0.1348 ± 0.0166** | **-0.0348** | -0.0091     | **146%**    |
+| average | -0.100      | -0.1238         | -0.0238       | **formal censored** | **-0.1349 ± 0.0170** | **-0.0349** | -0.0091     | **147%**    |
 | average |             |                 |               | informal GLUE       | -0.1300 ± 0.0416     | -0.0300     | -0.0170     | 126%        |
-| new     | -0.050      | -0.0659         | -0.0159       | **formal censored** | **-0.0573 ± 0.0080** | **-0.0073** | +0.0060     | **45%**     |
+| new     | -0.050      | -0.0659         | -0.0159       | **formal censored** | **-0.0571 ± 0.0083** | **-0.0071** | +0.0060     | **45%**     |
 | new     |             |                 |               | informal GLUE       | -0.0593 ± 0.0248     | -0.0093     | +0.0010     | 58%         |
 
 
@@ -801,7 +801,7 @@ Structured heterogeneity: the fit moves toward a length-weighted value
 **Single-realisation reading (one noise draw).** The structural residual stays small (0.0063, so the
 fit remains *precise*: RMSE 0.0968 ≈ the noise floor), the length-weighted proxy diverges from the
 arithmetic mean (old −1.2404 vs −1.000), and under the primary rule the fitted coefficient moves off
-the arithmetic mean in that direction by 60% (old), 146% (average, i.e. past the proxy) and 45% (new)
+the arithmetic mean in that direction by 60% (old), 147% (average, i.e. past the proxy) and 45% (new)
 of the arithmetic → proxy gap. Two things are worth noting about the comparison with the comparator
 column. The formal shift for old is **more than twice as large** (−0.1444 against −0.0666), so the
 informal score understates the structural effect just as it understates sensor bias (Step 8). And the
@@ -842,7 +842,7 @@ means the fit sits on the arithmetic mean, 1 on the length-weighted value.
 **Finding, and it is stronger than the single draw suggested — under the primary rule.** The median
 shift fraction is **0.74–1.26** at every correlation level and in every zone: the fitted coefficient
 tracks the length-weighted proxy approximately fully, not partially. The single-realisation
-60% / 146% / 45% sits inside these intervals, so it was a noisy draw of a quantity whose median is
+60% / 147% / 45% sits inside these intervals, so it was a noisy draw of a quantity whose median is
 near 1.
 
 **The comparator does not reproduce this, and the difference is a factor of two for `old`.** Under
