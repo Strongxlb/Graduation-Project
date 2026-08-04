@@ -1106,8 +1106,11 @@ This delivers Priority-2 #2 (a-priori identifiability) and links to #1 (sensor b
 > could substantially weaken this ideal identifiability, particularly for the average and new
 > coefficients, while the old coefficient remained comparatively robust.
 
-**What GLUE is (and is not).** The baseline GLUE is a *conservative, method-dependent behavioural
-envelope* — kept for behavioural uncertainty and risk propagation — but it is **not** a calibrated
+**What GLUE is (and is not).** The informal GLUE ensemble is a *conservative, method-dependent
+behavioural envelope*, retained throughout this log as a **comparator** — the contrast with the
+formal rule is itself a result. It is **not** the vehicle for risk propagation: every headline risk
+and scenario number comes from the formal censored likelihood (Steps 10 and 12), and where GLUE
+appears there it is reported alongside as the comparator. Nor is it a calibrated
 representation of all real-world uncertainty sources (it omits k_b uncertainty, monitor offsets,
 AR(1) covariance and censoring). Its breadth comes from the informal likelihood + threshold + prior
 
@@ -1851,11 +1854,12 @@ Findings:
 ## Step 11 — leave-one-monitor-out (LOO) predictive validation
 
 The draft calibrated and evaluated on the same six monitors, with no out-of-sample check. LOO
-cross-validation fills that gap: hold out one monitor, calibrate GLUE on the other five, then
-(a) check the three k_w stay stable and (b) *predict* the held-out sensor and measure the
+cross-validation fills that gap: hold out one monitor, re-weight the cached ensemble on the other
+five, then (a) check the three k_w stay stable and (b) *predict* the held-out sensor and measure the
 out-of-sample error and predictive-band coverage (`step11_loo.py`; cache reused, 30 noise
-realisations, σ-scaled threshold for 5 monitors). Full-6 reference: old −1.041 / avg −0.119 /
-new −0.052.
+realisations). Both weightings are run; the **formal censored likelihood is the primary** and the
+informal GLUE score (σ-scaled threshold for 5 monitors) is the comparator. Full-6 reference:
+formal old −1.0405 / avg −0.1028 / new −0.0509; informal old −1.0382 / avg −0.1171 / new −0.0516.
 
 ```
 held-out pred RMSE  = √[ mean_t (pred_mean_m(t) − obs_m(t))² ]     compared with the noise floor σ = 0.1
@@ -1863,6 +1867,19 @@ held-out pred RMSE  = √[ mean_t (pred_mean_m(t) − obs_m(t))² ]     compared
 coverage            = fraction of held-out hours inside the 90% band
 ```
 
+
+**Primary — formal censored likelihood:**
+
+| held-out (zone) | k_old      | k_avg  | k_new  | pred RMSE @m | 90% coverage |
+| --------------- | ---------- | ------ | ------ | ------------ | ------------ |
+| 107 (new)       | -1.038     | -0.104 | -0.050 | 0.098        | 0.92         |
+| 113 (new)       | -1.031     | -0.098 | -0.053 | 0.103        | 0.90         |
+| **15 (old)**    | **-1.086** | -0.102 | -0.050 | 0.094        | 0.94         |
+| 145 (old)       | -1.060     | -0.102 | -0.051 | 0.092        | 0.94         |
+| 209 (average)   | -1.040     | -0.102 | -0.050 | 0.099        | 0.91         |
+| 231 (average)   | -1.045     | -0.106 | -0.051 | 0.099        | 0.92         |
+
+**Comparator — informal GLUE:**
 
 | held-out (zone) | k_old      | k_avg  | k_new  | pred RMSE @m | 90% coverage |
 | --------------- | ---------- | ------ | ------ | ------------ | ------------ |
@@ -1887,11 +1904,16 @@ Findings:
 2. **Uncertainty is well-calibrated.** The 90 % predictive band (parameter + observation-noise
   variance) covers 92–94 % of held-out hours — close to the nominal 90 %, slightly conservative.
    So the reported uncertainty is trustworthy out-of-sample, not just in-sample.
-3. **Parameter stability confirms where the information lives.** k_avg/k_new are unchanged by dropping
-  any monitor (they are prior-dominated). k_old moves perceptibly **only when an old-zone monitor is
-   removed** (−1.041 → −0.986 without node 15; → −1.010 without node 145), and is unaffected by
-   dropping new/avg monitors — exactly matching Fisher/profile, which locate old's information at
-   monitors 15/145. Even then old stays within ~0.05 of the full-6 value.
+3. **Parameter stability confirms where the information lives — but the two weightings disagree on
+   the sign, and the primary is the one to quote.** Under both rules `k_old` moves perceptibly **only
+   when an old-zone monitor is removed** and barely at all when a new/avg monitor is dropped, which
+   is exactly what Fisher and the profile predict: old's information sits at monitors 15/145. The
+   *direction* differs, though. Under the **formal primary** dropping node 15 moves `k_old` from
+   −1.0405 to **−1.086** and node 145 to −1.060 — i.e. *stronger* decay, away from the truth −1.0.
+   Under the informal comparator the same drop gives **−0.985** and −1.025 — *weaker* decay, toward
+   the truth. The magnitude is similar (~0.05) but the sign is opposite, so a sentence like "removing
+   node 15 pulls old toward −0.99" is only true of the comparator. `k_avg` and `k_new` are stable
+   under both, as prior-dominated coefficients should be.
 4. **But this is the easy case, and on its own it does not support the claim it was asked for.**
   Every held-out monitor has a partner in the same zone, so the zone stays observed. Two harder
    tests were added.
@@ -1998,16 +2020,22 @@ parameter identification are separately valid claims here, and only the first of
 ## Step 12 — operational temperature / ageing scenario projection (WSP application)
 
 **Role.** After calibration (Steps 1–9), baseline risk metrics (Step 10) and LOO validation
-(Step 11), this step answers the operational question the supervisor posed: *given the GLUE
-behavioural ensemble, what happens to network-wide low-chlorine risk under warm-season and
+(Step 11), this step answers the operational question the supervisor posed: *given the calibrated
+ensemble, what happens to network-wide low-chlorine risk under warm-season and
 heatwave conditions with an ageing-reactivity stress, and does raising the source dose
-restore the baseline position?*
+restore the baseline position?* The supervisor phrased it in terms of the GLUE ensemble, because
+that is what the draft had; the ensemble propagated here is weighted by the **formal censored
+likelihood**, so the word GLUE is not used for it below.
 
 This is **not** a re-run of the enclosed homogeneous-`k_w` notebook. The scenario *method*
 (Arrhenius scaling → ensemble propagation → likelihood×consequence → risk register → dosing
-evaluation) is transplanted onto **this** project's six-monitor, three-zone GLUE ensemble
-(`k_b = −0.5` fixed; formal censored weights, 2196/8192 draws retained, ESS 157). The supervisor's
-numbers are not comparable with these and must never be quoted as results of this study.
+evaluation) is transplanted onto **this** project's six-monitor, three-zone **formally weighted**
+ensemble (`k_b = −0.5` fixed; formal censored weights, ESS 157). Of the 8192 draws, 2196 are carried
+forward: those whose weight exceeds `1e-6` of the maximum. That is a **numerical truncation to keep
+the scenario runs affordable, not a behavioural threshold** — the formal likelihood has no
+acceptance cut-off, and the discarded draws carry a combined weight far below the resolution of any
+number reported here. The supervisor's figures are not comparable with these and must never be
+quoted as results of this study.
 
 ### 12.1 Two probability definitions — keep them distinct
 
