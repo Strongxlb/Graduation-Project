@@ -2164,8 +2164,10 @@ evaluation) is transplanted onto **this** project's six-monitor, three-zone **fo
 ensemble (`k_b = −0.5` fixed; formal censored weights, ESS 157). Of the 8192 draws, 2196 are carried
 forward: those whose weight exceeds `1e-6` of the maximum. That is a **numerical truncation to keep
 the scenario runs affordable, not a behavioural threshold** — the formal likelihood has no
-acceptance cut-off, and the discarded draws carry a combined weight far below the resolution of any
-number reported here. The supervisor's figures are not comparable with these and must never be
+acceptance cut-off. The cost is now recorded rather than asserted: the 5996 discarded draws carry a
+combined weight of **3.79 × 10⁻⁶**, so the retained ensemble holds 0.9999962 of the total, orders of
+magnitude below the resolution of any number reported here (`discarded_weight_mass` in the
+artifact). The supervisor's figures are not comparable with these and must never be
 quoted as results of this study.
 
 ### 12.1 Two probability definitions — keep them distinct

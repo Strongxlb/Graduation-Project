@@ -661,6 +661,14 @@ report = {
                    "posterior ensemble, weighted by the primary formal censored likelihood",
     "informal_threshold_reference_only": B.RMSE_THR,
     "n_retained_draws": int(n_beh),
+    "n_total_draws": int(len(RMSE)),
+    "weight_floor_relative": WEIGHT_FLOOR,
+    # The point of a numerical truncation is that its cost can be checked, so the discarded mass
+    # belongs in the artifact and not only on stdout: a reader has to be able to see that dropping
+    # 5996 of 8192 draws cost a fraction of the total weight far below the resolution of any number
+    # reported here, without re-running the step.
+    "retained_weight_mass": float(1.0 - w_mass_dropped),
+    "discarded_weight_mass": w_mass_dropped,
     "retention_rule": "draws whose formal censored relative weight exceeds WEIGHT_FLOOR; this is a "
                       "numerical truncation of a likelihood, NOT a behavioural acceptance threshold",
     "C_CRIT": C_CRIT,
