@@ -1375,18 +1375,39 @@ Findings:
 3. **The ordering across zones matches Fisher Case B.** Marginalising `k_b` inflates the CRLB by
    1.2× for `old` but 1.8× for `average` and `new` (Step 7), and it is `average`/`new` that move
    most here. The weakly-informed coefficients are the ones that absorb a bulk-decay error.
-4. **The full-network risk ranking survives; the exact hot-spot set does not.** Spearman over all
-   92 junctions stays high (0.976 at −0.4, 0.933 at −0.6), so the broad spatial pattern is robust.
-   But the **top-6 Jaccard falls to 0.50 at both ±20%** — two of the six hot-spots are replaced
-   (at −0.4 the set becomes `131, 15, 143, 141, 139, 153`; at −0.6 `131, 243, 20, 141, 127, 129`,
-   against `131, 141, 129, 127, 15, 143` at the true k_b). The informal comparator gives the same
-   0.50, so this is a property of the perturbation and not of the weighting.
-5. **What to write.** `k_b` misspecification of ±20% substantially shifts the average/new
-   coefficients and **materially changes exact top-k hot-spot membership**, while leaving the
-   full-network risk ordering broadly correlated. It must **not** be reported as "the risk product is
-   insensitive to k_b" — that was an artefact of reading the informal table and of ranking on a
-   single seed. This closes Priority-2 #5 and gives Fisher Case B its empirical counterpart, as
-   Step 8 does for Case C.
+4. **The broad spatial pattern survives; the operational shortlist does not.** Spearman over all
+   92 junctions stays high (0.976 at −0.4, 0.933 at −0.6). But the **top-6 Jaccard falls to 0.50 at
+   both ±20%**: solving `x/(12−x) = 0.5` gives `x = 4`, so **four of the six reference hot-spots are
+   retained and two are replaced** (at −0.4 the set becomes `131, 15, 143, 141, 139, 153`; at −0.6
+   `131, 243, 20, 141, 127, 129`, against `131, 141, 129, 127, 15, 143` at the true `k_b`). Jaccard
+   compares set **membership**, not the order within the set, so this is a statement about who is on
+   the shortlist and not about who is first on it. The two indices are not in conflict: Spearman is
+   dominated by the 86 low- and mid-risk junctions whose relative order barely moves, while the
+   top-6 changes as soon as a few nodes swap across the 6th/7th boundary.
+5. **The sensitivity is present under both weightings, so it is not a weighting artefact.** The
+   informal comparator gives the *same* 0.50 at both ±20%. What the formal rule changes is the
+   **parameter** displacement — 1.4–1.6 SD against 0.28–0.40 SD — not the hot-spot conclusion. This
+   must not be presented as another case of the informal score reversing a result; it is a case of
+   the informal score understating a magnitude.
+6. **Why the earlier "ranking robust" claim was wrong — and it was not mainly the weighting.** The
+   superseded version of this section asserted "Top nodes (131, 243, 141, …) are unchanged at every
+   k_b" directly beneath its own table, which listed `131, 141, 139` / `131, 129, 141` /
+   `131, 243, 20` for the three `k_b` values. Those three sets are visibly different, and the quoted
+   node list matches none of the rows. **The primary defect was a summary sentence that did not
+   follow from the table above it**; the informal weighting and the single-seed ranking made it
+   easier to miss, but they are not what made it false.
+7. **What to write.** `k_b` misspecification of ±20% substantially shifts the average/new
+   coefficients and **changes which nodes occupy the top-k operational shortlist**, while leaving the
+   full-network risk ordering broadly rank-correlated. A high whole-network Spearman must therefore
+   **not** be quoted as evidence that the actionable hot-spot list is invariant. This closes
+   Priority-2 #5 and gives Fisher Case B its empirical counterpart, as Step 8 does for Case C.
+8. **Open — is the instability at the boundary or in the core?** `6` is a chosen cut-off. Whether the
+   two replacements are nodes sitting close to the 6th/7th risk boundary (a cut-off artefact, with a
+   stable high-risk core) or a genuine reshuffle of the leading nodes is **not** established here:
+   this step stores only the top-6 set, not per-node rank changes or the risk gaps around rank 6.
+   Reporting top-5/10/15 Jaccard, absolute rank changes and the deficit spacing near the boundary
+   would settle it, and that has not been run. Until it is, the claim stands at "the shortlist is
+   sensitive", with no assertion about where within the shortlist.
 
 ---
 

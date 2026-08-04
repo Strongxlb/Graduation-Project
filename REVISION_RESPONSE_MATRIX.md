@@ -155,7 +155,8 @@ long-form record and must still be read.
 | **Artifact** | `step8b_kb_sensitivity.json`, `step7_fisher.json` |
 | **Status** | **closed, stronger** — and the conclusion is the opposite of the one the earlier response recorded |
 | **What changed beyond the comment** | The single-seed gap is closed: 30 realisations, formal weighting, median risk field. Under the formal likelihood ±20% `k_b` moves `average` by 1.41–1.53 posterior SD and `new` by 1.49–1.58 SD, against 0.56–0.66 SD for `old` — the *weakly informed* coefficients absorb the bulk-decay error, exactly the ordering Fisher Case B predicts. The informal score puts the same shifts at 0.11–0.40 SD, a four- to fivefold understatement, which is why the earlier table read as a null result. |
-| **The risk conclusion is reversed and must be rewritten in the thesis** | The earlier response said the risk product was insensitive to `k_b`. It is not, at the level that matters operationally: the **full-network** ranking stays broadly correlated (Spearman 0.976 at −0.4, 0.933 at −0.6), but the **top-6 hot-spot membership loses two of six at both ±20%** (Jaccard 0.50 under *both* weightings, so this is the perturbation and not the score). The defensible sentence is: *`k_b` misspecification of ±20% substantially shifts the average and new coefficients and materially changes exact top-k hot-spot membership, while leaving the full-network risk ordering broadly correlated.* |
+| **The risk conclusion is reversed and must be rewritten in the thesis** | The earlier response said the risk product was insensitive to `k_b`. It is not, at the decision scale that matters: the **full-network** ranking stays broadly rank-correlated (Spearman 0.976 at −0.4, 0.933 at −0.6), but the **top-6 set retains only four of its six reference hot-spots at both ±20%** (Jaccard 0.50; Jaccard compares membership, not order within the set). The defensible sentence is: *the broad network-wide risk pattern remained strongly rank-correlated, but the exact high-priority shortlist was sensitive to bulk-decay misspecification.* |
+| **Attribution — do not over-claim this one** | The hot-spot sensitivity appears under **both** weightings: the informal comparator also gives Jaccard 0.50 at both ±20%. So this is **not** a fourth case of the informal score reversing a conclusion. What the formal rule changes is the *parameter* displacement (1.4–1.6 SD against 0.28–0.40 SD), a magnitude, not the risk verdict. The earlier "ranking robust" statement was primarily a **reporting inconsistency**: it asserted "Top nodes are unchanged at every k_b" directly beneath a table listing `131, 141, 139` / `131, 129, 141` / `131, 243, 20`, three visibly different sets, with a quoted node list matching none of them. The weighting and the single seed made it easy to miss; they are not what made it false. |
 | **Remaining limitation** | `k_b` is still *fixed* at each of three values rather than estimated jointly with the three `k_w`; a four-parameter ensemble would replace this sensitivity sweep with a marginal posterior. Only ±20% was tested. |
 
 ### #6 Held-out validation
@@ -245,15 +246,20 @@ Five things in this response need a decision rather than just reading:
    dissertation's identifiability narrative has to be rewritten around that distinction, and it
    becomes a stronger contribution: a quantified demonstration of the Stedinger / Mantovan–Todini
    critique on a controlled synthetic case.
-2. **The informal score reverses conclusions in four separate places**, so it cannot be left as the
+2. **The informal score reverses conclusions in three separate places**, so it cannot be left as the
    analysis of record anywhere: it hides the structural bias in 3.3, makes the threshold look like
-   the binding choice in 3.2, inverts the curvature of the sensor-bias response in #1, and
-   understates the `k_b` sensitivity of #5 four- to fivefold. In each case the formal likelihood
-   recovers the effect the review expected, or a stronger version of it.
-3. **One published conclusion is now reversed, not merely refined.** The earlier response said the
-   risk product was insensitive to `k_b` ±20%. Under the formal weighting over 30 realisations the
-   full-network ordering is indeed robust, but **two of the six hot-spots change identity at both
-   ±20%**. Anywhere the draft says the risk map is insensitive to `k_b`, that sentence has to go.
+   the binding choice in 3.2, and inverts the curvature of the sensor-bias response in #1. In each
+   case the formal likelihood recovers the effect the review expected, or a stronger version of it.
+   A *fourth* effect is a magnitude and not a reversal: it understates the `k_b`-induced parameter
+   displacement of #5 four- to fivefold, while both weightings agree on the risk verdict.
+3. **One published conclusion is now reversed, not merely refined — and its cause is not what it
+   looks like.** The earlier response said the risk product was insensitive to `k_b` ±20%. Over 30
+   realisations the full-network ordering is indeed robust, but the top-6 set **retains only four of
+   its six hot-spots at both ±20%**, under *both* weightings. The defect was therefore a **reporting
+   inconsistency** — a summary sentence contradicting the table printed directly above it — not a
+   weighting-induced reversal. Anywhere the draft says the risk map is insensitive to `k_b`, that
+   sentence has to go; and the general lesson is that a high whole-network rank correlation is not
+   evidence that the actionable shortlist is invariant.
 3. **The warm-up correction is not cosmetic.** Absolute severity numbers moved ~10% and the
    top-risk node list changed, so any figure carried over from the draft must be re-checked against
    the current artifacts rather than trusted.
