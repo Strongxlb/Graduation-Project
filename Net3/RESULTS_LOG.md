@@ -1983,8 +1983,19 @@ Findings:
    −1.0405 to **−1.086** and node 145 to −1.060 — i.e. *stronger* decay, away from the truth −1.0.
    Under the informal comparator the same drop gives **−0.985** and −1.025 — *weaker* decay, toward
    the truth. The magnitude is similar (~0.05) but the sign is opposite, so a sentence like "removing
-   node 15 pulls old toward −0.99" is only true of the comparator. `k_avg` and `k_new` are stable
-   under both, as prior-dominated coefficients should be.
+   node 15 pulls old toward −0.99" is only true of the comparator.
+
+   **`k_avg` and `k_new` are also stable under both rules — but for different reasons, and the
+   formal one must not be described as prior domination.** Under the informal comparator they are
+   genuinely prior-dominated: they retain 92% and 88% of the prior width (Step 3), so there is little
+   for a dropped monitor to change. Under the **formal primary they are informed** — 30.7% and 28.3%
+   of the prior width retained (Step 1), and their ensemble SD sits within a few percent of the
+   Case-A CRLB (Step 7). Their stability here has a different cause: **leave-one-monitor-out always
+   leaves the partner monitor of the same zone in the calibration set**, so no zone ever becomes
+   unobserved and each coefficient keeps its own source of information. Calling this prior
+   domination would contradict the central formal result of this project. What the loss of a zone's
+   information actually does is only visible in the harder leave-one-**zone**-out experiment below,
+   where both of a zone's monitors are removed and the coefficient does return to its prior.
 4. **But this is the easy case, and on its own it does not support the claim it was asked for.**
   Every held-out monitor has a partner in the same zone, so the zone stays observed. Two harder
    tests were added.
