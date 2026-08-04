@@ -182,7 +182,9 @@ CLAIMS = [
     # --- sensor drift: the ratio that decides whether a drift needs its own analysis at all ---
     ("RESULTS_LOG.md", r"the ratio reaches\s+\*\*([0-9.]+)\*\*\s+at D = \+0\.10",
      "step8d_sensor_drift.json", "equivalence/231/+0.100/drift_over_const_mean", 1),
-    ("RESULTS_LOG.md", r"\| 15 \(old\) \| −0\.100 \| −([0-9.]+) \|",
+    # whitespace-tolerant: a markdown formatter pads table columns, and an anchor that depends on
+    # the exact spacing silently stops matching the moment the table is reflowed
+    ("RESULTS_LOG.md", r"\|\s*15 \(old\)\s*\|\s*−0\.100\s*\|\s*−([0-9.]+)\s*\|",
      "step8d_sensor_drift.json", "rows[0]/own_shift_over_sd", -1),
     # --- sensor accuracy: the answer that changed when the primary rule changed ---
     ("RESULTS_LOG.md", r"σ = 0\.10[^\n]{0,90}?retains\s+([0-9.]+)\s*/\s*[0-9.]+\s*/\s*[0-9.]+\s*% of the prior",
@@ -407,6 +409,14 @@ def check_manifest():
 
 
 def check_figure_freshness():
+    """A figure older than the artifact it plots is stale and must be regenerated.
+
+    Caveat worth knowing before acting on a failure here: this compares mtimes, and **git does not
+    preserve mtimes**. Checking out or merging a branch rewrites every file whose content differs and
+    leaves the byte-identical ones alone, so a JSON can end up newer than its figure without either
+    being stale. The remedy is still to re-run the step — never to `touch` the figure, which would
+    hide a real staleness the next time.
+    """
     problems = []
     for fig, src in FIGURE_SOURCE.items():
         fp, sp = os.path.join(FIGDIR, fig), os.path.join(CACHE, src)

@@ -13,12 +13,12 @@ Wall coefficients are reported in `m/day`; the bulk coefficient `k_b` in `day⁻
 and they are not interchangeable:
 
 - **formal censored Gaussian likelihood — PRIMARY.** Every headline parameter, risk and scenario
-  number uses it. It carries no behavioural threshold.
+number uses it. It carries no behavioural threshold.
 - **formal iid Gaussian likelihood** — the same thing with sensor-floor zeros treated as exact
-  measurements; used to isolate what the censoring correction is worth (Steps 9 and 7b).
+measurements; used to isolate what the censoring correction is worth (Steps 9 and 7b).
 - **informal GLUE score** `exp(−½(RMSE/σ)²)·1[RMSE<T]` — a **comparator**, retained because the
-  draft used it and because the contrast is itself a result. It is *not* a Gaussian likelihood: it
-  drops the factor `N = 294`, which makes it equivalent to assuming `σ_eff = σ√N = 1.71 mg/L`.
+draft used it and because the contrast is itself a result. It is *not* a Gaussian likelihood: it
+drops the factor `N = 294`, which makes it equivalent to assuming `σ_eff = σ√N = 1.71 mg/L`.
 
 Every artifact in `baseline_cache/` carries a `primary_weighting` (or `weighting`) field, and
 `validate_artifacts.py` fails if one does not, so no table in this log can be read under the wrong
@@ -50,6 +50,8 @@ to the Gaussian standard deviation σ, not to a 95% interval or a hard error bou
 
 ---
 
+
+
 ## Files and how to reproduce
 
 Every number in this log comes from a script, but it is transcribed here by hand, so it can drift
@@ -65,14 +67,14 @@ cd Net3 && python provenance.py --check && python validate_artifacts.py
 check that cannot fail is worse than no check at all. The validator establishes:
 
 - a **registered claim** equals a named value at a named JSON path. This is the only check with real
-  teeth, and it fails both when the number moves *and* when the sentence is reworded so that the
-  anchor disappears — the failure mode that previously let a whole stale table survive;
+teeth, and it fails both when the number moves *and* when the sentence is reworded so that the
+anchor disappears — the failure mode that previously let a whole stale table survive;
 - every result artifact declares its weighting;
 - no number in the log is a near-miss of a JSON value (the signature of a stale transcription), with
-  table cells held to their own section's artifact from three decimals up;
+table cells held to their own section's artifact from three decimals up;
 - no forbidden phrasing survives — superseded configurations (pre-Sobol draw counts, the draft
-  warm-up length), labels naming the wrong inference rule, and over-claims such as treating a
-  single-run SD–CRLB match as frequentist efficiency, or calling the warm-up fully converged;
+warm-up length), labels naming the wrong inference rule, and over-claims such as treating a
+single-run SD–CRLB match as frequentist efficiency, or calling the warm-up fully converged;
 - the environment and the frozen `.inp` match the ones that produced the cache.
 
 It does **not** establish that the artifacts are correct, that an *unregistered* number in the prose
@@ -85,35 +87,37 @@ Numbers that describe a superseded run are exempt from the number check and must
 sentence ("an earlier run…", "the draft's earlier…").
 
 
-| file                             | purpose                                                                                         | writes                                                                |
-| -------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `wq_common.py`                   | frozen baseline config + WNTR/EPANET helpers (monitors, zone assignment, seeds, priors, timing) | — (imported by all step scripts)                                      |
-| `step0_warmup_convergence.py`    | is the warm-up long enough? successive-24 h-cycle convergence test with pre-declared criteria    | `figures/step0_warmup_convergence.png`, `step0_warmup_convergence.json` |
-| `step1_freeze_baseline.py`       | synthetic truth + noisy observations + 8192-draw Sobol library; all three weightings; cache every prediction | `baseline_cache/baseline.npz`, `baseline_cache/baseline_meta.json`    |
-| `step3_threshold_sensitivity.py` | behavioural-threshold sweep of the informal comparator, from the cache (no EPANET)               | `baseline_cache/step3_threshold.json`                                 |
-| `step4_displaced_prior.py`       | displaced prior, first look (informal, single realisation; superseded by 4d)                     | `baseline_cache/step4_displaced_prior.json`                           |
-| `step4b_sensitivity_curves.py`   | single-parameter RMSE curves (why old is one-sided); no weighting applied                        | `figures/step4b_sensitivity_curves.png`, `step4b_sensitivity.json`    |
-| `step4d_displaced_robust.py`     | robust displaced prior (formal primary + informal at 2 thresholds, 30 noise, both directions)    | `figures/step4d_displaced_robust.png`, `step4d_displaced_robust.json`, `step4d_preds_*.npy` |
-| `step5_structural_error.py`      | structural error, ±20% pipe-level jitter (informal, single field; superseded by 5c/5d)           | `figures/step5_structural_error.png`, `step5_structural_error.json`   |
-| `step5c_jitter_sweep.py`         | structural error, jitter sweep ±20/35/50% + 25-field ensemble (formal primary)                   | `figures/step5c_jitter_sweep.png`, `step5c_jitter_sweep.json`         |
-| `step5d_structured.py`           | structural error, length-correlated within-zone (formal primary + informal comparator)           | `figures/step5d_structured.png`, `step5d_structured.json`             |
-| `step6_noise_sensitivity.py`     | sensor-accuracy sweep σ=0.02/0.05/0.10/0.15 (formal primary + informal comparator)               | `figures/step6_noise_sensitivity.png`, `step6_noise_sensitivity.json` |
-| `step7_fisher.py`                | Fisher/CRLB a-priori identifiability (k_w, +k_b, +sensor offsets); scale-dependent FD steps       | `figures/step7_fisher.png`, `step7_fisher.json` |
-| `step7b_profile.py`              | profile likelihood: CONTINUOUS 95% intervals under censored (primary) and iid likelihoods         | `figures/step7b_profile.png`, `step7b_profile.json`, `step7b_rmse_grid.npy` |
-| `step7c_ar1.py`                  | AR(1) covariance Fisher/CRLB (per-coefficient widening) + ρ sensitivity sweep                     | `baseline_cache/step7c_ar1.json` |
-| `step7c_profile_ar1.py`          | AR(1) profile likelihood (rebuilds 21³ residual grid)                                            | `baseline_cache/step7c_resid_grid.npy`, `step7c_profile_ar1.json` |
-| `step8_sensor_bias.py`           | systematic sensor bias at node 15, two-sided (formal primary; informal curvature contrast)        | `figures/step8_sensor_bias.png`, `step8_sensor_bias.json` |
-| `step8b_kb_sensitivity.py`       | calibration at k_b ± 20% — bulk–wall compensation (formal primary + comparator; Priority-2 #5)    | `figures/step8b_kb_sensitivity.png`, `step8b_kb_sensitivity.json`, `step8b_preds_kb*.npy` |
-| `step8c_bias_bynode.py`          | bias-location sweep across all six monitors, both signs (formal primary + comparator)             | `baseline_cache/step8c_bias_bynode.json` |
-| `step8d_sensor_drift.py`         | sensor DRIFT (linear ramp) against mean- and end-equivalent constant-bias controls                | `figures/step8d_sensor_drift.png`, `step8d_sensor_drift.json` |
-| `step9_zeroclip.py`              | zero-floor censoring (L=0): formal censored vs formal iid (naive exact zero)                       | `figures/step9_zeroclip.png`, `step9_zeroclip.json` |
-| `step10_risk_metrics.py`         | risk duration/depth (trapezoid, 48 h), water-age corroboration, report-step sensitivity           | `figures/step10_risk_metrics.png`, `step10_risk_metrics.json` |
-| `step11_loo.py`                  | held-out validation A–D: monitor, zone, unmonitored junctions, heterogeneous truth                | `figures/step11_loo.png`, `step11_loo.json` |
-| `step12_scenarios.py`            | temperature/ageing scenario projection of the formal ensemble + dosing + risk register            | `figures/step12_*.png`, `step12_scenarios.json`, `step12_risk_register.csv` |
-| `step13_known_answer.py`         | known-answer test: single pipe with an analytic first-order solution (Priority-2 #7)             | `baseline_cache/step13_known_answer.json` |
-| `step14_repeated_noise.py`       | repeated-noise calibration: bias, estimator SD vs CRLB, interval coverage over 100 realisations   | `figures/step14_repeated_noise.png`, `step14_repeated_noise.json` |
-| `provenance.py`                  | records what produced the cache: config hash, frozen `.inp` hash, `wq_common.py` and step-script hashes, git tree hash, library versions | `baseline_cache/cache_manifest.json` |
-| `validate_artifacts.py`          | registered claims, weighting declarations, number drift, forbidden wording; exits non-zero on failure | — (report on stdout) |
+| file                             | purpose                                                                                                                                  | writes                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `wq_common.py`                   | frozen baseline config + WNTR/EPANET helpers (monitors, zone assignment, seeds, priors, timing)                                          | — (imported by all step scripts)                                                            |
+| `step0_warmup_convergence.py`    | is the warm-up long enough? successive-24 h-cycle convergence test with pre-declared criteria                                            | `figures/step0_warmup_convergence.png`, `step0_warmup_convergence.json`                     |
+| `step1_freeze_baseline.py`       | synthetic truth + noisy observations + 8192-draw Sobol library; all three weightings; cache every prediction                             | `baseline_cache/baseline.npz`, `baseline_cache/baseline_meta.json`                          |
+| `step3_threshold_sensitivity.py` | behavioural-threshold sweep of the informal comparator, from the cache (no EPANET)                                                       | `baseline_cache/step3_threshold.json`                                                       |
+| `step4_displaced_prior.py`       | displaced prior, first look (informal, single realisation; superseded by 4d)                                                             | `baseline_cache/step4_displaced_prior.json`                                                 |
+| `step4b_sensitivity_curves.py`   | single-parameter RMSE curves (why old is one-sided); no weighting applied                                                                | `figures/step4b_sensitivity_curves.png`, `step4b_sensitivity.json`                          |
+| `step4d_displaced_robust.py`     | robust displaced prior (formal primary + informal at 2 thresholds, 30 noise, both directions)                                            | `figures/step4d_displaced_robust.png`, `step4d_displaced_robust.json`, `step4d_preds_*.npy` |
+| `step5_structural_error.py`      | structural error, ±20% pipe-level jitter (informal, single field; superseded by 5c/5d)                                                   | `figures/step5_structural_error.png`, `step5_structural_error.json`                         |
+| `step5c_jitter_sweep.py`         | structural error, jitter sweep ±20/35/50% + 25-field ensemble (formal primary)                                                           | `figures/step5c_jitter_sweep.png`, `step5c_jitter_sweep.json`                               |
+| `step5d_structured.py`           | structural error, length-correlated within-zone (formal primary + informal comparator)                                                   | `figures/step5d_structured.png`, `step5d_structured.json`                                   |
+| `step6_noise_sensitivity.py`     | sensor-accuracy sweep σ=0.02/0.05/0.10/0.15 (formal primary + informal comparator)                                                       | `figures/step6_noise_sensitivity.png`, `step6_noise_sensitivity.json`                       |
+| `step7_fisher.py`                | Fisher/CRLB a-priori identifiability (k_w, +k_b, +sensor offsets); scale-dependent FD steps                                              | `figures/step7_fisher.png`, `step7_fisher.json`                                             |
+| `step7b_profile.py`              | profile likelihood: CONTINUOUS 95% intervals under censored (primary) and iid likelihoods                                                | `figures/step7b_profile.png`, `step7b_profile.json`, `step7b_rmse_grid.npy`                 |
+| `step7c_ar1.py`                  | AR(1) covariance Fisher/CRLB (per-coefficient widening) + ρ sensitivity sweep                                                            | `baseline_cache/step7c_ar1.json`                                                            |
+| `step7c_profile_ar1.py`          | AR(1) profile likelihood (rebuilds 21³ residual grid)                                                                                    | `baseline_cache/step7c_resid_grid.npy`, `step7c_profile_ar1.json`                           |
+| `step8_sensor_bias.py`           | systematic sensor bias at node 15, two-sided (formal primary; informal curvature contrast)                                               | `figures/step8_sensor_bias.png`, `step8_sensor_bias.json`                                   |
+| `step8b_kb_sensitivity.py`       | calibration at k_b ± 20% — bulk–wall compensation (formal primary + comparator; Priority-2 #5)                                           | `figures/step8b_kb_sensitivity.png`, `step8b_kb_sensitivity.json`, `step8b_preds_kb*.npy`   |
+| `step8c_bias_bynode.py`          | bias-location sweep across all six monitors, both signs (formal primary + comparator)                                                    | `baseline_cache/step8c_bias_bynode.json`                                                    |
+| `step8d_sensor_drift.py`         | sensor DRIFT (linear ramp) against mean- and end-equivalent constant-bias controls                                                       | `figures/step8d_sensor_drift.png`, `step8d_sensor_drift.json`                               |
+| `step9_zeroclip.py`              | zero-floor censoring (L=0): formal censored vs formal iid (naive exact zero)                                                             | `figures/step9_zeroclip.png`, `step9_zeroclip.json`                                         |
+| `step10_risk_metrics.py`         | risk duration/depth (trapezoid, 48 h), water-age corroboration, report-step sensitivity                                                  | `figures/step10_risk_metrics.png`, `step10_risk_metrics.json`                               |
+| `step11_loo.py`                  | held-out validation A–D: monitor, zone, unmonitored junctions, heterogeneous truth                                                       | `figures/step11_loo.png`, `step11_loo.json`                                                 |
+| `step12_scenarios.py`            | temperature/ageing scenario projection of the formal ensemble + dosing + risk register                                                   | `figures/step12_*.png`, `step12_scenarios.json`, `step12_risk_register.csv`                 |
+| `step13_known_answer.py`         | known-answer test: single pipe with an analytic first-order solution (Priority-2 #7)                                                     | `baseline_cache/step13_known_answer.json`                                                   |
+| `step14_repeated_noise.py`       | repeated-noise calibration: bias, estimator SD vs CRLB, interval coverage over 100 realisations                                          | `figures/step14_repeated_noise.png`, `step14_repeated_noise.json`                           |
+| `provenance.py`                  | records what produced the cache: config hash, frozen `.inp` hash, `wq_common.py` and step-script hashes, git tree hash, library versions | `baseline_cache/cache_manifest.json`                                                        |
+| `validate_artifacts.py`          | registered claims, weighting declarations, number drift, forbidden wording; exits non-zero on failure                                    | — (report on stdout)                                                                        |
+
+
 
 
 Run from the `Net3/` directory with the environment activated (no absolute interpreter paths, so the
@@ -155,6 +159,8 @@ libraries are git-ignored; rebuild them with the step that writes them. The smal
 
 ---
 
+
+
 ## Step 0 — how long must the warm-up be? (pre-declared convergence test)
 
 The draft discarded the first 24 h and assessed 24–72 h, but that value was never justified: the
@@ -179,9 +185,9 @@ horizon and successive 24 h cycles are differenced.
 
 - Units follow `X` (mg/L for chlorine, h for water age, m for tank level).
 - `Δ(k) → 0` means the field from hour `24k` onward is cyclostationary, so a warm-up of `24k` is
-  sufficient.
+sufficient.
 - Computed for the truth and for both corners of the prior box; the weak corner is the binding case
-  because the least reactive network forgets its initial condition most slowly.
+because the least reactive network forgets its initial condition most slowly.
 
 **Hard horizon limit — this bounds what can be claimed.** Pump 10 is driven by *absolute-time*
 controls (`IF SYSTEM TIME IS 01:00:00`, `25:00:00`, …) enumerated only to **159 h**, and the model
@@ -191,23 +197,25 @@ system, not a longer warm-up. The test therefore has 7 cycles and cannot certify
 
 **Result — worst value across the three parameter sets, per cycle pair:**
 
-| criterion | tolerance | 0–24 | 24–48 | 48–72 | 72–96 | 96–120 | 120–144 | earliest warm-up that satisfies it |
-|---|---|---|---|---|---|---|---|---|
-| tank level (m) | 0.05 | 0.8185 | 0.0496 | 0.0070 | 0.0009 | 0.0001 | 0.0001 | **24 h** (verified) |
-| monitor chlorine (mg/L) | 0.005 | 0.9209 | 0.0437 | 0.0234 | 0.0122 | 0.0064 | 0.0034 | **120 h** (verified) |
-| network p95 chlorine (mg/L) | 0.010 | 0.9511 | 0.1061 | 0.0396 | 0.0201 | 0.0103 | 0.0054 | **120 h** (verified) |
-| tank chlorine (mg/L) | 0.010 | 0.2457 | 0.0787 | 0.0416 | 0.0219 | 0.0115 | 0.0061 | **120 h** (verified) |
-| risk severity, rel. change in `E[A]` | 0.02 | 0.9023 | 0.6507 | 0.1196 | 0.2042 | 0.1056 | 0.0549 | not within 168 h; extrapolates to ≈168 h (**unverified**) |
-| water age p95 (h) | 1.0 | 23.999 | 21.676 | 19.043 | 16.692 | 14.630 | 12.815 | not within 168 h; extrapolates to ≈600 h (**unverified**) |
+
+| criterion                            | tolerance | 0–24   | 24–48  | 48–72  | 72–96  | 96–120 | 120–144 | earliest warm-up that satisfies it                        |
+| ------------------------------------ | --------- | ------ | ------ | ------ | ------ | ------ | ------- | --------------------------------------------------------- |
+| tank level (m)                       | 0.05      | 0.8185 | 0.0496 | 0.0070 | 0.0009 | 0.0001 | 0.0001  | **24 h** (verified)                                       |
+| monitor chlorine (mg/L)              | 0.005     | 0.9209 | 0.0437 | 0.0234 | 0.0122 | 0.0064 | 0.0034  | **120 h** (verified)                                      |
+| network p95 chlorine (mg/L)          | 0.010     | 0.9511 | 0.1061 | 0.0396 | 0.0201 | 0.0103 | 0.0054  | **120 h** (verified)                                      |
+| tank chlorine (mg/L)                 | 0.010     | 0.2457 | 0.0787 | 0.0416 | 0.0219 | 0.0115 | 0.0061  | **120 h** (verified)                                      |
+| risk severity, rel. change in `E[A]` | 0.02      | 0.9023 | 0.6507 | 0.1196 | 0.2042 | 0.1056 | 0.0549  | not within 168 h; extrapolates to ≈168 h (**unverified**) |
+| water age p95 (h)                    | 1.0       | 23.999 | 21.676 | 19.043 | 16.692 | 14.630 | 12.815  | not within 168 h; extrapolates to ≈600 h (**unverified**) |
+
 
 **Three findings, in order of consequence.**
 
 1. **The hydraulics settle almost immediately; the chemistry does not.** Tank levels are periodic to
-   0.0001 m after three cycles, so the driver is not the problem. Chlorine differences decay
+  0.0001 m after three cycles, so the driver is not the problem. Chlorine differences decay
    geometrically by roughly a factor of two per cycle and first meet all three concentration
    tolerances at a **120 h** warm-up — five times the baseline value.
 2. **The integrated risk severity has not converged even at the horizon.** Network-mean cumulative
-   deficit for the truth runs 0.9946 (start-up) → 0.1256 → 0.0714 → 0.0799 → 0.0901 → 0.0959
+  deficit for the truth runs 0.9946 (start-up) → 0.1256 → 0.0714 → 0.0799 → 0.0901 → 0.0959
    mg/L·h: it dips after the start-up transient and then climbs **monotonically**. Small
    concentration differences still move the integral, because the deficit integrates a
    threshold crossing. The relative change halves each cycle and would reach the 2% criterion at
@@ -216,7 +224,7 @@ system, not a longer warm-up. The test therefore has 7 cycles and cannot certify
    now with its cause identified: **the 24 h window sits on the descending limb of the transient,
    not on the plateau.**
 3. **Water age is horizon-dependent and cannot be converged in this model at all.** The p95
-   **water age** change is still **12.8 h between the last two cycles** available and decays by only
+  **water age** change is still **12.8 h between the last two cycles** available and decays by only
    ~12% per cycle; extrapolation puts the crossing near 600 h, far past the 168 h ceiling. So
    `mean_age_h` in Step 10 is a property of the chosen window, not an equilibrium water age. The
    water-age corroboration must be phrased as a rank association within a fixed window; the absolute
@@ -233,11 +241,11 @@ untouched.
 are not, so the honest formulation is bounded on both sides:
 
 - **Sayable:** *"A 120 h warm-up was selected because the chlorine concentration field first meets
-  the pre-declared cyclostationarity tolerances at the monitors, network-wide and in the tanks at
-  that point. It is a finite-horizon choice: with a 120 h warm-up the residual cycle-to-cycle drift in the integrated deficit is still 5.5%, and water age still 12.8 h between the last two cycles within the model's 168 h ceiling."*
+the pre-declared cyclostationarity tolerances at the monitors, network-wide and in the tanks at
+that point. It is a finite-horizon choice: with a 120 h warm-up the residual cycle-to-cycle drift in the integrated deficit is still 5.5%, and water age still 12.8 h between the last two cycles within the model's 168 h ceiling."*
 - **Not sayable:** that the model is fully cyclostationary after 120 h, or that water age has settled
-  to a horizon-independent equilibrium. Neither is true, and the second is not achievable in this
-  model at any warm-up available under the pump-control ceiling.
+to a horizon-independent equilibrium. Neither is true, and the second is not achievable in this
+model at any warm-up available under the pump-control ceiling.
 
 **Two routes were available and the cheaper one was taken deliberately.** The stronger route is to
 extend pump 10's absolute-time controls programmatically over 15–25 diurnal cycles, verify that the
@@ -250,6 +258,8 @@ carried as a stated limitation on the *severity* metrics (Steps 10 and 12) rathe
 
 ---
 
+
+
 ## Step 1 — the frozen baseline
 
 Config: monitors `107/113/15/145/209/231`; inlet 1.0, tank 0.5; **168 h simulation, 120 h warm-up**
@@ -258,14 +268,15 @@ Config: monitors `107/113/15/145/209/231`; inlet 1.0, tank 0.5; **168 h simulati
 **8192 = 2¹³ scrambled-Sobol prior draws**. Assessment window 48 h, so `N = 6 × 49 = 294`
 residuals, unchanged.
 
-This is no longer a reproduction of the draft. Three choices were changed deliberately, each with a
-reason recorded here rather than inherited:
+This is no longer a reproduction of the draft. Three choices were changed deliberately, each with a reason recorded here rather than inherited:
 
-| choice | draft | now | why |
-|---|---|---|---|
-| warm-up | 24 h | 120 h | Step 0: chlorine is not cyclostationary before then |
-| sampling | pseudo-random, 2¹¹ scale | 8192 scrambled Sobol | at the draft's sample size the formal likelihood had an effective sample size of only ~37 |
-| weighting | one informal score | three schemes side by side | the informal score is not a likelihood; see below |
+
+| choice    | draft                    | now                        | why                                                                                       |
+| --------- | ------------------------ | -------------------------- | ----------------------------------------------------------------------------------------- |
+| warm-up   | 24 h                     | 120 h                      | Step 0: chlorine is not cyclostationary before then                                       |
+| sampling  | pseudo-random, 2¹¹ scale | 8192 scrambled Sobol       | at the draft's sample size the formal likelihood had an effective sample size of only ~37 |
+| weighting | one informal score       | three schemes side by side | the informal score is not a likelihood; see below                                         |
+
 
 **Three weighting schemes, same data, same draws.** The formal censored Gaussian likelihood is the
 primary analysis; the formal iid one isolates the cost of treating a sensor-floor zero as an exact
@@ -281,20 +292,22 @@ informal GLUE    ℓ = −(1/2) (RMSE/σ)²                    · 1[RMSE < thres
 
 **Properties**:
 
-- The informal score is the formal iid one **divided by `N = 294`**. Equivalently it is a Gaussian
-  likelihood with `σ_eff = σ√N = 0.1 × 17.15 = 1.71 mg/L` — 17× the sensor noise and larger than the
-  1.0 mg/L inlet concentration. That is why it is nearly flat inside the behavioural set.
+- The informal score is the formal iid one **divided by** `N = 294`. Equivalently it is a Gaussian
+likelihood with `σ_eff = σ√N = 0.1 × 17.15 = 1.71 mg/L` — 17× the sensor noise and larger than the
+1.0 mg/L inlet concentration. That is why it is nearly flat inside the behavioural set.
 - The formal schemes carry **no threshold**; a hard cut-off belongs to the GLUE comparator, not to a
-  likelihood.
+likelihood.
 - 10 of the 294 window points are clipped at the sensor floor (43 of 1014 over the full record), so
-  the censored and iid schemes are not identical.
+the censored and iid schemes are not identical.
 
-| scheme | ESS | entropy (bits, of 13.00) | `k_w,old` | `k_w,avg` | `k_w,new` |
-|---|---|---|---|---|---|
-| formal censored (primary) | 157 | 7.97 | -0.9876 ± 0.0938 (25.0%) | -0.1091 ± 0.0142 (30.7%) | -0.0440 ± 0.0078 (28.3%) |
-| formal iid | 154 | 7.94 | -0.9708 ± 0.0920 (24.5%) | -0.1087 ± 0.0141 (30.6%) | -0.0441 ± 0.0078 (28.3%) |
-| informal GLUE, thr 0.107 | 4783 | 12.22 | -1.0115 ± 0.2668 (71.1%) | -0.1170 ± 0.0424 (91.8%) | -0.0492 ± 0.0242 (88.2%) |
-| informal GLUE, thr 0.120 (draft) | 7062 | 12.79 | -0.9431 ± 0.3220 (85.8%) | -0.1196 ± 0.0455 (98.4%) | -0.0529 ± 0.0269 (98.0%) |
+
+| scheme                           | ESS  | entropy (bits, of 13.00) | `k_w,old`                | `k_w,avg`                | `k_w,new`                |
+| -------------------------------- | ---- | ------------------------ | ------------------------ | ------------------------ | ------------------------ |
+| formal censored (primary)        | 157  | 7.97                     | -0.9876 ± 0.0938 (25.0%) | -0.1091 ± 0.0142 (30.7%) | -0.0440 ± 0.0078 (28.3%) |
+| formal iid                       | 154  | 7.94                     | -0.9708 ± 0.0920 (24.5%) | -0.1087 ± 0.0141 (30.6%) | -0.0441 ± 0.0078 (28.3%) |
+| informal GLUE, thr 0.107         | 4783 | 12.22                    | -1.0115 ± 0.2668 (71.1%) | -0.1170 ± 0.0424 (91.8%) | -0.0492 ± 0.0242 (88.2%) |
+| informal GLUE, thr 0.120 (draft) | 7062 | 12.79                    | -0.9431 ± 0.3220 (85.8%) | -0.1196 ± 0.0455 (98.4%) | -0.0529 ± 0.0269 (98.0%) |
+
 
 Bracketed figure is SD retained (= posterior SD / prior SD). The draft's configuration retained
 **85.8 / 98.4 / 98.0%** of the prior width for old / average / new; the formal censored retains 25.0 / 30.7 / 28.3 % of it on exactly the same observations. Nothing about the data
@@ -305,12 +318,14 @@ far it survives realistic error.
 **Sampling convergence.** Leading `2^k` subsets of a scrambled Sobol set are themselves balanced
 designs, so these four rows are exact sub-designs rather than ad-hoc thinning:
 
-| draws | ESS | `k_w,old` median | `k_w,avg` median | `k_w,new` median | max median drift |
-|---|---|---|---|---|---|
-| 1024 | 18.8 | -0.9744 | -0.1096 | -0.0444 | — |
-| 2048 | 39.3 | -0.9752 | -0.1097 | -0.0435 | 0.033 prior SD |
-| 4096 | 78.0 | -0.9787 | -0.1094 | -0.0437 | 0.009 prior SD |
-| 8192 | 156.7 | -0.9787 | -0.1090 | -0.0437 | 0.010 prior SD |
+
+| draws | ESS   | `k_w,old` median | `k_w,avg` median | `k_w,new` median | max median drift |
+| ----- | ----- | ---------------- | ---------------- | ---------------- | ---------------- |
+| 1024  | 18.8  | -0.9744          | -0.1096          | -0.0444          | —                |
+| 2048  | 39.3  | -0.9752          | -0.1097          | -0.0435          | 0.033 prior SD   |
+| 4096  | 78.0  | -0.9787          | -0.1094          | -0.0437          | 0.009 prior SD   |
+| 8192  | 156.7 | -0.9787          | -0.1090          | -0.0437          | 0.010 prior SD   |
+
 
 ESS is proportional to the number of draws (it stays at 1.9% of them), so prior sampling cannot be
 made efficient by brute force — but the **quantiles have converged** anyway: the medians move by
@@ -324,6 +339,8 @@ Cache `baseline.npz` holds all 8192 candidate predictions `C_all (8192 × 49 × 
 log-likelihoods, so every later step recomputes weights **without re-running EPANET**.
 
 ---
+
+
 
 ## Step 2 — prior vs behavioural identifiability (corrects the overclaim)
 
@@ -340,19 +357,18 @@ prior_SD = (b − a) / √12
 | average | [-0.2, -0.04]   | -0.120    | 0.046    | -0.10 | -0.1196 ± 0.0455 (98.4%)      | -0.1091 ± 0.0142 (30.7%)    |
 | new     | [-0.10, -0.005] | -0.0525   | 0.027    | -0.05 | -0.1196 → see note            | -0.0440 ± 0.0078 (28.3%)    |
 
-The informal column uses the draft's threshold 0.120 so that it reproduces the configuration the
-overclaim came from; `k_w,new` there is -0.0529 ± 0.0269 (98.0% retained).
 
-Interpretation, which has to be split by scheme because the two disagree about the *conclusion*, not
-just the digits:
+The informal column uses the draft's threshold 0.120 so that it reproduces the configuration the overclaim came from; `k_w,new` there is -0.0529 ± 0.0269 (98.0% retained).
+
+Interpretation, which has to be split by scheme because the two disagree about the *conclusion*, not just the digits:
 
 - **Under the informal GLUE score the original criticism stands.** All three distributions retain
-  86–98% of the prior width and the weighted means sit near the prior midpoints. Their apparent
-  agreement with the true values is a consequence of the prior ranges having been centred near
-  those values, not of the data.
+86–98% of the prior width and the weighted means sit near the prior midpoints. Their apparent
+agreement with the true values is a consequence of the prior ranges having been centred near
+those values, not of the data.
 - **Under the formal likelihood it does not.** The same observations contract all three
-  coefficients to 25–31% of the prior width. So "the data do not identify average and new" was
-  never a statement about the data; it was a statement about the score used to weight them.
+coefficients to 25–31% of the prior width. So "the data do not identify average and new" was
+never a statement about the data; it was a statement about the score used to weight them.
 
 Deleted overclaim (was in §4.4): *"The weighted mean of every group lies close to its true value."*
 The replacement claim must name the inference convention: under the informal GLUE score the means
@@ -360,6 +376,8 @@ are prior-dominated, under the formal likelihood all three are informed but stil
 ~0.7 posterior SD on this single noise realisation.
 
 ---
+
+
 
 ## Step 3 — behavioural-threshold sensitivity (no EPANET re-run)
 
@@ -390,12 +408,12 @@ Per-coefficient behavioural distribution — weighted `mean ± SD (m/day)` with 
 (= behavioural SD / prior SD; prior SD = 0.375 / 0.046 / 0.027 m/day for old / avg / new):
 
 
-| Threshold | k_w,old mean ± SD (retained) | k_w,avg mean ± SD (retained) | k_w,new mean ± SD (retained) |
-| --------- | ---------------------------- | ---------------------------- | ---------------------------- |
-| 0.107     | -1.0115 ± 0.2668 (71.1%)     | -0.1170 ± 0.0424 (91.8%)     | -0.0492 ± 0.0242 (88.2%)     |
-| 0.110     | -0.9956 ± 0.2844 (75.8%)     | -0.1174 ± 0.0437 (94.5%)     | -0.0512 ± 0.0254 (92.7%)     |
-| 0.120     | -0.9431 ± 0.3220 (85.8%)     | -0.1196 ± 0.0455 (98.4%)     | -0.0529 ± 0.0269 (98.0%)     |
-| *formal censored (no threshold)* | *-0.9876 ± 0.0938 (25.0%)* | *-0.1091 ± 0.0142 (30.7%)* | *-0.0440 ± 0.0078 (28.3%)* |
+| Threshold                        | k_w,old mean ± SD (retained) | k_w,avg mean ± SD (retained) | k_w,new mean ± SD (retained) |
+| -------------------------------- | ---------------------------- | ---------------------------- | ---------------------------- |
+| 0.107                            | -1.0115 ± 0.2668 (71.1%)     | -0.1170 ± 0.0424 (91.8%)     | -0.0492 ± 0.0242 (88.2%)     |
+| 0.110                            | -0.9956 ± 0.2844 (75.8%)     | -0.1174 ± 0.0437 (94.5%)     | -0.0512 ± 0.0254 (92.7%)     |
+| 0.120                            | -0.9431 ± 0.3220 (85.8%)     | -0.1196 ± 0.0455 (98.4%)     | -0.0529 ± 0.0269 (98.0%)     |
+| *formal censored (no threshold)* | *-0.9876 ± 0.0938 (25.0%)*   | *-0.1091 ± 0.0142 (30.7%)*   | *-0.0440 ± 0.0078 (28.3%)*   |
 
 
 As the threshold tightens (0.120 → 0.107):
@@ -419,17 +437,19 @@ moves, and those two are separated by less than the ensemble spread on either.
 Conclusions:
 
 - The draft's 0.12 threshold sits 4.85 sd(RMSE) above the noise floor, so a parameter set at the
-  truth passes with near-certainty — the filter only rejects grossly wrong sets.
+truth passes with near-certainty — the filter only rejects grossly wrong sets.
 - Tightening to a defensible ≈95% band (0.107) sharpens **old** and leaves **average/new** near the
-  prior. **This is a limit of the score, not of the monitoring array.** An earlier version of this
-  log drew the opposite conclusion from the same table, and that was the single most consequential
-  error in the draft: it turned an inefficiency of the weighting rule into a claimed property of the
-  sensor network. The formal row in the table above, the Case-A CRLB (Step 7) and the continuous
-  profile intervals (Step 7b) all show the array does inform average and new.
+prior. **This is a limit of the score, not of the monitoring array.** An earlier version of this
+log drew the opposite conclusion from the same table, and that was the single most consequential
+error in the draft: it turned an inefficiency of the weighting rule into a claimed property of the
+sensor network. The formal row in the table above, the Case-A CRLB (Step 7) and the continuous
+profile intervals (Step 7b) all show the array does inform average and new.
 - The operational risk ranking is robust to the threshold choice, which is a genuinely useful
-  finding and is unaffected by the correction above.
+finding and is unaffected by the correction above.
 
 ---
+
+
 
 ## Step 4 — displaced-prior experiment (PRELIMINARY, single noise realisation)
 
@@ -444,11 +464,11 @@ Question: do the observations pull the behavioural mean back toward the truth?
 behavioural 3359/8192 (41.0%), min RMSE 0.0972. Weighting: informal GLUE, as in the draft.
 
 
-| Group   | Orig mid | Displaced range (mid)     | True  | Beh. mean ± SD | SD retained | Gap to truth closed |
-| ------- | -------- | ------------------------- | ----- | -------------- | ----------- | ------------------- |
-| old     | -0.850   | [-2.025, -0.725] (-1.375) | -1.00 | -1.2185 ± 0.3287 | 87.6%     | 42%                 |
-| average | -0.120   | [-0.226, -0.066] (-0.146) | -0.10 | -0.1272 ± 0.0407 | 88.1%     | 41%                 |
-| new     | -0.0525  | [-0.125, -0.030] (-0.077) | -0.05 | -0.0556 ± 0.0175 | 63.9%     | 80%                 |
+| Group   | Orig mid | Displaced range (mid)     | True  | Beh. mean ± SD   | SD retained | Gap to truth closed |
+| ------- | -------- | ------------------------- | ----- | ---------------- | ----------- | ------------------- |
+| old     | -0.850   | [-2.025, -0.725] (-1.375) | -1.00 | -1.2185 ± 0.3287 | 87.6%       | 42%                 |
+| average | -0.120   | [-0.226, -0.066] (-0.146) | -0.10 | -0.1272 ± 0.0407 | 88.1%       | 41%                 |
+| new     | -0.0525  | [-0.125, -0.030] (-0.077) | -0.05 | -0.0556 ± 0.0175 | 63.9%       | 80%                 |
 
 
 ("Gap to truth closed" = distance the behavioural mean travels from the displaced midpoint
@@ -456,8 +476,7 @@ toward the truth, as a fraction of the 1 prior SD gap.)
 
 Reading:
 
-- The observations pull the displaced means **substantially** back toward the truth — 42%, 41% and
-80% of the gap — and acceptance drops to 41%, so the objective is discriminating here.
+- The observations pull the displaced means **substantially** back toward the truth — 42%, 41% and 80% of the gap — and acceptance drops to 41%, so the objective is discriminating here.
 - **This reverses what the draft's earlier run showed.** At the 24 h warm-up the same experiment
 closed only 9%, 12% and 22% of the gap and retained 99.8% / 96.9% / 92.8% of the prior width, which
 is what the "even the informed coefficient is not recovered" reading rested on. Under the corrected
@@ -477,6 +496,8 @@ and supersedes these numbers for reporting.
 
 ---
 
+
+
 ## Step 4b — single-parameter objective curves (why old is one-sided, avg/new flat)
 
 Each coefficient is swept across (and beyond) its prior while the other two are held at the
@@ -491,8 +512,8 @@ Single-parameter objective: old is an asymmetric valley, avg/new are flat
 | Coefficient | RMSE swing across its prior   | in units of sd(RMSE) | reading                                                                                             |
 | ----------- | ----------------------------- | -------------------- | --------------------------------------------------------------------------------------------------- |
 | old         | 0.0412 mg/L (0.0972 → 0.1384) | 10.0                 | steep on the weak side (weak edge exceeds the 0.12 threshold → rejectable); flat on the strong side |
-| avg         | 0.0075 mg/L (0.0973 → 0.1048) | 1.8                  | whole prior below the comparator's threshold → values indistinguishable *to that rule*               |
-| new         | 0.0092 mg/L (0.0972 → 0.1064) | 2.2                  | whole prior below the comparator's threshold → values indistinguishable *to that rule*               |
+| avg         | 0.0075 mg/L (0.0973 → 0.1048) | 1.8                  | whole prior below the comparator's threshold → values indistinguishable *to that rule*              |
+| new         | 0.0092 mg/L (0.0972 → 0.1064) | 2.2                  | whole prior below the comparator's threshold → values indistinguishable *to that rule*              |
 
 
 - **old is an asymmetric valley**: the objective climbs above the behavioural threshold only on
@@ -509,6 +530,8 @@ monitors are weakly but genuinely sensitive to avg/new, and a threshold on RMSE 
 sensitivity", not "the monitors are insensitive to them".
 
 ---
+
+
 
 ## Step 4d — robust displaced-prior (30 noise realisations × two thresholds)
 
@@ -550,23 +573,23 @@ the defensible ≈95% band 0.107 (retention 41% / 30%):
 Findings, and they are not the ones the previous version of this section reported:
 
 1. **Under the primary rule all three coefficients are pulled essentially all the way back, from
-   either direction.** The medians are 88–112% with IQRs that straddle 100%, and the posterior width
+  either direction.** The medians are 88–112% with IQRs that straddle 100%, and the posterior width
    collapses to 25–29% of the prior in every cell. A displaced prior is the cleanest possible test for
    prior domination, and the formal likelihood passes it for average and new as decisively as for old.
 2. **The comparator reproduces the draft's "identifiability gradient", and that gradient is an
-   artefact of the comparator.** At 0.12 the informal score recovers 9–23% of the gap for two of the
+  artefact of the comparator.** At 0.12 the informal score recovers 9–23% of the gap for two of the
    three coefficients and 61% for old-on-its-steep-side; tightening to 0.107 lifts everything.
    Reading down the four comparator columns, the apparent ordering `old ≫ new > avg` and its apparent
    threshold-dependence both vanish when the score is replaced. What survives from the old reading is
    only that the *comparator's* answer depends heavily on an analyst's threshold.
 3. **old's asymmetry is real but far weaker than it looked.** Even under the primary rule old recovers
-   slightly less from the strong side (88%) than from the weak side (112%), which is the residual
+  slightly less from the strong side (88%) than from the weak side (112%), which is the residual
    trace of the asymmetric valley in Step 4b: the objective bounds how *weak* old can be more sharply
    than how *strong*. Under the informal score that same asymmetry is a 9% versus 61% chasm. So the
    one-sided-identifiability claim should be reported as a mild direction-dependence of the formal
    posterior, not as one-sided identifiability.
 4. **The retention column is a diagnostic, not a result.** The primary rule's effective sample size
-   is ~2% of the library in both designs. That is enough for the medians and IQRs quoted here (Step 1
+  is ~2% of the library in both designs. That is enough for the medians and IQRs quoted here (Step 1
    shows the quantiles stable from 4096 draws) but it is the reason no finer statistic is quoted from
    this step.
 
@@ -580,7 +603,11 @@ not in identifiability *per se*.
 
 ---
 
+
+
 ## Step 5 — structural-error experiment (breaks the inverse crime)
+
+
 
 ### Step 5a — mild within-zone heterogeneity (±20% pipe-level jitter)
 
@@ -639,20 +666,22 @@ part. The control also calibrates the structural residual: 0.0055 mg/L at `jitte
 weighted mean is pinned near the centre of the accepted box and cannot follow the data. It
 **understates** the structural bias — by a factor of three to four in the old zone.
 
-| jitter | struct. resid. | above grid floor | old bias (SD) / incr | avg bias (SD) / incr | new bias (SD) / incr |
-| --- | --- | --- | --- | --- | --- |
-| **formal censored (primary)** | | | | | |
-| 0 (control) | 0.0055 | 0.0000 | +0.012 (+0.13) / — | −0.009 (−0.64) / — | +0.006 (+0.77) / — |
-| ±20% | 0.0068 | 0.0013 | −0.020 (−0.20) / **−0.0325** | −0.010 (−0.74) / −0.0012 | +0.007 (+0.93) / +0.0011 |
-| ±35% | 0.0103 | 0.0048 | −0.033 (−0.33) / **−0.0458** | −0.011 (−0.78) / −0.0016 | +0.008 (+1.05) / +0.0020 |
-| ±50% | 0.0145 | 0.0090 | −0.037 (−0.36) / **−0.0490** | −0.011 (−0.79) / −0.0016 | +0.009 (+1.18) / +0.0029 |
-| **informal GLUE (comparator)** | | | | | |
-| 0 (control) | 0.0055 | 0.0000 | −0.011 (−0.04) / — | −0.017 (−0.40) / — | +0.001 (+0.03) / — |
-| ±20% | 0.0068 | 0.0013 | −0.020 (−0.07) / −0.0081 | −0.018 (−0.42) / −0.0009 | +0.001 (+0.03) / −0.0001 |
-| ±35% | 0.0103 | 0.0048 | −0.022 (−0.09) / −0.0108 | −0.018 (−0.44) / −0.0015 | +0.001 (+0.05) / +0.0004 |
-| ±50% | 0.0145 | 0.0090 | −0.025 (−0.10) / −0.0134 | −0.019 (−0.45) / −0.0021 | +0.002 (+0.10) / +0.0016 |
 
-![Bias vs within-zone jitter, against the homogeneous control](figures/step5c_jitter_sweep.png)
+| jitter                         | struct. resid. | above grid floor | old bias (SD) / incr         | avg bias (SD) / incr     | new bias (SD) / incr     |
+| ------------------------------ | -------------- | ---------------- | ---------------------------- | ------------------------ | ------------------------ |
+| **formal censored (primary)**  |                |                  |                              |                          |                          |
+| 0 (control)                    | 0.0055         | 0.0000           | +0.012 (+0.13) / —           | −0.009 (−0.64) / —       | +0.006 (+0.77) / —       |
+| ±20%                           | 0.0068         | 0.0013           | −0.020 (−0.20) / **−0.0325** | −0.010 (−0.74) / −0.0012 | +0.007 (+0.93) / +0.0011 |
+| ±35%                           | 0.0103         | 0.0048           | −0.033 (−0.33) / **−0.0458** | −0.011 (−0.78) / −0.0016 | +0.008 (+1.05) / +0.0020 |
+| ±50%                           | 0.0145         | 0.0090           | −0.037 (−0.36) / **−0.0490** | −0.011 (−0.79) / −0.0016 | +0.009 (+1.18) / +0.0029 |
+| **informal GLUE (comparator)** |                |                  |                              |                          |                          |
+| 0 (control)                    | 0.0055         | 0.0000           | −0.011 (−0.04) / —           | −0.017 (−0.40) / —       | +0.001 (+0.03) / —       |
+| ±20%                           | 0.0068         | 0.0013           | −0.020 (−0.07) / −0.0081     | −0.018 (−0.42) / −0.0009 | +0.001 (+0.03) / −0.0001 |
+| ±35%                           | 0.0103         | 0.0048           | −0.022 (−0.09) / −0.0108     | −0.018 (−0.44) / −0.0015 | +0.001 (+0.05) / +0.0004 |
+| ±50%                           | 0.0145         | 0.0090           | −0.025 (−0.10) / −0.0134     | −0.019 (−0.45) / −0.0021 | +0.002 (+0.10) / +0.0016 |
+
+
+Bias vs within-zone jitter, against the homogeneous control
 
 **What the single-field table above shows, and why it is not the finding.** Read at face value, the
 formal column says symmetric heterogeneity biases the old-zone coefficient, with the increment
@@ -667,11 +696,11 @@ before anything is claimed.
 The candidate predictions are truth-independent, so repeating over many fields costs one truth
 simulation each. 25 fields, formal weighting, control subtracted:
 
-| zone | bias mean | bias SD | structural increment mean | increment SD | \|mean\| / SD |
-|---|---|---|---|---|---|
-| old | +0.0231 | 0.0335 | **+0.0107** | 0.0335 | **0.32** |
-| average | −0.0089 | 0.0046 | +0.0002 | 0.0046 | 0.04 |
-| new | +0.0055 | 0.0021 | −0.0005 | 0.0021 | 0.24 |
+| zone    | bias mean | bias SD | structural increment mean | increment SD | |mean| / SD |
+| ------- | --------- | ------- | ------------------------- | ------------ | ----------- |
+| old     | +0.0231   | 0.0335  | **+0.0107**               | 0.0335       | **0.32**    |
+| average | −0.0089   | 0.0046  | +0.0002                   | 0.0046       | 0.04        |
+| new     | +0.0055   | 0.0021  | −0.0005                   | 0.0021       | 0.24        |
 
 **This reverses the single-field reading, sign included.** The ensemble-mean structural increment for
 `old` is **+0.0107** m/day — weaker decay — where the single field gave **−0.0325**, stronger decay.
@@ -715,16 +744,18 @@ Primary rule = formal censored likelihood; the informal comparator is shown besi
 is the same rule's departure from the truth on the **homogeneous** baseline, i.e. what it does with no
 structural error at all; subtract it before reading any shift as structural.
 
-| zone | true arith. | length-wt proxy | lenwt − arith | rule | posterior mean ± SD | shift | hom. offset | frac of gap |
-|---|---|---|---|---|---|---|---|---|
-| old | -1.000 | **-1.2404** | -0.2404 | **formal censored** | **-1.1444 ± 0.1123** | **-0.1444** | +0.0124 | **60%** |
-| old | | | | informal GLUE | -1.0666 ± 0.2549 | -0.0666 | -0.0115 | 28% |
-| average | -0.100 | -0.1238 | -0.0238 | **formal censored** | **-0.1348 ± 0.0166** | **-0.0348** | -0.0091 | **146%** |
-| average | | | | informal GLUE | -0.1300 ± 0.0416 | -0.0300 | -0.0170 | 126% |
-| new | -0.050 | -0.0659 | -0.0159 | **formal censored** | **-0.0573 ± 0.0080** | **-0.0073** | +0.0060 | **45%** |
-| new | | | | informal GLUE | -0.0593 ± 0.0248 | -0.0093 | +0.0010 | 58% |
 
-![Structured heterogeneity: the fit moves toward a length-weighted value](figures/step5d_structured.png)
+| zone    | true arith. | length-wt proxy | lenwt − arith | rule                | posterior mean ± SD  | shift       | hom. offset | frac of gap |
+| ------- | ----------- | --------------- | ------------- | ------------------- | -------------------- | ----------- | ----------- | ----------- |
+| old     | -1.000      | **-1.2404**     | -0.2404       | **formal censored** | **-1.1444 ± 0.1123** | **-0.1444** | +0.0124     | **60%**     |
+| old     |             |                 |               | informal GLUE       | -1.0666 ± 0.2549     | -0.0666     | -0.0115     | 28%         |
+| average | -0.100      | -0.1238         | -0.0238       | **formal censored** | **-0.1348 ± 0.0166** | **-0.0348** | -0.0091     | **146%**    |
+| average |             |                 |               | informal GLUE       | -0.1300 ± 0.0416     | -0.0300     | -0.0170     | 126%        |
+| new     | -0.050      | -0.0659         | -0.0159       | **formal censored** | **-0.0573 ± 0.0080** | **-0.0073** | +0.0060     | **45%**     |
+| new     |             |                 |               | informal GLUE       | -0.0593 ± 0.0248     | -0.0093     | +0.0010     | 58%         |
+
+
+Structured heterogeneity: the fit moves toward a length-weighted value
 
 **Single-realisation reading (one noise draw).** The structural residual stays small (0.0063, so the
 fit remains *precise*: RMSE 0.0968 ≈ the noise floor), the length-weighted proxy diverges from the
@@ -748,12 +779,14 @@ must vanish at `CORR = 0`, where the two candidate targets coincide, and grow wi
 tested at once. The statistic is the fraction of the arithmetic → length-weighted gap travelled: 0
 means the fit sits on the arithmetic mean, 1 on the length-weighted value.
 
-| `CORR` | gap (old) | old: median [5, 95] | average | new |
-|---|---|---|---|---|
-| 0.00 | 0.0000 | control — targets coincide | control | control |
-| 0.25 | −0.1202 | +1.10 [−0.29, +2.47] | +1.26 [−0.95, +3.72] | +0.98 [−0.89, +2.66] |
-| 0.50 | −0.2404 | +0.86 [+0.12, +1.46] | +1.12 [−0.07, +2.43] | +0.92 [−0.03, +1.78] |
-| 0.75 | −0.3606 | +0.74 [+0.23, +1.06] | +1.07 [+0.22, +1.93] | +0.89 [+0.26, +1.46] |
+
+| `CORR` | gap (old) | old: median [5, 95]        | average              | new                  |
+| ------ | --------- | -------------------------- | -------------------- | -------------------- |
+| 0.00   | 0.0000    | control — targets coincide | control              | control              |
+| 0.25   | −0.1202   | +1.10 [−0.29, +2.47]       | +1.26 [−0.95, +3.72] | +0.98 [−0.89, +2.66] |
+| 0.50   | −0.2404   | +0.86 [+0.12, +1.46]       | +1.12 [−0.07, +2.43] | +0.92 [−0.03, +1.78] |
+| 0.75   | −0.3606   | +0.74 [+0.23, +1.06]       | +1.07 [+0.22, +1.93] | +0.89 [+0.26, +1.46] |
+
 
 **Finding, and it is stronger than the single draw suggested.** The median shift fraction is
 **0.74–1.26** at every correlation level and in every zone: the fitted coefficient tracks the
@@ -781,11 +814,11 @@ this design, which is what makes the design useful, and nothing here shows it is
 So the two statements available differ in strength and only the weaker one is supported:
 
 - **Supported:** structured heterogeneity makes the homogeneous estimate move off the arithmetic mean,
-  in the direction of a length-weighted proxy, by a fraction of the gap whose median is near 1 and
-  whose interval excludes zero at `CORR = 0.75`.
+in the direction of a length-weighted proxy, by a fraction of the gap whose median is near 1 and
+whose interval excludes zero at `CORR = 0.75`.
 - **Not supported:** that homogeneous fitting *recovers* the residence-weighted or effective
-  coefficient. Establishing what the fit actually estimates needs a sensitivity- or Jacobian-weighted
-  effective mean, which this step does not compute. That is open work, not a result.
+coefficient. Establishing what the fit actually estimates needs a sensitivity- or Jacobian-weighted
+effective mean, which this step does not compute. That is open work, not a result.
 
 **Honest caveat on magnitude.** Under the primary rule the old-zone offset of −0.1444 is 1.29
 posterior SD (0.1123), so the structural shift is now comparable with the posterior width rather than
@@ -800,22 +833,24 @@ than the shift being measured, so `grid_fit` cannot resolve it and only the weig
 The 7×7×7 grid ranges are chosen around the true values, so the nearest grid node to each truth is
 close by construction:
 
+
 | coeff | grid step | nearest node to truth | distance | half-step |
-|---|---|---|---|---|
-| old | 0.217 | -1.067 | 0.067 | 0.108 |
-| avg | 0.027 | -0.093 | 0.007 | 0.014 |
-| new | 0.016 | -0.052 | 0.002 | 0.008 |
+| ----- | --------- | --------------------- | -------- | --------- |
+| old   | 0.217     | -1.067                | 0.067    | 0.108     |
+| avg   | 0.027     | -0.093                | 0.007    | 0.014     |
+| new   | 0.016     | -0.052                | 0.002    | 0.008     |
+
 
 The grid best fit found in every run — `(-1.067, -0.093, -0.052)` — is **exactly** these nearest
 nodes, so "recovery to the nearest grid node" is guaranteed by the grid placement, not by the data.
 Consequences:
 
 - The deterministic grid **cannot distinguish identifiable from unidentifiable coefficients**: it
-  snaps every parameter to its nearest node, so even avg/new (shown unidentifiable by GLUE)
-  "recover" to the truth. This is why the draft's grid looked like successful recovery of all
-  three, masking what GLUE reveals.
+snaps every parameter to its nearest node, so even avg/new (shown unidentifiable by GLUE)
+"recover" to the truth. This is why the draft's grid looked like successful recovery of all
+three, masking what GLUE reveals.
 - The draft's reported 10-realisation spread for old (±0.12 m/day) ≈ **half a grid step** (0.108),
-  i.e. largely quantisation, not genuine estimation uncertainty.
+i.e. largely quantisation, not genuine estimation uncertainty.
 
 Fix for the draft: present the grid only as an implementation/plausibility check, and rely on GLUE
 (with the displaced priors of Steps 2/4) for identifiability and uncertainty.
@@ -823,24 +858,26 @@ Fix for the draft: present the grid only as an implementation/plausibility check
 ### Step 5 — overall
 
 - **Uncorrelated within-zone heterogeneity (±20–50%, Step 5c)**: the grouped model is **robust**. The
-  posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk
-  ranking is preserved. Across 25 independent fields at ±20% the structural increment is
-  `+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
+posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk
+ranking is preserved. Across 25 independent fields at ±20% the structural increment is
+`+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
 - **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at
-  the noise floor while the coefficient moves toward a length-weighted proxy — 60% of the gap for old
-  under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an
-  identified effective coefficient.
+the noise floor while the coefficient moves toward a length-weighted proxy — 60% of the gap for old
+under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an
+identified effective coefficient.
 - **Grid search (Step 5e)**: recovery to the nearest grid node is guaranteed by the grid being centred
-  on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid
-  placement; only a weighted ensemble can speak to identifiability.
+on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid
+placement; only a weighted ensemble can speak to identifiability.
 - Directly answers §3.3 ("report how far the behavioural ensemble sits from any simple average of the
-  true field"): the distance is ≈0 when heterogeneity is uncorrelated and a clear, resolved shift
-  toward the length-weighted proxy when it is correlated. **Structure in the heterogeneity, not
-  heterogeneity as such, is what breaks the averaging-out** — tested here with a synthetic pipe-length
-  correlation, which is one structured proxy and not a demonstrated flow-path or residence weighting.
-  The low-residual clipping in the old zone is a further precise-but-biased source (→ Step 9).
+true field"): the distance is ≈0 when heterogeneity is uncorrelated and a clear, resolved shift
+toward the length-weighted proxy when it is correlated. **Structure in the heterogeneity, not
+heterogeneity as such, is what breaks the averaging-out** — tested here with a synthetic pipe-length
+correlation, which is one structured proxy and not a demonstrated flow-path or residence weighting.
+The low-residual clipping in the old zone is a further precise-but-biased source (→ Step 9).
 
 ---
+
+
 
 ## Step 6 — sensor-accuracy (noise) sensitivity  [answers the email]
 
@@ -858,41 +895,45 @@ distortion is visible at every noise level.
 
 **Primary — formal censored likelihood** (SD retained = posterior SD / prior SD, median [IQR]):
 
-| σ (mg/L) | ESS med | ESS p5 | ESS min | frac < 100 | old SD ret. | avg SD ret. | new SD ret. | band @node15 |
-|---|---|---|---|---|---|---|---|---|
-| 0.02 | 1.8 | 1.3 | 1.2 | 100% | 4% [3–6] | 3% [2–4] | 3% [3–5] | 0.006 |
-| 0.05 | 20.9 | 17.2 | 16.8 | 100% | 13% [12–13] | 15% [14–15] | 15% [14–15] | 0.017 |
-| **0.10** | **159.6** | 137.3 | 124.6 | 0% | **27% [25–29]** | **30% [28–31]** | **29% [28–30]** | 0.034 |
-| 0.15 | 525.7 | 405.0 | 371.8 | 0% | 38% [37–40] | 45% [42–48] | 43% [42–44] | 0.051 |
+
+| σ (mg/L) | ESS med   | ESS p5 | ESS min | frac < 100 | old SD ret.     | avg SD ret.     | new SD ret.     | band @node15 |
+| -------- | --------- | ------ | ------- | ---------- | --------------- | --------------- | --------------- | ------------ |
+| 0.02     | 1.8       | 1.3    | 1.2     | 100%       | 4% [3–6]        | 3% [2–4]        | 3% [3–5]        | 0.006        |
+| 0.05     | 20.9      | 17.2   | 16.8    | 100%       | 13% [12–13]     | 15% [14–15]     | 15% [14–15]     | 0.017        |
+| **0.10** | **159.6** | 137.3  | 124.6   | 0%         | **27% [25–29]** | **30% [28–31]** | **29% [28–30]** | 0.034        |
+| 0.15     | 525.7     | 405.0  | 371.8   | 0%         | 38% [37–40]     | 45% [42–48]     | 43% [42–44]     | 0.051        |
+
 
 **Comparator — informal GLUE**, threshold scaling with σ as the ~95% acceptance band
 (`threshold_for_sigma`, 0.107 at σ = 0.1):
 
+
 | σ (mg/L) | ESS med | ESS p5 | ESS min | frac < 100 | old SD ret. | avg SD ret. | new SD ret. | band @node15 |
-|---|---|---|---|---|---|---|---|---|
-| 0.02 | 37.0 | 3.8 | 2.0 | 97% | 15% [12–17] | 17% [12–20] | 19% [15–21] | 0.020 |
-| 0.05 | 699.1 | 94.4 | 32.0 | 7% | 42% [32–48] | 47% [36–52] | 44% [37–52] | 0.053 |
-| 0.10 | 4218.0 | 1285.7 | 1157.9 | 0% | 65% [63–72] | 91% [83–94] | 87% [81–91] | 0.087 |
-| 0.15 | 6482.6 | 5137.4 | 3743.6 | 0% | 81% [77–88] | 98% [95–99] | 97% [95–98] | 0.126 |
+| -------- | ------- | ------ | ------- | ---------- | ----------- | ----------- | ----------- | ------------ |
+| 0.02     | 37.0    | 3.8    | 2.0     | 97%        | 15% [12–17] | 17% [12–20] | 19% [15–21] | 0.020        |
+| 0.05     | 699.1   | 94.4   | 32.0    | 7%         | 42% [32–48] | 47% [36–52] | 44% [37–52] | 0.053        |
+| 0.10     | 4218.0  | 1285.7 | 1157.9  | 0%         | 65% [63–72] | 91% [83–94] | 87% [81–91] | 0.087        |
+| 0.15     | 6482.6  | 5137.4 | 3743.6  | 0%         | 81% [77–88] | 98% [95–99] | 97% [95–98] | 0.126        |
+
 
 Ratio of informal to formal posterior SD — how much of the "required accuracy" belongs to the score
 rather than to the sensor: **×3.9 / 5.3 / 5.8** at σ = 0.02, **×3.3 / 3.2 / 3.0** at 0.05,
 **×2.4 / 3.1 / 3.0** at 0.10, **×2.1 / 2.2 / 2.3** at 0.15 (old / avg / new).
 
-![Sensor-accuracy sensitivity](figures/step6_noise_sensitivity.png)
+Sensor-accuracy sensitivity
 
 Findings:
 
 1. **A σ = 0.10 sensor is already useful, and the earlier conclusion that it is not was an artefact of
-   the scoring rule.** Under the primary rule a σ = 0.10 instrument retains 27 / 30 / 29 % of the prior width for old / average / new — all three well informed. The informal comparator on the same
+  the scoring rule.** Under the primary rule a σ = 0.10 instrument retains 27 / 30 / 29 % of the prior width for old / average / new — all three well informed. The informal comparator on the same
    observations reports 65 / 91 / 87%, which is what produced the earlier "σ ≲ 0.05 is required"
    recommendation. The required accuracy is therefore milder than previously reported, and the earlier
    figure should not be quoted.
 2. **Prediction uncertainty scales roughly linearly with σ under both rules**, but at different levels:
-   the 5–95% band at the risk-governing old-zone node 15 grows 0.006 → 0.051 mg/L under the primary
+  the 5–95% band at the risk-governing old-zone node 15 grows 0.006 → 0.051 mg/L under the primary
    rule against 0.020 → 0.126 under the comparator.
 3. **The two tightest rows are Monte-Carlo-limited under the primary rule, and this is the honest cost
-   of a sharp likelihood on a fixed prior library.** At σ = 0.05 the median ESS is 20.9 and at σ = 0.02
+  of a sharp likelihood on a fixed prior library.** At σ = 0.05 the median ESS is 20.9 and at σ = 0.02
    it is 1.8, i.e. essentially one member carries the posterior. Their "SD retained" figures of 13% and
    4% are therefore **not** measurements of what such a sensor would buy — with so few effective
    members the posterior width is *under*-estimated. Both rows are flagged `sampling_limited` in the
@@ -900,7 +941,7 @@ Findings:
    likelihood-adapted design (importance, sequential or adaptive sampling), not more uniform draws:
    ESS stays a roughly constant fraction of the library, so brute force does not fix it.
 4. **The comparator's minimum ESS is the diagnostic that matters, not its median.** At σ = 0.05 its
-   median ESS is 699 but its worst realisation is 32, and 7% of realisations fall below 100. A row
+  median ESS is 699 but its worst realisation is 32, and 7% of realisations fall below 100. A row
    summarised only by its median would look comfortably resolved while one realisation in fourteen was
    not.
 
@@ -914,6 +955,8 @@ sampling design rather than by the measurement. What must **not** be repeated is
 sensor units. This replaces the imported foundation-notebook noise sweep flagged in §3.5.
 
 ---
+
+
 
 ## Step 7 — a-priori identifiability: Fisher information / CRLB
 
@@ -929,14 +972,14 @@ expanded-model (realism) predictions.
 baseline GLUE is "realistic".**
 
 - *Layer 1 — controlled-baseline identifiability* (identical conditions: k_b fixed, unbiased
-  sensors, independent Gaussian noise, only three k_w): Fisher **Case A** (a-priori prediction) ↔
-  formal **profile likelihood** (a-posteriori validation) ↔ **baseline GLUE** (behavioural
-  reference). Cleanest conclusion: *the data carry information about all three; the formal
-  likelihood extracts it; informal GLUE is substantially broader and more prior-sensitive.*
+sensors, independent Gaussian noise, only three k_w): Fisher **Case A** (a-priori prediction) ↔
+formal **profile likelihood** (a-posteriori validation) ↔ **baseline GLUE** (behavioural
+reference). Cleanest conclusion: *the data carry information about all three; the formal
+likelihood extracts it; informal GLUE is substantially broader and more prior-sensitive.*
 - *Layer 2 — realism sensitivity*: Case **B** (+k_b), Case **C** (+6 monitor offsets), **AR(1)**
-  (Step 7c) and censored likelihood (Step 9) each *separately* relax one baseline assumption.
-  Conclusion: *ideal identifiability is fragile to real error sources — especially avg/new — while
-  old stays comparatively robust.*
+(Step 7c) and censored likelihood (Step 9) each *separately* relax one baseline assumption.
+Conclusion: *ideal identifiability is fragile to real error sources — especially avg/new — while
+old stays comparatively robust.*
 
 These baseline assumptions are **valid by construction** for this controlled synthetic experiment
 (k_b was fixed, noise was generated independent-Gaussian, no bias was injected), so **Case A is
@@ -974,11 +1017,13 @@ network by 0.0106 over 0.005. Per unit of coefficient that is **0.19 / 1.30 / 2.
 new and average have the *highest* per-unit sensitivity (near-source pipes lie upstream of the whole
 network), old roughly a tenth of new's.
 
-| case | old | average | new | condition # |
-|---|---|---|---|---|
-| A — k_w only | 0.25 ✅ | 0.29 ✅ | 0.29 ✅ | 215 |
-| B — k_w + k_b | 0.30 ✅ | 0.54 ✅ | 0.54 ✅ | 101 |
-| C — k_w + k_b + offsets | **0.67 ✅** | **2.24 ❌** | **1.09 ❌** | 88 |
+
+| case                    | old        | average    | new        | condition # |
+| ----------------------- | ---------- | ---------- | ---------- | ----------- |
+| A — k_w only            | 0.25 ✅     | 0.29 ✅     | 0.29 ✅     | 215         |
+| B — k_w + k_b           | 0.30 ✅     | 0.54 ✅     | 0.54 ✅     | 101         |
+| C — k_w + k_b + offsets | **0.67 ✅** | **2.24 ❌** | **1.09 ❌** | 88          |
+
 
 (values = CRLB SD / prior SD, a **1σ** ratio; **< 1** means the data could *in principle* narrow the
 coefficient below its prior — a heuristic, not a strict theorem.)
@@ -987,11 +1032,13 @@ coefficient below its prior — a heuristic, not a strict theorem.)
 closes the GLUE-vs-Fisher argument as a *consistency* reading (not a frequentist-efficiency proof —
 that needs the repeated-sampling test in Step 14):
 
-| coefficient | Case-A CRLB | formal censored ensemble SD | ratio | informal GLUE SD |
-|---|---|---|---|---|
-| old | 0.09473 | 0.09380 | **0.99** | 0.26679 |
-| average | 0.01351 | 0.01416 | **1.05** | 0.04240 |
-| new | 0.00796 | 0.00776 | **0.98** | 0.02419 |
+
+| coefficient | Case-A CRLB | formal censored ensemble SD | ratio    | informal GLUE SD |
+| ----------- | ----------- | --------------------------- | -------- | ---------------- |
+| old         | 0.09473     | 0.09380                     | **0.99** | 0.26679          |
+| average     | 0.01351     | 0.01416                     | **1.05** | 0.04240          |
+| new         | 0.00796     | 0.00776                     | **0.98** | 0.02419          |
+
 
 Case-A CRLB for old 0.09473 (see table). The empirical spread of the formally weighted ensemble sits
 within 1–5% of that bound on this single realisation. The informal score gives 2.8–3.1× the bound on the
@@ -999,7 +1046,7 @@ within 1–5% of that bound on this single realisation. The informal score gives
 evidence that the data are uninformative, nor a bug in the Jacobian: it is the statistical
 inefficiency of the score. Only the formal rows are like-for-like with a CRLB.
 
-![Fisher/CRLB with nuisance parameters](figures/step7_fisher.png)
+Fisher/CRLB with nuisance parameters
 
 **Case A is the like-for-like benchmark** for the baseline GLUE (both fix k_b and assume no sensor
 bias). Cases B and C are **realism sensitivity analyses**, not descriptions of the baseline GLUE.
@@ -1007,11 +1054,11 @@ bias). Cases B and C are **realism sensitivity analyses**, not descriptions of t
 Findings:
 
 1. **Idealised A — the data do contain information about all three** (CRLB/prior 0.25/0.29/0.29 < 1).
-   In fact new/avg have *higher per-unit sensitivity* than old (near-source pipes lie upstream of
+  In fact new/avg have *higher per-unit sensitivity* than old (near-source pipes lie upstream of
    the whole network; 2.12 and 1.30 against 0.19 mg/L per m/day). So the observations are
    not fundamentally devoid of information about avg/new.
 2. **The A-vs-GLUE gap is entirely the score, and this is now demonstrated rather than argued.**
-   The informal GLUE also fixes k_b and ignores bias, so its like-for-like benchmark is A; it gives
+  The informal GLUE also fixes k_b and ignores bias, so its like-for-like benchmark is A; it gives
    0.71/0.92/0.88 against the bound's 0.25/0.29/0.29. The formal ensemble on the same data gives
    0.25/0.31/0.28 — the bound, to within 5%. The residual explanations previously offered for the
    gap (threshold, zero-clipping, non-linearity, finite sampling, old's one-sided response) are
@@ -1019,17 +1066,16 @@ Findings:
    Stedinger 2008 / Mantovan & Todini 2006 predict. It must **not** be attributed to k_b or bias,
    which are absent from both.
 3. **Sensitivity ≠ identifiability.** new/avg respond more per unit, but their response *mimics* a
-   global k_b change or a per-monitor offset (non-unique) and is easily confounded; old's response
+  global k_b change or a per-monitor offset (non-unique) and is easily confounded; old's response
    is smaller but *distinctive* (localised at 15/145 with a particular spatiotemporal shape), so it
    survives confounding. This is why old is the robustly identifiable one despite its lower raw
    sensitivity.
 4. **Realism sensitivity (B, C).** Admitting k_b uncertainty (B) inflates the avg/new CRLB 1.8–1.9×
-   against 1.2× for old; adding per-monitor bias (C) pushes **avg (2.24) and new (1.09) above
+  against 1.2× for old; adding per-monitor bias (C) pushes **avg (2.24) and new (1.09) above
    their prior → practically unidentifiable**, while **old retains limited identifiability (0.67)**.
    Case C thus reproduces a *qualitatively similar* gradient to GLUE — but under an **expanded
    nuisance model the baseline GLUE did not use**, so it corroborates the robustness of the gradient
    rather than "confirming" the baseline run.
-
    **Two quantities are easy to confuse here and they carry opposite signs** (`step7_verify.py`
    prints both side by side). The Jacobian-column cosine `F_ij/√(F_ii F_jj)` — how collinear two
    *sensitivity directions* are, a property of the design — is **+0.333 / +0.770 / +0.831** for
@@ -1039,14 +1085,18 @@ Findings:
    is exactly what Step 8b measures), and only it should be called a parameter correlation. An
    earlier version of this log reported the cosine as if it were the correlation.
 5. **The condition number on the raw matrix is mostly a units artefact.** κ ≈ 215 for Case A
-   looks like a badly ill-conditioned problem, but the three coefficients differ in scale by a
+  looks like a badly ill-conditioned problem, but the three coefficients differ in scale by a
    factor of 20, so eigenvalues of the unnormalised information matrix mix magnitudes as much as
    geometry. Rescaling the parameters by their prior SD makes them dimensionless:
 
-   | form | eigenvalues (Case A) | condition number |
-   |---|---|---|
-   | raw | 23906 / 5106 / 111 | **215** |
-   | prior-scaled | 24.5 / 16.6 / 7.6 | **3.2** |
+
+
+
+| form         | eigenvalues (Case A) | condition number |
+| ------------ | -------------------- | ---------------- |
+| raw          | 23906 / 5106 / 111   | **215**          |
+| prior-scaled | 24.5 / 16.6 / 7.6    | **3.2**          |
+
 
    On the dimensionless matrix the spread is a factor of **3.2**, not 215, so the three coefficients
    are far more comparably informed than the raw number suggests. This also qualifies the framing the
@@ -1061,11 +1111,13 @@ Findings:
    0.0025, i.e. 2 / 5 / 5% of each truth) and each coefficient was additionally re-differenced over a
    range of steps around its default:
 
-   | coefficient | default step | steps tested | step as % of truth | Case-A CRLB spread over the sweep |
-   |---|---|---|---|---|
-   | old | 0.02 | 0.005 – 0.04 | 0.5 – 4% | **0.10%** |
-   | average | 0.005 | 0.002 – 0.02 | 2 – 20% | **1.00%** |
-   | new | 0.0025 | 0.001 – 0.01 | 2 – 20% | **1.14%** |
+
+| coefficient | default step | steps tested | step as % of truth | Case-A CRLB spread over the sweep |
+| ----------- | ------------ | ------------ | ------------------ | --------------------------------- |
+| old         | 0.02         | 0.005 – 0.04 | 0.5 – 4%           | **0.10%**                         |
+| average     | 0.005        | 0.002 – 0.02 | 2 – 20%            | **1.00%**                         |
+| new         | 0.0025       | 0.001 – 0.01 | 2 – 20%            | **1.14%**                         |
+
 
    The CRLB is flat to ~1% across a fourfold to tenfold change of step, so the derivatives are
    converged and the choice of step carries at most a ~1% error even at a 20% perturbation. The
@@ -1077,6 +1129,7 @@ This delivers Priority-2 #2 (a-priori identifiability) and links to #1 (sensor b
 #4 (AR(1), Step 7c) as realism analyses.
 
 **Recommended thesis statement (main identifiability line).**
+
 > A-priori Fisher information and formal profile likelihood showed that, under the controlled
 > baseline assumptions of fixed bulk decay, unbiased sensors and independent Gaussian errors, the
 > six-monitor dataset contained identifiable information about all three grouped wall-reaction
@@ -1091,7 +1144,8 @@ This delivers Priority-2 #2 (a-priori identifiability) and links to #1 (sensor b
 envelope* — kept for behavioural uncertainty and risk propagation — but it is **not** a calibrated
 representation of all real-world uncertainty sources (it omits k_b uncertainty, monitor offsets,
 AR(1) covariance and censoring). Its breadth comes from the informal likelihood + threshold + prior
-+ finite sampling + non-linear parameter space, **not** from having modelled reality.
+
+- finite sampling + non-linear parameter space, **not** from having modelled reality.
 
 **Do not write:** "the assumptions are false" (they hold by construction here); "GLUE's width ≈
 real-world identifiability" (unsupported — the nuisance terms are absent from the baseline run); or
@@ -1100,6 +1154,8 @@ write:** Case C produced a *qualitatively similar* identifiability gradient (old
 weak), corroborating the robustness of the gradient rather than confirming the baseline GLUE.
 
 ---
+
+
 
 ## Step 7b — profile likelihood (practical identifiability, a posteriori)
 
@@ -1119,11 +1175,13 @@ minimises the two nuisance coefficients with Nelder–Mead at each target value 
 endpoints by Brent bisection on `ΔNLL − 1.92`; **7770** distinct EPANET evaluations, run for both
 the censored and the iid likelihood.
 
-| coefficient | grid 95% | continuous 95% | grid half-width | continuous half-width | change | endpoint move |
-|---|---|---|---|---|---|---|
-| old | [−1.110, −0.850] | **[−1.1720, −0.8106]** | ±0.1300 | ±0.1807 | **+39.0%** | ~0.8 grid steps |
-| average | [−0.136, −0.088] | **[−0.1373, −0.0821]** | ±0.0240 | ±0.0276 | **+14.8%** | ~0.8 grid steps |
-| new | [−0.057, −0.034] | **[−0.0599, −0.0294]** | ±0.0119 | ±0.0152 | **+28.2%** | ~0.8 grid steps |
+
+| coefficient | grid 95%         | continuous 95%         | grid half-width | continuous half-width | change     | endpoint move   |
+| ----------- | ---------------- | ---------------------- | --------------- | --------------------- | ---------- | --------------- |
+| old         | [−1.110, −0.850] | **[−1.1720, −0.8106]** | ±0.1300         | ±0.1807               | **+39.0%** | ~0.8 grid steps |
+| average     | [−0.136, −0.088] | **[−0.1373, −0.0821]** | ±0.0240         | ±0.0276               | **+14.8%** | ~0.8 grid steps |
+| new         | [−0.057, −0.034] | **[−0.0599, −0.0294]** | ±0.0119         | ±0.0152               | **+28.2%** | ~0.8 grid steps |
+
 
 Primary continuous profile uses the **censored** likelihood; the iid continuous curve is retained as
 a local-identifiability benchmark (censoring impact is isolated in Step 9). The continuous 95% interval for `k_w,old` is [−1.1720, −0.8106].
@@ -1138,28 +1196,30 @@ intervals should be quoted, and the same caution applies to anything else read o
 is why the AR(1) widening factor for `old` in Step 7c (2.00×) should not be read as physical: its
 independent-case denominator was one of these too-narrow grid intervals.
 
-![Profile likelihood: tight two-sided intervals matching the CRLB](figures/step7b_profile.png)
+Profile likelihood: tight two-sided intervals matching the CRLB
 
 Findings:
 
 1. **Under the formal likelihood all three are tightly, two-sidedly identifiable** — the profile 95%
-   intervals bracket the truth and **match the Fisher CRLB 95% intervals** (Case A). The two formal
+  intervals bracket the truth and **match the Fisher CRLB 95% intervals** (Case A). The two formal
    tools agree: the observations *do* identify all three (idealised, k_b fixed, no bias).
 2. **Little parameter compensation**: the profile (re-optimising the other two) ≈ the sweep (others
-   at truth), so the three coefficients are not strongly confounded under the formal likelihood at
+  at truth), so the three coefficients are not strongly confounded under the formal likelihood at
    this idealised setting.
 3. **old's valley is mildly asymmetric** (shallower on the strong side), the residue of its
-   one-sided tendency; but the formal likelihood still bounds it two-sided. So the "one-sided"
+  one-sided tendency; but the formal likelihood still bounds it two-sided. So the "one-sided"
    description from Steps 4/4b is a *GLUE/informal-likelihood* view — under the efficient formal
    likelihood old is two-sided, though its strong side is only weakly constrained.
 4. **Far tighter than GLUE.** These formal intervals are much narrower than the GLUE behavioural
-   distributions (which barely narrow avg/new). The gap is GLUE's informal likelihood dropping the
+  distributions (which barely narrow avg/new). The gap is GLUE's informal likelihood dropping the
    N = 294 factor (→ too flat); the profile/Fisher use the full formal likelihood. This closes the
    third leg of Priority-2 #2 and confirms the Step 7 diagnosis of GLUE inefficiency.
 5. As in Step 7, this is the **idealised** benchmark (Case A); admitting k_b uncertainty and sensor
-   bias (Fisher Case C) is what renders avg/new *practically* unidentifiable.
+  bias (Fisher Case C) is what renders avg/new *practically* unidentifiable.
 
 ---
+
+
 
 ## Step 7c — error autocorrelation AR(1) (Layer-2 realism) — Priority-2 #4
 
@@ -1184,23 +1244,25 @@ inflation ≈ √[ (1+ρ)/(1−ρ) ] = √(1.4/0.6) ≈ 1.53
 N_eff     ≈ N · (1−ρ)/(1+ρ) = 294 · 0.6/1.4 ≈ 126     (of 294 hourly points)
 ```
 
+
 | coefficient | CRLB indep | CRLB AR(1) | widening | CRLB/prior indep | CRLB/prior AR(1) |
-|---|---|---|---|---|---|
-| old | ±0.0947 | ±0.1406 | 1.48× | 0.25 | 0.37 |
-| average | ±0.0135 | ±0.0201 | 1.49× | 0.29 | 0.43 |
-| new | ±0.0080 | ±0.0114 | 1.44× | 0.29 | 0.42 |
+| ----------- | ---------- | ---------- | -------- | ---------------- | ---------------- |
+| old         | ±0.0947    | ±0.1406    | 1.48×    | 0.25             | 0.37             |
+| average     | ±0.0135    | ±0.0201    | 1.49×    | 0.29             | 0.43             |
+| new         | ±0.0080    | ±0.0114    | 1.44×    | 0.29             | 0.42             |
+
 
 Findings:
 
 1. **Each coefficient widens by its *own* factor** (1.44–1.49×), computed from the full covariance —
-   *not* a single mechanical 1.53× applied to all. They land close to the scalar reference here
+  *not* a single mechanical 1.53× applied to all. They land close to the scalar reference here
    because the temporal Jacobian shape is similar across the six sensors; the covariance route is
    the defensible one and would separate the factors more where sensitivities differ in time.
 2. **AR(1) alone is a *modest* caveat.** Even at ρ = 0.4 the ideal identifiability survives
-   (CRLB/prior-SD old 0.37, avg 0.43, new 0.41 — all still < 1). So autocorrelation *inflates* the
+  (CRLB/prior-SD old 0.37, avg 0.43, new 0.41 — all still < 1). So autocorrelation *inflates* the
    idealised intervals ~1.5× but does **not** by itself destroy identifiability.
 3. **The dominant realism weakening is k_b + offsets, not AR(1).** Compare: Case C (k_b + 6 offsets)
-   pushes avg to 2.30 and new to 1.10 (unidentifiable), an order of magnitude larger effect than
+  pushes avg to 2.30 and new to 1.10 (unidentifiable), an order of magnitude larger effect than
    AR(1)'s ×1.5. AR(1) is therefore reported as a quantified *caveat*, not the leading realism term.
 
 **AR(1) profile likelihood (not just Fisher).** To avoid leaving the profile side "notional", the
@@ -1209,11 +1271,13 @@ so the AR(1) profile could be computed exactly as `NLL(θ) = ½·e(θ)ᵀ Σ⁻�
 operational notebook uses the same AR(1) observation process). The independent profile reproduces
 Step 7b (sanity check), and the AR(1) profile widens by its own per-coefficient factor:
 
-| coefficient | independent 95% | AR(1) 95% | half-width indep → AR(1) | widening |
-|---|---|---|---|---|
-| old | [-1.110, -0.850] | [-1.240, -0.720] | ±0.130 → ±0.260 | 2.00× |
-| average | [-0.136, -0.088] | [-0.144, -0.072] | ±0.024 → ±0.036 | 1.50× |
-| new | [-0.057, -0.034] | [-0.067, -0.029] | ±0.012 → ±0.019 | 1.60× |
+
+| coefficient | independent 95%  | AR(1) 95%        | half-width indep → AR(1) | widening |
+| ----------- | ---------------- | ---------------- | ------------------------ | -------- |
+| old         | [-1.110, -0.850] | [-1.240, -0.720] | ±0.130 → ±0.260          | 2.00×    |
+| average     | [-0.136, -0.088] | [-0.144, -0.072] | ±0.024 → ±0.036          | 1.50×    |
+| new         | [-0.057, -0.034] | [-0.067, -0.029] | ±0.012 → ±0.019          | 1.60×    |
+
 
 The `old` factor of 2.00× should not be read as a physical result: the grid step in that direction
 is 0.065 m/day, so each endpoint is quantised to about half the half-width being reported and the
@@ -1225,6 +1289,8 @@ is only a reference; the per-coefficient factors above come from the full covari
 
 ---
 
+
+
 ## Step 8 — systematic sensor bias (empirical, formal weighting) — Priority-2 #1
 
 A constant offset is added to one informative old-zone monitor (node 15) and the calibration is
@@ -1234,54 +1300,56 @@ error). The sweep is **two-sided**, because observations are censored at the sen
 negative offset is therefore not the mirror image of a positive one. Posterior SD of `k_w,old` with
 no offset (the random spread) = **0.1012**.
 
+
 | bias @ node 15 | old mean | old shift | shift / SD | avg mean | new mean | censored pts | ρ_Spearman | τ_Kendall | top-6 Jaccard |
-|---|---|---|---|---|---|---|---|---|---|
-| −0.100 | −1.4274 | −0.3869 | −3.82 | −0.1017 | −0.0498 | 13 | 1.000 | 0.990 | 1.00 |
-| −0.050 | −1.3028 | −0.2623 | −2.59 | −0.1033 | −0.0493 | 9 | 1.000 | 0.994 | 1.00 |
-| −0.025 | −1.1745 | −0.1339 | −1.32 | −0.1033 | −0.0500 | 8 | 1.000 | 0.996 | 1.00 |
-| 0.000 | −1.0405 | +0.0000 | +0.00 | −0.1028 | −0.0509 | 7 | 1.000 | 1.000 | 1.00 |
-| +0.025 | −0.9231 | +0.1174 | +1.16 | −0.1020 | −0.0519 | 6 | 1.000 | 0.994 | 1.00 |
-| +0.050 | −0.8192 | +0.2213 | +2.19 | −0.1013 | −0.0529 | 5 | 0.999 | 0.991 | 0.71 |
-| +0.100 | −0.6486 | +0.3919 | +3.87 | −0.0993 | −0.0551 | 5 | 0.999 | 0.988 | 0.71 |
+| -------------- | -------- | --------- | ---------- | -------- | -------- | ------------ | ---------- | --------- | ------------- |
+| −0.100         | −1.4274  | −0.3869   | −3.82      | −0.1017  | −0.0498  | 13           | 1.000      | 0.990     | 1.00          |
+| −0.050         | −1.3028  | −0.2623   | −2.59      | −0.1033  | −0.0493  | 9            | 1.000      | 0.994     | 1.00          |
+| −0.025         | −1.1745  | −0.1339   | −1.32      | −0.1033  | −0.0500  | 8            | 1.000      | 0.996     | 1.00          |
+| 0.000          | −1.0405  | +0.0000   | +0.00      | −0.1028  | −0.0509  | 7            | 1.000      | 1.000     | 1.00          |
+| +0.025         | −0.9231  | +0.1174   | +1.16      | −0.1020  | −0.0519  | 6            | 1.000      | 0.994     | 1.00          |
+| +0.050         | −0.8192  | +0.2213   | +2.19      | −0.1013  | −0.0529  | 5            | 0.999      | 0.991     | 0.71          |
+| +0.100         | −0.6486  | +0.3919   | +3.87      | −0.0993  | −0.0551  | 5            | 0.999      | 0.988     | 0.71          |
+
 
 Rank columns compare the 92-node risk field against the unbiased case; `top-6 Jaccard` compares the
 hot-spot sets.
 
-![Systematic bias pushes the calibrated coefficient](figures/step8_sensor_bias.png)
+Systematic bias pushes the calibrated coefficient
 
 Findings:
 
 1. **A systematic bias dominates the random spread by a factor of several.** A +0.05 mg/L offset at
-   node 15 moves `k_w,old` from −1.0405 to −0.8192 — **2.19 posterior SD**, away from the truth −1.0
+  node 15 moves `k_w,old` from −1.0405 to −0.8192 — **2.19 posterior SD**, away from the truth −1.0
    — and +0.10 mg/L at node 15 moves `k_w,old` by **3.87 posterior SD**. The review's claim that "a +0.05 mg/L offset shifts the estimate by
    more than the entire random spread" is confirmed, and understated. A positive bias (sensor
    over-reads) makes the fit infer *weaker* decay.
 2. **Only the locally-sensed coefficient moves.** `avg`/`new` shift by ≤0.004 across the whole ±0.10
-   sweep — the bias corrupts `old`, not the others.
+  sweep — the bias corrupts `old`, not the others.
 3. **The risk field is far more robust than the parameter.** At ±0.10, where `k_w,old` has moved
-   almost 4 posterior SD, the 92-node risk ranking still has Spearman 0.999 and Kendall ≥ 0.988
+  almost 4 posterior SD, the 92-node risk ranking still has Spearman 0.999 and Kendall ≥ 0.988
    against the unbiased case. The top-6 set is *unchanged* for every negative offset and loses one
    node at +0.05 and +0.10 (Jaccard 0.71). So an uncorrected sensor bias wrecks the coefficient while
    leaving the operational prioritisation nearly intact — which is reassuring operationally and a
    warning against reading the coefficient as physical.
 4. **Shape — the review is right, and our first answer was wrong.** Halving the offset
-   (0.05 → 0.025) retains **53%** of the shift: above the 50% that linearity would give, so the
+  (0.05 → 0.025) retains **53%** of the shift: above the 50% that linearity would give, so the
    response is sub-linear/**concave**, as the review states, though weaker than the ~70% it cites.
    An earlier version of this section reported *convex/39%*. That figure came from the informal GLUE
    score, whose flatness inverts the curvature as well as shrinking the shift. This is the third
    place where the informal score reverses a conclusion, after Steps 3 and 5c.
 5. **The response is asymmetric, and censoring is why.** `|negative| / |positive|` shift ratios are
-   1.14, 1.19 and 0.99 at ±0.025, ±0.05 and ±0.10, while the number of observations sitting on the
+  1.14, 1.19 and 0.99 at ±0.025, ±0.05 and ±0.10, while the number of observations sitting on the
    sensor floor runs 13 → 5 across the sweep. A negative offset pushes observations onto the floor,
    where a censored point carries different information from an unclipped one. Bias results must
    therefore always be quoted with their sign; a single ± figure is not meaningful.
 6. **Empirical counterpart to Step 7 Case C.** Fisher showed per-monitor offsets *absorb* the signal
-   (avg/new → unidentifiable); this run shows a real offset *biases* the most robustly informed
+  (avg/new → unidentifiable); this run shows a real offset *biases* the most robustly informed
    coefficient. A real bias would be estimable and correctable by reference sampling — the
    operational notebook's QA step; this quantifies the **uncorrected** impact. Only a constant offset
    is modelled here, not drift.
 
-**Why node 15, and does the location matter? (bias-location sweep, `step8c_bias_bynode.py`).** The
+**Why node 15, and does the location matter? (bias-location sweep,** `step8c_bias_bynode.py`**).** The
 same offsets were injected at each of the six monitors in turn (two per zone: new 107/113, old
 15/145, average 209/231), **two-sided** and under the **formal censored weighting**, 30 noise
 realisations, risk field taken as the median over them. Baseline (unbiased) formal means are
@@ -1290,14 +1358,14 @@ median of 7 observations already sitting on the sensor floor.
 
 Own-coefficient shift in posterior SD (the coefficient of the biased monitor's own zone):
 
-| biased node (zone) | own coef | −0.10 | −0.05 | +0.05 | +0.10 | largest cross-zone \|Δ\|/SD | top-6 Jaccard |
-|---|---|---|---|---|---|---|---|
-| 107 (new) | new | −3.84 | −1.92 | +1.85 | +3.62 | 1.85 (average) | 1.00 neg / 0.71 pos |
-| 113 (new) | new | **−4.44** | −2.24 | +2.08 | +3.97 | 2.02 (average) | 1.00 neg / 0.71 pos |
-| 15 (old) | old | −3.82 | −2.59 | +2.19 | +3.87 | 0.51 (new) | 1.00 neg / 0.71 pos |
-| 145 (old) | old | −3.31 | −1.89 | +1.59 | +2.95 | 0.80 (new) | 1.00 neg / 0.71 pos |
-| 209 (average) | average | −1.89 | −0.79 | +0.60 | +1.10 | 2.66 (new) | 1.00 except 0.71 at +0.10 |
-| 231 (average) | average | **−5.94** | −3.25 | +2.72 | +4.22 | 0.74 (new) | 1.00 throughout |
+| biased node (zone) | own coef | −0.10     | −0.05 | +0.05 | +0.10 | largest cross-zone |Δ|/SD | top-6 Jaccard             |
+| ------------------ | -------- | --------- | ----- | ----- | ----- | ------------------------- | ------------------------- |
+| 107 (new)          | new      | −3.84     | −1.92 | +1.85 | +3.62 | 1.85 (average)            | 1.00 neg / 0.71 pos       |
+| 113 (new)          | new      | **−4.44** | −2.24 | +2.08 | +3.97 | 2.02 (average)            | 1.00 neg / 0.71 pos       |
+| 15 (old)           | old      | −3.82     | −2.59 | +2.19 | +3.87 | 0.51 (new)                | 1.00 neg / 0.71 pos       |
+| 145 (old)          | old      | −3.31     | −1.89 | +1.59 | +2.95 | 0.80 (new)                | 1.00 neg / 0.71 pos       |
+| 209 (average)      | average  | −1.89     | −0.79 | +0.60 | +1.10 | 2.66 (new)                | 1.00 except 0.71 at +0.10 |
+| 231 (average)      | average  | **−5.94** | −3.25 | +2.72 | +4.22 | 0.74 (new)                | 1.00 throughout           |
 
 Across all 24 formal rows the 92-node risk ranking stays at Spearman **≥ 0.999** against the
 unbiased case (minimum 0.9993), so the columns above are the whole risk story: the full-network
@@ -1306,33 +1374,37 @@ ordering never moves, only the top-6 membership does.
 Findings (location matters, and not the way the earlier informal table suggested):
 
 1. **A bias mainly corrupts the coefficient of its own zone, but the leakage is not negligible.**
-   The largest shift is always the own-zone one, yet biasing a *new*-zone monitor moves `average` by
+  The largest shift is always the own-zone one, yet biasing a *new*-zone monitor moves `average` by
    up to 2.0 SD and biasing an *average*-zone monitor moves `new` by up to 2.7 SD. In absolute
    m/day the leakage is small; in units of the affected coefficient's own spread it is not. This is
    the `average`↔`new` confounding that Step 7's sloppiest eigen-direction identifies, seen from the
    data side.
 2. **The worst normalised corruption is not at node 15.** Measured in posterior SD the most damaging
-   single sensor is **231 (average zone): −5.94 SD at −0.10 mg/L**, followed by 113 (new, −4.44 SD);
+  single sensor is **231 (average zone): −5.94 SD at −0.10 mg/L**, followed by 113 (new, −4.44 SD);
    node 15 reaches −3.82 / +3.87 SD. Node 15 remains the right *headline* case for Step 8 — `old` is
    the physically dominant and most robustly identifiable coefficient — but it is not the worst
    location, and the earlier claim that "avg/new hardly respond" was an artefact of the informal
    weighting, which flattens exactly the coefficients that are weakly informed.
 3. **The two monitors within a zone differ** (113 > 107; 231 > 209; 15 > 145) — different local
-   sensitivity and information content, so *which* sensor drifts, not just which zone, changes the
+  sensitivity and information content, so *which* sensor drifts, not just which zone, changes the
    magnitude by up to 3× (231 against 209).
 4. **The response is sign-asymmetric**, and censoring is why: a negative offset pushes observations
-   onto the sensor floor (median censored count rises to 13 at node 15, −0.10) while a positive one
+  onto the sensor floor (median censored count rises to 13 at node 15, −0.10) while a positive one
    lifts them off it (down to 4–5). The negative shift is the larger one in eleven of the twelve
    node × magnitude pairs; the exception is node 15 at ±0.10 (−3.82 against +3.87), which is the same
    `|neg|/|pos| = 0.99` that Step 8's own sweep records at that magnitude. Bias results must be
    quoted with their sign.
 5. **The risk product is robust in ordering but not in its top-6 membership.** Spearman never falls
-   below 0.999, and every *negative* offset leaves the top-6 set intact; the *positive* offsets at
+  below 0.999, and every *negative* offset leaves the top-6 set intact; the *positive* offsets at
    the four new/old monitors, and +0.10 at 209, each replace one hot-spot (Jaccard 0.71). Only
    node 231 leaves the set untouched at every offset. So a single drifting sensor can reorder the
    margin of the hot-spot list without disturbing the network-scale pattern.
 
+
+
 ---
+
+
 
 ## Step 8b — k_b ± 20% (empirical partner to Fisher Case B; Priority-2 #5)
 
@@ -1345,38 +1417,42 @@ the **median over the 30 realisations**, so the ranking columns are not a single
 **Formal censored (primary).** Shift is against the `k_b = -0.5` row; `/SD` normalises it by that
 row's own posterior SD (old 0.1012, average 0.0136, new 0.0080 m/day).
 
-| k_b | ESS | k_w,old (shift, /SD) | k_w,avg (shift, /SD) | k_w,new (shift, /SD) | ρ_Spearman | top-6 Jaccard |
-|---|---|---|---|---|---|---|
-| -0.4 | 188 | -1.1078 (-0.0672, **-0.66**) | -0.1236 (-0.0208, **-1.53**) | -0.0635 (-0.0126, **-1.58**) | 0.976 | **0.50** |
-| -0.5 | 160 | -1.0405 (ref) | -0.1028 (ref) | -0.0509 (ref) | 1.000 | 1.00 |
-| -0.6 | 135 | -0.9835 (+0.0570, **+0.56**) | -0.0836 (+0.0192, **+1.41**) | -0.0390 (+0.0119, **+1.49**) | 0.933 | **0.50** |
+
+| k_b  | ESS | k_w,old (shift, /SD)         | k_w,avg (shift, /SD)         | k_w,new (shift, /SD)         | ρ_Spearman | top-6 Jaccard |
+| ---- | --- | ---------------------------- | ---------------------------- | ---------------------------- | ---------- | ------------- |
+| -0.4 | 188 | -1.1078 (-0.0672, **-0.66**) | -0.1236 (-0.0208, **-1.53**) | -0.0635 (-0.0126, **-1.58**) | 0.976      | **0.50**      |
+| -0.5 | 160 | -1.0405 (ref)                | -0.1028 (ref)                | -0.0509 (ref)                | 1.000      | 1.00          |
+| -0.6 | 135 | -0.9835 (+0.0570, **+0.56**) | -0.0836 (+0.0192, **+1.41**) | -0.0390 (+0.0119, **+1.49**) | 0.933      | **0.50**      |
+
 
 **Informal GLUE (comparator, threshold 0.107).** Same runs, same risk field, different weighting:
 
-| k_b | k_w,old (/SD) | k_w,avg (/SD) | k_w,new (/SD) | ρ_Spearman | top-6 Jaccard |
-|---|---|---|---|---|---|
-| -0.4 | -1.0741 (-0.15) | -0.1286 (-0.28) | -0.0613 (-0.40) | 0.976 | 0.50 |
-| -0.5 | -1.0368 (ref) | -0.1170 (ref) | -0.0517 (ref) | 1.000 | 1.00 |
-| -0.6 | -1.0086 (+0.11) | -0.1049 (+0.29) | -0.0422 (+0.40) | 0.946 | 0.50 |
 
-![k_b ±20% shifts the k_w estimates (bulk–wall compensation)](figures/step8b_kb_sensitivity.png)
+| k_b  | k_w,old (/SD)   | k_w,avg (/SD)   | k_w,new (/SD)   | ρ_Spearman | top-6 Jaccard |
+| ---- | --------------- | --------------- | --------------- | ---------- | ------------- |
+| -0.4 | -1.0741 (-0.15) | -0.1286 (-0.28) | -0.0613 (-0.40) | 0.976      | 0.50          |
+| -0.5 | -1.0368 (ref)   | -0.1170 (ref)   | -0.0517 (ref)   | 1.000      | 1.00          |
+| -0.6 | -1.0086 (+0.11) | -0.1049 (+0.29) | -0.0422 (+0.40) | 0.946      | 0.50          |
+
+
+k_b ±20% shifts the k_w estimates (bulk–wall compensation)
 
 Findings:
 
 1. **Bulk–wall compensation is confirmed empirically.** A weaker fixed k_b (−0.4) makes the fit
-   infer *stronger* wall decay (k_w more negative); a stronger k_b (−0.6) makes it *weaker*. Any
+  infer *stronger* wall decay (k_w more negative); a stronger k_b (−0.6) makes it *weaker*. Any
    error in the fixed k_b is absorbed into the k_w estimates (Priority-2 #5).
 2. **Magnitude — and this is where the weighting changes the verdict.** Under the formal likelihood
-   ±20% k_b moves `average` and `new` by **1.4–1.6 posterior SD** and `old` by 0.56–0.66 SD. Under
+  ±20% k_b moves `average` and `new` by **1.4–1.6 posterior SD** and `old` by 0.56–0.66 SD. Under
    the informal score the same runs give 0.28–0.40 and 0.11–0.15 SD, i.e. an understatement of
    **roughly four- to fivefold** (3.9× for `new`, 4.4× for `old`, 5.5× for `average`), because a flat
    score cannot follow the data. This is the same inertia documented
    in Steps 3, 5c and 8, and it is why the primary row must be the formal one.
 3. **The ordering across zones matches Fisher Case B.** Marginalising `k_b` inflates the CRLB by
-   1.2× for `old` but 1.8× for `average` and `new` (Step 7), and it is `average`/`new` that move
+  1.2× for `old` but 1.8× for `average` and `new` (Step 7), and it is `average`/`new` that move
    most here. The weakly-informed coefficients are the ones that absorb a bulk-decay error.
 4. **The broad spatial pattern survives; the operational shortlist does not.** Spearman over all
-   92 junctions stays high (0.976 at −0.4, 0.933 at −0.6). But the **top-6 Jaccard falls to 0.50 at
+  92 junctions stays high (0.976 at −0.4, 0.933 at −0.6). But the **top-6 Jaccard falls to 0.50 at
    both ±20%**: solving `x/(12−x) = 0.5` gives `x = 4`, so **four of the six reference hot-spots are
    retained and two are replaced** (at −0.4 the set becomes `131, 15, 143, 141, 139, 153`; at −0.6
    `131, 243, 20, 141, 127, 129`, against `131, 141, 129, 127, 15, 143` at the true `k_b`). Jaccard
@@ -1385,24 +1461,24 @@ Findings:
    dominated by the 86 low- and mid-risk junctions whose relative order barely moves, while the
    top-6 changes as soon as a few nodes swap across the 6th/7th boundary.
 5. **The sensitivity is present under both weightings, so it is not a weighting artefact.** The
-   informal comparator gives the *same* 0.50 at both ±20%. What the formal rule changes is the
+  informal comparator gives the *same* 0.50 at both ±20%. What the formal rule changes is the
    **parameter** displacement — 1.4–1.6 SD against 0.28–0.40 SD — not the hot-spot conclusion. This
    must not be presented as another case of the informal score reversing a result; it is a case of
    the informal score understating a magnitude.
 6. **Why the earlier "ranking robust" claim was wrong — and it was not mainly the weighting.** The
-   superseded version of this section asserted "Top nodes (131, 243, 141, …) are unchanged at every
+  superseded version of this section asserted "Top nodes (131, 243, 141, …) are unchanged at every
    k_b" directly beneath its own table, which listed `131, 141, 139` / `131, 129, 141` /
    `131, 243, 20` for the three `k_b` values. Those three sets are visibly different, and the quoted
    node list matches none of the rows. **The primary defect was a summary sentence that did not
    follow from the table above it**; the informal weighting and the single-seed ranking made it
    easier to miss, but they are not what made it false.
 7. **What to write.** `k_b` misspecification of ±20% substantially shifts the average/new
-   coefficients and **changes which nodes occupy the top-k operational shortlist**, while leaving the
+  coefficients and **changes which nodes occupy the top-k operational shortlist**, while leaving the
    full-network risk ordering broadly rank-correlated. A high whole-network Spearman must therefore
    **not** be quoted as evidence that the actionable hot-spot list is invariant. This closes
    Priority-2 #5 and gives Fisher Case B its empirical counterpart, as Step 8 does for Case C.
 8. **Open — is the instability at the boundary or in the core?** `6` is a chosen cut-off. Whether the
-   two replacements are nodes sitting close to the 6th/7th risk boundary (a cut-off artefact, with a
+  two replacements are nodes sitting close to the 6th/7th risk boundary (a cut-off artefact, with a
    stable high-risk core) or a genuine reshuffle of the leading nodes is **not** established here:
    this step stores only the top-6 set, not per-node rank changes or the risk gaps around rank 6.
    Reporting top-5/10/15 Jaccard, absolute rank changes and the deficit spacing near the boundary
@@ -1410,6 +1486,8 @@ Findings:
    sensitive", with no assertion about where within the shortlist.
 
 ---
+
+
 
 ## Step 8d — sensor DRIFT, a time-varying offset — Priority-2 #1, second half
 
@@ -1427,28 +1505,30 @@ b(t) = D · (t − t₀) / 48,        t ∈ [120, 168] h
 **Properties**:
 
 - The sensor reads correctly at the window start and is off by `D` at its end, so its **mean** offset
-  over the window is `D/2`.
+over the window is `D/2`.
 - A drift has both a mean and a shape. To separate them, every drift arm is run against **two
-  constant-bias controls on identical noise**: `const(D/2)`, the *mean-equivalent*, and `const(D)`,
-  the *end-equivalent*. If a drift lands on `const(D/2)` then only its mean matters and Step 8
-  already covers it; if it lands nearer `const(D)` the time structure matters in its own right.
+constant-bias controls on identical noise**: `const(D/2)`, the *mean-equivalent*, and `const(D)`,
+the *end-equivalent*. If a drift lands on `const(D/2)` then only its mean matters and Step 8
+already covers it; if it lands nearer `const(D)` the time structure matters in its own right.
 - Two-sided, for the same censoring reason as Step 8. Two locations: node 15 (old, the Step 8
-  headline) and node 231 (average, where Step 8c found the largest normalised corruption).
+headline) and node 231 (average, where Step 8c found the largest normalised corruption).
 
 Own-coefficient shift in posterior SD (baseline SDs old 0.1012, average 0.0136 m/day):
 
-| biased node | D | drift (0→D) | const(D/2) | const(D) | drift / const(D/2) | censored pts (drift) |
-|---|---|---|---|---|---|---|
-| 15 (old) | −0.100 | −2.34 | −2.59 | −3.82 | **0.90** | 10 |
-| 15 (old) | −0.050 | −1.17 | −1.32 | −2.59 | **0.89** | 8 |
-| 15 (old) | +0.050 | +1.05 | +1.16 | +2.19 | **0.90** | 6 |
-| 15 (old) | +0.100 | +1.99 | +2.19 | +3.87 | **0.91** | 6 |
-| 231 (average) | −0.100 | −3.19 | −3.25 | −5.94 | **0.98** | 7 |
-| 231 (average) | −0.050 | −1.52 | −1.55 | −3.25 | **0.98** | 7 |
-| 231 (average) | +0.050 | +1.41 | +1.44 | +2.72 | **0.98** | 7 |
-| 231 (average) | +0.100 | +2.68 | +2.72 | +4.22 | **0.99** | 7 |
 
-![Sensor drift against its mean- and end-equivalent constant-bias controls](figures/step8d_sensor_drift.png)
+| biased node   | D      | drift (0→D) | const(D/2) | const(D) | drift / const(D/2) | censored pts (drift) |
+| ------------- | ------ | ----------- | ---------- | -------- | ------------------ | -------------------- |
+| 15 (old)      | −0.100 | −2.34       | −2.59      | −3.82    | **0.90**           | 10                   |
+| 15 (old)      | −0.050 | −1.17       | −1.32      | −2.59    | **0.89**           | 8                    |
+| 15 (old)      | +0.050 | +1.05       | +1.16      | +2.19    | **0.90**           | 6                    |
+| 15 (old)      | +0.100 | +1.99       | +2.19      | +3.87    | **0.91**           | 6                    |
+| 231 (average) | −0.100 | −3.19       | −3.25      | −5.94    | **0.98**           | 7                    |
+| 231 (average) | −0.050 | −1.52       | −1.55      | −3.25    | **0.98**           | 7                    |
+| 231 (average) | +0.050 | +1.41       | +1.44      | +2.72    | **0.98**           | 7                    |
+| 231 (average) | +0.100 | +2.68       | +2.72      | +4.22    | **0.99**           | 7                    |
+
+
+Sensor drift against its mean- and end-equivalent constant-bias controls
 
 **Built-in cross-check.** The `const(D)` column reproduces Steps 8 and 8c exactly — node 15 at
 −0.10 gives −3.82 SD and at +0.10 gives +3.87 SD; node 231 at −0.10 gives −5.94 SD — and
@@ -1458,30 +1538,32 @@ scripts therefore agree on the shared conditions rather than merely being consis
 Findings:
 
 1. **A drift is, to a good approximation, its own mean.** The drift shift is **0.89–0.91** of the
-   mean-equivalent constant shift at node 15 and **0.98–0.99** at node 231 (the ratio reaches
+  mean-equivalent constant shift at node 15 and **0.98–0.99** at node 231 (the ratio reaches
    **0.9851** at D = +0.10), and roughly half the
    end-equivalent one. So a constant-bias analysis is not a different phenomenon from a drift: to
    within 1–11% it *is* the drift analysis, evaluated at the drift's mean. Step 8's sweep therefore
    transfers, and the comment's "bias, drift" pairing is answered rather than half-answered.
 2. **Where it departs from its mean, censoring is why.** Node 231's censored count is a flat 7 across
-   every arm and its ratio is 0.98–0.99; node 15's runs 6 → 10 → 13 across the arms and its ratio
+  every arm and its ratio is 0.98–0.99; node 15's runs 6 → 10 → 13 across the arms and its ratio
    drops to 0.90. A ramp spends only part of the window at the extreme offset, so it clips fewer
    observations than the constant bias of the same end value — and at an old-zone monitor, where the
    concentration is already near the sensor floor, that changes how much information the likelihood
    gets. The residual sits at 0.11–0.25 posterior SD for node 15 against 0.03–0.06 SD for node 231.
 3. **The departure is signed, not symmetric.** For negative `D` the drift does *less* damage than its
-   mean-equivalent (residual +0.15 to +0.25 SD toward the unbiased value); for positive `D` it does
+  mean-equivalent (residual +0.15 to +0.25 SD toward the unbiased value); for positive `D` it does
    *more* (−0.11 to −0.19 SD). Same asymmetry, same cause, as Steps 8 and 8c.
 4. **The risk product behaves exactly as under constant bias.** Spearman against the unbiased case is
-   ≥ 0.999 in all 24 arms; the top-6 set is unchanged everywhere except node 15 at +0.10 drift
+  ≥ 0.999 in all 24 arms; the top-6 set is unchanged everywhere except node 15 at +0.10 drift
    (Jaccard 0.71) — one node replaced, the same margin effect the positive constant offsets produce.
 5. **What this does and does not model.** Only a *linear* ramp within the assessment window is
-   tested, with a drift that starts at zero. A drift already part-developed at the start of the
+  tested, with a drift that starts at zero. A drift already part-developed at the start of the
    window is the `const(D₀) + ramp` case and is not run; nor is a step change, a non-monotone
    excursion, or a fouling curve. The claim supported is the narrow one: **for a monotone drift, the
    mean offset over the calibration window is what the estimate responds to.**
 
 ---
+
+
 
 ## Step 9 — sensitivity to zero-floor censoring (zero-clipped observations, L = 0)
 
@@ -1505,11 +1587,13 @@ SSE/RMSE, so the "naive" arm is the formal-Gaussian counterpart of the draft's R
 
 **Clipped-zero census (the actual calibration data):**
 
-| scope | clipped zeros | note |
-|---|---|---|
-| full record (6 × 169 h) | **43 / 1014** | the whole 168 h simulation |
-| calibration (6 × 49 post-warm-up h) | **10 / 294** | the points actually used to fit |
-| by node | 15 (old): 6, 145 (old): 3, 231 (average): 1 | old 9, average 1, new 0 |
+
+| scope                               | clipped zeros                               | note                            |
+| ----------------------------------- | ------------------------------------------- | ------------------------------- |
+| full record (6 × 169 h)             | **43 / 1014**                               | the whole 168 h simulation      |
+| calibration (6 × 49 post-warm-up h) | **10 / 294**                                | the points actually used to fit |
+| by node                             | 15 (old): 6, 145 (old): 3, 231 (average): 1 | old 9, average 1, new 0         |
+
 
 At the corrected warm-up the clipping is no longer confined to the old zone: one point now falls at
 an average-zone monitor. The concentration in the average zone has dropped far enough by 120 h to
@@ -1517,16 +1601,18 @@ reach the sensor floor occasionally, which the 24 h window never showed.
 
 **Naive-exact-0 vs censored-at-0 (median [IQR] over 30 noise realisations):**
 
-| coefficient | truth | naive median [IQR] | censored median [IQR] | Δ median |
-|---|---|---|---|---|
-| old | −1.0 | −1.0289 [−1.1180, −0.9700] | −1.0405 [−1.1324, −0.9850] | −0.0116 |
-| average | −0.1 | −0.1027 [−0.1122, −0.0952] | −0.1028 [−0.1122, −0.0953] | −0.00003 |
-| new | −0.05 | −0.0510 [−0.0566, −0.0434] | −0.0509 [−0.0564, −0.0433] | +0.00007 |
+
+| coefficient | truth | naive median [IQR]         | censored median [IQR]      | Δ median |
+| ----------- | ----- | -------------------------- | -------------------------- | -------- |
+| old         | −1.0  | −1.0289 [−1.1180, −0.9700] | −1.0405 [−1.1324, −0.9850] | −0.0116  |
+| average     | −0.1  | −0.1027 [−0.1122, −0.0952] | −0.1028 [−0.1122, −0.0953] | −0.00003 |
+| new         | −0.05 | −0.0510 [−0.0566, −0.0434] | −0.0509 [−0.0564, −0.0433] | +0.00007 |
+
 
 - node-15 fraction of hours below 0.2: naive `0.470` vs censored `0.470` (identical);
 - high-risk top-3 — ranked by expected time-fraction below 0.2 mg/L under the **formal-likelihood-
-  weighted ensemble** over all 8192 candidates: **131, 141, 129 — identical** under both estimators,
-  and now also identical to the primary risk map of Step 10, because both use the formal weighting;
+weighted ensemble** over all 8192 candidates: **131, 141, 129 — identical** under both estimators,
+and now also identical to the primary risk map of Step 10, because both use the formal weighting;
 - old profile 95% interval (baseline): naive `[−1.110, −0.850]` = censored `[−1.110, −0.850]`.
 
 The profile intervals above being *exactly* equal is a **resolution artefact of the grid**, not a
@@ -1537,26 +1623,26 @@ not quantised, does resolve it — run under both likelihoods on the same data i
 about 0.013–0.020 m/day toward stronger decay and the half-width grows from ±0.1772 to ±0.1807
 (+2.0%). `average` and `new` move by well under a percent of their half-widths. So the correct
 statement is: **grid-based profiles cannot resolve the censoring correction, whereas the continuous
-profile shows a modest shift and a slight widening, concentrated in `old`** — consistent in sign and
+profile shows a modest shift and a slight widening, concentrated in** `old` — consistent in sign and
 size with the weighted-mean comparison below.
 
-![Zero-clipping census (10/294) and the old profile at L=0: naive vs censored overlap](figures/step9_zeroclip.png)
+Zero-clipping census (10/294) and the old profile at L=0: naive vs censored overlap
 
 Findings:
 
 1. **10 of 294 calibration points are clipped, and they are concentrated in — but no longer confined
-   to — the old zone**: 9 at the old-zone monitors (15 and 145) and **1 at average-zone monitor 231**
+  to — the old zone**: 9 at the old-zone monitors (15 and 145) and **1 at average-zone monitor 231**
    (43 of 1014 over the full record). At the draft's superseded 24 h warm-up all 8 clipped points were
    in the old zone; at 120 h the average zone has depleted far enough to reach the sensor floor
    occasionally. The new zone still never clips.
-2. **The censoring correction is small but measurable, and it acts on `old` only.** The censored
-   likelihood moves the old median from −1.0289 to −1.0405, a shift of **−0.0116** m/day, and leaves
+2. **The censoring correction is small but measurable, and it acts on** `old` **only.** The censored
+  likelihood moves the old median from −1.0289 to −1.0405, a shift of **−0.0116** m/day, and leaves
    `average` and `new` unchanged to within 0.0001. Node-15 risk (0.470) and the top-3 risk ranking
    (131, 141, 129) are identical under both. So the draft's `max(0, ·)` + unweighted-RMSE choice did
    not bias the main conclusions — but "did not bias" is not "had no effect", and the effect it did
    have is the size of several other quantities discussed in this log.
 3. **The *grid* profile intervals being exactly equal is a resolution artefact, not a null result.**
-   Both estimators give `[−1.110, −0.850]` for `old` on the 21-point grid, which reads as perfect
+  Both estimators give `[−1.110, −0.850]` for `old` on the 21-point grid, which reads as perfect
    agreement. It is not: the grid steps 0.065 m/day in that direction, **five times** the −0.0116
    shift, so no grid-based interval could register it. The continuous profile (Step 7b) is not
    quantised and does register it — `old` = [−1.1720, −0.8106] censored against [−1.1517, −0.7973]
@@ -1564,7 +1650,7 @@ Findings:
    comparison and, if a profile is quoted at all, the continuous one; never present the coincident
    *grid* intervals as evidence of equivalence.
 4. **Why the effect is small here — and why that is not a general equivalence.** Two reasons specific
-   to this setup: (i) clipping is rare (`10/294 ≈ 3.4%`, so 284 uncensored points dominate the
+  to this setup: (i) clipping is rare (`10/294 ≈ 3.4%`, so 284 uncensored points dominate the
    likelihood); (ii) a clipped-0 point sits where the true concentration is already ≈ 0, so "exactly
    0" and "≤ 0" constrain a near-0 model `μ` in almost the same direction. This is an **empirical**
    result of the present experiment, **not** a theorem. A bias would appear if a larger fraction were
@@ -1572,7 +1658,7 @@ Findings:
    limit. Note also that the censoring fraction is **warm-up dependent** (8 points at 24 h, 10 at
    120 h) and would keep growing with a longer horizon, so it is not a fixed property of the design.
 5. **Reporting (≈ half a page).** State it as a robustness check with the correction quantified: the
-   clipping is rare, concentrated in the low-residual old zone, and shifts the old estimate by
+  clipping is rare, concentrated in the low-residual old zone, and shifts the old estimate by
    −0.012 m/day without changing node-15 risk or the risk ranking. Say that the censored likelihood
    is nevertheless what the analysis uses — it is the primary weighting throughout this revision, not
    a side check — and that a censoring-aware likelihood would become necessary if a future dataset
@@ -1599,7 +1685,11 @@ Findings:
 > likelihood would nevertheless become important if a larger fraction of observations were censored,
 > or if the instrument had a positive reporting limit.
 
+
+
 ---
+
+
 
 ## Step 10 — operational risk metrics (duration + depth) and water-age corroboration
 
@@ -1626,16 +1716,18 @@ water age       = EPANET AGE run (reaction-independent; hydraulic diagnostic)
 Each metric is a behavioural-weighted expectation `X̄_n = Σ_i w_i X_i,n`; 5–95 % bands are weighted
 ensemble quantiles (uncertainty is **not** collapsed). Ranked by expected cumulative deficit:
 
-| node | E[dur] h [5–95] | E[deficit] mg/L·h [5–95] | min C med [5–95] | mean age h |
-|---|---|---|---|---|
-| 131 | **48.0 [48.0, 48.0]** | **4.22 [4.11, 4.32]** | 0.034 [0.03, 0.03] | 70.2 |
-| 141 | 22.3 [20.0, 24.0] | 2.20 [2.08, 2.35] | 0.068 [0.06, 0.07] | 50.8 |
-| 139 | 22.0 [22.0, 22.0] | 1.82 [1.73, 1.91] | 0.102 [0.10, 0.11] | 53.8 |
-| 145 | 12.0 [12.0, 12.0] | 1.68 [1.62, 1.73] | 0.031 [0.03, 0.03] | 31.3 |
-| 15 | 22.0 [22.0, 22.0] | 1.38 [1.16, 1.59] | 0.055 [0.05, 0.06] | 38.9 |
-| 143 | 22.0 [22.0, 22.0] | 1.16 [0.95, 1.37] | 0.062 [0.06, 0.07] | 39.6 |
-| 129 | 24.0 [24.0, 24.0] | 0.84 [0.80, 0.88] | 0.147 [0.15, 0.15] | 53.2 |
-| 253 | 8.0 [8.0, 8.0] | 0.75 [0.72, 0.79] | 0.099 [0.09, 0.10] | 30.3 |
+
+| node | E[dur] h [5–95]       | E[deficit] mg/L·h [5–95] | min C med [5–95]   | mean age h |
+| ---- | --------------------- | ------------------------ | ------------------ | ---------- |
+| 131  | **48.0 [48.0, 48.0]** | **4.22 [4.11, 4.32]**    | 0.034 [0.03, 0.03] | 70.2       |
+| 141  | 22.3 [20.0, 24.0]     | 2.20 [2.08, 2.35]        | 0.068 [0.06, 0.07] | 50.8       |
+| 139  | 22.0 [22.0, 22.0]     | 1.82 [1.73, 1.91]        | 0.102 [0.10, 0.11] | 53.8       |
+| 145  | 12.0 [12.0, 12.0]     | 1.68 [1.62, 1.73]        | 0.031 [0.03, 0.03] | 31.3       |
+| 15   | 22.0 [22.0, 22.0]     | 1.38 [1.16, 1.59]        | 0.055 [0.05, 0.06] | 38.9       |
+| 143  | 22.0 [22.0, 22.0]     | 1.16 [0.95, 1.37]        | 0.062 [0.06, 0.07] | 39.6       |
+| 129  | 24.0 [24.0, 24.0]     | 0.84 [0.80, 0.88]        | 0.147 [0.15, 0.15] | 53.2       |
+| 253  | 8.0 [8.0, 8.0]        | 0.75 [0.72, 0.79]        | 0.099 [0.09, 0.10] | 30.3       |
+
 
 **Water age ↔ risk (all n = 92 junctions):** Spearman ρ = 0.73, descriptive association
 (spatial-block bootstrap 95% `[0.455, 0.897]`) for duration and `0.72` for deficit; Pearson `0.86`.
@@ -1650,10 +1742,12 @@ are nowhere near 92 independent samples.
 **Robustness of the pattern to the inference convention.** Both weightings give effectively the same
 operational answer, which is the question the review asked:
 
-| scheme | ESS | network-mean E[D] (h) | network-mean E[A] | top-10 overlap with primary |
-|---|---|---|---|---|
-| formal censored (primary) | 157 | 3.431 | 0.2181 | — |
-| informal GLUE | 4783 | 3.417 | 0.2207 | Jaccard 0.82 |
+
+| scheme                    | ESS  | network-mean E[D] (h) | network-mean E[A] | top-10 overlap with primary |
+| ------------------------- | ---- | --------------------- | ----------------- | --------------------------- |
+| formal censored (primary) | 157  | 3.431                 | 0.2181            | —                           |
+| informal GLUE             | 4783 | 3.417                 | 0.2207            | Jaccard 0.82                |
+
 
 The aggregate severity differs by 1.2% between schemes and eight of ten hot-spot nodes are shared.
 The node identities are, however, **more sensitive to the warm-up than to the weighting**: node 243,
@@ -1663,11 +1757,13 @@ previously ranked worst by deficit, leaves the top ten entirely at the corrected
 the largest consumer. 59 of the 92 junctions carry non-zero demand, totalling 192.6 L/s, so the
 choice matters and all three are reported rather than one being taken silently:
 
-| metric | unweighted (all 92) | consumer-only (59) | demand-weighted |
-|---|---|---|---|
-| `E[D]` (h) | 3.4309 | **4.4610** | **2.3554** |
-| `E[A]` (mg/L·h) | 0.2181 | 0.3053 | 0.1567 |
-| min C (mg/L) | 0.4922 | 0.4412 | 0.5297 |
+
+| metric          | unweighted (all 92) | consumer-only (59) | demand-weighted |
+| --------------- | ------------------- | ------------------ | --------------- |
+| `E[D]` (h)      | 3.4309              | **4.4610**         | **2.3554**      |
+| `E[A]` (mg/L·h) | 0.2181              | 0.3053             | 0.1567          |
+| min C (mg/L)    | 0.4922              | 0.4412             | 0.5297          |
+
 
 The two adjustments move in **opposite** directions, and the reason is a result in itself:
 consumer-only is *worse* than unweighted (4.46 vs 3.43 h) while demand-weighted is *better* (2.36 h).
@@ -1686,11 +1782,13 @@ metrics integrate the **hourly** report, so a dip beginning and ending inside on
 and trapezoidal integration of a binary indicator places any crossing at the midpoint between
 reports. The 12 highest-weight members were re-run at three reporting resolutions:
 
+
 | report step | points in window | network-mean `E[D]` (h) | network-mean `E[A]` | top-10 Jaccard vs hourly |
-|---|---|---|---|---|
-| 3600 s | 49 | 3.436 | 0.2180 | 1.00 |
-| 900 s | 193 | 3.374 | 0.2159 | 1.00 |
-| 300 s | 577 | 3.380 | 0.2164 | 1.00 |
+| ----------- | ---------------- | ----------------------- | ------------------- | ------------------------ |
+| 3600 s      | 49               | 3.436                   | 0.2180              | 1.00                     |
+| 900 s       | 193              | 3.374                   | 0.2159              | 1.00                     |
+| 300 s       | 577              | 3.380                   | 0.2164              | 1.00                     |
+
 
 Going from hourly to the solver's own 300 s changes `E[D]` by **−1.6%** and `E[A]` by **−0.7%**, and
 the top-10 set is identical. Two things are worth noting. The change is **negative**, so hourly
@@ -1700,30 +1798,30 @@ appears by 900 s and does not continue to 300 s, which is what convergence looks
 reporting is therefore adequate here**, and it is adequate because the chlorine field is smooth on
 the hour scale in this network, not because sub-hourly behaviour was assumed away.
 
-![Risk associated with water age; top nodes' expected duration with 5-95% bands](figures/step10_risk_metrics.png)
+Risk associated with water age; top nodes' expected duration with 5-95% bands
 
 Findings:
 
 1. **Duration and depth give different internal rankings within a broadly overlapping hotspot
-   cluster.** Node **131** is worst on both counts here (below 0.2 for the full 48 h *and* the
+  cluster.** Node **131** is worst on both counts here (below 0.2 for the full 48 h *and* the
    largest deficit at 4.22 mg/L·h), but below it the two metrics disagree: **145** is a *deep but
    short* risk (min C 0.031, only 12 h) while **129** is *long but shallow* (24 h, min C 0.147, the
    smallest deficit in the table). The cluster {131, 141, 139, 145, 15, 143, 129, 253} overlaps
    broadly across metrics while the internal order changes, which is the point of reporting duration
    and depth separately.
 2. **Ensemble uncertainty is much tighter than under the informal score.** With the formal weighting
-   the 5–95 % bands collapse to a fraction of their previous width (node 15: 22.0 [22.0, 22.0] h,
+  the 5–95 % bands collapse to a fraction of their previous width (node 15: 22.0 [22.0, 22.0] h,
    where the informal ensemble gave 8–24 h). That is the same efficiency gain seen in the parameters,
    propagated into the risk metrics: the earlier wide bands were mostly the weighting's inertia, not
    irreducible parameter uncertainty.
 3. **Water age gives hydraulic corroboration of the spatial pattern.** Mean water age is strongly
-   *associated* with both duration and deficit (Spearman 0.73, n = 92, spatial-block bootstrap
+  *associated* with both duration and deficit (Spearman 0.73, n = 92, spatial-block bootstrap
    [0.455, 0.897]); the
    worst nodes also have the longest residence times. This is corroboration, **not** validation:
    water age comes from the *same* hydraulic model (not an independent measurement), correlation is
    not causation, and residual chlorine also depends on wall decay, source dosing and tank mixing.
 4. **Water-age magnitudes are window-dependent (not steady state).** In this 72-h run the age field
-   is still filling (age at `t = 24 h` equals the elapsed 24 h for the leading nodes, and keeps rising
+  is still filling (age at `t = 24 h` equals the elapsed 24 h for the leading nodes, and keeps rising
    to `t = 72`), so the *absolute* mean age depends on the averaging window (post-warm-up mean 44.9 /
    40.2 h for 243/131; last-cycle mean 53.9 / 45.3 h) and differs from the draft's earlier single-
    window figures (≈ 36.0 / 34.6 h). The **rank** association is the robust, window-insensitive
@@ -1735,7 +1833,7 @@ Findings:
    never be quoted as steady-state values. The three window definitions are stored in
    `step10_risk_metrics.json` under `age_windows` so the choice is always explicit.
 5. **Interpretation, stated carefully.** The dominant decay term (old) is the *most robustly informed*
-   coefficient under the expanded realism analyses (Steps 4/7), and water age is reaction-independent;
+  coefficient under the expanded realism analyses (Steps 4/7), and water age is reaction-independent;
    so the leading hotspots are governed by residence time and the old-group decay rather than the
    weakly-informed avg/new coefficients. Consequently **parameter uncertainty affected the *magnitude*
    of the node-level risk metrics (see the 5–95 % bands) but did not materially change the leading
@@ -1743,7 +1841,11 @@ Findings:
    We do **not** claim the uncertainty "does not propagate" — it does, into the magnitudes; what is
    stable is the ordering of the top hotspots.
 
+
+
 ---
+
+
 
 ## Step 11 — leave-one-monitor-out (LOO) predictive validation
 
@@ -1760,36 +1862,40 @@ held-out pred RMSE  = √[ mean_t (pred_mean_m(t) − obs_m(t))² ]     compared
 coverage            = fraction of held-out hours inside the 90% band
 ```
 
-| held-out (zone) | k_old | k_avg | k_new | pred RMSE @m | 90% coverage |
-|---|---|---|---|---|---|
-| 107 (new) | -1.040 | -0.116 | -0.051 | 0.097 | 0.92 |
-| 113 (new) | -1.036 | -0.116 | -0.052 | 0.102 | 0.90 |
-| **15 (old)** | **-0.985** | -0.115 | -0.053 | 0.095 | 0.94 |
-| 145 (old) | -1.025 | -0.117 | -0.051 | 0.091 | 0.94 |
-| 209 (average) | -1.037 | -0.119 | -0.053 | 0.099 | 0.92 |
-| 231 (average) | -1.035 | -0.119 | -0.052 | 0.098 | 0.92 |
+
+| held-out (zone) | k_old      | k_avg  | k_new  | pred RMSE @m | 90% coverage |
+| --------------- | ---------- | ------ | ------ | ------------ | ------------ |
+| 107 (new)       | -1.040     | -0.116 | -0.051 | 0.097        | 0.92         |
+| 113 (new)       | -1.036     | -0.116 | -0.052 | 0.102        | 0.90         |
+| **15 (old)**    | **-0.985** | -0.115 | -0.053 | 0.095        | 0.94         |
+| 145 (old)       | -1.025     | -0.117 | -0.051 | 0.091        | 0.94         |
+| 209 (average)   | -1.037     | -0.119 | -0.053 | 0.099        | 0.92         |
+| 231 (average)   | -1.035     | -0.119 | -0.052 | 0.098        | 0.92         |
+
 
 (medians over 30 noise realisations; noise floor σ = 0.1 mg/L.)
 
-![LOO out-of-sample prediction error ≈ noise floor; held-out node-15 band covers the data](figures/step11_loo.png)
+LOO out-of-sample prediction error ≈ noise floor; held-out node-15 band covers the data
 
 Findings:
 
 1. **Out-of-sample prediction is at the noise floor.** Every held-out monitor is predicted with
-   RMSE ≈ 0.093–0.102 mg/L ≈ σ = 0.1 — i.e. the five-monitor calibration predicts the *unseen* sensor
+  RMSE ≈ 0.093–0.102 mg/L ≈ σ = 0.1 — i.e. the five-monitor calibration predicts the *unseen* sensor
    about as accurately as the measurement noise allows. No sign of over-fitting; the model
    generalises spatially.
 2. **Uncertainty is well-calibrated.** The 90 % predictive band (parameter + observation-noise
-   variance) covers 92–94 % of held-out hours — close to the nominal 90 %, slightly conservative.
+  variance) covers 92–94 % of held-out hours — close to the nominal 90 %, slightly conservative.
    So the reported uncertainty is trustworthy out-of-sample, not just in-sample.
 3. **Parameter stability confirms where the information lives.** k_avg/k_new are unchanged by dropping
-   any monitor (they are prior-dominated). k_old moves perceptibly **only when an old-zone monitor is
+  any monitor (they are prior-dominated). k_old moves perceptibly **only when an old-zone monitor is
    removed** (−1.041 → −0.986 without node 15; → −1.010 without node 145), and is unaffected by
    dropping new/avg monitors — exactly matching Fisher/profile, which locate old's information at
    monitors 15/145. Even then old stays within ~0.05 of the full-6 value.
 4. **But this is the easy case, and on its own it does not support the claim it was asked for.**
-   Every held-out monitor has a partner in the same zone, so the zone stays observed. Two harder
+  Every held-out monitor has a partner in the same zone, so the zone stays observed. Two harder
    tests were added.
+
+
 
 ### Step 11b — leave-one-ZONE-out: what happens when a zone becomes unobserved
 
@@ -1799,14 +1905,16 @@ sensor at all. This is the test that speaks to the actual claim.
 Both weightings are run: informal for continuity with Step 11a, formal so that the heterogeneous-truth
 test below differs from this one *only* in the truth.
 
-| scheme | zone dropped | monitors | `k_w,old` | `k_w,avg` | `k_w,new` | own-coef error | own SD retained | pred RMSE | 90% cov |
-|---|---|---|---|---|---|---|---|---|---|
-| informal | old | 15, 145 | **−0.850** | −0.115 | −0.052 | **+0.150** | **100%** | 0.100 | 0.96 |
-| informal | average | 209, 231 | −1.045 | **−0.120** | −0.054 | **−0.020** | **100%** | 0.099 | 0.93 |
-| informal | new | 107, 113 | −1.035 | −0.116 | **−0.052** | −0.002 | 95% | 0.100 | 0.92 |
-| formal | old | 15, 145 | **−0.851** | −0.102 | −0.051 | **+0.149** | **100%** | 0.100 | 0.96 |
-| formal | average | 209, 231 | −1.038 | **−0.120** | −0.050 | **−0.020** | **100%** | 0.099 | 0.92 |
-| formal | new | 107, 113 | −1.049 | −0.101 | **−0.049** | +0.001 | **57%** | 0.101 | 0.90 |
+
+| scheme   | zone dropped | monitors | `k_w,old`  | `k_w,avg`  | `k_w,new`  | own-coef error | own SD retained | pred RMSE | 90% cov |
+| -------- | ------------ | -------- | ---------- | ---------- | ---------- | -------------- | --------------- | --------- | ------- |
+| informal | old          | 15, 145  | **−0.850** | −0.115     | −0.052     | **+0.150**     | **100%**        | 0.100     | 0.96    |
+| informal | average      | 209, 231 | −1.045     | **−0.120** | −0.054     | **−0.020**     | **100%**        | 0.099     | 0.93    |
+| informal | new          | 107, 113 | −1.035     | −0.116     | **−0.052** | −0.002         | 95%             | 0.100     | 0.92    |
+| formal   | old          | 15, 145  | **−0.851** | −0.102     | −0.051     | **+0.149**     | **100%**        | 0.100     | 0.96    |
+| formal   | average      | 209, 231 | −1.038     | **−0.120** | −0.050     | **−0.020**     | **100%**        | 0.099     | 0.92    |
+| formal   | new          | 107, 113 | −1.049     | −0.101     | **−0.049** | +0.001         | **57%**         | 0.101     | 0.90    |
+
 
 **Finding, and it changes what the LOO result is worth.** Remove a zone's two monitors and that
 zone's coefficient **reverts to its prior midpoint** — `old` to −0.850 (prior mid −0.850) with 100% of
@@ -1833,10 +1941,10 @@ validation are the same problem seen twice.
 differs from Step 11a on purpose: predicting a truth value needs the parameter spread only, with no
 measurement-noise term, because there is no sensor there to add noise.
 
-| weighting | 90% coverage (normal approx.) | 90% coverage (weighted quantile) | mean \|pred − truth\| / mean\|truth\| |
-|---|---|---|---|
-| informal GLUE | 1.00 | 1.00 | 0.006 |
-| formal censored | 1.00 | 1.00 | 0.008 |
+| weighting       | 90% coverage (normal approx.) | 90% coverage (weighted quantile) | mean |pred − truth| / mean|truth| |
+| --------------- | ----------------------------- | -------------------------------- | --------------------------------- |
+| informal GLUE   | 1.00                          | 1.00                             | 0.006                             |
+| formal censored | 1.00                          | 1.00                             | 0.008                             |
 
 Nominal coverage is 0.90, so both schemes **over-cover**: the bands are conservative rather than
 calibrated. Mean prediction error at unmonitored junctions is 0.6–0.8% of the local concentration.
@@ -1853,11 +1961,13 @@ together — the combination the risk map actually relies on. Formal weighting, 
 from the formal rows of Step 11b is the truth. The coefficient error is measured against each field's
 own arithmetic zone mean, so it is not inflated by the heterogeneity itself.
 
+
 | zone dropped | own-coef error | own SD retained | pred RMSE | 90% cov | unmonitored rel. error |
-|---|---|---|---|---|---|
-| old | +0.139 | 100% | 0.098 | 0.96 | 0.008 |
-| average | −0.020 | 100% | 0.097 | 0.94 | 0.012 |
-| new | +0.012 | 55% | 0.102 | 0.88 | 0.011 |
+| ------------ | -------------- | --------------- | --------- | ------- | ---------------------- |
+| old          | +0.139         | 100%            | 0.098     | 0.96    | 0.008                  |
+| average      | −0.020         | 100%            | 0.097     | 0.94    | 0.012                  |
+| new          | +0.012         | 55%             | 0.102     | 0.88    | 0.011                  |
+
 
 **The structural discrepancy adds almost nothing on top of losing the sensors.** Compare row by row
 with the formal rows of Step 11b: coefficient errors +0.139 / −0.020 / +0.012 against +0.149 / −0.020
@@ -1881,6 +1991,8 @@ succeeds while a coefficient sits at its prior. The honest summary is that **spa
 parameter identification are separately valid claims here, and only the first of them is supported.**
 
 ---
+
+
 
 ## Step 12 — operational temperature / ageing scenario projection (WSP application)
 
@@ -1913,18 +2025,20 @@ E[A(s,n)]  = Σᵢ wᵢ · ∫ max(0, C_crit − C) dt     (mg/L·h)
 **Properties**:
 
 - `P_min` = probability the node dips below `0.2 mg/L` **at least once** in the window;
-  `P_bar` = probability a randomly chosen hour is below it. `P_min ≥ P_bar` always.
+`P_bar` = probability a randomly chosen hour is below it. `P_min ≥ P_bar` always.
 - The window is **48 h** (`t = 120…168`, post warm-up), so `P_min` is a 48-hour window
-  minimum, **not** a 24-hour "daily minimum". For otherwise identical trajectories a
-  48-hour window-breach probability **cannot be lower** than the corresponding probability
-  on a nested 24-hour window, and the two are **equal** whenever the diurnal pattern
-  repeats. Window length is therefore only a secondary reason not to compare with the
-  supervisor's figures; the primary reasons are the different parameterisation, monitoring
-  array, ensemble and simulation set-up.
+minimum, **not** a 24-hour "daily minimum". For otherwise identical trajectories a
+48-hour window-breach probability **cannot be lower** than the corresponding probability
+on a nested 24-hour window, and the two are **equal** whenever the diurnal pattern
+repeats. Window length is therefore only a secondary reason not to compare with the
+supervisor's figures; the primary reasons are the different parameterisation, monitoring
+array, ensemble and simulation set-up.
 - "`P_min > 0.5` nodes" counts over all 92 junctions; "indeterminate" is `0.05 < P_min < 0.95`;
-  "demand at risk" sums base demand over junctions with `P_min > 0.5` (zero-demand nodes
-  contribute 0); "network mean" of `E[D]` / `E[A]` is the **unweighted arithmetic mean over
-  all 92 junctions**, in `h` and `mg/L·h` respectively.
+"demand at risk" sums base demand over junctions with `P_min > 0.5` (zero-demand nodes
+contribute 0); "network mean" of `E[D]` / `E[A]` is the **unweighted arithmetic mean over
+all 92 junctions**, in `h` and `mg/L·h` respectively.
+
+
 
 ### 12.2 Scenario construction
 
@@ -1950,24 +2064,26 @@ inside the stated `8–24 °C` validity window; realised temperatures span `8.48
 needed resampling. All of these are recorded in `step12_scenarios.json` rather than only printed,
 so they can be checked.
 
-| key | label | mean water T | ageing multipliers `α` |
-|---|---|---|---|
-| A | Baseline 12 °C | 12 °C | all 1.00 |
-| B | Warm season 16 °C | 16 °C | all 1.00 |
-| C | Heatwave 20 °C | 20 °C | all 1.00 |
-| D | Heatwave + ageing stress | 20 °C | new 1.00 / avg 1.35 / old 1.85 |
+
+| key | label                    | mean water T | ageing multipliers `α`         |
+| --- | ------------------------ | ------------ | ------------------------------ |
+| A   | Baseline 12 °C           | 12 °C        | all 1.00                       |
+| B   | Warm season 16 °C        | 16 °C        | all 1.00                       |
+| C   | Heatwave 20 °C           | 20 °C        | all 1.00                       |
+| D   | Heatwave + ageing stress | 20 °C        | new 1.00 / avg 1.35 / old 1.85 |
+
 
 **Assumptions to state in the thesis**:
 
 - Calibrated coefficients are **effective parameters at an illustrative reference temperature**
-  `T_ref = 12 °C`; this is inherited from the supervisor's material, **not** measured from Net3.
+`T_ref = 12 °C`; this is inherited from the supervisor's material, **not** measured from Net3.
 - Ageing multipliers are **escalation-only stress-test inputs** (`α ≥ 1`), not asset records.
-  Because the baseline model already distinguishes new/average/old `k_w`, `α_new < 1` is not
-  used — it would weaken already-weak new pipes and double-count the zone structure. Scenario
-  D is therefore named an *ageing-reactivity stress*, not "the effect of ageing".
+Because the baseline model already distinguishes new/average/old `k_w`, `α_new < 1` is not
+used — it would weaken already-weak new pipes and double-count the zone structure. Scenario
+D is therefore named an *ageing-reactivity stress*, not "the effect of ageing".
 - `C_crit = 0.2 mg/L` and the demand-based consequence terciles (`1.16`, `3.39 L/s`) are
-  illustrative operational inputs, not legal limits. Demand is a **consequence proxy**, not
-  population or exposure.
+illustrative operational inputs, not legal limits. Demand is a **consequence proxy**, not
+population or exposure.
 
 **Numerical guard (important).** Zonal `k_w` are clipped to `CLIP_LO = −8.0 m/day` purely as a
 solver guard. An earlier run used `−3.0`, which was **active for 46.8 % of members in scenario
@@ -1986,12 +2102,14 @@ Any future change to the priors or to `α` must re-check this assertion.
 All means below are weighted by the **formal censored likelihood** (the primary scheme from Step 1);
 the informal GLUE score is not used for these headline numbers.
 
-| Scenario | mean k_b | mean k_w,old | `P_min>0.5` nodes | demand at risk | % demand | high/very-high | indeterminate | net-mean `P_bar` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| A. Baseline 12 °C | −0.504 | −0.994 | 21 | 36.3 L/s | 18.8 % | 10 | 0 | 0.0708 | 3.398 | 0.2216 |
-| B. Warm season 16 °C | −0.655 | −1.222 | 28 | 45.0 L/s | 23.4 % | 13 | 8 | 0.0884 | 4.245 | 0.3645 |
-| C. Heatwave 20 °C | −0.848 | −1.501 | 29 | 47.8 L/s | 24.8 % | 14 | 4 | 0.1087 | 5.218 | 0.5218 |
-| D. Heatwave + ageing stress | −0.848 | −2.777 | 31 | 49.4 L/s | 25.6 % | 15 | 4 | 0.1232 | 5.912 | 0.5790 |
+
+| Scenario                    | mean k_b | mean k_w,old | `P_min>0.5` nodes | demand at risk | % demand | high/very-high | indeterminate | net-mean `P_bar` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
+| --------------------------- | -------- | ------------ | ----------------- | -------------- | -------- | -------------- | ------------- | ---------------- | ------------------- | ------------------------ |
+| A. Baseline 12 °C           | −0.504   | −0.994       | 21                | 36.3 L/s       | 18.8 %   | 10             | 0             | 0.0708           | 3.398               | 0.2216                   |
+| B. Warm season 16 °C        | −0.655   | −1.222       | 28                | 45.0 L/s       | 23.4 %   | 13             | 8             | 0.0884           | 4.245               | 0.3645                   |
+| C. Heatwave 20 °C           | −0.848   | −1.501       | 29                | 47.8 L/s       | 24.8 %   | 14             | 4             | 0.1087           | 5.218               | 0.5218                   |
+| D. Heatwave + ageing stress | −0.848   | −2.777       | 31                | 49.4 L/s       | 25.6 %   | 15             | 4             | 0.1232           | 5.912               | 0.5790                   |
+
 
 Continuity check against Steps 1–11: with the temperature held at `T_ref` exactly (cached
 `C_all`, no `δT`), the baseline gives 21 nodes / 36.3 L/s and `E[A] = 0.2181`. Sampling the
@@ -1999,24 +2117,22 @@ stated temperature uncertainty therefore did **not materially change** the basel
 classification — the `P_min>0.5` count and demand at risk are unchanged and network-mean
 `E[A]` moves by under 2 % (`0.2181 → 0.2216`).
 
-![Four-panel window-breach probability maps](figures/step12_scenario_maps.png)
-
-![Ageing increment ΔP_min = P(D) − P(C) at 20 °C](figures/step12_ageing_delta.png)
-
-![Scenario escalation, dosing evaluation and ageing sensitivity](figures/step12_summary.png)
+Four-panel window-breach probability mapsAgeing increment ΔP_min = P(D) − P(C) at 20 °CScenario escalation, dosing evaluation and ageing sensitivity
 
 **Escalation.** Seven consumer junctions change risk band between A and D, carrying 18.9 L/s
 (10 % of network demand); **six of the seven are unmonitored**. The largest ageing-only
 increments at the same temperature (D − C) are nodes 217 (`ΔP_min = +0.346`), 239 (`+0.155`)
 and 215 (`+0.091`).
 
-**Ageing-stress sensitivity — is scenario D an artefact of `α_old = 1.85`?**
+**Ageing-stress sensitivity — is scenario D an artefact of** `α_old = 1.85`**?**
+
 
 | ageing set | `α_avg` | `α_old` | `P_min>0.5` nodes | demand at risk | high/very-high | indeterminate | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
-|---|---|---|---|---|---|---|---|---|
-| mild | 1.15 | 1.40 | 30 | 49.4 L/s | 15 | 4 | 5.515 | 0.550 |
-| central | 1.35 | 1.85 | 31 | 49.4 L/s | 15 | 4 | 5.912 | 0.579 |
-| severe | 1.50 | 2.20 | 31 | 49.4 L/s | 16 | 4 | 6.178 | 0.599 |
+| ---------- | ------- | ------- | ----------------- | -------------- | -------------- | ------------- | ------------------- | ------------------------ |
+| mild       | 1.15    | 1.40    | 30                | 49.4 L/s       | 15             | 4             | 5.515               | 0.550                    |
+| central    | 1.35    | 1.85    | 31                | 49.4 L/s       | 15             | 4             | 5.912               | 0.579                    |
+| severe     | 1.50    | 2.20    | 31                | 49.4 L/s       | 16             | 4             | 6.178               | 0.599                    |
+
 
 The **headline binary metrics are nearly insensitive** to the tested multiplier range: the count
 varies only from 30 to 31, demand at risk stays at 49.4 L/s and the indeterminate count is
@@ -2031,11 +2147,13 @@ The dose scales **both** the reservoir source quality and the tank initial quali
 source regime is raised consistently. (An earlier run left tanks fixed at `0.5 mg/L`, which
 confounded the result with an un-dosed boundary condition.) `inlet = 1.00` reuses scenario C.
 
+
 | inlet (mg/L) | `P_min>0.5` nodes | demand at risk | % demand | net-mean `P_min` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) | median-over-nodes of mean window min (mg/L) |
-|---|---|---|---|---|---|---|---|
-| 1.00 | 29 | 47.8 L/s | 24.8 % | 0.3246 | 5.218 | 0.5218 | 0.463 |
-| 1.15 | 28 | 45.0 L/s | 23.4 % | 0.3112 | 4.628 | 0.4527 | 0.532 |
-| 1.30 | 28 | 45.0 L/s | 23.4 % | 0.2915 | 4.288 | 0.3957 | 0.601 |
+| ------------ | ----------------- | -------------- | -------- | ---------------- | ------------------- | ------------------------ | ------------------------------------------- |
+| 1.00         | 29                | 47.8 L/s       | 24.8 %   | 0.3246           | 5.218               | 0.5218                   | 0.463                                       |
+| 1.15         | 28                | 45.0 L/s       | 23.4 %   | 0.3112           | 4.628               | 0.4527                   | 0.532                                       |
+| 1.30         | 28                | 45.0 L/s       | 23.4 %   | 0.2915           | 4.288               | 0.3957                   | 0.601                                       |
+
 
 (The last column takes, per junction, the likelihood-weighted mean of the per-member window minimum,
 then the median across the 92 junctions — it is **not** a pooled member-node median. It scales
@@ -2044,8 +2162,8 @@ almost exactly with the dose, `0.463 × 1.15 = 0.532`, `0.463 × 1.30 = 0.601`.)
 **Linearity known-answer test.** Measured `max |C(1.3) − 1.3·C(1.0)| = 1.4e-05 mg/L`. Stated
 precisely: *under fixed hydraulics and demands, first-order bulk and wall kinetics, and
 proportional scaling of all source and initial chlorine concentrations, increasing the dose by a
-factor `r` is mathematically equivalent to evaluating the unscaled concentration field against a
-threshold `C_crit / r`.* This equivalence is a property of that idealisation — it does **not**
+factor* `r` *is mathematically equivalent to evaluating the unscaled concentration field against a
+threshold* `C_crit / r`*.* This equivalence is a property of that idealisation — it does **not**
 imply that dosing is linear in a real network with dose-dependent chemistry, DBP formation or
 booster constraints.
 
@@ -2056,11 +2174,13 @@ comparator: the rows below measure **what the draft's warm-up cost**, not whethe
 is adequate. Identical 275-member subset (stride 8), identical weights and identical `(E_a, δT)`
 draws; only the simulation horizon differs.
 
+
 | inlet (mg/L) | nodes short / long | demand at risk short / long | `E[D]` short / long (h) | `E[A]` short / long (mg/L·h) | rel. change |
-|---|---|---|---|---|---|
-| 1.00 | 31 / 31 | 49.5 / 49.5 L/s | 5.370 / 5.389 | 0.5052 / 0.5484 | +8.6 % |
-| 1.15 | 29 / 29 | 45.2 / 47.8 L/s | 4.655 / 4.788 | 0.4306 / 0.4789 | +11.2 % |
-| 1.30 | 29 / 28 | 45.2 / 45.0 L/s | 4.040 / 4.369 | 0.3736 / 0.4220 | +13.0 % |
+| ------------ | ------------------ | --------------------------- | ----------------------- | ---------------------------- | ----------- |
+| 1.00         | 31 / 31            | 49.5 / 49.5 L/s             | 5.370 / 5.389           | 0.5052 / 0.5484              | +8.6 %      |
+| 1.15         | 29 / 29            | 45.2 / 47.8 L/s             | 4.655 / 4.788           | 0.4306 / 0.4789              | +11.2 %     |
+| 1.30         | 29 / 28            | 45.2 / 45.0 L/s             | 4.040 / 4.369           | 0.3736 / 0.4220              | +13.0 %     |
+
 
 Read honestly, with one caveat that has grown: the subset is now less representative than before
 (long-horizon subset `E[A] = 0.5484` against the full ensemble's `0.5218`, a 5 % gap, because the
@@ -2087,20 +2207,24 @@ and bands, escalation flag, monitor flag, sampling priority and control-measure 
 **Classification rules (put these in Methods or an appendix — the register is not reproducible
 without them).**
 
-| likelihood band | on `P_min` | score |
-|---|---|---|
-| rare | `< 0.05` | 1 |
-| unlikely | `0.05 – 0.20` | 2 |
-| possible | `0.20 – 0.50` | 3 |
-| likely | `0.50 – 0.80` | 4 |
-| almost certain | `≥ 0.80` | 5 |
+
+| likelihood band | on `P_min`    | score |
+| --------------- | ------------- | ----- |
+| rare            | `< 0.05`      | 1     |
+| unlikely        | `0.05 – 0.20` | 2     |
+| possible        | `0.20 – 0.50` | 3     |
+| likely          | `0.50 – 0.80` | 4     |
+| almost certain  | `≥ 0.80`      | 5     |
+
+
 
 | consequence band | on base demand `d` (L/s) | score |
-|---|---|---|
-| non-consumer | `d = 0` | 0 |
-| minor | `0 < d ≤ 1.16` | 1 |
-| moderate | `1.16 < d ≤ 3.39` | 2 |
-| major | `d > 3.39` | 3 |
+| ---------------- | ------------------------ | ----- |
+| non-consumer     | `d = 0`                  | 0     |
+| minor            | `0 < d ≤ 1.16`           | 1     |
+| moderate         | `1.16 < d ≤ 3.39`        | 2     |
+| major            | `d > 3.39`               | 3     |
+
 
 Terciles are the `1/3` and `2/3` quantiles of base demand over the **59 junctions with non-zero
 demand** (WNTR parses the `.inp` and stores every demand internally in **m³/s**, so `×1000` gives
@@ -2133,20 +2257,20 @@ altering the assumed age profile; calibration record exceeding its approved age.
 ### 12.6 Findings for the Results / Discussion
 
 1. **Temperature escalates risk materially but does not flatten the network.** `P_min>0.5`
-   nodes rise 21 → 28 → 29 from 12 → 16 → 20 °C; demand at risk 18.8 % → 24.8 %; network-mean
+  nodes rise 21 → 28 → 29 from 12 → 16 → 20 °C; demand at risk 18.8 % → 24.8 %; network-mean
    `E[A]` more than doubles (0.222 → 0.522 mg/L·h).
 2. **Ageing at the same temperature adds a spatially selective increment** (29 → 31 nodes;
-   `E[A]` 0.487 → 0.548), concentrated where old/average pipes control the supply path. The
+  `E[A]` 0.487 → 0.548), concentrated where old/average pipes control the supply path. The
    hot-spot set is robust across the tested `α` range (31–32 nodes, 49.5 L/s), while the
    severity magnitude scales with `α` — report it as a stress range, not as a measured effect.
 3. **The escalating nodes are almost all unmonitored** (7 of 8), which is an argument for
-   information-led monitoring design rather than for more monitoring in general.
+  information-led monitoring design rather than for more monitoring in general.
 4. **Source dosing is an incomplete control.** +30 % inlet dose improves every continuous
-   metric but does not return demand-at-risk to baseline. Under the idealisation of fixed
+  metric but does not return demand-at-risk to baseline. Under the idealisation of fixed
    hydraulics, first-order kinetics and proportional source scaling, dosing by `r` is exactly
    equivalent to testing against `C_crit / r`; it cannot buy back residence time.
 5. **Scenario maps are planning products outside the calibrated regime.** The Arrhenius form,
-   `T_ref` and `α_g` are assumptions; unlike the Step-11 LOO check, these projections cannot be
+  `T_ref` and `α_g` are assumptions; unlike the Step-11 LOO check, these projections cannot be
    verified against held-out chlorine observations. Absolute severity metrics are additionally
    horizon-dependent (paired warm-up test, §12.4).
 
@@ -2155,6 +2279,8 @@ Outputs: `figures/step12_scenario_maps.png`, `figures/step12_ageing_delta.png`,
 `baseline_cache/step12_risk_register.csv`.
 
 ---
+
+
 
 ## Step 13 — known-answer test: are the coefficients realised as we set them? (Priority-2 #7)
 
@@ -2178,13 +2304,15 @@ C = C0 · exp(k_b · t_res),     t_res = L / v
 
 - Units: `k_b` in 1/s after conversion, `t_res` in s, `C` in mg/L.
 - The test is a *unit* test in the literal sense: a wrong conversion factor changes `C` by a
-  constant relative amount at every `k_b`.
+constant relative amount at every `k_b`.
+
 
 | `k_b` (1/day) | `t_res` (h) | EPANET `C` | analytic `C` | relative error |
-|---|---|---|---|---|
-| −0.50 | 0.3927 | 0.991845 | 0.991852 | 6.8 × 10⁻⁶ |
-| −1.00 | 0.3927 | 0.983744 | 0.983771 | 2.7 × 10⁻⁵ |
-| −2.00 | 0.3927 | 0.967699 | 0.967805 | 1.1 × 10⁻⁴ |
+| ------------- | ----------- | ---------- | ------------ | -------------- |
+| −0.50         | 0.3927      | 0.991845   | 0.991852     | 6.8 × 10⁻⁶     |
+| −1.00         | 0.3927      | 0.983744   | 0.983771     | 2.7 × 10⁻⁵     |
+| −2.00         | 0.3927      | 0.967699   | 0.967805     | 1.1 × 10⁻⁴     |
+
 
 Worst relative error **1.1 × 10⁻⁴** against a 10⁻³ tolerance. The error *grows with the amount of
 decay* across a fourfold range of `k_b`, which is the signature of the quality solver's time
@@ -2217,6 +2345,8 @@ problem and not about a units mistake.
 
 ---
 
+
+
 ## Step 14 — repeated-noise calibration: bias, CRLB consistency, interval coverage
 
 Every formal posterior quoted elsewhere in this log (except where a step already averages over noise)
@@ -2240,29 +2370,31 @@ Headline calibration (old / average / new): empirical SD / CRLB ≈ 1.04 / 1.06 
 
 **Primary — formal censored** (100/100 valid):
 
-| coef | truth | E[post. mean] | bias | bias / emp. SD | emp. SD of mean | within-run SD | within/emp | CRLB | emp/CRLB | cov90 | cov95 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| old | −1.00 | −1.0055 | −0.0055 | −0.06 | 0.0981 | 0.0960 | 0.98 | 0.0947 | 1.04 | 0.89 | 0.97 |
-| average | −0.10 | −0.1021 | −0.0021 | −0.15 | 0.0144 | 0.0137 | 0.95 | 0.0135 | 1.06 | 0.88 | 0.96 |
-| new | −0.05 | −0.0498 | +0.0002 | +0.02 | 0.0089 | 0.0079 | 0.89 | 0.0080 | 1.12 | 0.85 | 0.91 |
+
+| coef    | truth | E[post. mean] | bias    | bias / emp. SD | emp. SD of mean | within-run SD | within/emp | CRLB   | emp/CRLB | cov90 | cov95 |
+| ------- | ----- | ------------- | ------- | -------------- | --------------- | ------------- | ---------- | ------ | -------- | ----- | ----- |
+| old     | −1.00 | −1.0055       | −0.0055 | −0.06          | 0.0981          | 0.0960        | 0.98       | 0.0947 | 1.04     | 0.89  | 0.97  |
+| average | −0.10 | −0.1021       | −0.0021 | −0.15          | 0.0144          | 0.0137        | 0.95       | 0.0135 | 1.06     | 0.88  | 0.96  |
+| new     | −0.05 | −0.0498       | +0.0002 | +0.02          | 0.0089          | 0.0079        | 0.89       | 0.0080 | 1.12     | 0.85  | 0.91  |
+
 
 **Comparator — informal GLUE** (threshold 0.107): bias/emp. SD up to −1.76 (`average`); within-run SD
 is **~4.6–4.7×** the formal width; cov90 ≈ 0.98–0.99. High coverage is bought by width, not by
 accuracy.
 
-![Repeated-noise calibration](figures/step14_repeated_noise.png)
+Repeated-noise calibration
 
 Findings:
 
 1. **Under the synthetic generative model the formal posterior mean is essentially unbiased** — every
-   bias is a small fraction of the estimator's own sampling SD.
+  bias is a small fraction of the estimator's own sampling SD.
 2. **The formal posterior spread is locally consistent with the Case-A CRLB** (emp/CRLB ≈ 1.04–1.12;
-   within-run SD / CRLB ≈ 1.00–1.01). This is a consistency check, not a proof of frequentist
+  within-run SD / CRLB ≈ 1.00–1.01). This is a consistency check, not a proof of frequentist
    efficiency: both quantities use the same model, truth and error assumptions.
 3. **Nominal intervals are close to calibrated** at 90%/95% for old and average; `new` is slightly
-   under-covered at 90% (0.85), consistent with its smaller ESS footprint and the shared-library
+  under-covered at 90% (0.85), consistent with its smaller ESS footprint and the shared-library
    coarseness.
 4. **The informal comparator is not a calibrated tight interval** — it over-covers by being several
-   times wider, which is the same inefficiency diagnosed in Steps 1–3 and 7.
+  times wider, which is the same inefficiency diagnosed in Steps 1–3 and 7.
 
 Outputs: `figures/step14_repeated_noise.png`, `baseline_cache/step14_repeated_noise.json`.

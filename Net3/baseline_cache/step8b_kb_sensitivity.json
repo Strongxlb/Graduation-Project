@@ -12,6 +12,69 @@
   "n_noise": 30,
   "informal_threshold": 0.107,
   "risk_ranking_basis": "median risk field over the 30 noise realisations",
+  "topk_note": "TOP_K = 6 is a chosen cut-off; the same comparison is reported at k = 3, 5, 6, 10, 15, together with per-node rank changes and the reference rank of every node that enters the leading set, so a cut-off effect can be told apart from a reshuffle of the leading nodes",
+  "reference_risk_profile_top12": [
+    {
+      "rank": 1,
+      "node": "131",
+      "risk": 0.9999978002473424
+    },
+    {
+      "rank": 2,
+      "node": "141",
+      "risk": 0.4995551591462625
+    },
+    {
+      "rank": 3,
+      "node": "129",
+      "risk": 0.48979591836734576
+    },
+    {
+      "rank": 4,
+      "node": "127",
+      "risk": 0.4699095133304978
+    },
+    {
+      "rank": 5,
+      "node": "15",
+      "risk": 0.4695909720551671
+    },
+    {
+      "rank": 6,
+      "node": "143",
+      "risk": 0.4694105791358
+    },
+    {
+      "rank": 7,
+      "node": "139",
+      "risk": 0.4489795918367337
+    },
+    {
+      "rank": 8,
+      "node": "20",
+      "risk": 0.38573716568452177
+    },
+    {
+      "rank": 9,
+      "node": "153",
+      "risk": 0.3673469387755095
+    },
+    {
+      "rank": 10,
+      "node": "125",
+      "risk": 0.3673469387755087
+    },
+    {
+      "rank": 11,
+      "node": "145",
+      "risk": 0.2656072267431644
+    },
+    {
+      "rank": 12,
+      "node": "243",
+      "risk": 0.26140843396875546
+    }
+  ],
   "rows": [
     {
       "kb": -0.4,
@@ -43,7 +106,43 @@
             "new": -1.5765605516708399
           },
           "risk_spearman_vs_kb_ref": 0.9755073692363119,
-          "risk_top6_jaccard_vs_kb_ref": 0.5
+          "risk_top6_jaccard_vs_kb_ref": 0.5,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 0.2,
+            "top5": 0.42857142857142855,
+            "top6": 0.5,
+            "top10": 0.5384615384615384,
+            "top15": 0.6666666666666666
+          },
+          "entered_top6": [
+            {
+              "node": "139",
+              "rank_here": 5,
+              "reference_rank": 7
+            },
+            {
+              "node": "153",
+              "rank_here": 6,
+              "reference_rank": 9
+            }
+          ],
+          "left_top6": [
+            {
+              "node": "129",
+              "reference_rank": 3,
+              "rank_here": 8
+            },
+            {
+              "node": "127",
+              "reference_rank": 4,
+              "rank_here": 20
+            }
+          ],
+          "rank_change": {
+            "max_over_92": 35,
+            "median_over_92": 1.0,
+            "max_within_reference_top15": 16
+          }
         },
         "informal_glue": {
           "old": -1.0740928573695578,
@@ -72,7 +171,43 @@
             "new": -0.402313890000805
           },
           "risk_spearman_vs_kb_ref": 0.9755598730304554,
-          "risk_top6_jaccard_vs_kb_ref": 0.5
+          "risk_top6_jaccard_vs_kb_ref": 0.5,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 0.5,
+            "top5": 0.42857142857142855,
+            "top6": 0.5,
+            "top10": 0.5384615384615384,
+            "top15": 0.6666666666666666
+          },
+          "entered_top6": [
+            {
+              "node": "143",
+              "rank_here": 5,
+              "reference_rank": 7
+            },
+            {
+              "node": "145",
+              "rank_here": 6,
+              "reference_rank": 12
+            }
+          ],
+          "left_top6": [
+            {
+              "node": "129",
+              "reference_rank": 2,
+              "rank_here": 8
+            },
+            {
+              "node": "127",
+              "reference_rank": 5,
+              "rank_here": 20
+            }
+          ],
+          "rank_change": {
+            "max_over_92": 35,
+            "median_over_92": 1.0,
+            "max_within_reference_top15": 15
+          }
         }
       }
     },
@@ -106,7 +241,21 @@
             "new": 0.0
           },
           "risk_spearman_vs_kb_ref": 1.0,
-          "risk_top6_jaccard_vs_kb_ref": 1.0
+          "risk_top6_jaccard_vs_kb_ref": 1.0,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 1.0,
+            "top5": 1.0,
+            "top6": 1.0,
+            "top10": 1.0,
+            "top15": 1.0
+          },
+          "entered_top6": [],
+          "left_top6": [],
+          "rank_change": {
+            "max_over_92": 0,
+            "median_over_92": 0.0,
+            "max_within_reference_top15": 0
+          }
         },
         "informal_glue": {
           "old": -1.03679069091897,
@@ -135,7 +284,21 @@
             "new": 0.0
           },
           "risk_spearman_vs_kb_ref": 1.0,
-          "risk_top6_jaccard_vs_kb_ref": 1.0
+          "risk_top6_jaccard_vs_kb_ref": 1.0,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 1.0,
+            "top5": 1.0,
+            "top6": 1.0,
+            "top10": 1.0,
+            "top15": 1.0
+          },
+          "entered_top6": [],
+          "left_top6": [],
+          "rank_change": {
+            "max_over_92": 0,
+            "median_over_92": 0.0,
+            "max_within_reference_top15": 0
+          }
         }
       }
     },
@@ -169,7 +332,43 @@
             "new": 1.4947812546856933
           },
           "risk_spearman_vs_kb_ref": 0.9325201974585808,
-          "risk_top6_jaccard_vs_kb_ref": 0.5
+          "risk_top6_jaccard_vs_kb_ref": 0.5,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 0.2,
+            "top5": 0.42857142857142855,
+            "top6": 0.5,
+            "top10": 0.8181818181818182,
+            "top15": 0.875
+          },
+          "entered_top6": [
+            {
+              "node": "243",
+              "rank_here": 2,
+              "reference_rank": 12
+            },
+            {
+              "node": "20",
+              "rank_here": 3,
+              "reference_rank": 8
+            }
+          ],
+          "left_top6": [
+            {
+              "node": "15",
+              "reference_rank": 5,
+              "rank_here": 7
+            },
+            {
+              "node": "143",
+              "reference_rank": 6,
+              "rank_here": 8
+            }
+          ],
+          "rank_change": {
+            "max_over_92": 55,
+            "median_over_92": 1.0,
+            "max_within_reference_top15": 10
+          }
         },
         "informal_glue": {
           "old": -1.0085793668923624,
@@ -198,7 +397,43 @@
             "new": 0.3955420689600379
           },
           "risk_spearman_vs_kb_ref": 0.9461586011106421,
-          "risk_top6_jaccard_vs_kb_ref": 0.5
+          "risk_top6_jaccard_vs_kb_ref": 0.5,
+          "topk_jaccard_vs_kb_ref": {
+            "top3": 0.2,
+            "top5": 0.42857142857142855,
+            "top6": 0.5,
+            "top10": 0.8181818181818182,
+            "top15": 0.875
+          },
+          "entered_top6": [
+            {
+              "node": "243",
+              "rank_here": 2,
+              "reference_rank": 11
+            },
+            {
+              "node": "20",
+              "rank_here": 3,
+              "reference_rank": 8
+            }
+          ],
+          "left_top6": [
+            {
+              "node": "15",
+              "reference_rank": 4,
+              "rank_here": 7
+            },
+            {
+              "node": "139",
+              "reference_rank": 6,
+              "rank_here": 9
+            }
+          ],
+          "rank_change": {
+            "max_over_92": 54,
+            "median_over_92": 1.0,
+            "max_within_reference_top15": 9
+          }
         }
       }
     }

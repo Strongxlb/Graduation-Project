@@ -122,6 +122,49 @@ for r in rows:
         top, reftop = set(a[f"risk_top{TOP_K}"]), set(b[f"risk_top{TOP_K}"])
         a[f"risk_top{TOP_K}_jaccard_vs_kb_ref"] = len(top & reftop) / len(top | reftop)
 
+# ---- how deep does the reordering go? -----------------------------------------------------------
+# TOP_K = 6 is a chosen cut-off, so a Jaccard computed only there cannot distinguish "the leading
+# nodes genuinely reshuffled" from "two nodes swapped across the 6th/7th boundary". Three diagnostics
+# separate them: the same comparison at several k; the rank each node holds in both fields; and,
+# decisively, the rank in the CORRECTLY SPECIFIED field of every node that enters the leading set. A
+# node entering the top 6 from reference rank 7 is a cut-off effect; one entering from rank 20 is not.
+TOP_KS = [3, 5, 6, 10, 15]
+
+
+def ranks_of(P):
+    """rank 1 = highest risk."""
+    order = np.argsort(P)[::-1]
+    r = np.empty(len(P), dtype=int)
+    r[order] = np.arange(1, len(P) + 1)
+    return r
+
+
+for r in rows:
+    for s in SCHEMES:
+        a, b = r["by_scheme"][s], ref["by_scheme"][s]
+        Pa, Pb = a["_P"], b["_P"]
+        ra, rb = ranks_of(Pa), ranks_of(Pb)
+        oa, ob = np.argsort(Pa)[::-1], np.argsort(Pb)[::-1]
+        a["topk_jaccard_vs_kb_ref"] = {
+            f"top{k}": len(set(oa[:k]) & set(ob[:k])) / len(set(oa[:k]) | set(ob[:k]))
+            for k in TOP_KS}
+        a["entered_top6"] = [{"node": str(ALL_NODES[i]), "rank_here": int(ra[i]),
+                              "reference_rank": int(rb[i])}
+                             for i in oa[:TOP_K] if i not in set(ob[:TOP_K])]
+        a["left_top6"] = [{"node": str(ALL_NODES[i]), "reference_rank": int(rb[i]),
+                           "rank_here": int(ra[i])}
+                          for i in ob[:TOP_K] if i not in set(oa[:TOP_K])]
+        d = np.abs(ra - rb)
+        a["rank_change"] = {"max_over_92": int(d.max()), "median_over_92": float(np.median(d)),
+                            "max_within_reference_top15": int(d[ob[:15]].max())}
+
+# Is rank 6 a cliff or a plateau? If consecutive risk values near the cut-off are nearly equal, a
+# small perturbation reorders them without changing the risk field in any material way.
+refP = ref["by_scheme"][B.PRIMARY_WEIGHTING]["_P"]
+o_ref = np.argsort(refP)[::-1][:12]
+reference_profile = [{"rank": i + 1, "node": str(ALL_NODES[j]), "risk": float(refP[j])}
+                     for i, j in enumerate(o_ref)]
+
 print("\n=== Step 8b: calibration under a misspecified k_b (observations generated at k_b = -0.5) ===")
 for s in SCHEMES:
     tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
@@ -142,6 +185,29 @@ print("\nshift/SD = displacement of the coefficient caused by the wrong k_b, in 
 print(f"coefficient's own posterior SD at the true k_b; rho_risk / J{TOP_K} compare the 92-node risk")
 print("field and its leading set against the correctly specified case.")
 
+print("\n--- is the top-6 turnover a cut-off effect or a real reshuffle? (PRIMARY scheme) ---")
+print("reference risk profile at the true k_b (rank, node, expected fraction of hours below 0.2):")
+for e in reference_profile:
+    mark = "   <- cut-off" if e["rank"] == TOP_K else ""
+    print(f"  {e['rank']:>2}  node {e['node']:>4}  {e['risk']:.4f}{mark}")
+print("\nJaccard against the correctly specified field at several k:")
+hdr = "  ".join(f"top{k:<2}" for k in TOP_KS)
+print(f"{'k_b':>5}  {hdr}   max|Δrank| (all 92 / ref top-15)")
+for r in rows:
+    a = r["by_scheme"][B.PRIMARY_WEIGHTING]
+    js = "  ".join(f"{a['topk_jaccard_vs_kb_ref'][f'top{k}']:<5.2f}" for k in TOP_KS)
+    print(f"{r['kb']:>5}  {js}   {a['rank_change']['max_over_92']:>3} / "
+          f"{a['rank_change']['max_within_reference_top15']:>3}")
+for r in rows:
+    if r["kb"] == B.KB_FIXED:
+        continue
+    a = r["by_scheme"][B.PRIMARY_WEIGHTING]
+    ent = ", ".join(f"{e['node']} (was rank {e['reference_rank']})" for e in a["entered_top6"])
+    lef = ", ".join(f"{e['node']} (now rank {e['rank_here']})" for e in a["left_top6"])
+    print(f"  k_b={r['kb']}: entered top-6: {ent or 'none'} | left: {lef or 'none'}")
+print("A node entering from reference rank 7-8 is a cut-off effect; one entering from far down is a")
+print("genuine reshuffle of the leading nodes. Read this together with the spacing table above.")
+
 for r in rows:
     for s in SCHEMES:
         del r["by_scheme"][s]["_P"]
@@ -149,6 +215,11 @@ report = {**B.weighting_provenance(comparators=["informal_glue"]),
           "kbs": KBS, "kb_true": B.KB_FIXED, "n_noise": N_NOISE,
           "informal_threshold": B.RMSE_THR,
           "risk_ranking_basis": f"median risk field over the {N_NOISE} noise realisations",
+          "topk_note": "TOP_K = 6 is a chosen cut-off; the same comparison is reported at k = 3, 5, "
+                       "6, 10, 15, together with per-node rank changes and the reference rank of "
+                       "every node that enters the leading set, so a cut-off effect can be told "
+                       "apart from a reshuffle of the leading nodes",
+          "reference_risk_profile_top12": reference_profile,
           "rows": rows}
 
 

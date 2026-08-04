@@ -1,24 +1,20 @@
 {
-  "generated_utc": "2026-08-04T00:49:12+00:00",
+  "generated_utc": "2026-08-04T11:18:35+00:00",
   "git": {
-    "commit": "fdc98793cf4a00da95a5df6087d72953a7c80ef0",
+    "commit": "3dedbf205bfefc1efa6934f99e258c48409ba66a",
     "dirty": true,
     "dirty_files": [
-      "Net3/Figures/step8d_sensor_drift.png",
       "Net3/RESULTS_LOG.md",
       "Net3/baseline_cache/step12_scenarios.json",
-      "Net3/baseline_cache/step7_fisher.json",
-      "Net3/baseline_cache/step8d_sensor_drift.json",
-      "Net3/step12_scenarios.py",
-      "Net3/step7_fisher.py",
-      "Net3/step8d_sensor_drift.py",
+      "Net3/baseline_cache/step8b_kb_sensitivity.json",
+      "Net3/step8b_kb_sensitivity.py",
       "Net3/validate_artifacts.py",
       "README.en.md",
       "README.md",
       "REVISION_RESPONSE_MATRIX.md"
     ],
-    "tree_sha256": "c01dcda54d205347b55a161810170df7b05a2d054fcc1133d3be53538ce1169a",
-    "uncommitted_diff_sha256": "1cde2eb480d7a4661e569abea11fc3a52a8aa1110d261e3808342058b3d63daa"
+    "tree_sha256": "e4d87ee178d21d16c05a4e6bd0569f3bf69c938c9c31c2bbd69222b1d04eed13",
+    "uncommitted_diff_sha256": "efdbf3660629e868f163c2007d951b45c7d6757d3ee5aa61a3a72c802f851d67"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -98,12 +94,12 @@
       "step7c_ar1.py": "7592ae96f7de7e953ee15dc4e8a4259462342113106070f7c7df0d7df58ea001",
       "step7c_profile_ar1.py": "baf9e19f77e7ffa1d3814f4eab54da8d631faaf009dd8be1704c5db64de6ba53",
       "step8_sensor_bias.py": "de4b56dcb96860374aa111adbf206536e11aa1163aec7a50d7146081e41a519b",
-      "step8b_kb_sensitivity.py": "77a76803488c394353f62ca0be90e80a31dda3b0bb36eb609d6fde0d52b9d902",
+      "step8b_kb_sensitivity.py": "f0f09db6e734299967024a3979072acb6dc2fd27f1737817e4c2491dc56d16c7",
       "step8c_bias_bynode.py": "c6ebddd7bb5086c1910f165ad885718d5ec05db88fea97cad97d9be222bcfcdc",
       "step8d_sensor_drift.py": "13adb4e975dc50a6dbcc3a3cf7b504ebb01533bf1e3e978496640a8022025e33",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "760ecfffb4d19d1d5c56658ebe84e674d320def98b92405ce47add7c34f1b240"
+    "step_scripts_combined_sha256": "3df10dc265249fee5a8d6ca38fdb173f06f83ef1b7e9dda9b35a88aae4014f0d"
   },
   "critical_fields": [
     "config_sha256",
