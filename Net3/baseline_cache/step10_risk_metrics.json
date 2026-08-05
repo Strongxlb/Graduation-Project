@@ -98,22 +98,22 @@
   },
   "network_averages": {
     "n_consumer_junctions": 59,
-    "total_demand_L_s": 192.558219334404,
+    "total_demand_L_s": 690.690397272975,
     "by_metric": {
       "E_duration_h": {
         "unweighted_all_junctions": 3.430888301071372,
         "consumer_only": 4.4609617222845745,
-        "demand_weighted": 2.355422772935518
+        "demand_weighted": 1.2310892537827651
       },
       "E_deficit": {
         "unweighted_all_junctions": 0.21813512408585045,
         "consumer_only": 0.3053008282251105,
-        "demand_weighted": 0.15669675979504968
+        "demand_weighted": 0.07984969575229632
       },
       "min_C": {
         "unweighted_all_junctions": 0.49223432929370803,
         "consumer_only": 0.4412260695641956,
-        "demand_weighted": 0.529653983286731
+        "demand_weighted": 0.6348189545499732
       }
     }
   },

@@ -21,6 +21,7 @@ import json
 import numpy as np
 from scipy.stats import spearmanr, pearsonr
 import wntr
+from wntr.metrics.hydraulic import average_expected_demand
 import wq_common as B
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -163,7 +164,12 @@ for i in order[:10]:
 # An unweighted mean over 92 junctions counts a zero-demand node the same as the largest consumer.
 # That is the right average for "how is the network doing hydraulically" and the wrong one for
 # "how much service is affected", so all three are reported instead of one being chosen silently.
-dem = np.array([wn.get_node(n).base_demand or 0.0 for n in ALL_NODES]) * 1000.0   # L/s
+# base_demand is the BASE value only. Four Net3 junctions (15, 35, 123, 203) encode their real
+# demand as 1 GPM times a large time-varying pattern (means 264 / 1718 / 1194 / 4512), so reading the
+# base alone makes them 0.063 L/s each instead of 16.7 / 108.4 / 75.3 / 284.6 - together 70% of the
+# network's actual demand, counted as four of its smallest users. average_expected_demand applies the
+# pattern and the global multiplier, which is what a demand weight has to be.
+dem = average_expected_demand(wn)[ALL_NODES].values * 1000.0                      # L/s
 consumer = dem > 0
 net_avgs = {}
 for label, metric in (("E_duration_h", Dbar), ("E_deficit", Abar), ("min_C", Mbar)):

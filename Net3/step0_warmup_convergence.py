@@ -101,8 +101,14 @@ def per_node_max(a, b):
 
 
 def risk_of_cycle(field, k):
-    """Single-member risk severity over one diurnal cycle: hours below C_MIN and deficit."""
-    c = cycle(field, k)
+    """Single-member risk severity over one diurnal cycle: hours below C_MIN and deficit.
+
+    Uses CYCLE_H + 1 points, not CYCLE_H. Trapezoidal integration over 24 points spans 23 intervals,
+    so the previous slice measured a 23 h cycle and under-reported both integrals by about 1/24. The
+    cycle-to-cycle RATIO the convergence criterion uses was almost unaffected, because both cycles
+    carried the same bias, but the absolute per-cycle deficit was not.
+    """
+    c = field[k * CYCLE_H:(k + 1) * CYCLE_H + 1]
     below = (c < C_MIN).astype(float)
     deficit = np.clip(C_MIN - c, 0, None)
     return np.trapezoid(below, dx=1.0, axis=0), np.trapezoid(deficit, dx=1.0, axis=0)

@@ -1,11 +1,29 @@
 {
-  "generated_utc": "2026-08-05T01:14:50+00:00",
+  "generated_utc": "2026-08-05T01:53:36+00:00",
   "git": {
-    "commit": "c9fd66a668a411315704bc1d4e297b459131d8b1",
-    "dirty": false,
-    "dirty_files": [],
-    "tree_sha256": "3f6ab8b3b62362f67a58ffdd97be70ad548fcf001b4df954fb9c600035a88b10",
-    "uncommitted_diff_sha256": null
+    "commit": "3427a9dfe8f07c3ab556b08fc48b8a22594333b4",
+    "dirty": true,
+    "dirty_files": [
+      "Net3/Figures/step0_warmup_convergence.png",
+      "Net3/Figures/step12_summary.png",
+      "Net3/RESULTS_LOG.md",
+      "Net3/baseline_cache/baseline_meta.json",
+      "Net3/baseline_cache/cache_manifest.json",
+      "Net3/baseline_cache/step0_warmup_convergence.json",
+      "Net3/baseline_cache/step10_risk_metrics.json",
+      "Net3/baseline_cache/step12_risk_register.csv",
+      "Net3/baseline_cache/step12_scenarios.json",
+      "Net3/step0_warmup_convergence.py",
+      "Net3/step10_risk_metrics.py",
+      "Net3/step12_scenarios.py",
+      "Net3/step1_freeze_baseline.py",
+      "README.en.md",
+      "README.md",
+      "REVISION_RESPONSE_MATRIX.md",
+      "plan1.md"
+    ],
+    "tree_sha256": "e1df475bb5b73a40537eaf23af4b8323201a0dd7bed539dd65f6b5af499b494e",
+    "uncommitted_diff_sha256": "a24c03865d403be34b3e7594fba57ab21d82c0f9ef707502e038392ec2c82708"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -66,14 +84,14 @@
     "wq_common_sha256": "0833aaefdf22a84f46669e43977e22e2fc1b6fd88089433cc2eafb3708b5611b",
     "provenance_sha256": "32947f408f974ef537abe0f179fc51c0c1f518b5b673b10c5489b8aade02ffaa",
     "step_scripts_sha256": {
-      "step0_warmup_convergence.py": "91bc137f2295f516cef82cc60565e4f0e3dea949103f0a3b53cdaa6ae8940ba3",
-      "step10_risk_metrics.py": "c58829f986cea1e7cfae247e4231c2a406604da5ea19c8d7510399af97de04c9",
+      "step0_warmup_convergence.py": "b5159780738b92748a79258584335ed79c6f61e83e5cef2a55e0422d44f0ccea",
+      "step10_risk_metrics.py": "34b014eb9f48e18b39d1ae57c899cf69ff5b1a8a5336b6bc1403ff0079915715",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
-      "step12_scenarios.py": "7f6be00b6dda631709644012cb7bf8f7d3d04acb86b43c9c38b94da1569c11c0",
+      "step12_scenarios.py": "eeab2926f2543264e27a117d4dc0609d527024b3a7669cb7c9dcd8bf16cb9471",
       "step13_known_answer.py": "6878d66318d3fff942e931995e664e6e30b3ee4ac9ad7b11f454889b371a1b3e",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
       "step15_unit_equivalence.py": "44ee19fd0a3073920267de6b8c6b2498720f65bd842ea422ff6a397b8c413685",
-      "step1_freeze_baseline.py": "cb7edf1b943a8feb2ce83e9631b747181f39694dfcf02c7a85c1603e7adc1833",
+      "step1_freeze_baseline.py": "cd84fb37081364263e5400a771c6993fe097377ac4122a1119bf867d16c0de55",
       "step3_threshold_sensitivity.py": "1568dcdd664143d2ea77bc1bd6dd829a3c126c9985060110f3f2edf0b317abfe",
       "step4_displaced_prior.py": "7f859a1a8a7a5c82adeaa38cdc84b2a97d1c01e6261d691b0e6963ccd4b35f20",
       "step4b_sensitivity_curves.py": "bc378f21cfc6adf1f21bd256f62fb99feb64e6d50bc2d0d039be5a8886af24a9",
@@ -93,7 +111,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "4473e55c4cd33116111d9f02360ee050f090b1081f5583bd34435480279512de"
+    "step_scripts_combined_sha256": "84b8bed2fef3a61bf880607f9336bc6a61fab0c004d0430ba15cb68c23bf4c55"
   },
   "critical_fields": [
     "config_sha256",

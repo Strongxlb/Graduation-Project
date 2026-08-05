@@ -1,63 +1,63 @@
 node,P_min_current,P_min_heatwave,P_min_heat_ageing,P_bar_current,E_duration_current_h,E_deficit_current_mgL_h,demand_L_s,likelihood,consequence,risk_score,risk_band_current,risk_band_heat_ageing,escalates_under_heat,monitored,sampling_priority,control_measure
-151,1.0,1.0,1.0,0.156,7.48,0.316,9.12,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-247,1.0,1.0,1.0,0.042,2.0,0.18,4.44,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-253,1.0,1.0,1.0,0.167,8.0,0.758,3.44,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-131,1.0,1.0,1.0,0.97,46.55,4.251,2.7,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-145,1.0,1.0,1.0,0.25,12.02,1.683,1.74,almost certain,moderate,10,very high,very high,False,True,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-149,1.0,1.0,1.0,0.126,6.04,0.294,1.71,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-153,1.0,1.0,1.0,0.373,17.89,0.657,2.79,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-251,1.0,1.0,1.0,0.125,6.0,0.573,1.52,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-255,1.0,1.0,1.0,0.167,8.0,0.704,2.55,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
-125,0.998,1.0,1.0,0.357,17.12,0.434,2.88,almost certain,moderate,10,very high,very high,False,False,0.081,Review dosing/booster strategy; consider flushing or turnover improvement
-15,1.0,1.0,1.0,0.457,21.95,1.39,0.06,almost certain,minor,5,medium,medium,False,True,0.0,Scheduled sampling within the monitoring programme; watch trend
-127,1.0,1.0,1.0,0.435,20.89,0.497,1.11,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-139,1.0,1.0,1.0,0.458,22.0,1.835,0.37,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-141,1.0,1.0,1.0,0.465,22.31,2.222,0.62,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-143,1.0,1.0,1.0,0.453,21.72,1.176,0.39,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-147,1.0,1.0,1.0,0.155,7.45,0.591,0.54,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-243,1.0,1.0,1.0,0.273,13.09,0.701,0.27,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
-101,0.0,0.0,0.0,0.0,0.0,0.0,11.98,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-103,0.0,0.0,0.0,0.0,0.0,0.0,8.4,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-105,0.0,0.0,0.0,0.0,0.0,0.0,8.54,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-107,0.0,0.0,0.0,0.0,0.0,0.0,3.45,rare,major,3,low,low,False,True,0.0,No action beyond routine monitoring
-109,0.0,0.0,0.0,0.0,0.0,0.0,14.6,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-111,0.0,0.0,0.0,0.0,0.0,0.0,8.96,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-117,0.0,0.0,0.0,0.0,0.0,0.0,7.43,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-119,0.0,0.0,0.0,0.0,0.0,0.0,11.11,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-177,0.0,1.0,1.0,0.0,0.0,0.0,3.67,rare,major,3,low,very high,True,False,0.0,No action beyond routine monitoring
-189,0.0,0.0,0.0,0.0,0.0,0.0,6.81,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-191,0.0,0.0,0.0,0.0,0.0,0.0,5.17,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-193,0.0,0.0,0.0,0.0,0.0,0.0,4.5,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-199,0.0,0.0,0.0,0.0,0.0,0.0,7.53,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-205,0.0,0.0,0.0,0.0,0.0,0.0,4.12,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-207,0.0,0.0,0.0,0.0,0.0,0.0,4.38,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-215,0.0,0.023,0.114,0.0,0.0,0.0,5.82,rare,major,3,low,medium,True,False,0.0,No action beyond routine monitoring
-229,0.0,0.0,0.0,0.0,0.0,0.0,4.05,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
-225,0.03,1.0,1.0,0.001,0.06,0.0,1.44,rare,moderate,2,low,very high,True,False,1.0,No action beyond routine monitoring
-219,0.011,1.0,1.0,0.0,0.02,0.0,2.61,rare,moderate,2,low,very high,True,False,0.386,No action beyond routine monitoring
-113,0.0,0.0,0.0,0.0,0.0,0.0,1.26,rare,moderate,2,low,low,False,True,0.0,No action beyond routine monitoring
-115,0.0,0.0,0.0,0.0,0.0,0.0,3.29,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-121,0.0,0.0,0.0,0.0,0.0,0.0,2.63,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-157,0.0,0.0,0.0,0.0,0.0,0.0,3.27,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-159,0.0,0.0,0.0,0.0,0.0,0.0,2.61,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-171,0.0,0.0,0.0,0.0,0.0,0.0,2.48,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-185,0.0,0.0,0.0,0.0,0.0,0.0,1.62,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-201,0.0,0.0,0.0,0.0,0.0,0.0,2.81,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
-217,0.0,0.403,0.748,0.0,0.0,0.0,1.53,rare,moderate,2,low,high,True,False,0.0,No action beyond routine monitoring
-239,0.0,0.832,0.986,0.0,0.0,0.0,2.81,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
-231,0.001,1.0,1.0,0.0,0.0,0.0,1.04,rare,minor,1,low,medium,True,True,0.024,No action beyond routine monitoring
-35,0.0,0.0,0.0,0.0,0.0,0.0,0.06,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-123,0.0,0.0,0.0,0.0,0.0,0.0,0.06,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-161,0.0,0.0,0.0,0.0,0.0,0.0,1.0,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-163,0.0,0.0,0.0,0.0,0.0,0.0,0.59,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-166,0.0,0.483,0.492,0.0,0.0,0.0,0.16,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-167,0.0,0.0,0.0,0.0,0.0,0.0,0.92,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-197,0.0,0.0,0.0,0.0,0.0,0.0,1.08,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-203,0.0,0.0,0.0,0.0,0.0,0.0,0.06,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-209,0.0,0.0,0.0,0.0,0.0,0.0,0.05,rare,minor,1,low,low,False,True,0.0,No action beyond routine monitoring
-211,0.0,0.0,0.0,0.0,0.0,0.0,0.55,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-213,0.0,0.0,0.0,0.0,0.0,0.0,0.88,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
-237,0.0,0.0,0.001,0.0,0.0,0.0,0.98,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+15,1.0,1.0,1.0,0.457,21.95,1.39,16.67,almost certain,major,15,very high,very high,False,True,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+151,1.0,1.0,1.0,0.156,7.48,0.316,9.75,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+247,1.0,1.0,1.0,0.042,2.0,0.18,4.75,almost certain,major,15,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+131,1.0,1.0,1.0,0.97,46.55,4.251,2.88,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+145,1.0,1.0,1.0,0.25,12.02,1.683,1.86,almost certain,moderate,10,very high,very high,False,True,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+149,1.0,1.0,1.0,0.126,6.04,0.294,1.83,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+153,1.0,1.0,1.0,0.373,17.89,0.657,2.98,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+253,1.0,1.0,1.0,0.167,8.0,0.758,3.68,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+255,1.0,1.0,1.0,0.167,8.0,0.704,2.73,almost certain,moderate,10,very high,very high,False,False,0.0,Review dosing/booster strategy; consider flushing or turnover improvement
+125,0.998,1.0,1.0,0.357,17.12,0.434,3.08,almost certain,moderate,10,very high,very high,False,False,0.162,Review dosing/booster strategy; consider flushing or turnover improvement
+127,1.0,1.0,1.0,0.435,20.89,0.497,1.19,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+139,1.0,1.0,1.0,0.458,22.0,1.835,0.4,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+141,1.0,1.0,1.0,0.465,22.31,2.222,0.66,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+143,1.0,1.0,1.0,0.453,21.72,1.176,0.42,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+147,1.0,1.0,1.0,0.155,7.45,0.591,0.58,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+243,1.0,1.0,1.0,0.273,13.09,0.701,0.29,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+251,1.0,1.0,1.0,0.125,6.0,0.573,1.63,almost certain,minor,5,medium,medium,False,False,0.0,Scheduled sampling within the monitoring programme; watch trend
+35,0.0,0.0,0.0,0.0,0.0,0.0,108.39,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+101,0.0,0.0,0.0,0.0,0.0,0.0,12.82,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+103,0.0,0.0,0.0,0.0,0.0,0.0,8.99,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+105,0.0,0.0,0.0,0.0,0.0,0.0,9.13,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+109,0.0,0.0,0.0,0.0,0.0,0.0,15.61,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+111,0.0,0.0,0.0,0.0,0.0,0.0,9.58,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+117,0.0,0.0,0.0,0.0,0.0,0.0,7.94,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+119,0.0,0.0,0.0,0.0,0.0,0.0,11.89,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+123,0.0,0.0,0.0,0.0,0.0,0.0,75.32,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+189,0.0,0.0,0.0,0.0,0.0,0.0,7.28,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+191,0.0,0.0,0.0,0.0,0.0,0.0,5.53,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+193,0.0,0.0,0.0,0.0,0.0,0.0,4.81,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+199,0.0,0.0,0.0,0.0,0.0,0.0,8.05,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+203,0.0,0.0,0.0,0.0,0.0,0.0,284.63,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+205,0.0,0.0,0.0,0.0,0.0,0.0,4.41,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+207,0.0,0.0,0.0,0.0,0.0,0.0,4.68,rare,major,3,low,low,False,False,0.0,No action beyond routine monitoring
+215,0.0,0.023,0.114,0.0,0.0,0.0,6.22,rare,major,3,low,medium,True,False,0.0,No action beyond routine monitoring
+219,0.011,1.0,1.0,0.0,0.02,0.0,2.79,rare,moderate,2,low,very high,True,False,0.771,No action beyond routine monitoring
+107,0.0,0.0,0.0,0.0,0.0,0.0,3.69,rare,moderate,2,low,low,False,True,0.0,No action beyond routine monitoring
+115,0.0,0.0,0.0,0.0,0.0,0.0,3.52,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+121,0.0,0.0,0.0,0.0,0.0,0.0,2.81,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+157,0.0,0.0,0.0,0.0,0.0,0.0,3.49,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+159,0.0,0.0,0.0,0.0,0.0,0.0,2.79,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+171,0.0,0.0,0.0,0.0,0.0,0.0,2.65,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+177,0.0,1.0,1.0,0.0,0.0,0.0,3.93,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
+185,0.0,0.0,0.0,0.0,0.0,0.0,1.73,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+201,0.0,0.0,0.0,0.0,0.0,0.0,3.01,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+229,0.0,0.0,0.0,0.0,0.0,0.0,4.33,rare,moderate,2,low,low,False,False,0.0,No action beyond routine monitoring
+239,0.0,0.832,0.986,0.0,0.0,0.0,3.01,rare,moderate,2,low,very high,True,False,0.0,No action beyond routine monitoring
+225,0.03,1.0,1.0,0.001,0.06,0.0,1.54,rare,minor,1,low,medium,True,False,1.0,No action beyond routine monitoring
+231,0.001,1.0,1.0,0.0,0.0,0.0,1.11,rare,minor,1,low,medium,True,True,0.048,No action beyond routine monitoring
+113,0.0,0.0,0.0,0.0,0.0,0.0,1.35,rare,minor,1,low,low,False,True,0.0,No action beyond routine monitoring
+161,0.0,0.0,0.0,0.0,0.0,0.0,1.07,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+163,0.0,0.0,0.0,0.0,0.0,0.0,0.64,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+166,0.0,0.483,0.492,0.0,0.0,0.0,0.18,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+167,0.0,0.0,0.0,0.0,0.0,0.0,0.98,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+197,0.0,0.0,0.0,0.0,0.0,0.0,1.15,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+209,0.0,0.0,0.0,0.0,0.0,0.0,0.06,rare,minor,1,low,low,False,True,0.0,No action beyond routine monitoring
+211,0.0,0.0,0.0,0.0,0.0,0.0,0.59,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+213,0.0,0.0,0.0,0.0,0.0,0.0,0.94,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
+217,0.0,0.403,0.748,0.0,0.0,0.0,1.63,rare,minor,1,low,medium,True,False,0.0,No action beyond routine monitoring
+237,0.0,0.0,0.001,0.0,0.0,0.0,1.05,rare,minor,1,low,low,False,False,0.0,No action beyond routine monitoring
 20,1.0,1.0,1.0,0.38,18.25,0.394,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
 50,1.0,1.0,1.0,0.167,8.0,0.688,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable
 129,1.0,1.0,1.0,0.495,23.78,0.859,0.0,almost certain,non-consumer,0,not applicable,not applicable,False,False,0.0,Not applicable

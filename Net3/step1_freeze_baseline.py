@@ -54,7 +54,12 @@ n_clip = int((raw < 0).sum())
 noisy = np.clip(raw, 0.0, None)
 obs_glue = noisy[B.WARMUP_H:]                          # (Tn, 6)
 n_clip_window = int((obs_glue == 0).sum())
-noise_rmse = float(np.sqrt(((noisy - truth_mon) ** 2).mean()))
+# TWO noise floors, because they are not interchangeable. The candidate RMSE below is computed on
+# the 49x6 assessment window, so that is the floor it must be compared with; the full-record figure
+# is kept because it describes the observation set as a whole. Quoting the full-record floor beside a
+# window RMSE compares two different samples.
+noise_rmse_full = float(np.sqrt(((noisy - truth_mon) ** 2).mean()))
+noise_rmse = float(np.sqrt(((noisy - truth_mon)[B.WARMUP_H:] ** 2).mean()))   # calibration window
 
 # 3) prior draws: scrambled Sobol over the three-zone box
 draws = B.prior_draws()
@@ -66,7 +71,8 @@ print(f"  timing      {B.DURATION_H} h run, {B.WARMUP_H} h warm-up -> {obs_glue.
 print(f"  sampling    scrambled Sobol, 2^{B.N_MC_LOG2} = {B.N_MC} draws (seed {B.SAMPLE_SEED})")
 print(f"  noise       sigma {B.SIGMA_OBS} mg/L, seed {B.NOISE_SEED}; {n_clip} of "
       f"{raw.size} raw points below zero, {n_clip_window} of {obs_glue.size} inside the window")
-print(f"  noise floor RMSE {noise_rmse:.4f} mg/L\n")
+print(f"  noise floor RMSE {noise_rmse:.4f} mg/L on the calibration window "
+      f"({noise_rmse_full:.4f} over the full record)\n")
 
 # 4) forward each draw over the whole network; cache predictions, RMSE and both log-likelihoods
 Tn = obs_glue.shape[0]
@@ -146,7 +152,9 @@ for m in range(10, B.N_MC_LOG2 + 1):
 
 summary = {
     "n_mc": B.N_MC, "n_resid": B.N_RESID, "Tn": int(Tn), "n_nodes": len(ALL_NODES),
-    "rmse_min": float(RMSE.min()), "noise_rmse": noise_rmse,
+    "rmse_min": float(RMSE.min()),
+    "noise_rmse": noise_rmse,                       # 49x6 calibration window; compare with rmse_min
+    "noise_rmse_full_record": noise_rmse_full,      # 169x6, the observation set as a whole
     "n_clip_raw": n_clip, "n_clip_window": n_clip_window,
     "behavioural_count_primary_thr": int((RMSE < B.RMSE_THR).sum()),
     "behavioural_count_draft_thr": int((RMSE < B.RMSE_THR_DRAFT).sum()),

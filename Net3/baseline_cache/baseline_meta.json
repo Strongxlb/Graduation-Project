@@ -58,7 +58,8 @@
     "Tn": 49,
     "n_nodes": 92,
     "rmse_min": 0.09714289156673955,
-    "noise_rmse": 0.09597982024803588,
+    "noise_rmse": 0.09731842201663914,
+    "noise_rmse_full_record": 0.09597982024803588,
     "n_clip_raw": 43,
     "n_clip_window": 10,
     "behavioural_count_primary_thr": 4786,
@@ -376,6 +377,6 @@
         }
       }
     ],
-    "runtime_s": 246.6
+    "runtime_s": 257.8
   }
 }

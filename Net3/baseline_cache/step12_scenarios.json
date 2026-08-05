@@ -111,8 +111,8 @@
       "alpha_avg": 1.15,
       "alpha_old": 1.4,
       "P_min_gt_0.5_nodes": 30,
-      "demand_at_risk_L_s": 49.4,
-      "high_or_very_high": 15,
+      "demand_at_risk_L_s": 69.4,
+      "high_or_very_high": 13,
       "indeterminate": 4,
       "net_mean_E_duration_h": 5.515,
       "net_mean_E_deficit": 0.55
@@ -122,8 +122,8 @@
       "alpha_avg": 1.35,
       "alpha_old": 1.85,
       "P_min_gt_0.5_nodes": 31,
-      "demand_at_risk_L_s": 49.4,
-      "high_or_very_high": 15,
+      "demand_at_risk_L_s": 69.4,
+      "high_or_very_high": 13,
       "indeterminate": 4,
       "net_mean_E_duration_h": 5.912,
       "net_mean_E_deficit": 0.579
@@ -133,8 +133,8 @@
       "alpha_avg": 1.5,
       "alpha_old": 2.2,
       "P_min_gt_0.5_nodes": 31,
-      "demand_at_risk_L_s": 49.4,
-      "high_or_very_high": 16,
+      "demand_at_risk_L_s": 69.4,
+      "high_or_very_high": 14,
       "indeterminate": 4,
       "net_mean_E_duration_h": 6.178,
       "net_mean_E_deficit": 0.599
@@ -143,8 +143,8 @@
   "sigma_convention": "observation sigma = 0.1 mg/L is one standard deviation",
   "product_statement": "calibration-conditioned scenario projection from the network model; not a sensor nowcast, not a spatial measurement, and not a statement that water is safe",
   "consequence_terciles_L_s": [
-    1.1635935222706661,
-    3.388784749298665
+    1.6665365633090958,
+    4.383965126048627
   ],
   "scenario_summary": [
     {
@@ -152,8 +152,8 @@
       "mean_kb": -0.504,
       "mean_kw_old": -0.994,
       "P_min_gt_0.5_nodes": 21,
-      "demand_at_risk_L_s": 36.3,
-      "pct_demand_at_risk": 18.8,
+      "demand_at_risk_L_s": 55.4,
+      "pct_demand_at_risk": 8.0,
       "high_or_very_high": 10,
       "indeterminate": 0,
       "net_mean_P_bar": 0.0708,
@@ -165,9 +165,9 @@
       "mean_kb": -0.655,
       "mean_kw_old": -1.222,
       "P_min_gt_0.5_nodes": 28,
-      "demand_at_risk_L_s": 45.0,
-      "pct_demand_at_risk": 23.4,
-      "high_or_very_high": 13,
+      "demand_at_risk_L_s": 64.7,
+      "pct_demand_at_risk": 9.4,
+      "high_or_very_high": 12,
       "indeterminate": 8,
       "net_mean_P_bar": 0.0884,
       "net_mean_E_duration_h": 4.245,
@@ -178,9 +178,9 @@
       "mean_kb": -0.848,
       "mean_kw_old": -1.501,
       "P_min_gt_0.5_nodes": 29,
-      "demand_at_risk_L_s": 47.8,
-      "pct_demand_at_risk": 24.8,
-      "high_or_very_high": 14,
+      "demand_at_risk_L_s": 67.8,
+      "pct_demand_at_risk": 9.8,
+      "high_or_very_high": 13,
       "indeterminate": 4,
       "net_mean_P_bar": 0.1087,
       "net_mean_E_duration_h": 5.218,
@@ -191,9 +191,9 @@
       "mean_kb": -0.848,
       "mean_kw_old": -2.777,
       "P_min_gt_0.5_nodes": 31,
-      "demand_at_risk_L_s": 49.4,
-      "pct_demand_at_risk": 25.6,
-      "high_or_very_high": 15,
+      "demand_at_risk_L_s": 69.4,
+      "pct_demand_at_risk": 10.0,
+      "high_or_very_high": 13,
       "indeterminate": 4,
       "net_mean_P_bar": 0.1232,
       "net_mean_E_duration_h": 5.912,
@@ -202,15 +202,15 @@
   ],
   "reference_at_T_ref_exact": {
     "P_min_gt_0.5_nodes": 21,
-    "demand_at_risk_L_s": 36.3,
+    "demand_at_risk_L_s": 55.4,
     "net_mean_E_deficit": 0.2181
   },
   "dosing_heatwave": [
     {
       "inlet_dose_mgl": 1.0,
       "P_min_gt_0.5_nodes": 29,
-      "demand_at_risk_L_s": 47.8,
-      "pct_demand_at_risk": 24.8,
+      "demand_at_risk_L_s": 67.8,
+      "pct_demand_at_risk": 9.8,
       "net_mean_P_min": 0.3246,
       "net_mean_E_duration_h": 5.218,
       "net_mean_E_deficit": 0.5218,
@@ -219,8 +219,8 @@
     {
       "inlet_dose_mgl": 1.15,
       "P_min_gt_0.5_nodes": 28,
-      "demand_at_risk_L_s": 45.0,
-      "pct_demand_at_risk": 23.4,
+      "demand_at_risk_L_s": 64.7,
+      "pct_demand_at_risk": 9.4,
       "net_mean_P_min": 0.3112,
       "net_mean_E_duration_h": 4.628,
       "net_mean_E_deficit": 0.4527,
@@ -229,8 +229,8 @@
     {
       "inlet_dose_mgl": 1.3,
       "P_min_gt_0.5_nodes": 28,
-      "demand_at_risk_L_s": 45.0,
-      "pct_demand_at_risk": 23.4,
+      "demand_at_risk_L_s": 64.7,
+      "pct_demand_at_risk": 9.4,
       "net_mean_P_min": 0.2915,
       "net_mean_E_duration_h": 4.288,
       "net_mean_E_deficit": 0.3957,
@@ -261,8 +261,8 @@
         "inlet_dose_mgl": 1.0,
         "short_P_min_gt_0.5_nodes": 31,
         "long_P_min_gt_0.5_nodes": 31,
-        "short_demand_at_risk_L_s": 49.5,
-        "long_demand_at_risk_L_s": 49.5,
+        "short_demand_at_risk_L_s": 69.6,
+        "long_demand_at_risk_L_s": 69.6,
         "short_net_mean_E_duration_h": 5.37,
         "long_net_mean_E_duration_h": 5.389,
         "short_net_mean_E_deficit": 0.5052,
@@ -273,8 +273,8 @@
         "inlet_dose_mgl": 1.15,
         "short_P_min_gt_0.5_nodes": 29,
         "long_P_min_gt_0.5_nodes": 29,
-        "short_demand_at_risk_L_s": 45.2,
-        "long_demand_at_risk_L_s": 47.8,
+        "short_demand_at_risk_L_s": 64.9,
+        "long_demand_at_risk_L_s": 67.8,
         "short_net_mean_E_duration_h": 4.655,
         "long_net_mean_E_duration_h": 4.788,
         "short_net_mean_E_deficit": 0.4306,
@@ -285,8 +285,8 @@
         "inlet_dose_mgl": 1.3,
         "short_P_min_gt_0.5_nodes": 29,
         "long_P_min_gt_0.5_nodes": 28,
-        "short_demand_at_risk_L_s": 45.2,
-        "long_demand_at_risk_L_s": 45.0,
+        "short_demand_at_risk_L_s": 64.9,
+        "long_demand_at_risk_L_s": 64.7,
         "short_net_mean_E_duration_h": 4.04,
         "long_net_mean_E_duration_h": 4.369,
         "short_net_mean_E_deficit": 0.3736,
@@ -295,10 +295,10 @@
       }
     ]
   },
-  "baseline_demand_at_risk_L_s": 36.25415045929601,
+  "baseline_demand_at_risk_L_s": 55.37568175518917,
   "dosing_restores_baseline": false,
   "n_escalating_consumer_nodes": 7,
-  "escalating_demand_L_s": 18.92,
+  "escalating_demand_L_s": 20.229999999999997,
   "top_escalating": [
     {
       "node": "215",
@@ -306,7 +306,7 @@
       "P_min_heatwave": 0.023,
       "P_min_heat_ageing": 0.114,
       "dP_ageing": 0.091,
-      "demand_L_s": 5.82,
+      "demand_L_s": 6.22,
       "band_current": "low",
       "band_heat_ageing": "medium",
       "monitored": false
@@ -317,7 +317,7 @@
       "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
       "dP_ageing": 0.0,
-      "demand_L_s": 3.67,
+      "demand_L_s": 3.93,
       "band_current": "low",
       "band_heat_ageing": "very high",
       "monitored": false
@@ -328,7 +328,7 @@
       "P_min_heatwave": 0.832,
       "P_min_heat_ageing": 0.986,
       "dP_ageing": 0.155,
-      "demand_L_s": 2.81,
+      "demand_L_s": 3.01,
       "band_current": "low",
       "band_heat_ageing": "very high",
       "monitored": false
@@ -339,7 +339,7 @@
       "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
       "dP_ageing": 0.0,
-      "demand_L_s": 2.61,
+      "demand_L_s": 2.79,
       "band_current": "low",
       "band_heat_ageing": "very high",
       "monitored": false
@@ -350,9 +350,9 @@
       "P_min_heatwave": 0.403,
       "P_min_heat_ageing": 0.748,
       "dP_ageing": 0.346,
-      "demand_L_s": 1.53,
+      "demand_L_s": 1.63,
       "band_current": "low",
-      "band_heat_ageing": "high",
+      "band_heat_ageing": "medium",
       "monitored": false
     },
     {
@@ -361,9 +361,9 @@
       "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
       "dP_ageing": 0.0,
-      "demand_L_s": 1.44,
+      "demand_L_s": 1.54,
       "band_current": "low",
-      "band_heat_ageing": "very high",
+      "band_heat_ageing": "medium",
       "monitored": false
     },
     {
@@ -372,7 +372,7 @@
       "P_min_heatwave": 1.0,
       "P_min_heat_ageing": 1.0,
       "dP_ageing": 0.0,
-      "demand_L_s": 1.04,
+      "demand_L_s": 1.11,
       "band_current": "low",
       "band_heat_ageing": "medium",
       "monitored": true
@@ -391,49 +391,49 @@
       "dP_min": 0.346,
       "P_C": 0.403,
       "P_D": 0.748,
-      "demand_L_s": 1.53
+      "demand_L_s": 1.63
     },
     {
       "node": "239",
       "dP_min": 0.155,
       "P_C": 0.832,
       "P_D": 0.986,
-      "demand_L_s": 2.81
+      "demand_L_s": 3.01
     },
     {
       "node": "215",
       "dP_min": 0.091,
       "P_C": 0.023,
       "P_D": 0.114,
-      "demand_L_s": 5.82
+      "demand_L_s": 6.22
     },
     {
       "node": "166",
       "dP_min": 0.008,
       "P_C": 0.483,
       "P_D": 0.492,
-      "demand_L_s": 0.16
+      "demand_L_s": 0.18
     },
     {
       "node": "237",
       "dP_min": 0.001,
       "P_C": 0.0,
       "P_D": 0.001,
-      "demand_L_s": 0.98
+      "demand_L_s": 1.05
     },
     {
       "node": "231",
       "dP_min": 0.0,
       "P_C": 1.0,
       "P_D": 1.0,
-      "demand_L_s": 1.04
+      "demand_L_s": 1.11
     },
     {
       "node": "219",
       "dP_min": 0.0,
       "P_C": 1.0,
       "P_D": 1.0,
-      "demand_L_s": 2.61
+      "demand_L_s": 2.79
     },
     {
       "node": "40",
@@ -447,7 +447,7 @@
       "dP_min": 0.0,
       "P_C": 0.0,
       "P_D": 0.0,
-      "demand_L_s": 4.05
+      "demand_L_s": 4.33
     }
   ],
   "review_triggers": [
@@ -459,5 +459,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 561.4
+  "runtime_s": 568.4
 }

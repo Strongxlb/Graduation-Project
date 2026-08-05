@@ -52,6 +52,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
 import wntr
+from wntr.metrics.hydraulic import average_expected_demand
 
 import wq_common as B
 
@@ -135,16 +136,21 @@ def risk_band(score):
     return "very high"
 
 
-def base_demand_L_s(wn, nodes):
-    """Base demand in L/s.
+def demand_L_s(wn, nodes):
+    """Pattern-aware average expected demand in L/s.
+
+    NOT the base value. Four Net3 junctions (15, 35, 123, 203) encode their demand as 1 GPM times a
+    large pattern, so a base-only reading makes them 0.063 L/s each instead of 16.7 / 108.4 / 75.3 /
+    284.6, and the network total 192.6 instead of 690.7 L/s. Since demand is the CONSEQUENCE axis of
+    the risk register, that error propagates into the terciles, the bands and the control measures -
+    node 15 alone moves from minor/medium to major/very high. average_expected_demand applies the
+    pattern and the global demand multiplier.
 
     WNTR parses the .inp and stores every demand internally in SI base units (m^3/s) regardless of
     the file's own unit declaration, so x1000 converts to L/s. The frozen Net3.inp declares
     `Units GPM` -- the conversion here is from WNTR's internal m^3/s, NOT from the file's units.
     """
-    return pd.Series({n: 1000.0 * sum(ts.base_value
-                                      for ts in wn.get_node(n).demand_timeseries_list)
-                      for n in nodes})
+    return average_expected_demand(wn)[list(nodes)] * 1000.0
 
 
 def consequence_from_demand(demand):
@@ -308,7 +314,7 @@ print(f"sampled water temperature spans {T_lo:.2f}–{T_hi:.2f} °C, "
       f"(dT truncated to [{DT_LO:+.1f}, {DT_HI:+.1f}] °C, {n_dT_resampled} draw(s) resampled)")
 
 wn0 = wntr.network.WaterNetworkModel(B.NET3_INP)
-DEMAND = base_demand_L_s(wn0, ALL_NODES)
+DEMAND = demand_L_s(wn0, ALL_NODES)
 CONSEQUENCE, q1, q2 = consequence_from_demand(DEMAND)
 DEM = DEMAND.values
 DEM_TOT = float(DEM.sum())

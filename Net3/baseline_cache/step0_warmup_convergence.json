@@ -42,7 +42,7 @@
     "n_resid_unchanged": true,
     "saturates_model_horizon": true,
     "basis": "the largest warm-up that the chlorine criteria verify; the risk-severity and water-age criteria cannot be satisfied inside the model horizon",
-    "residual_risk_drift_at_proposed": 0.054888,
+    "residual_risk_drift_at_proposed": 0.05087,
     "age_is_horizon_dependent": true
   },
   "per_criterion": {
@@ -117,12 +117,12 @@
     "risk_rel_dDeficit": {
       "tolerance": 0.02,
       "worst_by_cycle": [
-        0.902268,
-        0.650652,
-        0.119585,
-        0.204205,
-        0.105578,
-        0.054888
+        0.898337,
+        0.610424,
+        0.120596,
+        0.189748,
+        0.097839,
+        0.05087
       ],
       "first_pass_cycle": null,
       "first_pass_warmup_h": null,
@@ -149,9 +149,9 @@
           "network_max_dC": 0.9988530278205872,
           "tank_max_dC": 0.24533626437187195,
           "tank_max_dLevel": 0.8184547424316406,
-          "risk_rel_dDeficit": 0.8737462162971497,
-          "net_mean_deficit": 0.9946351051330566,
-          "net_mean_hours_below": 5.315217391304348,
+          "risk_rel_dDeficit": 0.8659122586250305,
+          "net_mean_deficit": 1.0050389766693115,
+          "net_mean_hours_below": 5.396739130434782,
           "top10_identical": false,
           "top10_jaccard": 0.17647058823529413
         },
@@ -161,11 +161,11 @@
           "network_max_dC": 0.999189555644989,
           "tank_max_dC": 0.24506109952926636,
           "tank_max_dLevel": 0.8184547424316406,
-          "risk_rel_dDeficit": 0.9022676348686218,
-          "net_mean_deficit": 0.9783338308334351,
-          "net_mean_hours_below": 5.010869565217392,
+          "risk_rel_dDeficit": 0.8983373045921326,
+          "net_mean_deficit": 0.9850991368293762,
+          "net_mean_hours_below": 5.048913043478261,
           "top10_identical": false,
-          "top10_jaccard": 0.17647058823529413
+          "top10_jaccard": 0.25
         },
         "prior_strong": {
           "monitor_max_dC": 0.8107946515083313,
@@ -173,11 +173,11 @@
           "network_max_dC": 0.9985750317573547,
           "tank_max_dC": 0.24565353989601135,
           "tank_max_dLevel": 0.8184547424316406,
-          "risk_rel_dDeficit": 0.8565827012062073,
-          "net_mean_deficit": 1.0110669136047363,
-          "net_mean_hours_below": 5.603260869565218,
+          "risk_rel_dDeficit": 0.8473601937294006,
+          "net_mean_deficit": 1.0228440761566162,
+          "net_mean_hours_below": 5.701086956521739,
           "top10_identical": false,
-          "top10_jaccard": 0.17647058823529413
+          "top10_jaccard": 0.25
         }
       },
       "age_p95_dAge": 23.99895668029785,
@@ -200,9 +200,9 @@
           "network_max_dC": 0.45855510234832764,
           "tank_max_dC": 0.06999436020851135,
           "tank_max_dLevel": 0.049579620361328125,
-          "risk_rel_dDeficit": 0.43148866295814514,
-          "net_mean_deficit": 0.1255764365196228,
-          "net_mean_hours_below": 1.184782608695652,
+          "risk_rel_dDeficit": 0.3910839855670929,
+          "net_mean_deficit": 0.1347634345293045,
+          "net_mean_hours_below": 1.309782608695652,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
@@ -212,9 +212,9 @@
           "network_max_dC": 0.49190059304237366,
           "tank_max_dC": 0.06724472343921661,
           "tank_max_dLevel": 0.049579620361328125,
-          "risk_rel_dDeficit": 0.650652289390564,
-          "net_mean_deficit": 0.09561485052108765,
-          "net_mean_hours_below": 0.6304347826086957,
+          "risk_rel_dDeficit": 0.6104239821434021,
+          "net_mean_deficit": 0.10014785081148148,
+          "net_mean_hours_below": 0.7228260869565217,
           "top10_identical": false,
           "top10_jaccard": 0.6666666666666666
         },
@@ -224,9 +224,9 @@
           "network_max_dC": 0.4420621991157532,
           "tank_max_dC": 0.07870897650718689,
           "tank_max_dLevel": 0.049579620361328125,
-          "risk_rel_dDeficit": 0.31782516837120056,
-          "net_mean_deficit": 0.1450045257806778,
-          "net_mean_hours_below": 1.358695652173913,
+          "risk_rel_dDeficit": 0.283544659614563,
+          "net_mean_deficit": 0.15612675249576569,
+          "net_mean_hours_below": 1.483695652173913,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         }
@@ -251,9 +251,9 @@
           "network_max_dC": 0.23831644654273987,
           "tank_max_dC": 0.03618277609348297,
           "tank_max_dLevel": 0.006969451904296875,
-          "risk_rel_dDeficit": 0.1195853054523468,
-          "net_mean_deficit": 0.07139162719249725,
-          "net_mean_hours_below": 1.1956521739130435,
+          "risk_rel_dDeficit": 0.12059637904167175,
+          "net_mean_deficit": 0.08205961436033249,
+          "net_mean_hours_below": 1.326086956521739,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
@@ -263,9 +263,9 @@
           "network_max_dC": 0.2717384397983551,
           "tank_max_dC": 0.03327265381813049,
           "tank_max_dLevel": 0.006969451904296875,
-          "risk_rel_dDeficit": 0.08791586756706238,
-          "net_mean_deficit": 0.033402830362319946,
-          "net_mean_hours_below": 0.5543478260869565,
+          "risk_rel_dDeficit": 0.10936466604471207,
+          "net_mean_deficit": 0.03901519998908043,
+          "net_mean_hours_below": 0.6630434782608695,
           "top10_identical": false,
           "top10_jaccard": 0.6666666666666666
         },
@@ -275,11 +275,11 @@
           "network_max_dC": 0.20379436016082764,
           "tank_max_dC": 0.041561782360076904,
           "tank_max_dLevel": 0.006969451904296875,
-          "risk_rel_dDeficit": 0.11587326973676682,
-          "net_mean_deficit": 0.09891843795776367,
-          "net_mean_hours_below": 1.5543478260869565,
+          "risk_rel_dDeficit": 0.11514478921890259,
+          "net_mean_deficit": 0.11185784637928009,
+          "net_mean_hours_below": 1.684782608695652,
           "top10_identical": false,
-          "top10_jaccard": 0.6666666666666666
+          "top10_jaccard": 0.8181818181818182
         }
       },
       "age_p95_dAge": 19.04250717163086,
@@ -302,9 +302,9 @@
           "network_max_dC": 0.03175695985555649,
           "tank_max_dC": 0.0190875381231308,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.1269194483757019,
-          "net_mean_deficit": 0.07992901653051376,
-          "net_mean_hours_below": 1.423913043478261,
+          "risk_rel_dDeficit": 0.11937981843948364,
+          "net_mean_deficit": 0.09195570647716522,
+          "net_mean_hours_below": 1.5543478260869565,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
@@ -314,11 +314,11 @@
           "network_max_dC": 0.04493853449821472,
           "tank_max_dC": 0.017759159207344055,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.20420466363430023,
-          "net_mean_deficit": 0.036339469254016876,
-          "net_mean_hours_below": 0.7282608695652174,
-          "top10_identical": false,
-          "top10_jaccard": 0.8181818181818182
+          "risk_rel_dDeficit": 0.18974818289279938,
+          "net_mean_deficit": 0.04328208416700363,
+          "net_mean_hours_below": 0.8315217391304348,
+          "top10_identical": true,
+          "top10_jaccard": 1.0
         },
         "prior_strong": {
           "monitor_max_dC": 0.0053525567054748535,
@@ -326,11 +326,11 @@
           "network_max_dC": 0.02907656878232956,
           "tank_max_dC": 0.02189447730779648,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.0997270867228508,
-          "net_mean_deficit": 0.11038044095039368,
-          "net_mean_hours_below": 1.75,
-          "top10_identical": true,
-          "top10_jaccard": 1.0
+          "risk_rel_dDeficit": 0.09510960429906845,
+          "net_mean_deficit": 0.1247376948595047,
+          "net_mean_hours_below": 1.8804347826086956,
+          "top10_identical": false,
+          "top10_jaccard": 0.8181818181818182
         }
       },
       "age_p95_dAge": 16.692398071289062,
@@ -353,11 +353,11 @@
           "network_max_dC": 0.010066501796245575,
           "tank_max_dC": 0.010087713599205017,
           "tank_max_dLevel": 8.7738037109375e-05,
-          "risk_rel_dDeficit": 0.06461624056100845,
-          "net_mean_deficit": 0.09007356315851212,
-          "net_mean_hours_below": 1.5434782608695652,
-          "top10_identical": true,
-          "top10_jaccard": 1.0
+          "risk_rel_dDeficit": 0.06065535917878151,
+          "net_mean_deficit": 0.1029333621263504,
+          "net_mean_hours_below": 1.673913043478261,
+          "top10_identical": false,
+          "top10_jaccard": 0.8181818181818182
         },
         "prior_weak": {
           "monitor_max_dC": 0.006408408284187317,
@@ -365,11 +365,11 @@
           "network_max_dC": 0.008631378412246704,
           "tank_max_dC": 0.00927722454071045,
           "tank_max_dLevel": 8.7738037109375e-05,
-          "risk_rel_dDeficit": 0.10557780414819717,
-          "net_mean_deficit": 0.043760158121585846,
-          "net_mean_hours_below": 0.8641304347826086,
-          "top10_identical": true,
-          "top10_jaccard": 1.0
+          "risk_rel_dDeficit": 0.09783871471881866,
+          "net_mean_deficit": 0.0514947809278965,
+          "net_mean_hours_below": 0.967391304347826,
+          "top10_identical": false,
+          "top10_jaccard": 0.8181818181818182
         },
         "prior_strong": {
           "monitor_max_dC": 0.002787567675113678,
@@ -377,11 +377,11 @@
           "network_max_dC": 0.011520810425281525,
           "tank_max_dC": 0.011548399925231934,
           "tank_max_dLevel": 8.7738037109375e-05,
-          "risk_rel_dDeficit": 0.051073286682367325,
-          "net_mean_deficit": 0.12138836085796356,
-          "net_mean_hours_below": 1.815217391304348,
-          "top10_identical": false,
-          "top10_jaccard": 0.8181818181818182
+          "risk_rel_dDeficit": 0.04857596009969711,
+          "net_mean_deficit": 0.13660144805908203,
+          "net_mean_hours_below": 1.9456521739130435,
+          "top10_identical": true,
+          "top10_jaccard": 1.0
         }
       },
       "age_p95_dAge": 14.62982177734375,
@@ -404,11 +404,11 @@
           "network_max_dC": 0.005313977599143982,
           "tank_max_dC": 0.00532599538564682,
           "tank_max_dLevel": 8.392333984375e-05,
-          "risk_rel_dDeficit": 0.03271646425127983,
-          "net_mean_deficit": 0.09589377790689468,
-          "net_mean_hours_below": 1.5869565217391304,
-          "top10_identical": true,
-          "top10_jaccard": 1.0
+          "risk_rel_dDeficit": 0.03080500103533268,
+          "net_mean_deficit": 0.10917682200670242,
+          "net_mean_hours_below": 1.7173913043478262,
+          "top10_identical": false,
+          "top10_jaccard": 0.8181818181818182
         },
         "prior_weak": {
           "monitor_max_dC": 0.003359071910381317,
@@ -416,11 +416,11 @@
           "network_max_dC": 0.0045655518770217896,
           "tank_max_dC": 0.0048728883266448975,
           "tank_max_dLevel": 8.392333984375e-05,
-          "risk_rel_dDeficit": 0.05488767847418785,
-          "net_mean_deficit": 0.04838025942444801,
-          "net_mean_hours_below": 0.9728260869565217,
-          "top10_identical": false,
-          "top10_jaccard": 0.8181818181818182
+          "risk_rel_dDeficit": 0.05086985230445862,
+          "net_mean_deficit": 0.05653296411037445,
+          "net_mean_hours_below": 1.076086956521739,
+          "top10_identical": true,
+          "top10_jaccard": 1.0
         },
         "prior_strong": {
           "monitor_max_dC": 0.001463174819946289,
@@ -428,9 +428,9 @@
           "network_max_dC": 0.006072767078876495,
           "tank_max_dC": 0.006086871027946472,
           "tank_max_dLevel": 8.392333984375e-05,
-          "risk_rel_dDeficit": 0.02572512812912464,
-          "net_mean_deficit": 0.12758806347846985,
-          "net_mean_hours_below": 1.8369565217391304,
+          "risk_rel_dDeficit": 0.024535207077860832,
+          "net_mean_deficit": 0.14323699474334717,
+          "net_mean_hours_below": 1.9673913043478262,
           "top10_identical": true,
           "top10_jaccard": 1.0
         }
@@ -446,19 +446,19 @@
       "truth/network_p95_dC 0.9299 > 0.01",
       "truth/tank_max_dC 0.2453 > 0.01",
       "truth/tank_max_dLevel 0.8185 > 0.05",
-      "truth/risk_rel_dDeficit 0.8737 > 0.02",
+      "truth/risk_rel_dDeficit 0.8659 > 0.02",
       "truth/top10 set changed",
       "prior_weak/monitor_max_dC 0.9209 > 0.005",
       "prior_weak/network_p95_dC 0.9511 > 0.01",
       "prior_weak/tank_max_dC 0.2451 > 0.01",
       "prior_weak/tank_max_dLevel 0.8185 > 0.05",
-      "prior_weak/risk_rel_dDeficit 0.9023 > 0.02",
+      "prior_weak/risk_rel_dDeficit 0.8983 > 0.02",
       "prior_weak/top10 set changed",
       "prior_strong/monitor_max_dC 0.8108 > 0.005",
       "prior_strong/network_p95_dC 0.9074 > 0.01",
       "prior_strong/tank_max_dC 0.2457 > 0.01",
       "prior_strong/tank_max_dLevel 0.8185 > 0.05",
-      "prior_strong/risk_rel_dDeficit 0.8566 > 0.02",
+      "prior_strong/risk_rel_dDeficit 0.8474 > 0.02",
       "prior_strong/top10 set changed"
     ],
     "1": [
@@ -466,17 +466,17 @@
       "truth/monitor_max_dC 0.02477 > 0.005",
       "truth/network_p95_dC 0.1035 > 0.01",
       "truth/tank_max_dC 0.06999 > 0.01",
-      "truth/risk_rel_dDeficit 0.4315 > 0.02",
+      "truth/risk_rel_dDeficit 0.3911 > 0.02",
       "truth/top10 set changed",
       "prior_weak/monitor_max_dC 0.04368 > 0.005",
       "prior_weak/network_p95_dC 0.1061 > 0.01",
       "prior_weak/tank_max_dC 0.06724 > 0.01",
-      "prior_weak/risk_rel_dDeficit 0.6507 > 0.02",
+      "prior_weak/risk_rel_dDeficit 0.6104 > 0.02",
       "prior_weak/top10 set changed",
       "prior_strong/monitor_max_dC 0.02059 > 0.005",
       "prior_strong/network_p95_dC 0.1012 > 0.01",
       "prior_strong/tank_max_dC 0.07871 > 0.01",
-      "prior_strong/risk_rel_dDeficit 0.3178 > 0.02",
+      "prior_strong/risk_rel_dDeficit 0.2835 > 0.02",
       "prior_strong/top10 set changed"
     ],
     "2": [
@@ -484,17 +484,17 @@
       "truth/monitor_max_dC 0.01233 > 0.005",
       "truth/network_p95_dC 0.03524 > 0.01",
       "truth/tank_max_dC 0.03618 > 0.01",
-      "truth/risk_rel_dDeficit 0.1196 > 0.02",
+      "truth/risk_rel_dDeficit 0.1206 > 0.02",
       "truth/top10 set changed",
       "prior_weak/monitor_max_dC 0.02337 > 0.005",
       "prior_weak/network_p95_dC 0.0308 > 0.01",
       "prior_weak/tank_max_dC 0.03327 > 0.01",
-      "prior_weak/risk_rel_dDeficit 0.08792 > 0.02",
+      "prior_weak/risk_rel_dDeficit 0.1094 > 0.02",
       "prior_weak/top10 set changed",
       "prior_strong/monitor_max_dC 0.01014 > 0.005",
       "prior_strong/network_p95_dC 0.03964 > 0.01",
       "prior_strong/tank_max_dC 0.04156 > 0.01",
-      "prior_strong/risk_rel_dDeficit 0.1159 > 0.02",
+      "prior_strong/risk_rel_dDeficit 0.1151 > 0.02",
       "prior_strong/top10 set changed"
     ],
     "3": [
@@ -502,35 +502,36 @@
       "truth/monitor_max_dC 0.006443 > 0.005",
       "truth/network_p95_dC 0.01832 > 0.01",
       "truth/tank_max_dC 0.01909 > 0.01",
-      "truth/risk_rel_dDeficit 0.1269 > 0.02",
+      "truth/risk_rel_dDeficit 0.1194 > 0.02",
       "truth/top10 set changed",
       "prior_weak/monitor_max_dC 0.0122 > 0.005",
       "prior_weak/network_p95_dC 0.01603 > 0.01",
       "prior_weak/tank_max_dC 0.01776 > 0.01",
-      "prior_weak/risk_rel_dDeficit 0.2042 > 0.02",
-      "prior_weak/top10 set changed",
+      "prior_weak/risk_rel_dDeficit 0.1897 > 0.02",
       "prior_strong/monitor_max_dC 0.005353 > 0.005",
       "prior_strong/network_p95_dC 0.02009 > 0.01",
       "prior_strong/tank_max_dC 0.02189 > 0.01",
-      "prior_strong/risk_rel_dDeficit 0.09973 > 0.02"
+      "prior_strong/risk_rel_dDeficit 0.09511 > 0.02",
+      "prior_strong/top10 set changed"
     ],
     "4": [
       "age_p95_dAge 14.63 > 1.0",
       "truth/tank_max_dC 0.01009 > 0.01",
-      "truth/risk_rel_dDeficit 0.06462 > 0.02",
+      "truth/risk_rel_dDeficit 0.06066 > 0.02",
+      "truth/top10 set changed",
       "prior_weak/monitor_max_dC 0.006408 > 0.005",
-      "prior_weak/risk_rel_dDeficit 0.1056 > 0.02",
+      "prior_weak/risk_rel_dDeficit 0.09784 > 0.02",
+      "prior_weak/top10 set changed",
       "prior_strong/network_p95_dC 0.01029 > 0.01",
       "prior_strong/tank_max_dC 0.01155 > 0.01",
-      "prior_strong/risk_rel_dDeficit 0.05107 > 0.02",
-      "prior_strong/top10 set changed"
+      "prior_strong/risk_rel_dDeficit 0.04858 > 0.02"
     ],
     "5": [
       "age_p95_dAge 12.81 > 1.0",
-      "truth/risk_rel_dDeficit 0.03272 > 0.02",
-      "prior_weak/risk_rel_dDeficit 0.05489 > 0.02",
-      "prior_weak/top10 set changed",
-      "prior_strong/risk_rel_dDeficit 0.02573 > 0.02"
+      "truth/risk_rel_dDeficit 0.03081 > 0.02",
+      "truth/top10 set changed",
+      "prior_weak/risk_rel_dDeficit 0.05087 > 0.02",
+      "prior_strong/risk_rel_dDeficit 0.02454 > 0.02"
     ]
   },
   "runtime_s": 0.1

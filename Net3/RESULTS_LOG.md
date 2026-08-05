@@ -58,7 +58,7 @@ draft's 72 h / 24 h configuration are marked as superseded wherever they still a
 
 **What 120 h does and does not mean.** The three chlorine-concentration criteria pass at 120 h. Two
 others never pass inside the model's 168 h ceiling: with a 120 h warm-up the **residual
-cycle-to-cycle drift** in the integrated deficit is still **5.5%**, and the **water age** p95 changes
+cycle-to-cycle drift** in the integrated deficit is still **5.1%**, and the **water age** p95 changes
 by still **12.8 h between the last two cycles** available. So 120 h is a *pragmatic finite-horizon
 warm-up under which the concentration field is cyclostationary to the stated tolerances*, and this
 log never says the model reached periodic steady state or that water age converged. Everything
@@ -256,7 +256,7 @@ system, not a longer warm-up. The test therefore has 7 cycles and cannot certify
 | monitor chlorine (mg/L)              | 0.005     | 0.9209 | 0.0437 | 0.0234 | 0.0122 | 0.0064 | 0.0034  | **120 h** (verified)                                      |
 | network p95 chlorine (mg/L)          | 0.010     | 0.9511 | 0.1061 | 0.0396 | 0.0201 | 0.0103 | 0.0054  | **120 h** (verified)                                      |
 | tank chlorine (mg/L)                 | 0.010     | 0.2457 | 0.0787 | 0.0416 | 0.0219 | 0.0115 | 0.0061  | **120 h** (verified)                                      |
-| risk severity, rel. change in `E[A]` | 0.02      | 0.9023 | 0.6507 | 0.1196 | 0.2042 | 0.1056 | 0.0549  | not within 168 h; extrapolates to ≈168 h (**unverified**) |
+| risk severity, rel. change in `E[A]` | 0.02      | 0.8983 | 0.6104 | 0.1206 | 0.1897 | 0.0978 | 0.0509  | not within 168 h; extrapolates to ≈168 h (**unverified**) |
 | water age p95 (h)                    | 1.0       | 23.999 | 21.676 | 19.043 | 16.692 | 14.630 | 12.815  | not within 168 h; extrapolates to ≈600 h (**unverified**) |
 
 
@@ -267,7 +267,7 @@ system, not a longer warm-up. The test therefore has 7 cycles and cannot certify
    geometrically by roughly a factor of two per cycle and first meet all three concentration
    tolerances at a **120 h** warm-up — five times the baseline value.
 2. **The integrated risk severity has not converged even at the horizon.** Network-mean cumulative
-  deficit for the truth runs 0.9946 (start-up) → 0.1256 → 0.0714 → 0.0799 → 0.0901 → 0.0959
+  deficit for the truth runs 1.005 (start-up) → 0.1348 → 0.0821 → 0.092 → 0.1029 → 0.1092
    mg/L·h: it dips after the start-up transient and then climbs **monotonically**. Small
    concentration differences still move the integral, because the deficit integrates a
    threshold crossing. The relative change halves each cycle and would reach the 2% criterion at
@@ -294,7 +294,7 @@ are not, so the honest formulation is bounded on both sides:
 
 - **Sayable:** *"A 120 h warm-up was selected because the chlorine concentration field first meets
 the pre-declared cyclostationarity tolerances at the monitors, network-wide and in the tanks at
-that point. It is a finite-horizon choice: with a 120 h warm-up the residual cycle-to-cycle drift in the integrated deficit is still 5.5%, and water age still 12.8 h between the last two cycles within the model's 168 h ceiling."*
+that point. It is a finite-horizon choice: with a 120 h warm-up the residual cycle-to-cycle drift in the integrated deficit is still 5.1%, and water age still 12.8 h between the last two cycles within the model's 168 h ceiling."*
 - **Not sayable:** that the model is fully cyclostationary after 120 h, or that water age has settled
 to a horizon-independent equilibrium. Neither is true, and the second is not achievable in this
 model at any warm-up available under the pump-control ceiling.
@@ -305,7 +305,7 @@ extended model reproduces the original bit-for-bit over the first 168 h, and onl
 convergence of the severity and age criteria. That is the right thing to do if the warm-up itself is
 a research question. Here it is not: it is a nuisance parameter, the concentration field — which is
 what every likelihood in this log is built from — is cyclostationary to tolerance at 120 h, and
-changing the warm-up would invalidate every cached result. The 5.5% deficit drift is therefore
+changing the warm-up would invalidate every cached result. The 5.1% deficit drift is therefore
 carried as a stated limitation on the *severity* metrics (Steps 10 and 12) rather than removed.
 
 ---
@@ -474,7 +474,7 @@ As the threshold tightens (0.120 → 0.107):
 toward the truth (-0.9431 → -1.0115, true -1.0).
 - **average / new barely change**: SD retained stays 88–98% and the means stay near the prior
 midpoint.
-- **But no threshold gets close to the formal result.** Tightening from 0.120 to 0.107 recovers
+- **But no tested threshold gets close to the formal result** — and the reason is structural, not a property of the particular values tried. A hard cut-off multiplies the score by an indicator; it cannot restore the factor `N` the informal score drops, so no choice of cut-off turns it into the Gaussian likelihood. What the sweep shows empirically is that within the range that keeps a usable acceptance rate, Tightening from 0.120 to 0.107 recovers
 about a seventh of the gap for `old` and almost none for `avg`/`new`, whereas switching to the
 formal likelihood cuts every SD by a factor of three. The earlier reading — "average/new cannot be
 sharpened by any threshold, so their non-identifiability is a property of the monitoring array" —
@@ -1327,7 +1327,14 @@ Findings:
   pushes avg to 2.30 and new to 1.10 (unidentifiable), an order of magnitude larger effect than
    AR(1)'s ×1.5. AR(1) is therefore reported as a quantified *caveat*, not the leading realism term.
 
-**AR(1) profile likelihood (not just Fisher).** To avoid leaving the profile side "notional", the
+**AR(1) profile likelihood — a coarse sensitivity, not a second primary interval.** Read the
+intervals below as a **fixed-ρ, uncensored, grid-resolution sensitivity analysis**, not as 95%
+intervals on the same footing as Step 7b's. Three things separate them: ρ = 0.4 is *assumed* and no
+value of it is supported by these iid-generated observations; the objective is the plain Gaussian
+`½·eᵀΣ⁻¹e`, **not** the censored likelihood that is primary everywhere else; and the endpoints come
+off the 21³ grid, which Step 7b showed to be systematically narrow by 15–39%. A continuous censored
+AR(1) profile has not been implemented, and until it is, only the *direction and rough size* of the
+widening should be quoted. To avoid leaving the profile side "notional", the
 21³ grid was rebuilt storing the full 294-residual vector `e` at every node (`step7c_profile_ar1.py`),
 so the AR(1) profile could be computed exactly as `NLL(θ) = ½·e(θ)ᵀ Σ⁻¹ e(θ)` (the attached
 operational notebook uses the same AR(1) observation process). The independent profile reproduces
@@ -1880,26 +1887,39 @@ The node identities are, however, **more sensitive to the warm-up than to the we
 previously ranked worst by deficit, leaves the top ten entirely at the corrected 120 h warm-up.
 
 **Which network average?** An unweighted mean over 92 junctions counts a zero-demand node the same as
-the largest consumer. 59 of the 92 junctions carry non-zero demand, totalling 192.6 L/s, so the
+the largest consumer. 59 of the 92 junctions carry non-zero demand, totalling **690.7 L/s**, so the
 choice matters and all three are reported rather than one being taken silently:
 
 
 | metric          | unweighted (all 92) | consumer-only (59) | demand-weighted |
 | --------------- | ------------------- | ------------------ | --------------- |
-| `E[D]` (h)      | 3.4309              | **4.4610**         | **2.3554**      |
-| `E[A]` (mg/L·h) | 0.2181              | 0.3053             | 0.1567          |
-| min C (mg/L)    | 0.4922              | 0.4412             | 0.5297          |
+| `E[D]` (h)      | 3.4309              | **4.4610**         | **1.2311**      |
+| `E[A]` (mg/L·h) | 0.2181              | 0.3053             | 0.0798          |
+| min C (mg/L)    | 0.4922              | 0.4412             | 0.6348          |
 
+
+**The demand weights are pattern-aware, and they have to be.** The weights come from
+`wntr.metrics.hydraulic.average_expected_demand`, which applies each junction's pattern and the
+global demand multiplier; the network total is **690.7 L/s**. An earlier version of this log read
+the raw `base_demand` field instead, and that superseded reading is worth recording because of how
+quietly it fails: four Net3 junctions (15, 35, 123, 203) encode a large demand as 1 GPM times a
+large pattern, so the base field alone reports them as 0.063 L/s each instead of 16.7 / 108.4 /
+75.3 / 284.6 — together **70 % of the network's actual water, counted as four of its smallest
+users** — and gives a network total of 192.6 L/s. Every demand-weighted number below, and every
+L/s in Step 12, changed when it was corrected.
 
 The two adjustments move in **opposite** directions, and the reason is a result in itself:
-consumer-only is *worse* than unweighted (4.46 vs 3.43 h) while demand-weighted is *better* (2.36 h).
-That combination can only happen if the risk concentrates at **small** consumers rather than large
-ones — network extremities and low-turnover dead-ends, which is where long residence time is
-expected. So the worst chlorine conditions coincide with the least demand.
+consumer-only is *worse* than unweighted (4.46 vs 3.43 h) while demand-weighted is *better*
+(1.23 h). That combination can only happen if the risk concentrates at **small** consumers rather
+than large ones — network extremities and low-turnover dead-ends, which is where long residence time
+is expected. So the worst chlorine conditions coincide with the least demand, and the pattern
+correction **sharpens** this: once the four large patterned demands are counted at their true size,
+the demand-weighted severity falls from 2.36 h to 1.23 h, i.e. the large consumers are even
+better-served relative to the network mean than the base-only reading suggested.
 
 This has two consequences for reporting. The unweighted figure used elsewhere in this log is the
-**conservative** choice, not a flattering one — demand-weighting would lower every severity number by
-about a third. And a demand-weighted headline would understate exactly the customers the risk map is
+**conservative** choice, not a flattering one — demand-weighting more than halves every severity
+number. And a demand-weighted headline would understate exactly the customers the risk map is
 supposed to find, so the consumer-only average is the one to quote alongside any demand-weighted
 figure.
 
@@ -2202,7 +2222,7 @@ probability. They answer different questions and both are reported.
 **Formulas**:
 
 ```
-P_min(s,n) = Σᵢ wᵢ · 1[ min over t ∈ [24, 72] h of C(s,i,n,t) < C_crit ]
+P_min(s,n) = Σᵢ wᵢ · 1[ min over t ∈ [120, 168] h of C(s,i,n,t) < C_crit ]
 P_bar(s,n) = E[D(s,n)] / 48                     (the Step-10 quantity)
 E[D(s,n)]  = Σᵢ wᵢ · ∫ 1[C < C_crit] dt          (h, trapezoid over 48 intervals)
 E[A(s,n)]  = Σᵢ wᵢ · ∫ max(0, C_crit − C) dt     (mg/L·h)
@@ -2267,7 +2287,7 @@ so they can be checked.
 Because the baseline model already distinguishes new/average/old `k_w`, `α_new < 1` is not
 used — it would weaken already-weak new pipes and double-count the zone structure. Scenario
 D is therefore named an *ageing-reactivity stress*, not "the effect of ageing".
-- `C_crit = 0.2 mg/L` and the demand-based consequence terciles (`1.16`, `3.39 L/s`) are
+- `C_crit = 0.2 mg/L` and the demand-based consequence terciles (`1.67`, `4.38 L/s`) are
 illustrative operational inputs, not legal limits. Demand is a **consequence proxy**, not
 population or exposure.
 
@@ -2291,37 +2311,40 @@ the informal GLUE score is not used for these headline numbers.
 
 | Scenario                    | mean k_b | mean k_w,old | `P_min>0.5` nodes | demand at risk | % demand | high/very-high | indeterminate | net-mean `P_bar` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
 | --------------------------- | -------- | ------------ | ----------------- | -------------- | -------- | -------------- | ------------- | ---------------- | ------------------- | ------------------------ |
-| A. Baseline 12 °C           | −0.504   | −0.994       | 21                | 36.3 L/s       | 18.8 %   | 10             | 0             | 0.0708           | 3.398               | 0.2216                   |
-| B. Warm season 16 °C        | −0.655   | −1.222       | 28                | 45.0 L/s       | 23.4 %   | 13             | 8             | 0.0884           | 4.245               | 0.3645                   |
-| C. Heatwave 20 °C           | −0.848   | −1.501       | 29                | 47.8 L/s       | 24.8 %   | 14             | 4             | 0.1087           | 5.218               | 0.5218                   |
-| D. Heatwave + ageing stress | −0.848   | −2.777       | 31                | 49.4 L/s       | 25.6 %   | 15             | 4             | 0.1232           | 5.912               | 0.5790                   |
+| A. Baseline 12 °C           | −0.504   | −0.994       | 21                | 55.4 L/s       | 8.0 %    | 10             | 0             | 0.0708           | 3.398               | 0.2216                   |
+| B. Warm season 16 °C        | −0.655   | −1.222       | 28                | 64.7 L/s       | 9.4 %    | 12             | 8             | 0.0884           | 4.245               | 0.3645                   |
+| C. Heatwave 20 °C           | −0.848   | −1.501       | 29                | 67.8 L/s       | 9.8 %    | 13             | 4             | 0.1087           | 5.218               | 0.5218                   |
+| D. Heatwave + ageing stress | −0.848   | −2.777       | 31                | 69.4 L/s       | 10.0 %   | 13             | 4             | 0.1232           | 5.912               | 0.5790                   |
 
 
 Continuity check against Steps 1–11: with the temperature held at `T_ref` exactly (cached
-`C_all`, no `δT`), the baseline gives 21 nodes / 36.3 L/s and `E[A] = 0.2181`. Sampling the
+`C_all`, no `δT`), the baseline gives 21 nodes / 55.4 L/s and `E[A] = 0.2181`. Sampling the
 stated temperature uncertainty therefore did **not materially change** the baseline
 classification — the `P_min>0.5` count and demand at risk are unchanged and network-mean
 `E[A]` moves by under 2 % (`0.2181 → 0.2216`).
 
 Four-panel window-breach probability mapsAgeing increment ΔP_min = P(D) − P(C) at 20 °CScenario escalation, dosing evaluation and ageing sensitivity
 
-**Escalation.** Seven consumer junctions change risk band between A and D, carrying 18.9 L/s
-(10 % of network demand); **six of the seven are unmonitored**. The largest ageing-only
-increments at the same temperature (D − C) are nodes 217 (`ΔP_min = +0.346`), 239 (`+0.155`)
-and 215 (`+0.091`).
+**Escalation.** Seven consumer junctions change risk band between A and D, carrying 20.23 L/s
+(2.9 % of network demand); **six of the seven are unmonitored**. The largest ageing-only
+increment at the same temperature (D − C) is at node 249 (`ΔP_min = +0.410`), which carries **no
+demand**; the largest at consumer junctions are 217 (`+0.346`), 239 (`+0.155`) and 215
+(`+0.091`). Demand share is small here because the escalating nodes are network extremities —
+the same "risk sits at small consumers" pattern Step 10 quantifies, so a demand-share headline
+understates the operational relevance of these seven nodes.
 
 **Ageing-stress sensitivity — is scenario D an artefact of** `α_old = 1.85`**?**
 
 
 | ageing set | `α_avg` | `α_old` | `P_min>0.5` nodes | demand at risk | high/very-high | indeterminate | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) |
 | ---------- | ------- | ------- | ----------------- | -------------- | -------------- | ------------- | ------------------- | ------------------------ |
-| mild       | 1.15    | 1.40    | 30                | 49.4 L/s       | 15             | 4             | 5.515               | 0.550                    |
-| central    | 1.35    | 1.85    | 31                | 49.4 L/s       | 15             | 4             | 5.912               | 0.579                    |
-| severe     | 1.50    | 2.20    | 31                | 49.4 L/s       | 16             | 4             | 6.178               | 0.599                    |
+| mild       | 1.15    | 1.40    | 30                | 69.4 L/s       | 13             | 4             | 5.515               | 0.550                    |
+| central    | 1.35    | 1.85    | 31                | 69.4 L/s       | 13             | 4             | 5.912               | 0.579                    |
+| severe     | 1.50    | 2.20    | 31                | 69.4 L/s       | 14             | 4             | 6.178               | 0.599                    |
 
 
 The **headline binary metrics are nearly insensitive** to the tested multiplier range: the count
-varies only from 30 to 31, demand at risk stays at 49.4 L/s and the indeterminate count is
+varies only from 30 to 31, demand at risk stays at 69.4 L/s and the indeterminate count is
 constant. The **continuous severity metric increases monotonically** (`E[A]` 0.550 → 0.579 →
 0.599 mg/L·h), and node-level probabilities do move with `α`. So the hot-spot conclusion is
 robust to the multiplier choice, but the magnitude of the ageing penalty is not — it should be
@@ -2336,9 +2359,9 @@ confounded the result with an un-dosed boundary condition.) `inlet = 1.00` reuse
 
 | inlet (mg/L) | `P_min>0.5` nodes | demand at risk | % demand | net-mean `P_min` | net-mean `E[D]` (h) | net-mean `E[A]` (mg/L·h) | median-over-nodes of mean window min (mg/L) |
 | ------------ | ----------------- | -------------- | -------- | ---------------- | ------------------- | ------------------------ | ------------------------------------------- |
-| 1.00         | 29                | 47.8 L/s       | 24.8 %   | 0.3246           | 5.218               | 0.5218                   | 0.463                                       |
-| 1.15         | 28                | 45.0 L/s       | 23.4 %   | 0.3112           | 4.628               | 0.4527                   | 0.532                                       |
-| 1.30         | 28                | 45.0 L/s       | 23.4 %   | 0.2915           | 4.288               | 0.3957                   | 0.601                                       |
+| 1.00         | 29                | 67.8 L/s       | 9.8 %    | 0.3246           | 5.218               | 0.5218                   | 0.463                                       |
+| 1.15         | 28                | 64.7 L/s       | 9.4 %    | 0.3112           | 4.628               | 0.4527                   | 0.532                                       |
+| 1.30         | 28                | 64.7 L/s       | 9.4 %    | 0.2915           | 4.288               | 0.3957                   | 0.601                                       |
 
 
 (The last column takes, per junction, the likelihood-weighted mean of the per-member window minimum,
@@ -2363,9 +2386,9 @@ draws; only the simulation horizon differs.
 
 | inlet (mg/L) | nodes short / long | demand at risk short / long | `E[D]` short / long (h) | `E[A]` short / long (mg/L·h) | rel. change |
 | ------------ | ------------------ | --------------------------- | ----------------------- | ---------------------------- | ----------- |
-| 1.00         | 31 / 31            | 49.5 / 49.5 L/s             | 5.370 / 5.389           | 0.5052 / 0.5484              | +8.6 %      |
-| 1.15         | 29 / 29            | 45.2 / 47.8 L/s             | 4.655 / 4.788           | 0.4306 / 0.4789              | +11.2 %     |
-| 1.30         | 29 / 28            | 45.2 / 45.0 L/s             | 4.040 / 4.369           | 0.3736 / 0.4220              | +13.0 %     |
+| 1.00         | 31 / 31            | 69.6 / 69.6 L/s             | 5.370 / 5.389           | 0.5052 / 0.5484              | +8.6 %      |
+| 1.15         | 29 / 29            | 64.9 / 67.8 L/s             | 4.655 / 4.788           | 0.4306 / 0.4789              | +11.2 %     |
+| 1.30         | 29 / 28            | 64.9 / 64.7 L/s             | 4.040 / 4.369           | 0.3736 / 0.4220              | +13.0 %     |
 
 
 Read honestly, with one caveat that has grown: the subset is now less representative than before
@@ -2374,12 +2397,12 @@ formal weights are concentrated and a stride-8 thinning samples them unevenly). 
 +13.0 % figures carry a few percent of subset error and should be read as "of order 10 %", which
 is also what Step 0's cycle-to-cycle analysis independently gives. The **conclusion is unchanged**
 under both horizons: node counts and demand at risk are essentially the same, every metric still
-improves monotonically with dose, and demand at risk stays well above the 36.3 L/s baseline.
+improves monotonically with dose, and demand at risk stays well above the 55.4 L/s baseline.
 
-**Read the binary and continuous columns together.** The identical 45.0 L/s at 1.15 and 1.30 is
+**Read the binary and continuous columns together.** The identical 64.7 L/s at 1.15 and 1.30 is
 a **threshold artefact**, not evidence that the extra dose does nothing: the continuous metrics
 improve monotonically (`E[D]` 5.22 → 4.63 → 4.29 h; `E[A]` 0.522 → 0.453 → 0.396). Even so,
-+30 % dose leaves 45.0 L/s at risk against 36.3 L/s at baseline — **source dosing alone does not
++30 % dose leaves 64.7 L/s at risk against 55.4 L/s at baseline — **source dosing alone does not
 restore the pre-heatwave demand-at-risk position**. Turnover measures (flushing, storage
 management, rezoning) act on residence time and should be evaluated alongside dosing. DBP
 formation, taste and acceptability are not modelled.
@@ -2404,22 +2427,40 @@ without them).**
 
 
 
-| consequence band | on base demand `d` (L/s) | score |
-| ---------------- | ------------------------ | ----- |
-| non-consumer     | `d = 0`                  | 0     |
-| minor            | `0 < d ≤ 1.16`           | 1     |
-| moderate         | `1.16 < d ≤ 3.39`        | 2     |
-| major            | `d > 3.39`               | 3     |
+| consequence band | on average expected demand `d` (L/s) | score |
+| ---------------- | ----------------------------------- | ----- |
+| non-consumer     | `d = 0`                             | 0     |
+| minor            | `0 < d ≤ 1.67`                      | 1     |
+| moderate         | `1.67 < d ≤ 4.38`                   | 2     |
+| major            | `d > 4.38`                          | 3     |
 
 
-Terciles are the `1/3` and `2/3` quantiles of base demand over the **59 junctions with non-zero
+Terciles are the `1/3` and `2/3` quantiles of demand over the **59 junctions with non-zero
 demand** (WNTR parses the `.inp` and stores every demand internally in **m³/s**, so `×1000` gives
 L/s; the frozen `Net3.inp` itself declares `Units GPM` — the conversion is from WNTR's internal SI
-value, not from the file's units). The risk score is
+value, not from the file's units). `d` is the **pattern-aware average expected demand**
+(`wntr.metrics.hydraulic.average_expected_demand`), not the `base_demand` field: four Net3
+junctions encode a large demand as 1 GPM times a large pattern, and reading the base value alone
+would put them in the *minor* band while they carry 70 % of the network's water. The risk score is
 `likelihood score × consequence score` (range `0–15`), mapped as `0 → not applicable`,
 `1–3 → low`, `4–6 → medium`, `7–9 → high`, `≥10 → very high`.
 
-Sampling priority uses the **discrete consequence score (0–3), not raw demand**:
+**What this score is, and what it is not.** Its likelihood axis is `P_min` — the probability of *any*
+breach in the 48 h window — so the register scores **whether a node breaches at all, weighted by how
+much water it serves**. It does **not** use the duration and cumulative-deficit metrics that Step 10
+introduced precisely because a single probability conflates a node marginally below the threshold
+for the whole window with one far below it for two hours. A node that dips just under 0.2 mg/L once
+and a node that sits at 0.03 mg/L for 48 h receive the same likelihood band. The register is
+therefore a **breach-probability × consequence** product and should be named as one; folding `E[D]`
+or `E[A]` into the severity axis is open work, and until it is done the register must not be
+described as a severity ranking.
+
+**Sampling priority is a classification-ambiguity index, not an optimal-monitoring criterion.** It
+peaks where the assessment cannot classify a node either way and weights that by consequence. It
+contains no Jacobian, no redundancy against the existing six monitors, no observation-noise model and
+no expected posterior-variance reduction, so it must not be read as expected information gain or as
+sensor placement. Name it `classification-ambiguity sampling index`. It uses the **discrete
+consequence score (0–3), not raw demand**:
 
 ```
 priority(n) = consequence_score(n) · P_min(n) · [1 − P_min(n)]     normalised by its maximum
@@ -2443,12 +2484,12 @@ altering the assumed age profile; calibration record exceeding its approved age.
 ### 12.6 Findings for the Results / Discussion
 
 1. **Temperature escalates risk materially but does not flatten the network.** `P_min>0.5`
-  nodes rise 21 → 28 → 29 from 12 → 16 → 20 °C; demand at risk 18.8 % → 24.8 %; network-mean
+  nodes rise 21 → 28 → 29 from 12 → 16 → 20 °C; demand at risk 8.0 % → 9.8 %; network-mean
    `E[A]` more than doubles (0.222 → 0.522 mg/L·h).
 2. **Ageing at the same temperature adds a spatially selective increment** (`P_min>0.5` nodes
    29 → 31; network-mean `E[A]` 0.5218 → 0.579 mg/L·h), concentrated where old/average pipes
    control the supply path. The **`P_min`-classified set** is robust across the tested `α` range
-   (30 / 31 / 31 nodes, 49.4 L/s at all three), while the severity magnitude scales with `α`
+   (30 / 31 / 31 nodes, 69.4 L/s at all three), while the severity magnitude scales with `α`
    (`E[A]` 0.550 → 0.579 → 0.599) — report it as a stress range, not as a measured effect.
    *"Set" here means the nodes classified `P_min > 0.5`, which is a breach-probability
    classification and not the `E[A]`-ranked hot-spot list of Step 10; the two are different

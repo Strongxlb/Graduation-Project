@@ -1,3 +1,10 @@
+> **SUPERSEDED — DO NOT READ AS THE CURRENT PLAN.** This document describes the original
+> Bristol Water Field Lab three-DMA field-data study. The project was refocused onto a
+> controlled EPANET Net3 synthetic three-zone case, because a known truth is a precondition
+> for the identifiability analysis that became the contribution. Monitors, data sources,
+> DMA transfer and the hierarchical-MCMC plan below are all from the superseded scope.
+> The current definition of the project is in [`README.md`](./README.md).
+
 # 毕业设计执行计划 - Plan 1
 
 > 配套文件：[`README.md`](./README.md) · [`README.en.md`](./README.en.md) · [`background/Literature/literature.md`](./background/Literature/literature.md)
