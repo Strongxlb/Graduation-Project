@@ -170,6 +170,11 @@ CLAIMS = [
      "by_scheme/formal_censored/coef/old/empirical_sd_over_crlb", 1),
     ("RESULTS_LOG.md", r"nominal 90% intervals cover[^\n]{0,80}?([0-9.]+)\s*/\s*[0-9.]+\s*/\s*[0-9.]+",
      "step14_repeated_noise.json", "by_scheme/formal_censored/coef/old/coverage/q90", 1),
+    # --- the noise floor that a candidate RMSE may be compared with: window, not full record ---
+    ("RESULTS_LOG.md", r"realised noise RMSE of \*?\*?([0-9.]+) mg/L\*?\*? on the same",
+     "baseline_meta.json", "summary/noise_rmse", 1),
+    ("RESULTS_LOG.md", r"all three at truth\) on the calibration window = \*\*([0-9.]+) mg/L",
+     "step4b_sensitivity.json", "summary/noise_floor_rmse", 1),
     # --- warm-up: the residual drift that stops "converged" from being sayable ---
     ("RESULTS_LOG.md", r"residual cycle-to-cycle drift[^\n]{0,90}?([0-9.]+)\s*%",
      "step0_warmup_convergence.json", "per_criterion/risk_rel_dDeficit/worst_by_cycle[5]", 100),
@@ -240,6 +245,13 @@ FORBIDDEN = [
      "repeated-sampling test in Step 14"),
     (r"(?i)(complete|full) periodic steady state|water age had converged|has converged after 120",
      "120 h is a finite-horizon pragmatic choice; the deficit and water-age criteria never pass"),
+    # The candidate RMSE is computed on the 49x6 assessment window, so 0.0960 (the full-record
+    # realised noise RMSE) is not its comparator; 0.0973 is. Both numbers are real and live in the
+    # artifacts, so a drift check cannot see this — only the pairing is wrong.
+    (r"(?i)noise floor[^\n]{0,45}0\.0960|0\.0960[^\n]{0,45}noise floor|"
+     r"noise floor of 0\.096\b",
+     "0.0960 is the FULL-RECORD realised noise RMSE; the comparator for a window RMSE is 0.0973 "
+     "(baseline_meta summary/noise_rmse). Name which of sigma / window / full-record is meant"),
     (r"(?i)all numbers are checked|every number is verified|7/7 checks passing",
      "the validator covers a subset of numbers and establishes no semantic consistency"),
     # Step 8b: two readings that were written, tested against the artifact, and refuted. Neither can

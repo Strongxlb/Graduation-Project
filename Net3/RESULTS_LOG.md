@@ -385,7 +385,10 @@ made efficient by brute force — but the **quantiles have converged** anyway: t
 0.01 prior SD between the last two sizes and the 5/95 endpoints by less. ESS is the conservative
 diagnostic here; the Sobol design's space-filling is what buys the stability.
 
-Minimum RMSE 0.0971 mg/L against a noise floor of 0.0960. Behavioural counts, for the comparator:
+Minimum candidate RMSE 0.0971 mg/L, against a **realised noise RMSE of 0.0973 mg/L on the same
+120–168 h calibration window** — the comparison has to be window-against-window, and the
+full-record realised noise RMSE (0.0960, `noise_rmse_full_record`) is a different sample and must
+not be quoted here. Behavioural counts, for the comparator:
 4786/8192 at 0.107 and 7084/8192 at 0.120.
 
 Cache `baseline.npz` holds all 8192 candidate predictions `C_all (8192 × 49 × 92)` plus both formal
@@ -440,7 +443,14 @@ Sampling SD of the RMSE statistic at the truth:
 sd(RMSE) ≈ σ / √(2N) = 0.10 / √(2·294) = 0.0041 mg/L      (N = 6 monitors × 49 h = 294)
 ```
 
-Observed minimum RMSE = 0.0971 mg/L, against a noise floor of 0.0960.
+Observed minimum candidate RMSE = 0.0971 mg/L, against a realised noise RMSE of **0.0973 mg/L**
+over the same 120–168 h calibration window. (The full-record realised noise RMSE is 0.0960; it
+describes the observation set as a whole and is not the comparator for a window RMSE.)
+
+**Three different quantities get called "the noise floor" in this literature, so this log names
+them.** `σ = 0.10 mg/L` is the *nominal* noise level the observations were generated with;
+`0.0973` is the *realised* noise RMSE on the calibration window; `0.0960` is the realised noise
+RMSE over the full record. The table below is scaled on `σ`, not on either realised value.
 
 **Scope of this step, restated.** The behavioural threshold belongs to the informal GLUE comparator
 only — the formal likelihood carries no cut-off. So this is a sensitivity analysis *of the
@@ -450,8 +460,8 @@ depends on an analyst's choice, not about how much the data say.
 Retention and objective-scale table:
 
 
-| Threshold | Retained | Retention | SD above noise floor | band node15 | band node107 | nonzero-risk nodes |
-| --------- | -------- | --------- | -------------------- | ----------- | ------------ | ------------------ |
+| Threshold | Retained | Retention | SD above σ | band node15 | band node107 | nonzero-risk nodes |
+| --------- | -------- | --------- | ---------- | ----------- | ------------ | ------------------ |
 | 0.107     | 4786     | 58.4%     | 1.70                 | 0.1008      | 0.0762       | 24                 |
 | 0.110     | 5668     | 69.2%     | 2.42                 | 0.1121      | 0.0788       | 24                 |
 | 0.120     | 7084     | 86.5%     | 4.85                 | 0.1419      | 0.0816       | 24                 |
@@ -489,8 +499,9 @@ moves, and those two are separated by less than the ensemble spread on either.
 
 Conclusions:
 
-- The draft's 0.12 threshold sits 4.85 sd(RMSE) above the noise floor, so a parameter set at the
-truth passes with near-certainty — the filter only rejects grossly wrong sets.
+- The draft's 0.12 threshold sits 4.85 sd(RMSE) above the **nominal** noise level `σ = 0.10`
+(`sd_above_floor = (thr − σ) / sd(RMSE)`), so a parameter set at the truth passes with
+near-certainty — the filter only rejects grossly wrong sets.
 - Tightening to a defensible ≈95% band (0.107) sharpens **old** and leaves **average/new** near the
 prior. **This is a limit of the score, not of the monitoring array.** An earlier version of this
 log drew the opposite conclusion from the same table, and that was the single most consequential
@@ -555,7 +566,9 @@ and supersedes these numbers for reporting.
 
 Each coefficient is swept across (and beyond) its prior while the other two are held at the
 truth; RMSE is computed against the baseline noisy observations
-(`step4b_sensitivity_curves.py`). Noise-floor RMSE (all three at truth) = 0.0960 mg/L; the minimum
+(`step4b_sensitivity_curves.py`).
+Realised noise RMSE (all three at truth) on the calibration window = **0.0973 mg/L**
+(`noise_floor_rmse`); the minimum
 over the sweep is 0.0972 mg/L. No weighting is applied here — the object plotted is the objective
 itself, and the two thresholds are drawn only to show where the informal comparator would cut it.
 
@@ -681,7 +694,8 @@ ensemble under the primary rule, and Step 5d with the structured design. Read th
 configuration, not as the result.
 
 - **Noise-free structural residual** (best homogeneous fit vs the heterogeneous truth) =
-**0.0068 mg/L** — a small fraction of the noise floor (0.0960). The within-zone heterogeneity is
+**0.0068 mg/L** — a small fraction of the realised window noise RMSE (0.0973). The within-zone
+heterogeneity is
 essentially invisible under σ = 0.1.
 - Grid-search best fit (-1.067, -0.12, -0.037); 4613/8192 behavioural at thr 0.107, min RMSE 0.0973.
 
@@ -699,7 +713,8 @@ group, minor reorder).
 **Finding (null / robustness), with the caveat that one field cannot establish it.** ±20% *symmetric*
 within-zone heterogeneity produces no meaningful structural error here: the effective grouped
 coefficients match the true field averages to within a fraction of the posterior SD (biases −0.024 /
-−0.018 / +0.001), the structural residual (0.0068) is swamped by the noise (0.0960), and the risk map
+−0.018 / +0.001), the structural residual (0.0068) is swamped by the noise (0.0973 on the window),
+and the risk map
 is preserved. This is *not* the "precise but biased" pathology, because symmetric mean-zero jitter
 averages out — old's length-weighted mean (−0.989) is essentially its arithmetic mean (−1.007), so the
 fit has nothing to be biased toward. The claim only becomes safe in Step 5c, where the same test is
@@ -785,7 +800,8 @@ from the fit quality, which was excellent throughout.
 
 The structural residual grows 0.0068 → 0.0145 mg/L, but only 0.0013 → 0.0090 of that is above the
 grid floor, so the earlier reading "the residual is 7% of the noise floor" overstated it by about
-fivefold; against the 0.096 noise floor the true structural part at ±20% is 1.3%. The risk ranking
+fivefold; against the realised window noise RMSE of 0.0973 the true structural part at ±20% is
+1.3%. The risk ranking
 is unchanged across all magnitudes.
 
 ### Step 5d — structured (length-correlated) within-zone heterogeneity → precise-but-biased
@@ -817,7 +833,8 @@ structural error at all; subtract it before reading any shift as structural.
 Structured heterogeneity: the fit moves toward a length-weighted value
 
 **Single-realisation reading (one noise draw).** The structural residual stays small (0.0063, so the
-fit remains *precise*: RMSE 0.0968 ≈ the noise floor), the length-weighted proxy diverges from the
+fit remains *precise*: RMSE 0.0968, just under the realised window noise RMSE of 0.0973), the
+length-weighted proxy diverges from the
 arithmetic mean (old −1.2404 vs −1.000), and under the primary rule the fitted coefficient moves off
 the arithmetic mean in that direction by 60% (old), 147% (average, i.e. past the proxy) and 45% (new)
 of the arithmetic → proxy gap. Two things are worth noting about the comparison with the comparator
@@ -912,7 +929,7 @@ Fix for the draft: present the grid only as an implementation/plausibility check
 ### Step 5 — overall
 
 - **Uncorrelated within-zone heterogeneity (±20–50%, Step 5c)**: the grouped model is **robust**. The posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk ranking is preserved. Across 25 independent fields at ±20% the structural increment is `+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
-- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at the noise floor while the coefficient moves toward a length-weighted proxy — 60% of the gap for old under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an identified effective coefficient.
+- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at the realised window noise RMSE while the coefficient moves toward a length-weighted proxy — 60% of the gap for old under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an identified effective coefficient.
 - **Grid search (Step 5e)**: recovery to the nearest grid node is guaranteed by the grid being centred on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid placement; only a weighted ensemble can speak to identifiability.
 - Directly answers §3.3 ("report how far the behavioural ensemble sits from any simple average of the
 true field"): the distance is ≈0 when heterogeneity is uncorrelated and a clear, resolved shift

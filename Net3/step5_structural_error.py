@@ -97,7 +97,13 @@ for kw, sim in GRID.items():
 rng_n = np.random.default_rng(B.NOISE_SEED)
 noisy = np.clip(truth_mon + rng_n.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)
 obs = noisy[B.WARMUP_H:]
-noise_rmse = float(np.sqrt(((noisy - truth_mon) ** 2).mean()))
+# TWO noise floors, and only one of them is the right comparator here. Every RMSE below is computed
+# on the 49x6 assessment window (`obs`), so the floor it must be read against is the realised noise
+# RMSE on that same window. The full-record figure describes the observation set as a whole and is
+# kept for that purpose only; quoting it beside a window RMSE compares two different samples, which
+# is exactly the mistake this line used to make.
+noise_rmse_full = float(np.sqrt(((noisy - truth_mon) ** 2).mean()))
+noise_rmse = float(np.sqrt(((noisy - truth_mon)[B.WARMUP_H:] ** 2).mean()))
 
 # grid-search best fit vs noisy obs
 best_fit, best_rmse = None, np.inf
@@ -160,7 +166,8 @@ report = {
                       "drawn or the score's own offset.",
     "primary_weighting_elsewhere": B.PRIMARY_WEIGHTING,
     "jitter": JITTER, "jitter_seed": JITTER_SEED,
-    "noise_floor_rmse": noise_rmse,
+    "noise_floor_rmse": noise_rmse,                # 49x6 window; compare with rmse_min
+    "noise_floor_rmse_full_record": noise_rmse_full,   # 169x6, the observation set as a whole
     "structural_min_rmse_noisefree": best_nf_rmse,
     "structural_best_homogeneous": best_nf,
     "gridsearch_best_fit_noisy": best_fit, "gridsearch_best_rmse": best_rmse,
@@ -184,7 +191,8 @@ with open(os.path.join(HERE, "baseline_cache", "step5_structural_error.json"), "
     json.dump(report, f, indent=2, default=_jsafe)
 
 print("\n=== structural error (+/-20% pipe-level jitter) ===")
-print(f"noise floor RMSE            = {noise_rmse:.4f}")
+print(f"noise floor RMSE            = {noise_rmse:.4f} on the calibration window "
+      f"({noise_rmse_full:.4f} over the full record)")
 print(f"structural min RMSE (noise-free best homogeneous) = {best_nf_rmse:.4f}"
       f"  -> irreducible structural residual = {best_nf_rmse:.4f} mg/L")
 print(f"grid-search best fit (noisy) = {best_fit}, RMSE {best_rmse:.4f}")

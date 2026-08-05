@@ -4,7 +4,8 @@
   "primary_weighting_elsewhere": "formal_censored",
   "jitter": 0.2,
   "jitter_seed": 12345,
-  "noise_floor_rmse": 0.09599656236880391,
+  "noise_floor_rmse": 0.09732424080753001,
+  "noise_floor_rmse_full_record": 0.09599656236880391,
   "structural_min_rmse_noisefree": 0.0067725758999586105,
   "structural_best_homogeneous": [
     -1.067,
