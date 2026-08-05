@@ -31,10 +31,12 @@ A passing run therefore means "no detected drift in the covered numbers", not "t
 Usage:
     python validate_artifacts.py            # summary; exit 1 if any check fails
     python validate_artifacts.py --verbose  # also list unmatched (probably prose) numbers
+    python validate_artifacts.py --release  # additionally require a clean-tree manifest at HEAD
 """
 import bisect
 import json
 import os
+import subprocess
 import re
 import sys
 
@@ -495,6 +497,46 @@ def check_manifest():
     return [f"manifest field {k!r}: cache={o!r} now={n!r}" for k, o, n in bad], []
 
 
+def check_release_provenance(release=False):
+    """Is the manifest a citable release record, or a development snapshot?
+
+    The manifest is written from whatever tree it is run on. The working habit here has been
+    edit -> provenance.py -> commit everything including the manifest, which guarantees the manifest
+    records a DIRTY tree at the PREVIOUS commit and never describes the commit it ships in. That is
+    fine while developing and useless for citation: `uncommitted_diff_sha256` identifies the diff
+    without storing it, so nothing outside this working copy can reconstruct what ran.
+
+    Normally this reports a note. Under --release it fails, so the release sequence has to be
+    followed deliberately: commit everything -> provenance.py on a clean tree -> commit the manifest
+    alone -> this check -> tag.
+    """
+    path = os.path.join(CACHE, "cache_manifest.json")
+    if not os.path.exists(path):
+        return ["cache_manifest.json missing"], []
+    with open(path) as f:
+        git = json.load(f).get("git", {})
+    head = subprocess.run(["git", "-C", os.path.dirname(HERE), "rev-parse", "HEAD"],
+                          capture_output=True, text=True)
+    head = head.stdout.strip() if head.returncode == 0 else None
+    recorded = git.get("commit")
+    problems, notes = [], []
+    msgs = []
+    if git.get("dirty"):
+        n = len(git.get("dirty_files") or [])
+        msgs.append(f"manifest was written on a DIRTY tree ({n} modified file(s)); the diff is "
+                    f"identified by hash, not stored")
+    if recorded and head and recorded != head:
+        msgs.append(f"manifest records commit {recorded[:12]}, HEAD is {head[:12]} — it does not "
+                    f"describe the current tree")
+    if not msgs:
+        notes.append(f"release-grade: manifest records a clean tree at {(recorded or '?')[:12]}"
+                     + (" (= HEAD)" if recorded == head else ""))
+        return [], notes
+    msgs.append("release sequence: commit everything -> python provenance.py on a clean tree -> "
+                "commit the manifest alone -> python validate_artifacts.py --release -> tag")
+    return (msgs, []) if release else ([], msgs)
+
+
 def check_figure_freshness():
     """A figure older than the artifact it plots is stale and must be regenerated.
 
@@ -817,11 +859,12 @@ def check_env_claims(text):
 
 
 # ---------------------------------------------------------------- driver
-def main(verbose=False):
+def main(verbose=False, release=False):
     sections, text = log_sections()
     checks = [
         ("artifacts exist", lambda: check_artifacts_exist()),
         ("cache manifest", lambda: check_manifest()),
+        ("release provenance", lambda: check_release_provenance(release)),
         ("weighting declared in every artifact", lambda: check_weighting_declared()),
         ("registered claims vs JSON paths", lambda: check_claims()),
         ("forbidden / superseded wording", lambda: check_forbidden()),
@@ -851,4 +894,4 @@ def main(verbose=False):
 
 
 if __name__ == "__main__":
-    sys.exit(main(verbose="--verbose" in sys.argv))
+    sys.exit(main(verbose="--verbose" in sys.argv, release="--release" in sys.argv))
