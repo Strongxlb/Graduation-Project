@@ -1,44 +1,11 @@
 {
-  "generated_utc": "2026-08-05T00:04:36+00:00",
+  "generated_utc": "2026-08-05T01:14:50+00:00",
   "git": {
-    "commit": "64ec7d37fd0965cf6c28edfacae2c513bc4cced2",
-    "dirty": true,
-    "dirty_files": [
-      "Net3/Figures/step12_ageing_delta.png",
-      "Net3/Figures/step4b_sensitivity_curves.png",
-      "Net3/Figures/step6_noise_sensitivity.png",
-      "Net3/Figures/step7b_profile.png",
-      "Net3/Figures/step8d_sensor_drift.png",
-      "Net3/RESULTS_LOG.md",
-      "Net3/baseline_cache/baseline_meta.json",
-      "Net3/baseline_cache/step0_warmup_convergence.json",
-      "Net3/baseline_cache/step10_risk_metrics.json",
-      "Net3/baseline_cache/step11_loo.json",
-      "Net3/baseline_cache/step12_scenarios.json",
-      "Net3/baseline_cache/step13_known_answer.json",
-      "Net3/baseline_cache/step14_repeated_noise.json",
-      "Net3/baseline_cache/step3_threshold.json",
-      "Net3/baseline_cache/step4b_sensitivity.json",
-      "Net3/baseline_cache/step4d_displaced_robust.json",
-      "Net3/baseline_cache/step5_structural_error.json",
-      "Net3/baseline_cache/step5c_jitter_sweep.json",
-      "Net3/baseline_cache/step5d_structured.json",
-      "Net3/baseline_cache/step6_noise_sensitivity.json",
-      "Net3/baseline_cache/step7_fisher.json",
-      "Net3/baseline_cache/step7b_profile.json",
-      "Net3/baseline_cache/step7c_ar1.json",
-      "Net3/baseline_cache/step8_sensor_bias.json",
-      "Net3/baseline_cache/step8b_kb_sensitivity.json",
-      "Net3/baseline_cache/step8c_bias_bynode.json",
-      "Net3/baseline_cache/step8d_sensor_drift.json",
-      "Net3/baseline_cache/step9_zeroclip.json",
-      "Net3/provenance.py",
-      "Net3/step10_risk_metrics.py",
-      "Net3/step13_known_answer.py",
-      "Net3/wq_common.py"
-    ],
-    "tree_sha256": "97fb13ba3e21bcd8b82733e17fcaf5832eb9cf0372736f0525eb4da8563c6b45",
-    "uncommitted_diff_sha256": "9f05931e8dc629795c7ff94d1caea340b830072725d1d7baed82fc3103e09ddd"
+    "commit": "c9fd66a668a411315704bc1d4e297b459131d8b1",
+    "dirty": false,
+    "dirty_files": [],
+    "tree_sha256": "3f6ab8b3b62362f67a58ffdd97be70ad548fcf001b4df954fb9c600035a88b10",
+    "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -105,6 +72,7 @@
       "step12_scenarios.py": "7f6be00b6dda631709644012cb7bf8f7d3d04acb86b43c9c38b94da1569c11c0",
       "step13_known_answer.py": "6878d66318d3fff942e931995e664e6e30b3ee4ac9ad7b11f454889b371a1b3e",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
+      "step15_unit_equivalence.py": "44ee19fd0a3073920267de6b8c6b2498720f65bd842ea422ff6a397b8c413685",
       "step1_freeze_baseline.py": "cb7edf1b943a8feb2ce83e9631b747181f39694dfcf02c7a85c1603e7adc1833",
       "step3_threshold_sensitivity.py": "1568dcdd664143d2ea77bc1bd6dd829a3c126c9985060110f3f2edf0b317abfe",
       "step4_displaced_prior.py": "7f859a1a8a7a5c82adeaa38cdc84b2a97d1c01e6261d691b0e6963ccd4b35f20",
@@ -125,7 +93,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "9f29d3ebdcbdab40ce8c7a1caafdeb53dd455c11cddf8dd2cd1e10fc971194d9"
+    "step_scripts_combined_sha256": "4473e55c4cd33116111d9f02360ee050f090b1081f5583bd34435480279512de"
   },
   "critical_fields": [
     "config_sha256",
