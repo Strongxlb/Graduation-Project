@@ -1,16 +1,21 @@
 {
-  "generated_utc": "2026-08-05T13:11:38+00:00",
+  "generated_utc": "2026-08-05T13:47:20+00:00",
   "git": {
-    "commit": "d68c36dfcf3f77221052ed7aaf3390cf40d92228",
+    "commit": "7d6187c5bf933fa233a50de194ab5a3380fb7f19",
     "dirty": true,
     "dirty_files": [
+      "\"meetings/meeting-\\350\\200\\201\\345\\270\\210/8.05-\\351\\202\\256\\344\\273\\266-\\345\\215\\225\\344\\275\\215\\344\\277\\256\\346\\255\\243-draft.md\"",
       "Net3/RESULTS_LOG.md",
-      "Net3/baseline_cache/step5_structural_error.json",
-      "Net3/step5_structural_error.py",
-      "Net3/validate_artifacts.py"
+      "Net3/baseline_cache/step15_full_regression.json",
+      "Net3/s15b.inp",
+      "Net3/step15b_full_regression.py",
+      "Net3/validate_artifacts.py",
+      "README.en.md",
+      "README.md",
+      "REVISION_RESPONSE_MATRIX.md"
     ],
-    "tree_sha256": "284bf43590ebff0120da9a1566a28d697fcf3823150fb9cf5e485ccc6c511a3c",
-    "uncommitted_diff_sha256": "80b0cc4a7dd69c623169be8520924c3029d267b98f426f551e45a6472d60dfa8"
+    "tree_sha256": "585552286bf8e5ec747341e5730458828bfe6532f12c479e9e34de03e2747527",
+    "uncommitted_diff_sha256": "7b4511bd7517b8551cb09801a6295b320df37d62febf06556a98e146063559c2"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -78,6 +83,7 @@
       "step13_known_answer.py": "8452eda4801bd3ae2552e128e86a49a6359bb63a19008c120c607b016ce3d372",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
       "step15_unit_equivalence.py": "58ac6c1e617fd45ae47fd0ff1c47415ff8b83b9981364b881e4a6d27fb3397c7",
+      "step15b_full_regression.py": "fda023de2236ebe75c8fd46f9cdfb89a01f215253ffcab3cd130ed2e9c16c8e0",
       "step1_freeze_baseline.py": "cd84fb37081364263e5400a771c6993fe097377ac4122a1119bf867d16c0de55",
       "step3_threshold_sensitivity.py": "1568dcdd664143d2ea77bc1bd6dd829a3c126c9985060110f3f2edf0b317abfe",
       "step4_displaced_prior.py": "7f859a1a8a7a5c82adeaa38cdc84b2a97d1c01e6261d691b0e6963ccd4b35f20",
@@ -98,7 +104,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "620df58c0b830054bd5cc3b529515585b34543d5d36ee3d5f3004fa5bd1f6c26"
+    "step_scripts_combined_sha256": "6c90df443d61f00aef219fc24d7865c9c1ca8a4912266b63fd881812a1a6eae6"
   },
   "critical_fields": [
     "config_sha256",

@@ -179,6 +179,8 @@ python step12_scenarios.py              # ~9 min
 python step13_known_answer.py           # analytic known-answer test
 python step14_repeated_noise.py         # ~10 s (cache only, 100 noise realisations)
 python step15_unit_equivalence.py       # ~90 s (3 x 256 EPANET runs; no cache)
+python step15b_full_regression.py       # full-library + artifact + log regression; re-runs
+                                        # the 8192 legacy arm and reads two git commits
 python provenance.py                    # refresh baseline_cache/cache_manifest.json
 python validate_artifacts.py            # cross-check the documents against the artifacts
 ```
@@ -2845,21 +2847,48 @@ floating point. Done without the tolerance it **introduces a 17.8% maximum relat
 1.9% of the risk-duration cells. The second row is why the tolerance is part of the fix and not an
 afterthought.
 
-### Verification on the full library, and on this log
+### Step 15b — verification on the full library, and on this log
 
-The whole pipeline was re-run under the corrected configuration and every artifact compared with its
-pre-correction counterpart:
+**This section used to quote numbers no artifact held.** The three bullets below were originally
+produced by throwaway scripts during the correction, which breaks this repository's own rule that
+every number comes from a script and a named artifact. `step15b_full_regression.py` now performs the
+whole comparison and writes `step15_full_regression.json`. Running it did not merely confirm the old
+bullets — **two of the three were wrong**, and the corrected figures are below.
 
-- **`baseline.npz`, all 8192 candidates**: `C_all` max relative difference **2.3 × 10⁻⁷**, `RMSE`
-  9.2 × 10⁻⁸, `loglik_censored` 1.7 × 10⁻⁷; the Sobol draws themselves bit-identical.
-- **26 artifacts, ~4000 numeric fields**: five fields moved by more than 1e-4 relative, and four of
-  them are quantities this log does not quote (a wall-clock runtime, a max-vs-p95 water-age
-  diagnostic, a second-order finite-difference ratio, and the iid arm of a profile the log reports
-  under the censored rule).
-- **This log, 1720 checked numbers**: **two** changed. In the single-pipe analytic check the
-  EPANET value moved in its sixth decimal (before the fix it read `0.991845`), which is precisely
-  what a tolerance change should touch; and the continuous profile took a few more optimiser steps
-  (before the fix, `7770` EPANET evaluations), which is an iteration count and not a result.
+The comparison has two halves with different reproducibility. The **full-library** half is live: the
+corrected arm is read from `baseline_cache/baseline.npz` — the cache the rest of the pipeline
+actually consumes, so this checks the stored artifact rather than a fresh copy of it — and only the
+legacy arm is re-simulated (8192 EPANET runs). The **artifact** and **log** halves are historical,
+read from git at two recorded commits: `64ec7d3` (the last state before the correction) and
+`3427a9d` (the state that recorded it). They cannot be re-derived from the working tree, because
+later work — the demand-pattern fix, the register's severity axis — legitimately moved numbers
+afterwards. The two SHAs are stored in the artifact, and if the history is ever rewritten the script
+exits with an error instead of quietly reporting nothing.
+
+- **`baseline.npz`, all 8192 candidates**: `C_all` max absolute difference `1.2 × 10⁻⁷ mg/L`, max
+  **relative difference 2.3 × 10⁻⁷**; `RMSE` 7.2 × 10⁻⁸; `loglik_censored` 1.3 × 10⁻⁷;
+  `loglik_iid` 1.4 × 10⁻⁷ (full precision in the artifact). Both arms are driven by the same Sobol
+  draw set, whose SHA-256 is recorded so a silently regenerated design is detectable. *(The earlier
+  bullet quoted 9.2 × 10⁻⁸ and 1.7 × 10⁻⁷ for the second and third of these; neither matches what
+  the tracked script measures.)*
+- **26 artifacts, 4915 numeric fields** (3 excluded as runtimes and hashes): **34** fields moved by
+  more than 1e-4 relative — not the five the earlier bullet claimed. The relative screen
+  over-reports badly here, so they are banded by how large the quantity itself is: 4 have a
+  magnitude below 1e-4 (a relative move of a number that is itself ~1e-6 is one ulp of the
+  simulation), 21 move by less than 1e-4 in absolute terms, and 9 move by more. Of those 9, the
+  largest is an **optimiser iteration count** (`n_epanet_evaluations` 7770 → 7792); the rest are
+  finite-difference convergence diagnostics, `half_width_change_vs_grid_frac` ratios, a
+  max-vs-p95 water-age diagnostic and two Kendall τ values in the fifth decimal. **No estimate,
+  interval, ranking or risk number is among them.** This is the expected signature of a change in
+  *numerical resolution*: what moves is the machinery that measures convergence, not the results.
+- **This log, 3582 numbers at `3427a9d`** (3473 at `64ec7d3`; the sequences are aligned with
+  `difflib` so inserted prose does not report every later number as changed): **three** numbers
+  changed, not two, plus four insertions which are the new Step 15 text itself. The three are
+  `0.991845 → 0.991846` (the EPANET value in the single-pipe analytic check, sixth decimal),
+  `6.8 → 6.7 × 10⁻⁶` — which is *that same value's own relative error*, i.e. the same fact appearing
+  twice in one table and counted once — and `7770 → 7792` EPANET evaluations, an iteration count.
+  *(The earlier bullet's "1720 checked numbers" was the validator's count of numbers it could match
+  to an artifact, not the number of numbers in the log; the two were conflated.)*
 
 **What this means, stated carefully.** The correction changed the *meaning* of the numbers, not the
 numbers. Every parameter, identifiability, structural-error, sensor-bias, `k_b`, risk and scenario
