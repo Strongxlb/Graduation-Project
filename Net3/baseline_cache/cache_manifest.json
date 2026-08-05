@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-08-05T14:29:31+00:00",
+  "generated_utc": "2026-08-05T16:55:11+00:00",
   "git": {
-    "commit": "f66edafb69ce7e6705c68ae9b5d6ee77744e1423",
+    "commit": "5364e56379bf873dc4967973dd4a5e3a2b1b34dd",
     "dirty": true,
     "dirty_files": [
       "Net3/RESULTS_LOG.md",
@@ -10,8 +10,8 @@
       "Net3/step12_scenarios.py",
       "Net3/validate_artifacts.py"
     ],
-    "tree_sha256": "3caf14a4d27530fa82fffe4c7dd0002d5285a9b97b463a0f85dc15b5a0bdbf9a",
-    "uncommitted_diff_sha256": "067db085e44450529b7bc0247c90c84da646e6e42fa6dcca0191c5ca7f818535"
+    "tree_sha256": "ffb1e55e5a6e40119778204c3cb27e2b1656eb95c803bc55225e1011ae4ee263",
+    "uncommitted_diff_sha256": "750444409b59c0c55e8030604939271e9c841c98d44e8a4f2fa0776a50cb00cd"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -75,7 +75,7 @@
       "step0_warmup_convergence.py": "b5159780738b92748a79258584335ed79c6f61e83e5cef2a55e0422d44f0ccea",
       "step10_risk_metrics.py": "34b014eb9f48e18b39d1ae57c899cf69ff5b1a8a5336b6bc1403ff0079915715",
       "step11_loo.py": "35efc6e363fdfe589a021aef56eee8f571d433a1171665ed97a226ae113f0bf3",
-      "step12_scenarios.py": "8f5797bbbcd2a8ddbe757f3087df6199447f049fad449b538271cff51d7e2e07",
+      "step12_scenarios.py": "0c51ce807c7c71f698fd73f4702a74113a8f225b23fed3f8d09f36f19846342c",
       "step13_known_answer.py": "8452eda4801bd3ae2552e128e86a49a6359bb63a19008c120c607b016ce3d372",
       "step14_repeated_noise.py": "f459d34c88fd5551bf2401e5cc625c77d928824fa0eb839ce1b00e571f0d5421",
       "step15_unit_equivalence.py": "58ac6c1e617fd45ae47fd0ff1c47415ff8b83b9981364b881e4a6d27fb3397c7",
@@ -100,7 +100,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "5ba2da5e6ee9ee645eecdb990d441009df03cb95a5ff39a257d05bb3aa845bf4"
+    "step_scripts_combined_sha256": "b909d957e3ee882bd3dcd81c117df4ff806fb980ba2f93c3c16a94235e81f481"
   },
   "critical_fields": [
     "config_sha256",

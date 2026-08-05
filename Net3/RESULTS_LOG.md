@@ -2353,6 +2353,45 @@ demand**; the largest at consumer junctions are 217 (`+0.346`), 239 (`+0.155`) a
 the same "risk sits at small consumers" pattern Step 10 quantifies, so a demand-share headline
 understates the operational relevance of these seven nodes.
 
+**Which band is the escalation judged on?** On the **governing** band (§12.5.1), so the escalation
+column follows the same rule as the control measures. Judged on the breach band alone it returns the
+*identical* set — 7 junctions, 20.23 L/s, 6 unmonitored, and no node is found by one test and not the
+other. The finding above is therefore unchanged by the governance rule.
+
+**But a band-change test is blind to a large amount of deterioration, and the governing rule does
+not fix that.** Sixteen consumer junctions (52.3 L/s) sit at `P_min ≈ 1` in *both* A and D, so their
+likelihood band cannot move by construction. Their below-threshold durations move a great deal:
+
+
+| node | demand (L/s) | `E[D]` A → D (h) | Δ | severity band A → D | flagged? |
+| ---- | ------------ | ---------------- | ------ | ------------------- | -------- |
+| 243  | 0.29         | 13.09 → **48.00**| +34.91 | medium → medium     | no       |
+| 15   | **16.67**    | 21.95 → 33.51    | +11.56 | very high → very high | no     |
+| 143  | 0.42         | 21.72 → 32.09    | +10.37 | medium → medium     | no       |
+| 151  | **9.75**     | 7.48 → 12.00     | +4.52  | high → **very high**| **no**   |
+| 131  | 2.88         | 46.55 → 48.00    | +1.45  | very high → very high | no     |
+
+
+Node 243 spends the **entire 48 h window** below the threshold under scenario D and is not flagged;
+node 15, the network's largest single consumer, gains 11.6 h and is not flagged; node 151 (9.75 L/s)
+actually **changes its severity band** and is still flagged by neither test.
+
+**Two different mechanisms cause this, and they were conflated in an earlier version of this log.**
+
+1. **Saturation.** A junction already at `very high` cannot rise, so `max(breach, severity)` has no
+   headroom. The governance rule decides *which axis drives an action*; it does not make a band
+   comparison sensitive to change at the ceiling. Those are separate properties and only the first
+   was argued for.
+2. **The ceiling of the multiplicative matrix.** `score = axis score (1–5) × consequence score
+   (0–3)`, so a **minor** consumer (consequence 1) tops out at score 5 → `medium`, whatever happens
+   to it. **20 junctions (17.46 L/s) are capped below `high` by construction.** The register cannot
+   express "this small consumer has no chlorine for the whole window" as anything worse than medium.
+   That is a property of the `likelihood × consequence` form itself, not of this implementation.
+
+So the band-change columns are **necessary but not sufficient**. For any junction whose band cannot
+move, escalation has to be read on the continuous metrics (`ΔE[D]`, `ΔE[A]`), which is why they are
+carried in the artifact.
+
 **Ageing-stress sensitivity — is scenario D an artefact of** `α_old = 1.85`**?**
 
 
@@ -2556,6 +2595,32 @@ breach" would then be a tautology rather than a result.
 sustained 6, prolonged 9, persistent 1. Against the breach product: **49 in the same risk band, 10
 in a lower one, 0 in a higher one.**
 
+**All four scenarios are banded, and this is where the absolute edges earn their keep.** The
+severity scale was declared in absolute hours precisely so it could be carried across scenarios; the
+portability is now exercised rather than merely claimed (`E[D]` is already computed for every
+scenario, so it costs no simulation):
+
+
+| scenario | negligible | brief | sustained | prolonged | **persistent** | high/v-high (breach) | high/v-high (severity) |
+| -------- | ---------- | ----- | --------- | --------- | -------------- | -------------------- | ---------------------- |
+| A. 12 °C            | 42 | 1 | 6 | 9 | **1** | 10 | 6 |
+| B. 16 °C            | 38 | 5 | 6 | 6 | **4** | 12 | 6 |
+| C. 20 °C            | 36 | 3 | 8 | 6 | **6** | 13 | 7 |
+| D. 20 °C + ageing   | 35 | 4 | 6 | 6 | **8** | 13 | 7 |
+
+
+**The two axes escalate differently, and the severity axis is the one that keeps moving.** The
+count of *persistent* consumers — below 0.2 mg/L for at least half the window — runs
+**1 → 4 → 6 → 8**, monotonically and without flattening. The breach count runs 10 → 12 → 13 → **13**
+and **saturates between C and D**: at 20 °C most of the exposed set is already at `P_min > 0.8`, so
+adding the ageing stress cannot move it. Demand at risk on the severity axis (sustained or worse)
+goes 50.6 → 50.6 → 60.0 → 60.0 L/s.
+
+This is the strongest argument in this log for carrying the second axis at all: **the ageing stress
+in scenario D is nearly invisible to the breach product and clearly visible to the severity
+product.** A register built on breach probability alone would report that ageing adds almost
+nothing on top of a heatwave, which is not what the field does.
+
 What the ten share is the *probability* and the *duration*: `P_min = 1.000` (node 125: 0.998) with
 `E[D]` of 2.0–17.9 h out of 48. What they do **not** share is depth, and an earlier version of this
 section wrongly flattened them into "marginally below". Sorted by depth:
@@ -2685,7 +2750,24 @@ altering the assumed age profile; calibration record exceeding its approved age.
    **empirical, not implied**: `E[D] ≤ T_window · P_min` holds (0 violations across 92 junctions)
    but bounds the continuous quantities, not the banded scores, whose scales are not aligned — it
    permits an inversion of one band, forbids one only once `P_min ≥ 0.80`, and the nearest consumer
-   junction is **0.939 h** of `E[D]` from inverting. Because neither product is the correct one, the register acts on the
+   junction is **0.939 h** of `E[D]` from inverting.
+7. **The ageing stress is nearly invisible to breach probability and clearly visible to severity.**
+   Banding all four scenarios on the same absolute hours, the count of *persistent* consumers
+   (below 0.2 mg/L for at least half the 48 h window) runs **1 → 4 → 6 → 8** from A to D, while the
+   breach count runs 10 → 12 → 13 → **13** and saturates between C and D — at 20 °C most of the
+   exposed set is already at `P_min > 0.8`, so the ageing stress cannot move it. A register built
+   on breach probability alone would report that ageing adds almost nothing on top of a heatwave.
+   This is the clearest justification in this log for carrying a second axis, and it only exists
+   because the severity edges were declared in absolute hours rather than as quantiles (§12.5.1).
+8. **A band-change escalation test is necessary but not sufficient, for two separate reasons.**
+   Sixteen consumer junctions (52.3 L/s) sit at `P_min ≈ 1` in both A and D, so their likelihood
+   band cannot move; node 243 goes to the **full 48 h window** below the threshold and node 15, the
+   network's largest consumer, gains 11.6 h, and neither is flagged. `max(breach, severity)` does
+   not rescue this — it **saturates**, which is a different property from the one it was adopted
+   for. Separately, the multiplicative matrix **caps a minor consumer at `medium`** (score
+   `5 × 1 = 5`), so **20 junctions (17.46 L/s)** can never be classified `high` however severe they
+   become. That is a property of the `likelihood × consequence` form itself. Escalation at a
+   saturated or capped junction has to be read on `ΔE[D]` and `ΔE[A]` (§12.3). Because neither product is the correct one, the register acts on the
    **higher** of the two bands, a pre-declared rule that currently coincides with the breach axis
    here and is reported as coinciding rather than assumed to (§12.5.1).
 

@@ -211,6 +211,13 @@ CLAIMS = [
      "severity_axis/ordering_is_not_guaranteed/max_inversion_permitted_by_the_bound", 1),
     ("RESULTS_LOG.md", r"depth spans a factor of ([0-9.]+)",
      "step12_scenarios.json", "severity_axis/depth_spread_over_movers/ratio", 1),
+    # --- Step 12's escalation limits: the two counts an audit's follow-through produced ---
+    ("RESULTS_LOG.md", r"\*\*([0-9]+) junctions \(17\.46 L/s\)\*\* can never be classified",
+     "step12_scenarios.json",
+     "escalation_test/two_distinct_reasons_a_band_cannot_move/n_junctions_capped_below_high", 1),
+    ("RESULTS_LOG.md", r"node 243 goes to the \*\*full ([0-9]+) h window\*\*",
+     "step12_scenarios.json",
+     "escalation_test/two_distinct_reasons_a_band_cannot_move/worked_example/E_duration_h_D", 1),
     # --- Step 15b: the whole-repository regression. Registered because these three counts are
     # exactly the ones that were quoted for a year without an artifact behind them.
     ("RESULTS_LOG.md", r"\*\*26 artifacts, ([0-9]+) numeric fields\*\*",

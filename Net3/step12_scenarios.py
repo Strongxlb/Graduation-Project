@@ -384,6 +384,20 @@ def risk_bands_for(P):
     return np.array([risk_band(int(s)) for s in scores]), scores
 
 
+def severity_bands_for(Dbar):
+    """The severity product on the same consequence axis. Costs nothing per scenario: E[D] is
+    already computed for every scenario, so banding it is arithmetic on an array in memory."""
+    scores = np.array([severity_band(float(d)) * int(CONSEQUENCE[n])
+                       for n, d in zip(ALL_NODES, Dbar)])
+    return np.array([risk_band(int(s)) for s in scores]), scores
+
+
+def governing_bands_for(breach_bands, sev_bands):
+    """The pre-declared governance rule: neither axis alone may reduce an action."""
+    return np.array([b if BAND_ORDER[b] >= BAND_ORDER[s] else s
+                     for b, s in zip(breach_bands, sev_bands)])
+
+
 # ============================== scenarios ==============================
 t_all = time.time()
 results = {}
@@ -523,10 +537,26 @@ del dose_C_sub
 print(f"\ntotal runtime {time.time() - t_all:.1f}s\n")
 
 # ============================== tables ==============================
+# Severity and governing bands are computed for EVERY scenario, not only the baseline. The absolute
+# pre-declared duration edges were justified by being portable across scenarios; that justification
+# is only worth anything if the portability is exercised, and E[D] is already in memory for all four,
+# so it costs no simulation. It also removes an inconsistency: the register acts on the governing
+# band, so escalation must be judged on the governing band too.
+SCEN_BANDS = {}
+for key, r in results.items():
+    b_breach, _ = risk_bands_for(r["P_min"])
+    b_sev, _ = severity_bands_for(r["Dbar"])
+    SCEN_BANDS[key] = {"breach": b_breach, "severity": b_sev,
+                       "governing": governing_bands_for(b_breach, b_sev),
+                       "severity_score": np.array([severity_band(float(d)) for d in r["Dbar"]])}
+
 summary_rows = []
 for key, r in results.items():
     P = r["P_min"]
-    bands, _ = risk_bands_for(P)
+    bands = SCEN_BANDS[key]["breach"]
+    sev_bands = SCEN_BANDS[key]["severity"]
+    gov_bands = SCEN_BANDS[key]["governing"]
+    sev_sc = SCEN_BANDS[key]["severity_score"]
     at = P > 0.5
     summary_rows.append({
         "scenario": r["label"],
@@ -536,6 +566,13 @@ for key, r in results.items():
         "demand_at_risk_L_s": round(float(DEM[at].sum()), 1),
         "pct_demand_at_risk": round(100 * float(DEM[at].sum()) / DEM_TOT, 1),
         "high_or_very_high": int(np.isin(bands, ["high", "very high"]).sum()),
+        "high_or_very_high_severity": int(np.isin(sev_bands, ["high", "very high"]).sum()),
+        "high_or_very_high_governing": int(np.isin(gov_bands, ["high", "very high"]).sum()),
+        "severity_band_counts": {SEV_LABEL[k]: int((sev_sc[CONSEQUENCE.values > 0] == k).sum())
+                                 for k in range(1, 6)},
+        "n_persistent_consumers": int((sev_sc[CONSEQUENCE.values > 0] == 5).sum()),
+        "demand_at_risk_severity_L_s": round(
+            float(DEM[sev_sc >= 3].sum()), 1),      # sustained or worse
         "indeterminate": int(((P > 0.05) & (P < 0.95)).sum()),
         "net_mean_P_bar": round(float(r["P_bar"].mean()), 4),
         "net_mean_E_duration_h": round(float(r["Dbar"].mean()), 3),
@@ -581,10 +618,19 @@ P_A = results["A_baseline"]["P_min"]
 P_C = results["C_heatwave"]["P_min"]
 P_D = results["D_heat_age"]["P_min"]
 dP_age = P_D - P_C
-bands_A, _ = risk_bands_for(P_A)
-bands_D, _ = risk_bands_for(P_D)
+bands_A = SCEN_BANDS["A_baseline"]["breach"]
+bands_D = SCEN_BANDS["D_heat_age"]["breach"]
+gov_A = SCEN_BANDS["A_baseline"]["governing"]
+gov_D = SCEN_BANDS["D_heat_age"]["governing"]
+sev_A = SCEN_BANDS["A_baseline"]["severity"]
+sev_D = SCEN_BANDS["D_heat_age"]["severity"]
 
-esc = np.where((bands_A != bands_D) & (DEM > 0))[0]
+# A breach-only escalation test is STRUCTURALLY BLIND to any node already at P_min ~ 1 in both
+# scenarios: its likelihood band cannot change, so it can never be flagged however much its
+# below-threshold duration grows. Those nodes are exactly the ones the severity axis exists for.
+esc = np.where((gov_A != gov_D) & (DEM > 0))[0]
+esc_breach_only = np.where((bands_A != bands_D) & (DEM > 0))[0]
+blind = np.where((P_A > 0.999) & (P_D > 0.999) & (DEM > 0))[0]
 esc = esc[np.argsort(-DEM[esc])]
 esc_rows = [{
     "node": ALL_NODES[j],
@@ -593,11 +639,99 @@ esc_rows = [{
     "P_min_heat_ageing": round(float(P_D[j]), 3),
     "dP_ageing": round(float(dP_age[j]), 3),
     "demand_L_s": round(float(DEM[j]), 2),
-    "band_current": bands_A[j],
-    "band_heat_ageing": bands_D[j],
+    "band_current": gov_A[j],
+    "band_heat_ageing": gov_D[j],
+    "band_current_breach": bands_A[j],
+    "band_heat_ageing_breach": bands_D[j],
+    "band_current_severity": sev_A[j],
+    "band_heat_ageing_severity": sev_D[j],
+    "E_duration_h_A": round(float(results["A_baseline"]["Dbar"][j]), 2),
+    "E_duration_h_D": round(float(results["D_heat_age"]["Dbar"][j]), 2),
+    "escalates_on_breach_only": bool(bands_A[j] != bands_D[j]),
     "monitored": ALL_NODES[j] in B.MONITOR_NODES,
 } for j in esc]
 esc_df = pd.DataFrame(esc_rows)
+esc_compare = {
+    "test": "risk band changes between scenario A and scenario D",
+    "on_governing_band": {
+        "n_consumer_junctions": int(len(esc)),
+        "demand_L_s": round(float(DEM[esc].sum()), 2),
+        "n_unmonitored": int(sum(1 for j in esc if ALL_NODES[j] not in B.MONITOR_NODES)),
+    },
+    "on_breach_band_only": {
+        "n_consumer_junctions": int(len(esc_breach_only)),
+        "demand_L_s": round(float(DEM[esc_breach_only].sum()), 2),
+        "n_unmonitored": int(sum(1 for j in esc_breach_only
+                                 if ALL_NODES[j] not in B.MONITOR_NODES)),
+    },
+    "found_only_by_the_governing_test": [ALL_NODES[j] for j in esc
+                                         if j not in set(esc_breach_only.tolist())],
+    "the_governing_rule_does_NOT_remove_the_blind_spot": {
+        "why": "max(breach, severity) SATURATES. Where the breach band is already 'very high' -- "
+               "which is what P_min ~ 1 at a consuming junction gives -- no rise in the severity "
+               "band can move the governing band, so a band-change escalation test stays blind "
+               "however far E[D] grows. The rule fixes which axis drives an ACTION; it does not "
+               "make a band comparison sensitive to change at the ceiling",
+        "nodes": [{
+            "node": ALL_NODES[j],
+            "demand_L_s": round(float(DEM[j]), 2),
+            "E_duration_h_A": round(float(results["A_baseline"]["Dbar"][j]), 2),
+            "E_duration_h_D": round(float(results["D_heat_age"]["Dbar"][j]), 2),
+            "delta_E_duration_h": round(float(results["D_heat_age"]["Dbar"][j]
+                                              - results["A_baseline"]["Dbar"][j]), 2),
+            "severity_band_A": sev_A[j],
+            "severity_band_D": sev_D[j],
+            "severity_band_changes": bool(sev_A[j] != sev_D[j]),
+            "governing_band_A": gov_A[j],
+            "governing_band_D": gov_D[j],
+            "flagged_by_either_escalation_test": bool(gov_A[j] != gov_D[j]),
+        } for j in sorted(blind, key=lambda k: -(results["D_heat_age"]["Dbar"][k]
+                                                 - results["A_baseline"]["Dbar"][k]))],
+        "n_changing_severity_band_but_flagged_by_neither_test": int(sum(
+            1 for j in blind if sev_A[j] != sev_D[j] and gov_A[j] == gov_D[j])),
+        "demand_L_s_of_those": round(float(sum(
+            DEM[j] for j in blind if sev_A[j] != sev_D[j] and gov_A[j] == gov_D[j])), 2),
+        "recommendation": "for junctions whose band cannot move, escalation has to be read on the "
+                          "CONTINUOUS metric (delta E[D], delta E[A]), not on a band change. The "
+                          "band-change columns are necessary but not sufficient",
+    },
+    "two_distinct_reasons_a_band_cannot_move": {
+        "1_saturation_at_the_top": "a junction already at 'very high' cannot rise. This is what "
+                                   "P_min ~ 1 at a moderate or major consumer produces, and it is "
+                                   "why max(breach, severity) does not help there",
+        "2_ceiling_of_the_multiplicative_matrix": "score = axis score (1-5) x consequence score "
+                                                  "(0-3), so a MINOR consumer (consequence 1) tops "
+                                                  "out at score 5 -> 'medium' however severe it "
+                                                  "gets. The register cannot express 'this small "
+                                                  "consumer has no chlorine for the whole window' "
+                                                  "as anything above medium",
+        "max_attainable_band_by_consequence_score": {
+            str(c): risk_band(5 * c) for c in (0, 1, 2, 3)},
+        "n_junctions_capped_below_high": int((CONSEQUENCE.values == 1).sum()),
+        "demand_L_s_capped_below_high": round(
+            float(DEM[CONSEQUENCE.values == 1].sum()), 2),
+        "worked_example": {
+            "node": "243",
+            "E_duration_h_A": round(float(results["A_baseline"]["Dbar"][ALL_NODES.index("243")]), 2),
+            "E_duration_h_D": round(float(results["D_heat_age"]["Dbar"][ALL_NODES.index("243")]), 2),
+            "demand_L_s": round(float(DEM[ALL_NODES.index("243")]), 2),
+            "consequence_score": int(CONSEQUENCE["243"]),
+            "note": "goes to the FULL window below the threshold under scenario D and stays "
+                    "'medium' in both, because its consequence score of 1 caps the product",
+        },
+    },
+    "structural_blind_spot_of_the_breach_test": {
+        "n_consumer_junctions_with_P_min_1_in_both_A_and_D": int(len(blind)),
+        "demand_L_s": round(float(DEM[blind].sum()), 2),
+        "why": "their likelihood band cannot change between the two scenarios, so a breach-only "
+               "escalation test can never flag them however far their below-threshold duration "
+               "grows; this is the conflation the severity axis exists to prevent, present in the "
+               "escalation column",
+        "max_E_duration_growth_h": round(float(max(
+            (results["D_heat_age"]["Dbar"][j] - results["A_baseline"]["Dbar"][j] for j in blind),
+            default=0.0)), 2),
+    },
+}
 esc_demand = float(esc_df["demand_L_s"].sum()) if len(esc_df) else 0.0
 print(f"\n{len(esc_df)} consumer junctions change risk band A -> D; demand {esc_demand:.1f} L/s "
       f"({100 * esc_demand / DEM_TOT:.0f}% of network)\n")
@@ -650,7 +784,8 @@ register = pd.DataFrame([{
                                     int(SEV_RISK[j]))),
     "band_shift_severity_minus_breach": int(shift[j]),
     "risk_band_heat_ageing": bands_D[j],
-    "escalates_under_heat": bool(bands_A[j] != bands_D[j]),
+    "escalates_under_heat": bool(gov_A[j] != gov_D[j]),                 # the governing rule
+    "escalates_under_heat_breach_only": bool(bands_A[j] != bands_D[j]),
     "monitored": n in B.MONITOR_NODES,
     "sampling_priority": round(float(prio[j]), 3),
     "control_measure": CONTROL.get(GOV_BANDS[j], "Not applicable"),          # the governing rule
@@ -1013,6 +1148,7 @@ report = {
     },
     "baseline_demand_at_risk_L_s": base_at_risk,
     "dosing_restores_baseline": bool(restored),
+    "escalation_test": esc_compare,
     "n_escalating_consumer_nodes": int(len(esc_df)),
     "escalating_demand_L_s": esc_demand,
     "top_escalating": esc_rows[:15],
