@@ -206,7 +206,8 @@ Two step scripts must not run concurrently from the same directory (shared WNTR 
 | Repeated-noise calibration (Step 14) | ✅ done |
 | Reproducibility infrastructure | ✅ done (clean release tag still pending) |
 | **Rewrite Results / Discussion / Conclusion** | ⏳ in progress |
-| Formatting, numbering, front matter, references | ⏳ to do (the review's "30-page limit" was a misreading; length is not a constraint) |
+| Formatting, numbering, front matter, references | ⏳ to do |
+| Fit within the 12 000-word CIVE70058 limit (review's "30 pages" is not the rule) | ⏳ to do — the 20 Jul draft is 11 624 words at pre-review scope |
 | Research paper submission | due 2026-08-21 |
 | Research poster submission | due 2026-08-28 |
 

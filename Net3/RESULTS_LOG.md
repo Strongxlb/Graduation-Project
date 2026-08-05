@@ -2446,14 +2446,85 @@ would put them in the *minor* band while they carry 70 % of the network's water.
 `1–3 → low`, `4–6 → medium`, `7–9 → high`, `≥10 → very high`.
 
 **What this score is, and what it is not.** Its likelihood axis is `P_min` — the probability of *any*
-breach in the 48 h window — so the register scores **whether a node breaches at all, weighted by how
-much water it serves**. It does **not** use the duration and cumulative-deficit metrics that Step 10
-introduced precisely because a single probability conflates a node marginally below the threshold
-for the whole window with one far below it for two hours. A node that dips just under 0.2 mg/L once
-and a node that sits at 0.03 mg/L for 48 h receive the same likelihood band. The register is
-therefore a **breach-probability × consequence** product and should be named as one; folding `E[D]`
-or `E[A]` into the severity axis is open work, and until it is done the register must not be
-described as a severity ranking.
+breach in the 48 h window — so this product scores **whether a node breaches at all, weighted by how
+much water it serves**. On its own it conflates a node marginally below the threshold for the whole
+window with one far below it for two hours: a node that dips just under 0.2 mg/L once and a node
+that sits at 0.03 mg/L for 48 h receive the same likelihood band. It is a **breach-probability ×
+consequence** product and is named `risk_score_breach` in the register.
+
+### 12.5.1 A second, parallel axis: severity
+
+The register therefore carries a **second product on the same consequence axis**, scoring *how long*
+rather than *whether*:
+
+
+| severity band | on `E[D]` (h below 0.2 mg/L in the 48 h window) | score |
+| ------------- | ---------------------------------------------- | ----- |
+| negligible    | `E[D] < 1`                                     | 1     |
+| brief         | `1 ≤ E[D] < 6`                                 | 2     |
+| sustained     | `6 ≤ E[D] < 12`                                | 3     |
+| prolonged     | `12 ≤ E[D] < 24`                               | 4     |
+| persistent    | `E[D] ≥ 24` (half the window or more)          | 5     |
+
+
+`risk_score_severity = severity score × consequence score`, the same `0–15` range and the same band
+mapping, so the two products are directly comparable.
+
+Three choices need stating. **The edges are absolute pre-declared hours, not quantiles of this
+network's own results** — a scale taken from the data would shift with the heatwave and could
+therefore never show escalation. **`E[D]` is the axis rather than `E[A]`** because hours-below has
+an operational meaning that a `mg/L·h` integral does not. And because `E[D]` alone cannot separate a
+long shallow excursion from a short deep one, the register also carries
+`E_depth_while_below_mgL = E[A]/E[D]`, the mean depth below the threshold while below it.
+
+**The two axes are not independent, and the direction of disagreement is constrained.** Since
+`D_i ≤ T_window · 1[member i breaches]`, taking weighted expectations gives
+
+```
+E[D] ≤ T_window · P_min        equivalently   P_bar ≤ P_min
+```
+
+so a high severity score cannot occur at a low breach probability, while the converse is entirely
+possible. Verified on the register: **0 of 92 junctions violate it**, and the tightest node reaches
+`E[D] / (T_window · P_min) = 0.97`. Disagreement between the two products should therefore be
+expected to be **one-sided**, and observing that is not a discovery.
+
+**Result (scenario A, the 59 consumer junctions).** Severity bands: negligible 42, brief 1,
+sustained 6, prolonged 9, persistent 1. Against the breach product: **49 in the same risk band, 10
+in a lower one, 0 in a higher one.**
+
+All ten movers share a signature — `P_min = 1.000` (node 125: 0.998) with `E[D]` of 2.0–17.9 h and a
+mean depth of only **0.025–0.14 mg/L** below the threshold:
+
+
+| node | `P_min` | `E[D]` (h) | depth while below (mg/L) | demand (L/s) | breach band | severity band |
+| ---- | ------- | ---------- | ------------------------ | ------------ | ----------- | ------------- |
+| 247  | 1.000   | 2.00       | 0.0899                   | 4.75         | very high   | medium        |
+| 253  | 1.000   | 8.00       | 0.0947                   | 3.68         | very high   | medium        |
+| 255  | 1.000   | 8.00       | 0.0880                   | 2.73         | very high   | medium        |
+| 149  | 1.000   | 6.04       | 0.0487                   | 1.83         | very high   | medium        |
+| 151  | 1.000   | 7.48       | 0.0423                   | 9.75         | very high   | high          |
+| 153  | 1.000   | 17.89      | 0.0367                   | 2.98         | very high   | high          |
+| 125  | 0.998   | 17.12      | 0.0254                   | 3.08         | very high   | high          |
+| 145  | 1.000   | 12.02      | 0.1400                   | 1.86         | very high   | high          |
+| 147  | 1.000   | 7.45       | 0.0793                   | 0.58         | medium      | low           |
+| 251  | 1.000   | 6.00       | 0.0954                   | 1.63         | medium      | low           |
+
+
+These are junctions that go below 0.2 mg/L **with certainty but marginally** — reliably, briefly and
+shallowly. On the breach product they are indistinguishable from node 131, which is below the
+threshold for **46.6 of 48 h**; on the severity product they are two bands apart.
+
+**How to read the pair.** In this network the breach product never *under*-states severity and
+over-states it for 10 of 59 consumer junctions. Neither ordering is the correct one: `P_min` is the
+right axis for "is this node compliant", severity for "how much chlorine is missing and for how
+long", and the register reports both plus the shift (`band_shift_severity_minus_breach`) rather than
+picking one. This is the same lesson Step 8b reached from the other direction — a shortlist is not
+meaningful without naming the metric that produced it — applied to the register itself.
+
+**What it still is not.** Both products are conditioned on the calibrated ensemble and on scenario A;
+neither is a measurement. And the severity axis inherits `E[D]`'s own blind spot, which is why the
+depth column exists and must be read with it.
 
 **Sampling priority is a classification-ambiguity index, not an optimal-monitoring criterion.** It
 peaks where the assessment cannot classify a node either way and weights that by consequence. It
@@ -2464,7 +2535,7 @@ consequence score (0–3), not raw demand**:
 
 ```
 priority(n) = consequence_score(n) · P_min(n) · [1 − P_min(n)]     normalised by its maximum
-priority(n) = 0  where base demand = 0
+priority(n) = 0  where demand = 0
 ```
 
 so it peaks at `P_min = 0.5` — the junctions the assessment cannot classify either way.
@@ -2506,6 +2577,14 @@ altering the assumed age profile; calibration record exceeding its approved age.
   `T_ref` and `α_g` are assumptions; unlike the Step-11 LOO check, these projections cannot be
    verified against held-out chlorine observations. Absolute severity metrics are additionally
    horizon-dependent (paired warm-up test, §12.4).
+6. **A breach-probability register and a severity register disagree, and the disagreement is
+   one-sided.** Scoring `E[D]` on pre-declared absolute bands against the same consequence axis
+   puts **10 of 59** consumer junctions in a *lower* risk band and **none** in a higher one; the
+   ten all breach with certainty (`P_min = 1.000`) but only for 2.0–17.9 h and only 0.025–0.14 mg/L
+   below the threshold. The one-sidedness is expected rather than discovered — `E[D] ≤ T_window ·
+   P_min` bounds severity by likelihood, verified with 0 violations across 92 junctions — but the
+   *size* of the gap is not, and it is what separates "certainly but marginally below" from node
+   131's 46.6 h. Both products are reported; neither is the correct one (§12.5.1).
 
 Outputs: `figures/step12_scenario_maps.png`, `figures/step12_ageing_delta.png`,
 `figures/step12_summary.png`, `baseline_cache/step12_scenarios.json`,

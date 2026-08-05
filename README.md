@@ -223,6 +223,7 @@ python validate_artifacts.py           # 校验日志与产物一致
 | 可复现基础设施（冻结模型、provenance、自动校验） | ✅ 完成（clean release tag 仍待做） |
 | **重写 Results / Discussion / Conclusion（论文正文）** | ⏳ 进行中 |
 | 标题样式、图表编号、参考文献补 Stedinger 2008 / Mantovan & Todini 2006 | ⏳ 待做 |
+| 压到 CIVE70058 的 **12 000 词**上限（review 里的「30 页」不是规定） | ⏳ 待做 —— 7/20 草稿已 11 624 词，且只覆盖 review 前的范围 |
 | Research paper 提交 | 截止 2026-08-21 |
 | Research poster 提交 | 截止 2026-08-28 |
 

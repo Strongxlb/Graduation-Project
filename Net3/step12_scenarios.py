@@ -95,6 +95,15 @@ SCENARIO_DEF = {
 
 LIK_LABEL = {1: "rare", 2: "unlikely", 3: "possible", 4: "likely", 5: "almost certain"}
 CONS_LABEL = {0: "non-consumer", 1: "minor", 2: "moderate", 3: "major"}
+# Severity axis: how LONG a node is expected to spend below the threshold, not whether it goes below
+# at all. The bands are absolute hours in the 48 h assessment window, PRE-DECLARED rather than taken
+# as quantiles of this network's own results, because a severity scale that moves with the data
+# cannot be compared across scenarios (its own bands would shift with the heatwave). E[D] is the
+# axis rather than E[A] because hours-below has an operational meaning that a mg/L*h integral does
+# not; E[A] is carried alongside as the DEPTH diagnostic (E[A]/E[D] = mean depth while below), since
+# a long shallow excursion and a short deep one give the same E[D].
+SEV_LABEL = {1: "negligible", 2: "brief", 3: "sustained", 4: "prolonged", 5: "persistent"}
+SEV_EDGES_H = (1.0, 6.0, 12.0, 24.0)     # < 1 | 1-6 | 6-12 | 12-24 | >= 24 (half the window)
 CONTROL = {
     "very high": "Review dosing/booster strategy; consider flushing or turnover improvement",
     "high": "Confirmatory sampling; review local operation and demand assumptions",
@@ -121,6 +130,15 @@ def likelihood_band(p):
         return 3
     if p < 0.80:
         return 4
+    return 5
+
+
+def severity_band(d_hours):
+    """Severity score 1-5 from the expected below-threshold duration E[D], in hours."""
+    d = float(d_hours)
+    for i, edge in enumerate(SEV_EDGES_H):
+        if d < edge:
+            return i + 1
     return 5
 
 
@@ -555,26 +573,88 @@ unc = np.clip(P_A, 0.0, 1.0) * (1.0 - np.clip(P_A, 0.0, 1.0))
 prio_raw = CONSEQUENCE.values * unc
 prio = np.where(DEM > 0, prio_raw / (prio_raw.max() + 1e-12), 0.0)
 
+# ---- severity axis (parallel to the breach-probability axis, NOT a replacement) ----
+# The breach product answers "does this node go below the threshold at all, and who does it serve".
+# The severity product answers "for how long, and who does it serve". They are different questions
+# and they do not have to agree; where they disagree is itself a reportable result, so both scores
+# are carried and the disagreement is counted rather than resolved by picking one.
+DBAR_A = results["A_baseline"]["Dbar"]
+ABAR_A = results["A_baseline"]["Abar"]
+SEV_SCORE = np.array([severity_band(d) for d in DBAR_A])
+SEV_RISK = SEV_SCORE * CONSEQUENCE.values
+SEV_BANDS = np.array([risk_band(int(s)) for s in SEV_RISK])
+# mean depth below the threshold while below it; undefined (0) where the node never goes below
+DEPTH_A = np.where(DBAR_A > 1e-9, ABAR_A / np.maximum(DBAR_A, 1e-9), 0.0)
+
+BAND_ORDER = {"not applicable": 0, "low": 1, "medium": 2, "high": 3, "very high": 4}
+shift = np.array([BAND_ORDER[SEV_BANDS[j]] - BAND_ORDER[bands_A[j]] for j in range(len(ALL_NODES))])
+
 register = pd.DataFrame([{
     "node": n,
     "P_min_current": round(float(P_A[j]), 3),
     "P_min_heatwave": round(float(P_C[j]), 3),
     "P_min_heat_ageing": round(float(P_D[j]), 3),
     "P_bar_current": round(float(results["A_baseline"]["P_bar"][j]), 3),
-    "E_duration_current_h": round(float(results["A_baseline"]["Dbar"][j]), 2),
-    "E_deficit_current_mgL_h": round(float(results["A_baseline"]["Abar"][j]), 3),
+    "E_duration_current_h": round(float(DBAR_A[j]), 2),
+    "E_deficit_current_mgL_h": round(float(ABAR_A[j]), 3),
+    "E_depth_while_below_mgL": round(float(DEPTH_A[j]), 4),
     "demand_L_s": round(float(DEM[j]), 2),
     "likelihood": LIK_LABEL[likelihood_band(float(P_A[j]))],
+    "severity": SEV_LABEL[int(SEV_SCORE[j])],
     "consequence": CONS_LABEL[int(CONSEQUENCE[n])],
-    "risk_score": int(likelihood_band(float(P_A[j])) * int(CONSEQUENCE[n])),
+    "risk_score_breach": int(likelihood_band(float(P_A[j])) * int(CONSEQUENCE[n])),
+    "risk_score_severity": int(SEV_RISK[j]),
     "risk_band_current": bands_A[j],
+    "risk_band_severity": SEV_BANDS[j],
+    "band_shift_severity_minus_breach": int(shift[j]),
     "risk_band_heat_ageing": bands_D[j],
     "escalates_under_heat": bool(bands_A[j] != bands_D[j]),
     "monitored": n in B.MONITOR_NODES,
     "sampling_priority": round(float(prio[j]), 3),
     "control_measure": CONTROL.get(bands_A[j], "Not applicable"),
 } for j, n in enumerate(ALL_NODES)])
-register = register.sort_values(["risk_score", "P_min_current"], ascending=False)
+register = register.sort_values(["risk_score_breach", "P_min_current"], ascending=False)
+
+# how much the two axes disagree, and in which direction; a node is only interesting here if it
+# serves demand, since a zero-demand node scores 0 on both by construction
+cons_mask = CONSEQUENCE.values > 0
+sev_counts = {SEV_LABEL[k]: int((SEV_SCORE[cons_mask] == k).sum()) for k in range(1, 6)}
+agree = int((shift[cons_mask] == 0).sum())
+sev_up = int((shift[cons_mask] > 0).sum())
+sev_dn = int((shift[cons_mask] < 0).sum())
+mov = np.where(cons_mask & (shift != 0))[0]
+mov = mov[np.argsort(-np.abs(shift[mov]))]
+severity_moves = [{
+    "node": ALL_NODES[j],
+    "P_min": round(float(P_A[j]), 3),
+    "E_duration_h": round(float(DBAR_A[j]), 2),
+    "E_depth_while_below_mgL": round(float(DEPTH_A[j]), 4),
+    "demand_L_s": round(float(DEM[j]), 2),
+    "band_breach": bands_A[j],
+    "band_severity": SEV_BANDS[j],
+    "direction": "severity higher" if shift[j] > 0 else "severity lower",
+} for j in mov[:12]]
+severity_axis = {
+    "axis": "expected below-threshold duration E[D] in the assessment window, banded on absolute "
+            "pre-declared hours",
+    "band_edges_h": list(SEV_EDGES_H),
+    "scenario": "A_baseline (the same scenario the breach product is scored on)",
+    "consumer_junctions": int(cons_mask.sum()),
+    "severity_band_counts_consumers": sev_counts,
+    "risk_band_agreement_consumers": {"same band": agree, "severity band higher": sev_up,
+                                      "severity band lower": sev_dn},
+    "nodes_that_move": severity_moves,
+    "n_nodes_that_move": int(len(mov)),
+    "reading": "the two products are not interchangeable: where the severity band is LOWER the node "
+               "breaches reliably but only briefly, and where it is HIGHER the breach is less "
+               "certain but long when it happens. Neither ordering is the correct one — the pair is "
+               "the result",
+}
+print(f"\nseverity axis on E[D] (consumer junctions only, n={int(cons_mask.sum())}):")
+print("  band counts   " + ", ".join(f"{k} {v}" for k, v in sev_counts.items()))
+print(f"  vs breach product: {agree} same band, {sev_up} severity higher, {sev_dn} severity lower")
+if severity_moves:
+    print(pd.DataFrame(severity_moves).to_string(index=False))
 reg_path = os.path.join(CACHEDIR, "step12_risk_register.csv")
 register.to_csv(reg_path, index=False)
 print(f"\nrisk register -> {reg_path} ({len(register)} rows)")
@@ -688,7 +768,7 @@ report = {
         "E_deficit": "weighted expected cumulative deficit, mg/L*h",
         "network_mean": "unweighted arithmetic mean over all 92 junctions",
         "indeterminate": "0.05 < P_min < 0.95",
-        "demand_at_risk": "sum of base demand over junctions with P_min > 0.5 "
+        "demand_at_risk": "sum of average expected demand over junctions with P_min > 0.5 "
                           "(zero-demand nodes contribute 0)",
         "median_over_nodes_of_mean_window_min_mgl":
             "per junction take the likelihood-weighted mean of the per-member window minimum, "
@@ -699,14 +779,37 @@ report = {
             "almost certain": "P_min >= 0.80"},
         "likelihood_scores": {"rare": 1, "unlikely": 2, "possible": 3, "likely": 4,
                               "almost certain": 5},
-        "consequence_scores": {"non-consumer (base demand = 0)": 0,
+        "consequence_scores": {"non-consumer (d = 0)": 0,
                                "minor (0 < d <= tercile1)": 1,
                                "moderate (tercile1 < d <= tercile2)": 2,
                                "major (d > tercile2)": 3},
-        "consequence_terciles": "1/3 and 2/3 quantiles of base demand over the 59 junctions "
-                                "with non-zero base demand (WNTR stores demand internally in "
-                                "m^3/s, so x1000 -> L/s; the .inp itself declares GPM)",
-        "risk_score": "likelihood score x consequence score, range 0-15",
+        "consequence_terciles": "1/3 and 2/3 quantiles of average expected demand over the 59 "
+                                "junctions with non-zero demand. d is the PATTERN-AWARE average "
+                                "expected demand (wntr.metrics.hydraulic.average_expected_demand), "
+                                "not the base_demand field: four Net3 junctions encode a large "
+                                "demand as 1 GPM times a large pattern and a base-only reading "
+                                "puts them in the minor band. WNTR stores demand internally in "
+                                "m^3/s, so x1000 -> L/s; the .inp itself declares GPM",
+        "risk_score_breach": "likelihood score (on P_min) x consequence score, range 0-15. "
+                             "Answers: does this node breach at all, and who does it serve",
+        "risk_score_severity": "severity score (on E[D]) x consequence score, range 0-15. "
+                               "Answers: for how long, and who does it serve. It is a PARALLEL "
+                               "axis, not a replacement — the two products answer different "
+                               "questions and are reported together with their disagreement",
+        "severity_bands_on_E_duration_h": {
+            "negligible": "E[D] < 1 h", "brief": "1 <= E[D] < 6 h",
+            "sustained": "6 <= E[D] < 12 h", "prolonged": "12 <= E[D] < 24 h",
+            "persistent": "E[D] >= 24 h (half the assessment window or more)"},
+        "severity_scores": {"negligible": 1, "brief": 2, "sustained": 3, "prolonged": 4,
+                            "persistent": 5},
+        "severity_bands_are_absolute": "the edges are pre-declared hours, NOT quantiles of this "
+                                       "network's own results, so the same scale applies across "
+                                       "scenarios; a data-driven scale would move with the "
+                                       "heatwave and could not show escalation",
+        "E_depth_while_below_mgL": "E[A]/E[D], the mean depth below C_crit while below it; 0 "
+                                   "where E[D] = 0. E[D] alone cannot separate a long shallow "
+                                   "excursion from a short deep one, so the depth is carried "
+                                   "with it",
         "risk_band_mapping": {"not applicable": "score = 0", "low": "1 <= score <= 3",
                               "medium": "4 <= score <= 6", "high": "7 <= score <= 9",
                               "very high": "score >= 10"},
@@ -714,8 +817,8 @@ report = {
                              "normalised by its maximum; forced to 0 at zero-demand nodes. This "
                              "ranks where MEASUREMENT would reduce uncertainty most, so a node "
                              "with P_min = 1 scores 0: it is confidently at risk, not low "
-                             "priority. Intervention priority is the separate risk_score column; "
-                             "the two must not be merged.",
+                             "priority. Intervention priority is the separate risk_score_breach "
+                             "and risk_score_severity columns; the three must not be merged.",
     },
     "uncertainty_sources": {
         "kinetics": f"formal censored-likelihood weights over {n_beh} retained draws "
@@ -747,6 +850,7 @@ report = {
         "sensor nowcast, not a spatial measurement, and not a statement that water is safe"
     ),
     "consequence_terciles_L_s": [q1, q2],
+    "severity_axis": severity_axis,
     "scenario_summary": summary_rows,
     "reference_at_T_ref_exact": {
         "P_min_gt_0.5_nodes": int((ref["P_min"] > 0.5).sum()),

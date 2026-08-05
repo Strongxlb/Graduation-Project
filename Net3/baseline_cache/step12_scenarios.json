@@ -22,7 +22,7 @@
     "E_deficit": "weighted expected cumulative deficit, mg/L*h",
     "network_mean": "unweighted arithmetic mean over all 92 junctions",
     "indeterminate": "0.05 < P_min < 0.95",
-    "demand_at_risk": "sum of base demand over junctions with P_min > 0.5 (zero-demand nodes contribute 0)",
+    "demand_at_risk": "sum of average expected demand over junctions with P_min > 0.5 (zero-demand nodes contribute 0)",
     "median_over_nodes_of_mean_window_min_mgl": "per junction take the likelihood-weighted mean of the per-member window minimum, then the median of those 92 node values (NOT a pooled member-node median)",
     "likelihood_bands_on_P_min": {
       "rare": "P_min < 0.05",
@@ -39,13 +39,30 @@
       "almost certain": 5
     },
     "consequence_scores": {
-      "non-consumer (base demand = 0)": 0,
+      "non-consumer (d = 0)": 0,
       "minor (0 < d <= tercile1)": 1,
       "moderate (tercile1 < d <= tercile2)": 2,
       "major (d > tercile2)": 3
     },
-    "consequence_terciles": "1/3 and 2/3 quantiles of base demand over the 59 junctions with non-zero base demand (WNTR stores demand internally in m^3/s, so x1000 -> L/s; the .inp itself declares GPM)",
-    "risk_score": "likelihood score x consequence score, range 0-15",
+    "consequence_terciles": "1/3 and 2/3 quantiles of average expected demand over the 59 junctions with non-zero demand. d is the PATTERN-AWARE average expected demand (wntr.metrics.hydraulic.average_expected_demand), not the base_demand field: four Net3 junctions encode a large demand as 1 GPM times a large pattern and a base-only reading puts them in the minor band. WNTR stores demand internally in m^3/s, so x1000 -> L/s; the .inp itself declares GPM",
+    "risk_score_breach": "likelihood score (on P_min) x consequence score, range 0-15. Answers: does this node breach at all, and who does it serve",
+    "risk_score_severity": "severity score (on E[D]) x consequence score, range 0-15. Answers: for how long, and who does it serve. It is a PARALLEL axis, not a replacement \u2014 the two products answer different questions and are reported together with their disagreement",
+    "severity_bands_on_E_duration_h": {
+      "negligible": "E[D] < 1 h",
+      "brief": "1 <= E[D] < 6 h",
+      "sustained": "6 <= E[D] < 12 h",
+      "prolonged": "12 <= E[D] < 24 h",
+      "persistent": "E[D] >= 24 h (half the assessment window or more)"
+    },
+    "severity_scores": {
+      "negligible": 1,
+      "brief": 2,
+      "sustained": 3,
+      "prolonged": 4,
+      "persistent": 5
+    },
+    "severity_bands_are_absolute": "the edges are pre-declared hours, NOT quantiles of this network's own results, so the same scale applies across scenarios; a data-driven scale would move with the heatwave and could not show escalation",
+    "E_depth_while_below_mgL": "E[A]/E[D], the mean depth below C_crit while below it; 0 where E[D] = 0. E[D] alone cannot separate a long shallow excursion from a short deep one, so the depth is carried with it",
     "risk_band_mapping": {
       "not applicable": "score = 0",
       "low": "1 <= score <= 3",
@@ -53,7 +70,7 @@
       "high": "7 <= score <= 9",
       "very high": "score >= 10"
     },
-    "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), normalised by its maximum; forced to 0 at zero-demand nodes. This ranks where MEASUREMENT would reduce uncertainty most, so a node with P_min = 1 scores 0: it is confidently at risk, not low priority. Intervention priority is the separate risk_score column; the two must not be merged."
+    "sampling_priority": "consequence SCORE (0-3, not raw demand) x P_min(1 - P_min), normalised by its maximum; forced to 0 at zero-demand nodes. This ranks where MEASUREMENT would reduce uncertainty most, so a node with P_min = 1 scores 0: it is confidently at risk, not low priority. Intervention priority is the separate risk_score_breach and risk_score_severity columns; the three must not be merged."
   },
   "uncertainty_sources": {
     "kinetics": "formal censored-likelihood weights over 2196 retained draws (ESS 156.7); informal GLUE is a comparator, not the primary",
@@ -146,6 +163,133 @@
     1.6665365633090958,
     4.383965126048627
   ],
+  "severity_axis": {
+    "axis": "expected below-threshold duration E[D] in the assessment window, banded on absolute pre-declared hours",
+    "band_edges_h": [
+      1.0,
+      6.0,
+      12.0,
+      24.0
+    ],
+    "scenario": "A_baseline (the same scenario the breach product is scored on)",
+    "consumer_junctions": 59,
+    "severity_band_counts_consumers": {
+      "negligible": 42,
+      "brief": 1,
+      "sustained": 6,
+      "prolonged": 9,
+      "persistent": 1
+    },
+    "risk_band_agreement_consumers": {
+      "same band": 49,
+      "severity band higher": 0,
+      "severity band lower": 10
+    },
+    "nodes_that_move": [
+      {
+        "node": "149",
+        "P_min": 1.0,
+        "E_duration_h": 6.04,
+        "E_depth_while_below_mgL": 0.0487,
+        "demand_L_s": 1.83,
+        "band_breach": "very high",
+        "band_severity": "medium",
+        "direction": "severity lower"
+      },
+      {
+        "node": "247",
+        "P_min": 1.0,
+        "E_duration_h": 2.0,
+        "E_depth_while_below_mgL": 0.0899,
+        "demand_L_s": 4.75,
+        "band_breach": "very high",
+        "band_severity": "medium",
+        "direction": "severity lower"
+      },
+      {
+        "node": "253",
+        "P_min": 1.0,
+        "E_duration_h": 8.0,
+        "E_depth_while_below_mgL": 0.0947,
+        "demand_L_s": 3.68,
+        "band_breach": "very high",
+        "band_severity": "medium",
+        "direction": "severity lower"
+      },
+      {
+        "node": "255",
+        "P_min": 1.0,
+        "E_duration_h": 8.0,
+        "E_depth_while_below_mgL": 0.088,
+        "demand_L_s": 2.73,
+        "band_breach": "very high",
+        "band_severity": "medium",
+        "direction": "severity lower"
+      },
+      {
+        "node": "125",
+        "P_min": 0.998,
+        "E_duration_h": 17.12,
+        "E_depth_while_below_mgL": 0.0254,
+        "demand_L_s": 3.08,
+        "band_breach": "very high",
+        "band_severity": "high",
+        "direction": "severity lower"
+      },
+      {
+        "node": "145",
+        "P_min": 1.0,
+        "E_duration_h": 12.02,
+        "E_depth_while_below_mgL": 0.14,
+        "demand_L_s": 1.86,
+        "band_breach": "very high",
+        "band_severity": "high",
+        "direction": "severity lower"
+      },
+      {
+        "node": "147",
+        "P_min": 1.0,
+        "E_duration_h": 7.45,
+        "E_depth_while_below_mgL": 0.0793,
+        "demand_L_s": 0.58,
+        "band_breach": "medium",
+        "band_severity": "low",
+        "direction": "severity lower"
+      },
+      {
+        "node": "151",
+        "P_min": 1.0,
+        "E_duration_h": 7.48,
+        "E_depth_while_below_mgL": 0.0423,
+        "demand_L_s": 9.75,
+        "band_breach": "very high",
+        "band_severity": "high",
+        "direction": "severity lower"
+      },
+      {
+        "node": "153",
+        "P_min": 1.0,
+        "E_duration_h": 17.89,
+        "E_depth_while_below_mgL": 0.0367,
+        "demand_L_s": 2.98,
+        "band_breach": "very high",
+        "band_severity": "high",
+        "direction": "severity lower"
+      },
+      {
+        "node": "251",
+        "P_min": 1.0,
+        "E_duration_h": 6.0,
+        "E_depth_while_below_mgL": 0.0954,
+        "demand_L_s": 1.63,
+        "band_breach": "medium",
+        "band_severity": "low",
+        "direction": "severity lower"
+      }
+    ],
+    "n_nodes_that_move": 10,
+    "reading": "the two products are not interchangeable: where the severity band is LOWER the node breaches reliably but only briefly, and where it is HIGHER the breach is less certain but long when it happens. Neither ordering is the correct one \u2014 the pair is the result"
+  },
   "scenario_summary": [
     {
       "scenario": "A. Baseline 12 \u00b0C",
@@ -459,5 +603,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 568.4
+  "runtime_s": 576.6
 }

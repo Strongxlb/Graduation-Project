@@ -186,6 +186,13 @@ CLAIMS = [
      "step15_unit_equivalence.json", "comparisons/corrected_vs_legacy/max_rel_diff", 1e7),
     ("RESULTS_LOG.md", r"introduces a ([0-9.]+)% maximum relative error",
      "step15_unit_equivalence.json", "comparisons/units_only_vs_legacy/max_rel_diff", 100),
+    # --- the register's two axes: the disagreement count is the whole point of carrying both ---
+    ("RESULTS_LOG.md", r"\*\*([0-9]+) in the same risk band, [0-9]+\s*\n?in a lower one",
+     "step12_scenarios.json", "severity_axis/risk_band_agreement_consumers/same band", 1),
+    ("RESULTS_LOG.md", r"in the same risk band,\s*\*?\*?([0-9]+)\s*\n?in a lower one",
+     "step12_scenarios.json", "severity_axis/risk_band_agreement_consumers/severity band lower", 1),
+    ("RESULTS_LOG.md", r"in a lower one, ([0-9]+) in a higher one",
+     "step12_scenarios.json", "severity_axis/risk_band_agreement_consumers/severity band higher", 1),
     # --- sensor drift: the ratio that decides whether a drift needs its own analysis at all ---
     ("RESULTS_LOG.md", r"the ratio reaches\s+\*\*([0-9.]+)\*\*\s+at D = \+0\.10",
      "step8d_sensor_drift.json", "equivalence/231/+0.100/drift_over_const_mean", 1),
