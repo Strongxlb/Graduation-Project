@@ -217,6 +217,7 @@ long-form record and must still be read.
 |---|---|
 | **Comment** | 59 pages against a 30-page limit; no heading styles, no numbered sections or figures, no tables, placeholders remaining, front matter missing; engage with the statistical critique of GLUE (Stedinger et al. 2008; Mantovan and Todini 2006), consider Powell et al. (2000). |
 | **Status** | **thesis document** — outside this repository, except the references |
+| **Note on the length figure** | The "30-page limit" in the comment does not match the coursework specification; length is not the constraint the comment takes it to be, so compression is **not** a driver of what this project reports. The structural half of the comment (heading styles, numbered sections and figures, tables, front matter, placeholders) stands on its own and is unaffected. |
 | **What this repository contributes** | The GLUE critique is no longer something to cite politely: this project now contains a concrete, quantified instance of exactly what those papers warn about (the factor-`N` omission, the 2.8–3.2× inflation over the CRLB, and the resulting prior domination). That makes the required engagement short and pointed. The numeric prose the comment wants converted to tables already exists as tables in `RESULTS_LOG.md` and as machine-readable JSON. |
 
 ---

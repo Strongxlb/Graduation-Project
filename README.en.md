@@ -206,7 +206,7 @@ Two step scripts must not run concurrently from the same directory (shared WNTR 
 | Repeated-noise calibration (Step 14) | ✅ done |
 | Reproducibility infrastructure | ✅ done (clean release tag still pending) |
 | **Rewrite Results / Discussion / Conclusion** | ⏳ in progress |
-| Compress to 30 pages, formatting, references | ⏳ to do |
+| Formatting, numbering, front matter, references | ⏳ to do (the review's "30-page limit" was a misreading; length is not a constraint) |
 | Research paper submission | due 2026-08-21 |
 | Research poster submission | due 2026-08-28 |
 

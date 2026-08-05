@@ -222,7 +222,7 @@ python validate_artifacts.py           # 校验日志与产物一致
 | 重复噪声校准（Step 14） | ✅ 完成 |
 | 可复现基础设施（冻结模型、provenance、自动校验） | ✅ 完成（clean release tag 仍待做） |
 | **重写 Results / Discussion / Conclusion（论文正文）** | ⏳ 进行中 |
-| 压缩篇幅至 30 页、标题样式、图表编号、参考文献补 Stedinger 2008 / Mantovan & Todini 2006 | ⏳ 待做 |
+| 标题样式、图表编号、参考文献补 Stedinger 2008 / Mantovan & Todini 2006 | ⏳ 待做 |
 | Research paper 提交 | 截止 2026-08-21 |
 | Research poster 提交 | 截止 2026-08-28 |
 
