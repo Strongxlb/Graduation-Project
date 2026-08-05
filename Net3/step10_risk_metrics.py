@@ -231,7 +231,8 @@ for step_s in REPORT_STEPS_S:
                                                      float(cache["S_new"][i])))
         wn_ts.options.time.report_timestep = step_s
         res_ts = wntr.sim.EpanetSimulator(wn_ts).run_sim()
-        q_ts = res_ts.node["quality"][ALL_NODES]
+        # this path bypasses simulate_chlorine, so the kg/m^3 -> mg/L conversion is applied here
+        q_ts = B.internal_to_mgl(res_ts.node["quality"][ALL_NODES])
         hours = np.asarray(q_ts.index, dtype=float) / 3600.0
         keep = hours >= B.WARMUP_H
         c_ts = q_ts.values[keep]

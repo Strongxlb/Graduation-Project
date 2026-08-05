@@ -4,7 +4,7 @@
   "primary_weighting_elsewhere": "formal_censored",
   "jitter": 0.2,
   "jitter_seed": 12345,
-  "noise_floor_rmse": 0.09599656242905512,
+  "noise_floor_rmse": 0.09599656236880391,
   "structural_min_rmse_noisefree": 0.0067725758999586105,
   "structural_best_homogeneous": [
     -1.067,
@@ -16,19 +16,19 @@
     -0.12,
     -0.037
   ],
-  "gridsearch_best_rmse": 0.09752994209283138,
+  "gridsearch_best_rmse": 0.09752994060329004,
   "glue_behavioural": {
     "old": {
-      "mean": -1.0302593861951266,
-      "sd": 0.26005804251506554
+      "mean": -1.0302593851362056,
+      "sd": 0.2600580425341478
     },
     "average": {
-      "mean": -0.11555951667453589,
-      "sd": 0.04213229618887564
+      "mean": -0.11555951669938291,
+      "sd": 0.042132296183692464
     },
     "new": {
-      "mean": -0.04815072376131775,
-      "sd": 0.023380464825392622
+      "mean": -0.04815072374778285,
+      "sd": 0.023380464826885855
     }
   },
   "true_reference": {
@@ -58,7 +58,7 @@
     }
   },
   "behavioural_count": 4613,
-  "rmse_min": 0.0973404493831895,
+  "rmse_min": 0.09734044976413853,
   "risk_rank_glue": [
     "131",
     "129",

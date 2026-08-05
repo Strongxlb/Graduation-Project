@@ -6,8 +6,8 @@
   "n_retained_draws": 2196,
   "n_total_draws": 8192,
   "weight_floor_relative": 1e-06,
-  "retained_weight_mass": 0.9999962073865474,
-  "discarded_weight_mass": 3.7926134526244937e-06,
+  "retained_weight_mass": 0.9999962073887739,
+  "discarded_weight_mass": 3.792611226072218e-06,
   "retention_rule": "draws whose formal censored relative weight exceeds WEIGHT_FLOOR; this is a numerical truncation of a likelihood, NOT a behavioural acceptance threshold",
   "C_CRIT": 0.2,
   "assessment_window_h": [
@@ -239,7 +239,7 @@
   ],
   "dosing_boundary": "reservoir source quality AND tank initial quality both scaled by dose",
   "dosing_linearity_check": {
-    "max_abs_err_mgL": 1.4215707778930664e-05,
+    "max_abs_err_mgL": 1.420825719833374e-05,
     "conditions": "holds under fixed hydraulics and demands, first-order bulk and wall kinetics, and proportional scaling of ALL source and initial chlorine concentrations; a dose factor r is then equivalent to evaluating the unscaled field against C_crit / r"
   },
   "dosing_paired_warmup_test": {
@@ -459,5 +459,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 557.6
+  "runtime_s": 561.4
 }

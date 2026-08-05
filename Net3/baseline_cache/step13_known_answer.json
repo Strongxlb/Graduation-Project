@@ -15,28 +15,28 @@
         "kb_per_day": -0.5,
         "t_res_h": 0.3926990758470519,
         "velocity_m_s": 0.7073553131710614,
-        "epanet_c": 0.991845428943634,
+        "epanet_c": 0.99184550344944,
         "analytic_c": 0.9918521444427253,
-        "rel_error": 6.770665495744744e-06
+        "rel_error": 6.6955476403398945e-06
       },
       {
         "kb_per_day": -1.0,
         "t_res_h": 0.3926990758470519,
         "velocity_m_s": 0.7073553131710614,
-        "epanet_c": 0.9837439656257629,
+        "epanet_c": 0.98374392837286,
         "analytic_c": 0.9837706764356328,
-        "rel_error": 2.715145969444931e-05
+        "rel_error": 2.7189327160797863e-05
       },
       {
         "kb_per_day": -2.0,
         "t_res_h": 0.3926990758470519,
         "velocity_m_s": 0.7073553131710614,
-        "epanet_c": 0.9676991701126099,
+        "epanet_c": 0.9676991612650454,
         "analytic_c": 0.9678047438146223,
-        "rel_error": 0.00010908574553618398
+        "rel_error": 0.00010909488742613172
       }
     ],
-    "worst_rel_error": 0.00010908574553618398,
+    "worst_rel_error": 0.00010909488742613172,
     "pass": true
   },
   "wall_arm": {
@@ -45,7 +45,7 @@
     "rows": [
       {
         "kw_per_day": 0.0,
-        "epanet_c": 0.991845428943634,
+        "epanet_c": 0.99184550344944,
         "extra_decay_vs_kw0": 0.0,
         "kf_free_lower_bound_c": 0.9918521444427253,
         "bound_applies": false,
@@ -53,32 +53,32 @@
       },
       {
         "kw_per_day": -0.1,
-        "epanet_c": 0.9712321162223816,
-        "extra_decay_vs_kw0": 0.02061331272125244,
+        "epanet_c": 0.9712320752441883,
+        "extra_decay_vs_kw0": 0.020613428205251694,
         "kf_free_lower_bound_c": 0.9704476238209063,
         "bound_applies": true,
         "above_bound": true
       },
       {
         "kw_per_day": -0.5,
-        "epanet_c": 0.9057186245918274,
-        "extra_decay_vs_kw0": 0.08612680435180664,
+        "epanet_c": 0.9057185961864889,
+        "extra_decay_vs_kw0": 0.08612690726295114,
         "kf_free_lower_bound_c": 0.8893501003094862,
         "bound_applies": true,
         "above_bound": true
       },
       {
         "kw_per_day": -1.0,
-        "epanet_c": 0.8490339517593384,
-        "extra_decay_vs_kw0": 0.14281147718429565,
+        "epanet_c": 0.8490339969284832,
+        "extra_decay_vs_kw0": 0.14281150652095675,
         "kf_free_lower_bound_c": 0.7974410352914919,
         "bound_applies": true,
         "above_bound": true
       },
       {
         "kw_per_day": -2.0,
-        "epanet_c": 0.7791802287101746,
-        "extra_decay_vs_kw0": 0.21266520023345947,
+        "epanet_c": 0.7791802054271102,
+        "extra_decay_vs_kw0": 0.2126652980223298,
         "kf_free_lower_bound_c": 0.6411360890125971,
         "bound_applies": true,
         "above_bound": true
@@ -92,6 +92,14 @@
     "pass": true,
     "seconds_per_day": 86400,
     "per_day_to_per_second_of_minus_1": -1.1574074074074073e-05
+  },
+  "concentration_unit_arm": {
+    "pass": true,
+    "note": "WNTR stores concentration in kg/m^3 whatever inpfile_units says; checked against WNTR's own to_si/from_si, not against our assumption about them",
+    "wntr_to_si_of_1_mg_L": 0.001,
+    "wntr_from_si_of_1_kg_m3": 1000.0,
+    "quality_tolerance_kg_m3": 1e-05,
+    "tolerance_relative_to_1_mg_L_source": 0.01
   },
   "all_pass": true
 }

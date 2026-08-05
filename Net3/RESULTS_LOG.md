@@ -20,6 +20,16 @@ measurements; used to isolate what the censoring correction is worth (Steps 9 an
 draft used it and because the contrast is itself a result. It is *not* a Gaussian likelihood: it
 drops the factor `N = 294`, which makes it equivalent to assuming `σ_eff = σ√N = 1.71 mg/L`.
 
+**Concentration unit convention (added after the Step 15 correction — read it before any mg/L
+number below).** Every concentration in this log is in **mg/L**, and that is now true rather than
+merely written. WNTR's Python API stores concentration internally in **kg/m³** whatever
+`options.quality.inpfile_units` says, so the conversion happens at the model boundary in
+`wq_common.build_model` (in) and `run_model` / `simulate_chlorine` (out), and nowhere else — which is
+why no step script carries a factor of 1000. EPANET's absolute quality tolerance scales with the
+unit (`QUALITY_TOLERANCE = 1e-5 kg/m³`), because a tolerance only means something next to the unit
+it is measured in. **Before Step 15 the same numbers were kg/m³ read as mg/L, i.e. 1000× too high**;
+Step 15 documents what that did and did not change, and measures it.
+
 **Naming the ensembles.** A weighting rule and the ensemble it produces are different things, and
 conflating them is how a sentence ends up ambiguous between "the baseline configuration" and "the
 informal rule". Two names are used throughout and only these two:
@@ -167,6 +177,7 @@ python step11_loo.py                    # ~70 s
 python step12_scenarios.py              # ~9 min
 python step13_known_answer.py           # analytic known-answer test
 python step14_repeated_noise.py         # ~10 s (cache only, 100 noise realisations)
+python step15_unit_equivalence.py       # ~90 s (3 x 256 EPANET runs; no cache)
 python provenance.py                    # refresh baseline_cache/cache_manifest.json
 python validate_artifacts.py            # cross-check the documents against the artifacts
 ```
@@ -1223,7 +1234,7 @@ m/day in the `old` direction — coarser than several effects discussed elsewher
 censoring shift is 0.012, structural increments ~0.01) — so a grid interval can only place its
 endpoints on nodes *inside* the true interval, and is therefore biased narrow. The continuous version
 minimises the two nuisance coefficients with Nelder–Mead at each target value and locates the
-endpoints by Brent bisection on `ΔNLL − 1.92`; **7770** distinct EPANET evaluations, run for both
+endpoints by Brent bisection on `ΔNLL − 1.92`; **7792** distinct EPANET evaluations, run for both
 the censored and the iid likelihood.
 
 
@@ -2490,7 +2501,7 @@ constant relative amount at every `k_b`.
 
 | `k_b` (1/day) | `t_res` (h) | EPANET `C` | analytic `C` | relative error |
 | ------------- | ----------- | ---------- | ------------ | -------------- |
-| −0.50         | 0.3927      | 0.991845   | 0.991852     | 6.8 × 10⁻⁶     |
+| −0.50         | 0.3927      | 0.991846   | 0.991852     | 6.7 × 10⁻⁶     |
 | −1.00         | 0.3927      | 0.983744   | 0.983771     | 2.7 × 10⁻⁵     |
 | −2.00         | 0.3927      | 0.967699   | 0.967805     | 1.1 × 10⁻⁴     |
 
@@ -2514,6 +2525,16 @@ falls monotonically as `k_w` strengthens, and `C` stays above the `k_f`-free lim
 term would be `(4/D)·k_w`. All three hold. That is enough to establish the wall coefficient is
 applied with the intended sign and scale, and it is stated as such rather than as an exact analytic
 match.
+
+**Arm 4 — the concentration unit, against WNTR's own converter.** Arms 1–3 all test the *time*
+conversion, which was documented in the inherited material and correct from the start. The
+*concentration* conversion was not applied at all until Step 15, and nothing here would have caught
+it: under first-order kinetics the analytic check is a ratio, so it passes on either scale. This arm
+therefore pins the unit against `wntr.epanet.util.to_si` / `from_si` rather than against our belief
+about them — `to_si(1.0 mg/L) = 0.001 kg/m³`, `from_si(1.0 kg/m³) = 1000 mg/L`, the helpers in
+`wq_common` agree with both, and `QUALITY_TOLERANCE` is 1e-5 of a 1 mg/L source. A first-order
+coefficient carries no mass unit, which is why arms 1–3 were unaffected by the error arm 4 exists to
+prevent.
 
 **Arm 3 — the conversion helper itself.**
 `per_day_to_per_second(−1.0) = −0.0000115741 per second`, i.e. exactly `−1/86400`.
@@ -2579,3 +2600,114 @@ Findings:
   times wider, which is the same inefficiency diagnosed in Steps 1–3 and 7.
 
 Outputs: `figures/step14_repeated_noise.png`, `baseline_cache/step14_repeated_noise.json`.
+---
+
+## Step 15 — the chlorine concentration unit was wrong by 1000×, and what that did (and did not) change
+
+**This is not a review comment.** It was found by self-audit after the revision was otherwise
+complete, and it is the largest single error in the project's history: every chlorine concentration
+in the repository was on a scale 1000× too high, for the whole of its life, until this step.
+
+**What was wrong.** WNTR's Python API stores concentration internally in **kg/m³**.
+`options.quality.inpfile_units = "mg/L"` governs only how the `.inp` is read and written — it does
+not change what a value assigned through the API means. Assigning `initial_quality = 1.0` intending
+"1 mg/L" therefore made EPANET simulate **1000 mg/L**, and reading `run_sim()` output as mg/L
+repeated the error on the way out. Measured directly, before the fix WNTR wrote this into the file
+it hands EPANET:
+
+```
+[QUALITY]                       [OPTIONS]
+River      1000.0               QUALITY    Chlorine mg/L
+Lake       1000.0               TOLERANCE  0.01
+1           500.0
+```
+
+So the source was 1000 mg/L, the tanks 500 mg/L, the sensor noise σ 100 mg/L and the "0.2 mg/L
+operational threshold" 200 mg/L. After the fix the same probe shows `River 1.0`, `1 0.5`,
+`TOLERANCE 1e-05`.
+
+**Why it survived so long — three reasons, and none of them is carelessness alone.**
+
+1. **First-order kinetics are linear in C.** The field scales exactly with the source, and σ and the
+   risk threshold were expressed on the same wrong scale, so **every ratio the analysis depends on
+   was preserved**: σ/C₀ = 0.1 and C_MIN/C₀ = 0.2 either way. No internal check could fail.
+2. **The reaction coefficients are not affected, so the known-answer test passed.** `k_b` is
+   `1/time` and first-order `k_w` is `length/time`; neither carries a mass unit, so the factor
+   cannot propagate into them. Verified against the file WNTR writes: `GLOBAL BULK -0.5000` and
+   `WALL -3.2808 / -0.3281 / -0.1640 ft/day`, which are exactly the intended −0.5 day⁻¹ and
+   −1.0 / −0.1 / −0.05 m/day. Step 13's analytic arm therefore passed at 10⁻⁴ throughout.
+3. **The factor had already been found, and mis-diagnosed.** The inherited starter notebook records,
+   as a measured fact, that a **zero-order** global bulk coefficient needs `×1000`
+   (`ZERO_ORDER_BULK_CAL = 1000.0`). That is the same kg/m³ fact: a zero-order coefficient carries a
+   `mass/volume/time` dimension, so it shows the factor. It was recorded as a quirk of zero-order
+   bulk rather than as a property of the concentration unit, so it was never applied to
+   concentrations themselves — where, under first order, it has no symptom. The one place the factor
+   was visible is the one place it was patched.
+
+**The trap inside the fix.** EPANET's water-quality tolerance is an **absolute** concentration. At
+the old scale `0.01` was 1e-5 of the source; at the corrected scale it would be 1e-2 of it.
+Correcting the units alone would therefore not relabel the experiment, it would coarsen it by three
+orders of magnitude. `wq_common.QUALITY_TOLERANCE` scales with the unit for exactly this reason.
+
+**Formula** — the conversion, applied at the model boundary and nowhere else:
+
+```
+internal (WNTR/EPANET)  =  reported (mg/L) / 1000        build_model, on the way in
+reported (mg/L)         =  internal × 1000              run_model / simulate_chlorine, on the way out
+QUALITY_TOLERANCE       =  0.01 / 1000  =  1e-5 kg/m³   holds the tolerance/source ratio fixed
+```
+
+**Properties**:
+
+- Everything outside `wq_common` is in mg/L, so no step script changed: `σ = 0.1` and
+  `C_MIN = 0.2` still read as they always did, and are now true.
+- AGE runs are exempt: their "initial quality" is a time, not a concentration.
+
+### Step 15 — measured effect on 256 leading Sobol candidates
+
+Three arms on identical candidates (`step15_unit_equivalence.py`): **legacy** (the superseded
+configuration, whose raw output is what the old cache stored and this log quoted as mg/L),
+**corrected** (current), and **units_only** (units fixed, tolerance left at 0.01 — the fix done
+wrong, kept as the counterfactual).
+
+| comparison | max abs diff | max rel diff | points below 0.2 | hours-below cells that differ |
+|---|---|---|---|---|
+| corrected vs legacy | 1.19 × 10⁻⁷ mg/L | **2.3 × 10⁻⁷** | 79391 → 79391 | **0 of 23552** |
+| units_only vs legacy | 2.09 × 10⁻² mg/L | **17.8 %** | 79391 → 79301 | **440 of 23552** |
+
+So the correction, done properly, leaves the reported field **unchanged to 2.3 × 10⁻⁷ relative** —
+floating point. Done without the tolerance it **introduces a 17.8% maximum relative error** and moves
+1.9% of the risk-duration cells. The second row is why the tolerance is part of the fix and not an
+afterthought.
+
+### Verification on the full library, and on this log
+
+The whole pipeline was re-run under the corrected configuration and every artifact compared with its
+pre-correction counterpart:
+
+- **`baseline.npz`, all 8192 candidates**: `C_all` max relative difference **2.3 × 10⁻⁷**, `RMSE`
+  9.2 × 10⁻⁸, `loglik_censored` 1.7 × 10⁻⁷; the Sobol draws themselves bit-identical.
+- **26 artifacts, ~4000 numeric fields**: five fields moved by more than 1e-4 relative, and four of
+  them are quantities this log does not quote (a wall-clock runtime, a max-vs-p95 water-age
+  diagnostic, a second-order finite-difference ratio, and the iid arm of a profile the log reports
+  under the censored rule).
+- **This log, 1720 checked numbers**: **two** changed. In the single-pipe analytic check the
+  EPANET value moved in its sixth decimal (before the fix it read `0.991845`), which is precisely
+  what a tolerance change should touch; and the continuous profile took a few more optimiser steps
+  (before the fix, `7770` EPANET evaluations), which is an iteration count and not a result.
+
+**What this means, stated carefully.** The correction changed the *meaning* of the numbers, not the
+numbers. Every parameter, identifiability, structural-error, sensor-bias, `k_b`, risk and scenario
+conclusion in this log stands **verbatim**, and that is measured rather than argued. What was wrong,
+and is now right, is the physical interpretation: the sensor σ, the `0.2 mg/L` threshold, the dosing
+levels and every `mg/L` and `mg/L·h` in the risk tables were, until this step, statements about a
+1000 mg/L system. Any engineering claim that depends on the absolute concentration — required sensor
+accuracy, the operational threshold, the dosing evaluation — was **not** supported before the fix and
+**is** supported now.
+
+**Guarded against return.** `step13` arm 4 pins the concentration unit against WNTR's own
+`to_si`/`from_si` rather than against our belief about them, and the unit convention and the
+tolerance are now part of the provenance config hash, so a cache built under a different convention
+can no longer be mistaken for this one.
+
+Outputs: `baseline_cache/step15_unit_equivalence.json`.

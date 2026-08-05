@@ -88,11 +88,11 @@
     "age_p95_dAge": {
       "tolerance": 1.0,
       "worst_by_cycle": [
-        23.998905,
-        21.675676,
+        23.998957,
+        21.675629,
         19.042507,
-        16.692413,
-        14.629829,
+        16.692398,
+        14.629822,
         12.814903
       ],
       "first_pass_cycle": null,
@@ -158,7 +158,7 @@
         "prior_weak": {
           "monitor_max_dC": 0.9208953976631165,
           "network_p95_dC": 0.9510605931282043,
-          "network_max_dC": 0.9991894960403442,
+          "network_max_dC": 0.999189555644989,
           "tank_max_dC": 0.24506109952926636,
           "tank_max_dLevel": 0.8184547424316406,
           "risk_rel_dDeficit": 0.9022676348686218,
@@ -168,10 +168,10 @@
           "top10_jaccard": 0.17647058823529413
         },
         "prior_strong": {
-          "monitor_max_dC": 0.8107945919036865,
+          "monitor_max_dC": 0.8107946515083313,
           "network_p95_dC": 0.9073764085769653,
-          "network_max_dC": 0.9985749125480652,
-          "tank_max_dC": 0.24565351009368896,
+          "network_max_dC": 0.9985750317573547,
+          "tank_max_dC": 0.24565353989601135,
           "tank_max_dLevel": 0.8184547424316406,
           "risk_rel_dDeficit": 0.8565827012062073,
           "net_mean_deficit": 1.0110669136047363,
@@ -180,8 +180,8 @@
           "top10_jaccard": 0.17647058823529413
         }
       },
-      "age_p95_dAge": 23.998905181884766,
-      "age_max_dAge": 30.513328552246094
+      "age_p95_dAge": 23.99895668029785,
+      "age_max_dAge": 30.513351440429688
     },
     {
       "cycle": 1,
@@ -195,12 +195,12 @@
       ],
       "sets": {
         "truth": {
-          "monitor_max_dC": 0.02477414160966873,
-          "network_p95_dC": 0.10346703976392746,
+          "monitor_max_dC": 0.02477414906024933,
+          "network_p95_dC": 0.10346700996160507,
           "network_max_dC": 0.45855510234832764,
-          "tank_max_dC": 0.06999434530735016,
+          "tank_max_dC": 0.06999436020851135,
           "tank_max_dLevel": 0.049579620361328125,
-          "risk_rel_dDeficit": 0.43148860335350037,
+          "risk_rel_dDeficit": 0.43148866295814514,
           "net_mean_deficit": 0.1255764365196228,
           "net_mean_hours_below": 1.184782608695652,
           "top10_identical": false,
@@ -209,7 +209,7 @@
         "prior_weak": {
           "monitor_max_dC": 0.04368193447589874,
           "network_p95_dC": 0.1060827225446701,
-          "network_max_dC": 0.49190062284469604,
+          "network_max_dC": 0.49190059304237366,
           "tank_max_dC": 0.06724472343921661,
           "tank_max_dLevel": 0.049579620361328125,
           "risk_rel_dDeficit": 0.650652289390564,
@@ -220,9 +220,9 @@
         },
         "prior_strong": {
           "monitor_max_dC": 0.020588979125022888,
-          "network_p95_dC": 0.10118869692087173,
+          "network_p95_dC": 0.10118874162435532,
           "network_max_dC": 0.4420621991157532,
-          "tank_max_dC": 0.07870900630950928,
+          "tank_max_dC": 0.07870897650718689,
           "tank_max_dLevel": 0.049579620361328125,
           "risk_rel_dDeficit": 0.31782516837120056,
           "net_mean_deficit": 0.1450045257806778,
@@ -231,7 +231,7 @@
           "top10_jaccard": 0.8181818181818182
         }
       },
-      "age_p95_dAge": 21.675676345825195,
+      "age_p95_dAge": 21.675628662109375,
       "age_max_dAge": 31.619125366210938
     },
     {
@@ -246,31 +246,31 @@
       ],
       "sets": {
         "truth": {
-          "monitor_max_dC": 0.012328267097473145,
-          "network_p95_dC": 0.03524039685726166,
-          "network_max_dC": 0.23831643164157867,
-          "tank_max_dC": 0.03618276119232178,
+          "monitor_max_dC": 0.012328274548053741,
+          "network_p95_dC": 0.03524041175842285,
+          "network_max_dC": 0.23831644654273987,
+          "tank_max_dC": 0.03618277609348297,
           "tank_max_dLevel": 0.006969451904296875,
-          "risk_rel_dDeficit": 0.11958518624305725,
-          "net_mean_deficit": 0.07139163464307785,
+          "risk_rel_dDeficit": 0.1195853054523468,
+          "net_mean_deficit": 0.07139162719249725,
           "net_mean_hours_below": 1.1956521739130435,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
         "prior_weak": {
-          "monitor_max_dC": 0.023372724652290344,
-          "network_p95_dC": 0.030798882246017456,
-          "network_max_dC": 0.2717384696006775,
+          "monitor_max_dC": 0.02337270975112915,
+          "network_p95_dC": 0.030798887833952904,
+          "network_max_dC": 0.2717384397983551,
           "tank_max_dC": 0.03327265381813049,
           "tank_max_dLevel": 0.006969451904296875,
-          "risk_rel_dDeficit": 0.08791597932577133,
+          "risk_rel_dDeficit": 0.08791586756706238,
           "net_mean_deficit": 0.033402830362319946,
           "net_mean_hours_below": 0.5543478260869565,
           "top10_identical": false,
           "top10_jaccard": 0.6666666666666666
         },
         "prior_strong": {
-          "monitor_max_dC": 0.010136235505342484,
+          "monitor_max_dC": 0.01013624295592308,
           "network_p95_dC": 0.0396423414349556,
           "network_max_dC": 0.20379436016082764,
           "tank_max_dC": 0.041561782360076904,
@@ -283,7 +283,7 @@
         }
       },
       "age_p95_dAge": 19.04250717163086,
-      "age_max_dAge": 21.335342407226562
+      "age_max_dAge": 21.339942932128906
     },
     {
       "cycle": 3,
@@ -298,43 +298,43 @@
       "sets": {
         "truth": {
           "monitor_max_dC": 0.00644272193312645,
-          "network_p95_dC": 0.01832006499171257,
+          "network_p95_dC": 0.018320072442293167,
           "network_max_dC": 0.03175695985555649,
-          "tank_max_dC": 0.019087553024291992,
+          "tank_max_dC": 0.0190875381231308,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.12691962718963623,
+          "risk_rel_dDeficit": 0.1269194483757019,
           "net_mean_deficit": 0.07992901653051376,
           "net_mean_hours_below": 1.423913043478261,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
         "prior_weak": {
-          "monitor_max_dC": 0.012197434902191162,
+          "monitor_max_dC": 0.012197449803352356,
           "network_p95_dC": 0.01603151485323906,
-          "network_max_dC": 0.04493851959705353,
+          "network_max_dC": 0.04493853449821472,
           "tank_max_dC": 0.017759159207344055,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.2042045295238495,
-          "net_mean_deficit": 0.036339472979307175,
+          "risk_rel_dDeficit": 0.20420466363430023,
+          "net_mean_deficit": 0.036339469254016876,
           "net_mean_hours_below": 0.7282608695652174,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         },
         "prior_strong": {
           "monitor_max_dC": 0.0053525567054748535,
-          "network_p95_dC": 0.020089218392968178,
-          "network_max_dC": 0.029076583683490753,
-          "tank_max_dC": 0.021894484758377075,
+          "network_p95_dC": 0.020089220255613327,
+          "network_max_dC": 0.02907656878232956,
+          "tank_max_dC": 0.02189447730779648,
           "tank_max_dLevel": 0.000911712646484375,
-          "risk_rel_dDeficit": 0.09972701966762543,
+          "risk_rel_dDeficit": 0.0997270867228508,
           "net_mean_deficit": 0.11038044095039368,
           "net_mean_hours_below": 1.75,
           "top10_identical": true,
           "top10_jaccard": 1.0
         }
       },
-      "age_p95_dAge": 16.692413330078125,
-      "age_max_dAge": 18.55939483642578
+      "age_p95_dAge": 16.692398071289062,
+      "age_max_dAge": 18.559402465820312
     },
     {
       "cycle": 4,
@@ -348,22 +348,22 @@
       ],
       "sets": {
         "truth": {
-          "monitor_max_dC": 0.0033801645040512085,
-          "network_p95_dC": 0.009434910491108894,
-          "network_max_dC": 0.010066494345664978,
-          "tank_max_dC": 0.010087698698043823,
+          "monitor_max_dC": 0.003380168229341507,
+          "network_p95_dC": 0.009434914216399193,
+          "network_max_dC": 0.010066501796245575,
+          "tank_max_dC": 0.010087713599205017,
           "tank_max_dLevel": 8.7738037109375e-05,
-          "risk_rel_dDeficit": 0.064615897834301,
-          "net_mean_deficit": 0.09007357805967331,
+          "risk_rel_dDeficit": 0.06461624056100845,
+          "net_mean_deficit": 0.09007356315851212,
           "net_mean_hours_below": 1.5434782608695652,
           "top10_identical": true,
           "top10_jaccard": 1.0
         },
         "prior_weak": {
-          "monitor_max_dC": 0.006408415734767914,
-          "network_p95_dC": 0.008386556059122086,
-          "network_max_dC": 0.00863136351108551,
-          "tank_max_dC": 0.009277239441871643,
+          "monitor_max_dC": 0.006408408284187317,
+          "network_p95_dC": 0.00838653277605772,
+          "network_max_dC": 0.008631378412246704,
+          "tank_max_dC": 0.00927722454071045,
           "tank_max_dLevel": 8.7738037109375e-05,
           "risk_rel_dDeficit": 0.10557780414819717,
           "net_mean_deficit": 0.043760158121585846,
@@ -373,19 +373,19 @@
         },
         "prior_strong": {
           "monitor_max_dC": 0.002787567675113678,
-          "network_p95_dC": 0.010293403640389442,
-          "network_max_dC": 0.011520802974700928,
+          "network_p95_dC": 0.010293400846421719,
+          "network_max_dC": 0.011520810425281525,
           "tank_max_dC": 0.011548399925231934,
           "tank_max_dLevel": 8.7738037109375e-05,
-          "risk_rel_dDeficit": 0.0510733500123024,
-          "net_mean_deficit": 0.12138835340738297,
+          "risk_rel_dDeficit": 0.051073286682367325,
+          "net_mean_deficit": 0.12138836085796356,
           "net_mean_hours_below": 1.815217391304348,
           "top10_identical": false,
           "top10_jaccard": 0.8181818181818182
         }
       },
-      "age_p95_dAge": 14.629829406738281,
-      "age_max_dAge": 16.33556365966797
+      "age_p95_dAge": 14.62982177734375,
+      "age_max_dAge": 16.335556030273438
     },
     {
       "cycle": 5,
@@ -399,20 +399,20 @@
       ],
       "sets": {
         "truth": {
-          "monitor_max_dC": 0.0017705373466014862,
-          "network_p95_dC": 0.004980032332241535,
-          "network_max_dC": 0.005313992500305176,
-          "tank_max_dC": 0.005325987935066223,
+          "monitor_max_dC": 0.0017705336213111877,
+          "network_p95_dC": 0.004980035591870546,
+          "network_max_dC": 0.005313977599143982,
+          "tank_max_dC": 0.00532599538564682,
           "tank_max_dLevel": 8.392333984375e-05,
-          "risk_rel_dDeficit": 0.032716624438762665,
-          "net_mean_deficit": 0.09589376300573349,
+          "risk_rel_dDeficit": 0.03271646425127983,
+          "net_mean_deficit": 0.09589377790689468,
           "net_mean_hours_below": 1.5869565217391304,
           "top10_identical": true,
           "top10_jaccard": 1.0
         },
         "prior_weak": {
           "monitor_max_dC": 0.003359071910381317,
-          "network_p95_dC": 0.004435328301042318,
+          "network_p95_dC": 0.00443533668294549,
           "network_max_dC": 0.0045655518770217896,
           "tank_max_dC": 0.0048728883266448975,
           "tank_max_dLevel": 8.392333984375e-05,
@@ -424,9 +424,9 @@
         },
         "prior_strong": {
           "monitor_max_dC": 0.001463174819946289,
-          "network_p95_dC": 0.0054238224402070045,
+          "network_p95_dC": 0.005423821974545717,
           "network_max_dC": 0.006072767078876495,
-          "tank_max_dC": 0.006086863577365875,
+          "tank_max_dC": 0.006086871027946472,
           "tank_max_dLevel": 8.392333984375e-05,
           "risk_rel_dDeficit": 0.02572512812912464,
           "net_mean_deficit": 0.12758806347846985,
@@ -436,7 +436,7 @@
         }
       },
       "age_p95_dAge": 12.814903259277344,
-      "age_max_dAge": 14.302452087402344
+      "age_max_dAge": 14.302444458007812
     }
   ],
   "failures_by_cycle": {

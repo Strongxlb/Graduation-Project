@@ -340,10 +340,51 @@ def make_kw_hook(kw_old, kw_avg, kw_new, material=None):
     return _hook
 
 
+# ==================== concentration units ====================
+# WNTR's Python API stores CONCENTRATION internally in kg/m^3, not in the units named by
+# `options.quality.inpfile_units` — that field only governs how the .inp is read and written. So a
+# value assigned to `initial_quality` is a kg/m^3 value, and `run_sim()` returns kg/m^3, whatever the
+# .inp header says. Assigning 1.0 intending "1 mg/L" therefore simulates 1000 mg/L, and reading the
+# result as mg/L repeats the error on the way out.
+#
+# This is the same factor the project already knew about in one place: the supervisor's notebook
+# measured that a ZERO-ORDER global bulk coefficient needs x1000, because a zero-order coefficient
+# carries a mass/volume dimension. It is the same kg/m^3 fact, and it applies to concentrations
+# themselves as well. Under FIRST-order kinetics it is invisible — the field scales exactly with the
+# source, and sigma and the risk threshold were scaled with it — which is why nothing broke and no
+# known-answer test failed. The first-order coefficients are unaffected: k_b is 1/time and k_w is
+# length/time, so neither carries a mass unit.
+#
+# Convention from here: everything OUTSIDE this module is in mg/L. The conversion happens at the
+# model boundary, in build_model on the way in and in the two run helpers on the way out.
+MG_L_PER_KG_M3 = 1000.0
+
+
+def mgl_to_internal(v):
+    """mg/L -> kg/m^3, the unit WNTR actually stores."""
+    return v / MG_L_PER_KG_M3
+
+
+def internal_to_mgl(v):
+    """kg/m^3 -> mg/L."""
+    return v * MG_L_PER_KG_M3
+
+
+# EPANET's water-quality tolerance is an ABSOLUTE concentration below which differences are ignored.
+# It therefore has to be scaled with the concentration unit or the correction above would silently
+# coarsen the solution: at the old (1000x too high) scale, 0.01 was 1e-5 of the source; at the
+# correct scale it would be 1e-2 of it. Holding the RATIO fixed keeps the numerics identical, which
+# is what makes the unit fix a relabelling rather than a change of result.
+QUALITY_TOLERANCE = mgl_to_internal(0.01)      # = 1e-5 kg/m^3, i.e. 1e-5 of a 1 mg/L source
+
+
 def build_model(kb_per_day, kw_per_day, inp_file=NET3_INP, inlet_mgl=INLET_CHLORINE_MGL,
                 tank_mgl=TANK_INIT_MGL, duration_hours=DURATION_H, bulk_order=1, wall_order=1,
                 quality="CHEMICAL", pre_run=None):
-    """The one place the baseline model is configured; both callers below use it."""
+    """The one place the baseline model is configured; both callers below use it.
+
+    `inlet_mgl` and `tank_mgl` are in mg/L and are converted to WNTR's internal kg/m^3 here.
+    """
     wn = wntr.network.WaterNetworkModel(inp_file)
     wn.options.time.duration = duration_hours * 3600
     wn.options.time.hydraulic_timestep = HYDRAULIC_TIMESTEP_S
@@ -352,22 +393,32 @@ def build_model(kb_per_day, kw_per_day, inp_file=NET3_INP, inlet_mgl=INLET_CHLOR
     wn.options.quality.parameter = quality
     wn.options.quality.chemical_name = "Chlorine"
     wn.options.quality.inpfile_units = "mg/L"
+    wn.options.quality.tolerance = QUALITY_TOLERANCE
     wn.options.reaction.bulk_order = bulk_order
     wn.options.reaction.wall_order = wall_order
     wn.options.reaction.bulk_coeff = per_day_to_per_second(kb_per_day)
     wn.options.reaction.wall_coeff = per_day_to_per_second(kw_per_day)
+    # AGE carries no concentration: its "initial quality" is an age in seconds, so the conversion
+    # must not be applied there.
+    conv = mgl_to_internal if quality == "CHEMICAL" else (lambda v: v)
     for r in wn.reservoir_name_list:
-        wn.get_node(r).initial_quality = inlet_mgl
+        wn.get_node(r).initial_quality = conv(inlet_mgl)
     for t in wn.tank_name_list:
-        wn.get_node(t).initial_quality = tank_mgl
+        wn.get_node(t).initial_quality = conv(tank_mgl)
     if pre_run is not None:
         pre_run(wn)
     return wn
 
 
 def run_model(wn):
-    """Run and return (results, hours index). Use when link or head results are needed too."""
+    """Run and return (results, hours index). Use when link or head results are needed too.
+
+    For a CHEMICAL run the node quality is converted to mg/L; for AGE it is left alone (seconds),
+    because the caller converts it to hours itself.
+    """
     res = wntr.sim.EpanetSimulator(wn).run_sim()
+    if wn.options.quality.parameter == "CHEMICAL":
+        res.node["quality"] = internal_to_mgl(res.node["quality"])
     return res, np.asarray(res.node["quality"].index, dtype=float) / 3600.0
 
 
@@ -381,7 +432,7 @@ def simulate_chlorine(kb_per_day, kw_per_day, monitor_nodes=None, inp_file=NET3_
                      tank_mgl=tank_mgl, duration_hours=duration_hours, bulk_order=bulk_order,
                      wall_order=wall_order, quality="CHEMICAL", pre_run=pre_run)
     res = wntr.sim.EpanetSimulator(wn).run_sim()
-    q = res.node["quality"][monitor_nodes]
+    q = internal_to_mgl(res.node["quality"][monitor_nodes])     # kg/m^3 -> mg/L at the boundary
     q.index = q.index / 3600.0
     q.index.name = "hours"
     return q

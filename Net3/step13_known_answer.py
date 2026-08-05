@@ -63,13 +63,14 @@ def single_pipe(kb_per_day, kw_per_day, roughness=100.0):
     wn.options.quality.parameter = "CHEMICAL"
     wn.options.quality.chemical_name = "Chlorine"
     wn.options.quality.inpfile_units = "mg/L"
+    wn.options.quality.tolerance = B.QUALITY_TOLERANCE
     wn.options.reaction.bulk_order = 1
     wn.options.reaction.wall_order = 1
     wn.options.reaction.bulk_coeff = B.per_day_to_per_second(kb_per_day)
     wn.options.reaction.wall_coeff = B.per_day_to_per_second(kw_per_day)
-    wn.get_node("R").initial_quality = C0
+    wn.get_node("R").initial_quality = B.mgl_to_internal(C0)   # C0 is mg/L; WNTR stores kg/m^3
     res = wntr.sim.EpanetSimulator(wn).run_sim()
-    c_end = float(res.node["quality"]["J"].values[-1])
+    c_end = B.internal_to_mgl(float(res.node["quality"]["J"].values[-1]))
     flow = float(np.abs(res.link["flowrate"]["P"].values[-1]))
     area = np.pi * (DIAM_M / 2.0) ** 2
     velocity = flow / area
@@ -153,7 +154,26 @@ conv_ok = (abs(B.per_day_to_per_second(-1.0) - (-1.0 / 86400.0)) < 1e-18
 print(f"arm 3 — per_day_to_per_second(-1.0) = {B.per_day_to_per_second(-1.0):.6e} "
       f"(= -1/86400) -> {'PASS' if conv_ok else 'FAIL'}")
 
-all_ok = bulk_ok and monotone and kw0_matches_bulk and bounded and conv_ok
+# ---------------- arm 4: the CONCENTRATION unit, against WNTR's own converter ----------------
+# The time conversion above was documented and correct from the start; the concentration one was not
+# applied at all until this was found. WNTR's Python API stores concentration in kg/m^3 regardless of
+# options.quality.inpfile_units, so the check is done against WNTR's own to_si/from_si rather than
+# against our belief about them.
+from wntr.epanet.util import to_si, from_si, QualParam, FlowUnits, MassUnits
+si_of_1mgl = to_si(FlowUnits.GPM, 1.0, QualParam.Quality, mass_units=MassUnits.mg)
+mgl_of_1si = from_si(FlowUnits.GPM, 1.0, QualParam.Quality, mass_units=MassUnits.mg)
+conc_ok = (abs(si_of_1mgl - 0.001) < 1e-12
+           and abs(mgl_of_1si - 1000.0) < 1e-9
+           and abs(B.mgl_to_internal(1.0) - si_of_1mgl) < 1e-12
+           and abs(B.internal_to_mgl(0.001) - 1.0) < 1e-12
+           and abs(B.QUALITY_TOLERANCE - 1e-5) < 1e-18)
+print(f"arm 4 — WNTR to_si(1.0 mg/L) = {si_of_1mgl:.6g} kg/m3; from_si(1.0 kg/m3) = "
+      f"{mgl_of_1si:.6g} mg/L; helpers agree; tolerance {B.QUALITY_TOLERANCE:.1e} kg/m3 "
+      f"(= 1e-5 of a 1 mg/L source) -> {'PASS' if conc_ok else 'FAIL'}")
+print("A first-order coefficient carries no mass unit (k_b is 1/time, k_w is length/time), so this")
+print("factor never touched them; it touched every concentration, which is why it was invisible.\n")
+
+all_ok = bulk_ok and monotone and kw0_matches_bulk and bounded and conv_ok and conc_ok
 report = {
     "purpose": "Priority-2 #7 known-answer test: confirm coefficients are realised as intended",
     "geometry": {"length_m": LENGTH_M, "diameter_m": DIAM_M, "demand_m3_s": DEMAND_M3S,
@@ -169,6 +189,14 @@ report = {
     "unit_conversion_arm": {"pass": bool(conv_ok), "seconds_per_day": B.SECONDS_PER_DAY,
                             "per_day_to_per_second_of_minus_1":
                                 float(B.per_day_to_per_second(-1.0))},
+    "concentration_unit_arm": {
+        "pass": bool(conc_ok),
+        "note": "WNTR stores concentration in kg/m^3 whatever inpfile_units says; checked against "
+                "WNTR's own to_si/from_si, not against our assumption about them",
+        "wntr_to_si_of_1_mg_L": float(si_of_1mgl),
+        "wntr_from_si_of_1_kg_m3": float(mgl_of_1si),
+        "quality_tolerance_kg_m3": float(B.QUALITY_TOLERANCE),
+        "tolerance_relative_to_1_mg_L_source": float(B.QUALITY_TOLERANCE * B.MG_L_PER_KG_M3)},
     "all_pass": bool(all_ok),
 }
 with open(os.path.join(OUT, "step13_known_answer.json"), "w") as f:

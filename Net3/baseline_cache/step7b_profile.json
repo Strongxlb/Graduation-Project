@@ -2,7 +2,7 @@
   "NG": 21,
   "N": 294,
   "sigma": 0.1,
-  "rmse_min": 0.09716717878275657,
+  "rmse_min": 0.09716717985916933,
   "n_censored_observations": 10,
   "primary_likelihood": "censored",
   "grid_interval_status": "visualisation only; endpoints are quantised to the grid step and systematically narrower than the continuous interval",
@@ -51,86 +51,86 @@
     "method": "Nelder-Mead over the two nuisance coefficients at each target value; endpoints by Brent bisection on DNLL - 1.92",
     "by_likelihood": {
       "censored": {
-        "nll_min": 151.59557325443785,
+        "nll_min": 151.59557669229008,
         "kw_at_min": [
-          -0.9715889021311889,
-          -0.10709976461098777,
-          -0.044187452393523494
+          -0.9717190194271876,
+          -0.10713821870237714,
+          -0.04416823407746984
         ],
         "coef": {
           "old": {
-            "lo": -1.1719965305628757,
-            "hi": -0.810555359692374,
+            "lo": -1.17201468515992,
+            "hi": -0.8105766867453702,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.06499999999999995,
-            "half_width": 0.18072058543525082,
+            "half_width": 0.1807189992072749,
             "grid_half_width": 0.12999999999999995,
-            "half_width_change_vs_grid_frac": 0.39015834950193007
+            "half_width_change_vs_grid_frac": 0.39014614774826906
           },
           "average": {
-            "lo": -0.13725763885132028,
-            "hi": -0.08213714078792947,
+            "lo": -0.13728186803048587,
+            "hi": -0.08213752274244879,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.008000000000000007,
-            "half_width": 0.027560249031695405,
+            "half_width": 0.02757217264401854,
             "grid_half_width": 0.024,
-            "half_width_change_vs_grid_frac": 0.14834370965397525
+            "half_width_change_vs_grid_frac": 0.14884052683410576
           },
           "new": {
-            "lo": -0.05987515431516723,
-            "hi": -0.029427907947399662,
+            "lo": -0.059854199631434124,
+            "hi": -0.029433693897586148,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.004750000000000004,
-            "half_width": 0.015223623183883785,
+            "half_width": 0.015210252866923988,
             "grid_half_width": 0.011875000000000004,
-            "half_width_change_vs_grid_frac": 0.2819893207481079
+            "half_width_change_vs_grid_frac": 0.28086339931991433
           }
         }
       },
       "iid": {
-        "nll_min": 138.6979624929348,
+        "nll_min": 138.69796686533738,
         "kw_at_min": [
-          -0.955468432251674,
-          -0.10668534638777714,
-          -0.04434749345257458
+          -0.9554269011839375,
+          -0.1066486931974732,
+          -0.04436110722086985
         ],
         "coef": {
           "old": {
-            "lo": -1.1516569921994009,
-            "hi": -0.7972659008660379,
+            "lo": -1.1516540640921786,
+            "hi": -0.7972701025459015,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.06499999999999995,
-            "half_width": 0.1771955456666815,
+            "half_width": 0.17719198077313858,
             "grid_half_width": 0.12999999999999995,
-            "half_width_change_vs_grid_frac": 0.3630426589744735
+            "half_width_change_vs_grid_frac": 0.3630152367164512
           },
           "average": {
-            "lo": -0.1366958214000908,
-            "hi": -0.08173965251706695,
+            "lo": -0.13668506281992746,
+            "hi": -0.08174163742329327,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.008000000000000007,
-            "half_width": 0.027478084441511917,
+            "half_width": 0.027471712698317094,
             "grid_half_width": 0.024,
-            "half_width_change_vs_grid_frac": 0.14492018506299642
+            "half_width_change_vs_grid_frac": 0.14465469576321222
           },
           "new": {
-            "lo": -0.060047666169900225,
-            "hi": -0.029558417471450896,
+            "lo": -0.06003215210594232,
+            "hi": -0.029576053032241555,
             "open_low": false,
             "open_high": false,
             "grid_step": 0.004750000000000004,
-            "half_width": 0.015244624349224665,
+            "half_width": 0.015228049536850384,
             "grid_half_width": 0.011875000000000004,
-            "half_width_change_vs_grid_frac": 0.28375783993470827
+            "half_width_change_vs_grid_frac": 0.2823620662610846
           }
         }
       }
     },
-    "n_epanet_evaluations": 7770
+    "n_epanet_evaluations": 7792
   }
 }

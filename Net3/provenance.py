@@ -167,6 +167,14 @@ def frozen_config():
         "sample_seed": B.SAMPLE_SEED,
         "zone_rule": {"y_low": B.ZONE_Y_LOW, "x_mid": B.ZONE_X_MID,
                       "cross_zone": "weaker (newer) side wins"},
+        # The concentration unit is part of the experiment definition, not an implementation
+        # detail. Before the kg/m^3 correction the same "inlet_mgl: 1.0" meant a 1000 mg/L source,
+        # so a config hash that omitted the convention would have declared two physically different
+        # caches identical. The solver tolerance is here for the same reason: it is an ABSOLUTE
+        # concentration, so it only means anything alongside the unit it is measured in.
+        "concentration_unit": "mg/L at every interface; kg/m^3 inside WNTR, converted in "
+                              "wq_common.build_model / run_model / simulate_chlorine",
+        "quality_tolerance_kg_m3": B.QUALITY_TOLERANCE,
     }
 
 

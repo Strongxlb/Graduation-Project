@@ -10,32 +10,32 @@
   "risk_ranking_basis": "median risk field over the noise realisations; the top-6 set and the Spearman/Kendall columns share that field, and the modal per-realisation ordering is reported separately as risk_rank_mode",
   "symmetry_check": {
     "0.025": {
-      "positive": 0.11740048660584934,
-      "negative": -0.13394952578145336,
-      "sum": -0.01654903917560402,
-      "abs_ratio": 1.14096227072009
+      "positive": 0.11740051681456176,
+      "negative": -0.13394952711349584,
+      "sum": -0.016549010298934075,
+      "abs_ratio": 1.1409619884814801
     },
     "0.05": {
-      "positive": 0.221311023953491,
-      "negative": -0.26231550221990974,
-      "sum": -0.04100447826641873,
-      "abs_ratio": 1.185279872343982
+      "positive": 0.22131106785940113,
+      "negative": -0.2623155056291875,
+      "sum": -0.04100443776978635,
+      "abs_ratio": 1.1852796526011815
     },
     "0.1": {
-      "positive": 0.3918725567148804,
-      "negative": -0.38689151859571735,
-      "sum": 0.0049810381191630615,
-      "abs_ratio": 0.9872891376703697
+      "positive": 0.39187254051418907,
+      "negative": -0.3868915421307144,
+      "sum": 0.004980998383474655,
+      "abs_ratio": 0.987289238544403
     }
   },
-  "baseline_old_sd": 0.10117113826904761,
+  "baseline_old_sd": 0.10117114656090895,
   "rows": [
     {
       "offset": -0.1,
-      "old_mean_med": -1.427405481547468,
-      "old_sd_med": 0.05974069459436482,
-      "avg_mean_med": -0.10171544613540862,
-      "new_mean_med": -0.04983453439312455,
+      "old_mean_med": -1.4274054844633288,
+      "old_sd_med": 0.05974069277224546,
+      "avg_mean_med": -0.1017154436956363,
+      "new_mean_med": -0.049834534859088286,
       "risk_top6": [
         "131",
         "141",
@@ -61,8 +61,8 @@
         "145",
         "143"
       ],
-      "old_shift": -0.38689151859571735,
-      "shift_over_sd": -3.8241293437545845,
+      "old_shift": -0.3868915421307144,
+      "shift_over_sd": -3.824129262959284,
       "spearman_vs_unbiased": 0.9995023686171003,
       "kendall_vs_unbiased": 0.9902810953665777,
       "top6_jaccard_vs_unbiased": 1.0,
@@ -71,10 +71,10 @@
     },
     {
       "offset": -0.05,
-      "old_mean_med": -1.3028294651716603,
-      "old_sd_med": 0.1049194607236335,
-      "avg_mean_med": -0.10327241455684974,
-      "new_mean_med": -0.04934546544277443,
+      "old_mean_med": -1.302829447961802,
+      "old_sd_med": 0.1049194570716238,
+      "avg_mean_med": -0.10327241389642448,
+      "new_mean_med": -0.04934546455380914,
       "risk_top6": [
         "131",
         "141",
@@ -100,8 +100,8 @@
         "15",
         "143"
       ],
-      "old_shift": -0.26231550221990974,
-      "shift_over_sd": -2.592789867821056,
+      "old_shift": -0.2623155056291875,
+      "shift_over_sd": -2.5927896890173465,
       "spearman_vs_unbiased": 0.9996897902206366,
       "kendall_vs_unbiased": 0.9936974789915967,
       "top6_jaccard_vs_unbiased": 1.0,
@@ -110,10 +110,10 @@
     },
     {
       "offset": -0.025,
-      "old_mean_med": -1.174463488733204,
-      "old_sd_med": 0.10855451914224598,
-      "avg_mean_med": -0.10328297258885419,
-      "new_mean_med": -0.05003205981099525,
+      "old_mean_med": -1.1744634694461102,
+      "old_sd_med": 0.10855451899126581,
+      "avg_mean_med": -0.10328297208242075,
+      "new_mean_med": -0.05003205925438315,
       "risk_top6": [
         "131",
         "141",
@@ -139,8 +139,8 @@
         "15",
         "143"
       ],
-      "old_shift": -0.13394952578145336,
-      "shift_over_sd": -1.3239895099849242,
+      "old_shift": -0.13394952711349584,
+      "shift_over_sd": -1.3239894146386197,
       "spearman_vs_unbiased": 0.9997414918505306,
       "kendall_vs_unbiased": 0.9957983193277312,
       "top6_jaccard_vs_unbiased": 1.0,
@@ -149,10 +149,10 @@
     },
     {
       "offset": 0.0,
-      "old_mean_med": -1.0405139629517506,
-      "old_sd_med": 0.10117113826904761,
-      "avg_mean_med": -0.1027664365847395,
-      "new_mean_med": -0.050945085865920864,
+      "old_mean_med": -1.0405139423326144,
+      "old_sd_med": 0.10117114656090895,
+      "avg_mean_med": -0.10276643496424166,
+      "new_mean_med": -0.05094508744983714,
       "risk_top6": [
         "131",
         "141",
@@ -188,10 +188,10 @@
     },
     {
       "offset": 0.025,
-      "old_mean_med": -0.9231134763459012,
-      "old_sd_med": 0.08837846819651177,
-      "avg_mean_med": -0.10201624523746564,
-      "new_mean_med": -0.051894933071487535,
+      "old_mean_med": -0.9231134255180526,
+      "old_sd_med": 0.08837847684595855,
+      "avg_mean_med": -0.10201624196575332,
+      "new_mean_med": -0.05189493608274186,
       "risk_top6": [
         "131",
         "129",
@@ -217,8 +217,8 @@
         "15",
         "143"
       ],
-      "old_shift": 0.11740048660584934,
-      "shift_over_sd": 1.1604148042067344,
+      "old_shift": 0.11740051681456176,
+      "shift_over_sd": 1.1604150076907758,
       "spearman_vs_unbiased": 0.9996897902206366,
       "kendall_vs_unbiased": 0.9936974789915967,
       "top6_jaccard_vs_unbiased": 1.0,
@@ -227,10 +227,10 @@
     },
     {
       "offset": 0.05,
-      "old_mean_med": -0.8192029389982596,
-      "old_sd_med": 0.07686822178155839,
-      "avg_mean_med": -0.10125462888033718,
-      "new_mean_med": -0.0529265035107491,
+      "old_mean_med": -0.8192028744732133,
+      "old_sd_med": 0.07686822739996034,
+      "avg_mean_med": -0.10125462282596652,
+      "new_mean_med": -0.052926507191872335,
       "risk_top6": [
         "131",
         "129",
@@ -256,8 +256,8 @@
         "15",
         "143"
       ],
-      "old_shift": 0.221311023953491,
-      "shift_over_sd": 2.1874916872532517,
+      "old_shift": 0.22131106785940113,
+      "shift_over_sd": 2.1874919419457535,
       "spearman_vs_unbiased": 0.9994571328861143,
       "kendall_vs_unbiased": 0.9905462184873951,
       "top6_jaccard_vs_unbiased": 0.7142857142857143,
@@ -266,10 +266,10 @@
     },
     {
       "offset": 0.1,
-      "old_mean_med": -0.6486414062368702,
-      "old_sd_med": 0.0588946285533711,
-      "avg_mean_med": -0.09934496913022929,
-      "new_mean_med": -0.055050087468609246,
+      "old_mean_med": -0.6486414018184253,
+      "old_sd_med": 0.05889462457747972,
+      "avg_mean_med": -0.09934496820936085,
+      "new_mean_med": -0.055050086656583286,
       "risk_top6": [
         "131",
         "129",
@@ -295,8 +295,8 @@
         "15",
         "129"
       ],
-      "old_shift": 0.3918725567148804,
-      "shift_over_sd": 3.873363129243059,
+      "old_shift": 0.39187254051418907,
+      "shift_over_sd": 3.8733626516554955,
       "spearman_vs_unbiased": 0.9993278788113794,
       "kendall_vs_unbiased": 0.9884453781512607,
       "top6_jaccard_vs_unbiased": 0.7142857142857143,
@@ -315,11 +315,11 @@
   ],
   "offset_signs": "two-sided; censoring at the sensor floor makes the response asymmetric, so the negative arm is measured rather than mirrored (see Step 9)",
   "location_note": "node 15 is one monitor, not the worst case; Step 8c sweeps all six and finds a larger displacement at monitor 231 (average zone)",
-  "shift025_over_shift050": 0.5304773549397219,
+  "shift025_over_shift050": 0.5304773861971797,
   "shift_scaling": "sub-linear (concave)",
   "informal_comparator_curvature": {
     "threshold": 0.107,
-    "shift025_over_shift050": 0.4517486815079345,
+    "shift025_over_shift050": 0.45174868294481385,
     "shift_scaling": "super-linear (convex)"
   }
 }

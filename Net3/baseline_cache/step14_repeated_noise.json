@@ -13,9 +13,9 @@
     0.95
   ],
   "crlb_case_A_from_step7": {
-    "old": 0.09473369006981404,
-    "average": 0.01350909067881071,
-    "new": 0.007955988481251095
+    "old": 0.09473373828904655,
+    "average": 0.013509087998662104,
+    "new": 0.007955984346052079
   },
   "shared_library_caveat": "all realisations are weighted against the same 8192-member Sobol prediction library, so their Monte Carlo errors are not independent and interval endpoints are resolved only to the effective sample size reported below",
   "by_scheme": {
@@ -23,77 +23,77 @@
       "n_valid": 100,
       "n_empty": 0,
       "ess": {
-        "med": 158.30558182676023,
-        "p5": 121.56526023507806,
-        "min": 112.97798490937247,
-        "max": 213.76755819354213
+        "med": 158.3055870424128,
+        "p5": 121.56531465765781,
+        "min": 112.9779870386728,
+        "max": 213.76770987389656
       },
       "coef": {
         "old": {
           "truth": -1.0,
           "prior_sd": 0.37527767497325676,
-          "mean_of_posterior_mean": -1.0054922787348108,
-          "bias_mean": -0.00549227873481084,
-          "bias_mean_over_prior_sd": -0.014635239720034596,
-          "bias_median": -0.0002811570749732262,
-          "empirical_sd_of_posterior_mean": 0.09808469536323228,
-          "mean_posterior_sd_within_realisation": 0.09600770611948697,
-          "within_over_empirical": 0.9788245328585291,
-          "rmse_of_posterior_mean": 0.09774746296223731,
+          "mean_of_posterior_mean": -1.005492239283936,
+          "bias_mean": -0.005492239283936051,
+          "bias_mean_over_prior_sd": -0.014635134595543,
+          "bias_median": -0.0002811402325348933,
+          "empirical_sd_of_posterior_mean": 0.09808469100379838,
+          "mean_posterior_sd_within_realisation": 0.0960076997984641,
+          "within_over_empirical": 0.9788245119184416,
+          "rmse_of_posterior_mean": 0.09774745641483214,
           "coverage": {
             "q90": 0.89,
             "q95": 0.97,
             "normal90": 0.89,
             "normal95": 0.96
           },
-          "bias_over_empirical_sd": -0.05599526729905774,
-          "crlb": 0.09473369006981404,
-          "empirical_sd_over_crlb": 1.035372899450541,
-          "within_sd_over_crlb": 1.0134483946390567
+          "bias_over_empirical_sd": -0.055994867575444175,
+          "crlb": 0.09473373828904655,
+          "empirical_sd_over_crlb": 1.0353723264306067,
+          "within_sd_over_crlb": 1.0134478120723
         },
         "average": {
           "truth": -0.1,
           "prior_sd": 0.046188021535170064,
-          "mean_of_posterior_mean": -0.10210337999597158,
-          "bias_mean": -0.0021033799959715715,
-          "bias_mean_over_prior_sd": -0.04553951275808478,
-          "bias_median": -0.001488560548574519,
-          "empirical_sd_of_posterior_mean": 0.014370472955994536,
-          "mean_posterior_sd_within_realisation": 0.013708125529168304,
-          "within_over_empirical": 0.9539091421100419,
-          "rmse_of_posterior_mean": 0.014452321455622074,
+          "mean_of_posterior_mean": -0.10210337663722358,
+          "bias_mean": -0.0021033766372235696,
+          "bias_mean_over_prior_sd": -0.04553944003905741,
+          "bias_median": -0.0014885594248782719,
+          "empirical_sd_of_posterior_mean": 0.014370473051319764,
+          "mean_posterior_sd_within_realisation": 0.013708125343365336,
+          "within_over_empirical": 0.9539091228528765,
+          "rmse_of_posterior_mean": 0.01445232106063031,
           "coverage": {
             "q90": 0.88,
             "q95": 0.96,
             "normal90": 0.87,
             "normal95": 0.97
           },
-          "bias_over_empirical_sd": -0.14636818164667031,
-          "crlb": 0.01350909067881071,
-          "empirical_sd_over_crlb": 1.0637631575406419,
-          "within_sd_over_crlb": 1.014733401017863
+          "bias_over_empirical_sd": -0.1463679469501109,
+          "crlb": 0.013509087998662104,
+          "empirical_sd_over_crlb": 1.0637633756433424,
+          "within_sd_over_crlb": 1.0147335885829558
         },
         "new": {
           "truth": -0.05,
           "prior_sd": 0.027424137786507225,
-          "mean_of_posterior_mean": -0.049808783976844816,
-          "bias_mean": 0.0001912160231551871,
-          "bias_mean_over_prior_sd": 0.006972544575285283,
-          "bias_median": 0.00029976236469853035,
-          "empirical_sd_of_posterior_mean": 0.008879463867319236,
-          "mean_posterior_sd_within_realisation": 0.007942341791935282,
-          "within_over_empirical": 0.8944618628571684,
-          "rmse_of_posterior_mean": 0.008837024009972412,
+          "mean_of_posterior_mean": -0.049808785103240404,
+          "bias_mean": 0.00019121489675959918,
+          "bias_mean_over_prior_sd": 0.006972503502140279,
+          "bias_median": 0.00029976211630968613,
+          "empirical_sd_of_posterior_mean": 0.008879463790641027,
+          "mean_posterior_sd_within_realisation": 0.00794234193765425,
+          "within_over_empirical": 0.8944618869920382,
+          "rmse_of_posterior_mean": 0.00883702390932348,
           "coverage": {
             "q90": 0.85,
             "q95": 0.91,
             "normal90": 0.85,
             "normal95": 0.93
           },
-          "bias_over_empirical_sd": 0.021534636101055094,
-          "crlb": 0.007955988481251095,
-          "empirical_sd_over_crlb": 1.116072991840597,
-          "within_sd_over_crlb": 0.9982847273663137
+          "bias_over_empirical_sd": 0.021534509433006537,
+          "crlb": 0.007955984346052079,
+          "empirical_sd_over_crlb": 1.1160735622924143,
+          "within_sd_over_crlb": 0.998285264549999
         }
       }
     },
@@ -101,77 +101,77 @@
       "n_valid": 100,
       "n_empty": 0,
       "ess": {
-        "med": 156.83801126257092,
-        "p5": 120.25324868833309,
-        "min": 112.7579340374009,
-        "max": 213.027917888175
+        "med": 156.83791314692547,
+        "p5": 120.25329814737042,
+        "min": 112.75794210225082,
+        "max": 213.02806948042144
       },
       "coef": {
         "old": {
           "truth": -1.0,
           "prior_sd": 0.37527767497325676,
-          "mean_of_posterior_mean": -0.9949359735171516,
-          "bias_mean": 0.005064026482848427,
-          "bias_mean_over_prior_sd": 0.013494078706412,
-          "bias_median": 0.01063709106369648,
-          "empirical_sd_of_posterior_mean": 0.09588455022605283,
-          "mean_posterior_sd_within_realisation": 0.094993406763425,
-          "within_over_empirical": 0.9907060787110447,
-          "rmse_of_posterior_mean": 0.09553822725250304,
+          "mean_of_posterior_mean": -0.9949359351584676,
+          "bias_mean": 0.005064064841532434,
+          "bias_mean_over_prior_sd": 0.013494180920549863,
+          "bias_median": 0.01063710819217345,
+          "empirical_sd_of_posterior_mean": 0.09588454577318498,
+          "mean_posterior_sd_within_realisation": 0.09499340027541024,
+          "within_over_empirical": 0.9907060570544628,
+          "rmse_of_posterior_mean": 0.09553822486140272,
           "coverage": {
             "q90": 0.9,
             "q95": 0.95,
             "normal90": 0.89,
             "normal95": 0.96
           },
-          "bias_over_empirical_sd": 0.05281378982234073,
-          "crlb": 0.09473369006981404,
-          "empirical_sd_over_crlb": 1.0121483725102511,
-          "within_sd_over_crlb": 1.0027415452033968
+          "bias_over_empirical_sd": 0.05281419232575275,
+          "crlb": 0.09473373828904655,
+          "empirical_sd_over_crlb": 1.0121478103252628,
+          "within_sd_over_crlb": 1.0027409663236495
         },
         "average": {
           "truth": -0.1,
           "prior_sd": 0.046188021535170064,
-          "mean_of_posterior_mean": -0.1020292902528528,
-          "bias_mean": -0.0020292902528527973,
-          "bias_mean_over_prior_sd": -0.04393542276556673,
-          "bias_median": -0.001420465393244058,
-          "empirical_sd_of_posterior_mean": 0.014357148266643418,
-          "mean_posterior_sd_within_realisation": 0.01370165991206024,
-          "within_over_empirical": 0.9543441119079266,
-          "rmse_of_posterior_mean": 0.01442859827624297,
+          "mean_of_posterior_mean": -0.102029286920426,
+          "bias_mean": -0.0020292869204259906,
+          "bias_mean_over_prior_sd": -0.04393535061640996,
+          "bias_median": -0.0014204617922521923,
+          "empirical_sd_of_posterior_mean": 0.014357148415998552,
+          "mean_posterior_sd_within_realisation": 0.013701659706547709,
+          "within_over_empirical": 0.9543440876657363,
+          "rmse_of_posterior_mean": 0.014428597954688167,
           "coverage": {
             "q90": 0.9,
             "q95": 0.96,
             "normal90": 0.86,
             "normal95": 0.97
           },
-          "bias_over_empirical_sd": -0.1413435464456082,
-          "crlb": 0.01350909067881071,
-          "empirical_sd_over_crlb": 1.0627768077064508,
-          "within_sd_over_crlb": 1.014254788706954
+          "bias_over_empirical_sd": -0.1413433128659938,
+          "crlb": 0.013509087998662104,
+          "empirical_sd_over_crlb": 1.0627770296129861,
+          "within_sd_over_crlb": 1.0142549747181067
         },
         "new": {
           "truth": -0.05,
           "prior_sd": 0.027424137786507225,
-          "mean_of_posterior_mean": -0.049888402718380534,
-          "bias_mean": 0.0001115972816194688,
-          "bias_mean_over_prior_sd": 0.00406930866845247,
-          "bias_median": 0.00022447902840073974,
-          "empirical_sd_of_posterior_mean": 0.008877739302692382,
-          "mean_posterior_sd_within_realisation": 0.007947128223319186,
-          "within_over_empirical": 0.89517476830042,
-          "rmse_of_posterior_mean": 0.008833943996232272,
+          "mean_of_posterior_mean": -0.04988840380630052,
+          "bias_mean": 0.00011159619369948554,
+          "bias_mean_over_prior_sd": 0.004069268998290669,
+          "bias_median": 0.00022447897334012396,
+          "empirical_sd_of_posterior_mean": 0.008877739193866994,
+          "mean_posterior_sd_within_realisation": 0.007947128379625266,
+          "within_over_empirical": 0.8951747968801987,
+          "rmse_of_posterior_mean": 0.008833943874217631,
           "coverage": {
             "q90": 0.86,
             "q95": 0.91,
             "normal90": 0.85,
             "normal95": 0.93
           },
-          "bias_over_empirical_sd": 0.012570461669856009,
-          "crlb": 0.007955988481251095,
-          "empirical_sd_over_crlb": 1.1158562287531542,
-          "within_sd_over_crlb": 0.9988863410306853
+          "bias_over_empirical_sd": 0.012570339279236712,
+          "crlb": 0.007955984346052079,
+          "empirical_sd_over_crlb": 1.1158567950516782,
+          "within_sd_over_crlb": 0.9988868798577757
         }
       }
     },
@@ -179,77 +179,77 @@
       "n_valid": 100,
       "n_empty": 0,
       "ess": {
-        "med": 4638.477364065971,
-        "p5": 1035.441337110755,
-        "min": 1.9999999273693172,
-        "max": 6413.786380887064
+        "med": 4638.477364148726,
+        "p5": 1035.441337104445,
+        "min": 1.9999999273543096,
+        "max": 6413.786381291444
       },
       "coef": {
         "old": {
           "truth": -1.0,
           "prior_sd": 0.37527767497325676,
-          "mean_of_posterior_mean": -1.0195846528975405,
-          "bias_mean": -0.019584652897540522,
-          "bias_mean_over_prior_sd": -0.052187098257140324,
-          "bias_median": -0.018012963730904774,
-          "empirical_sd_of_posterior_mean": 0.05301049186253086,
-          "mean_posterior_sd_within_realisation": 0.24888475607959162,
-          "within_over_empirical": 4.695009371446893,
-          "rmse_of_posterior_mean": 0.05626339621947397,
+          "mean_of_posterior_mean": -1.0195846518885296,
+          "bias_mean": -0.019584651888529647,
+          "bias_mean_over_prior_sd": -0.05218709556843556,
+          "bias_median": -0.018012962503222818,
+          "empirical_sd_of_posterior_mean": 0.05301049190573842,
+          "mean_posterior_sd_within_realisation": 0.24888475616981048,
+          "within_over_empirical": 4.69500936932201,
+          "rmse_of_posterior_mean": 0.056263395908551006,
           "coverage": {
             "q90": 0.98,
             "q95": 0.98,
             "normal90": 0.98,
             "normal95": 0.98
           },
-          "bias_over_empirical_sd": -0.36944861685736297,
-          "crlb": 0.09473369006981404,
-          "empirical_sd_over_crlb": 0.5595738097340529,
-          "within_sd_over_crlb": 2.627204280717619
+          "bias_over_empirical_sd": -0.3694485975220614,
+          "crlb": 0.09473373828904655,
+          "empirical_sd_over_crlb": 0.5595735253684978,
+          "within_sd_over_crlb": 2.6272029444296447
         },
         "average": {
           "truth": -0.1,
           "prior_sd": 0.046188021535170064,
-          "mean_of_posterior_mean": -0.11477282084484287,
-          "bias_mean": -0.014772820844842868,
-          "bias_mean_over_prior_sd": -0.3198409534297554,
-          "bias_median": -0.013009067667269364,
-          "empirical_sd_of_posterior_mean": 0.008387174752983475,
-          "mean_posterior_sd_within_realisation": 0.039280271602160355,
-          "within_over_empirical": 4.683373455189738,
-          "rmse_of_posterior_mean": 0.01696695285098466,
+          "mean_of_posterior_mean": -0.11477282078497247,
+          "bias_mean": -0.014772820784972468,
+          "bias_mean_over_prior_sd": -0.3198409521335232,
+          "bias_median": -0.013009067600865898,
+          "empirical_sd_of_posterior_mean": 0.008387174749660423,
+          "mean_posterior_sd_within_realisation": 0.03928027159446863,
+          "within_over_empirical": 4.683373456128239,
+          "rmse_of_posterior_mean": 0.016966952797230338,
           "coverage": {
             "q90": 0.99,
             "q95": 0.99,
             "normal90": 0.99,
             "normal95": 0.99
           },
-          "bias_over_empirical_sd": -1.7613584168599683,
-          "crlb": 0.01350909067881071,
-          "empirical_sd_over_crlb": 0.6208541309252541,
-          "within_sd_over_crlb": 2.9076917563202294
+          "bias_over_empirical_sd": -1.7613584104195021,
+          "crlb": 0.013509087998662104,
+          "empirical_sd_over_crlb": 0.6208542538542248,
+          "within_sd_over_crlb": 2.90769233262518
         },
         "new": {
           "truth": -0.05,
           "prior_sd": 0.027424137786507225,
-          "mean_of_posterior_mean": -0.05115226432790581,
-          "bias_mean": -0.0011522643279058067,
-          "bias_mean_over_prior_sd": -0.04201642862488552,
-          "bias_median": -0.0009483667970702631,
-          "empirical_sd_of_posterior_mean": 0.004887167292349761,
-          "mean_posterior_sd_within_realisation": 0.022581749646714364,
-          "within_over_empirical": 4.620621373461724,
-          "rmse_of_posterior_mean": 0.004997326603629523,
+          "mean_of_posterior_mean": -0.05115226435063534,
+          "bias_mean": -0.0011522643506353403,
+          "bias_mean_over_prior_sd": -0.0420164294537004,
+          "bias_median": -0.0009483668207938695,
+          "empirical_sd_of_posterior_mean": 0.00488716729310553,
+          "mean_posterior_sd_within_realisation": 0.022581749645194656,
+          "within_over_empirical": 4.620621372436215,
+          "rmse_of_posterior_mean": 0.004997326609602127,
           "coverage": {
             "q90": 0.98,
             "q95": 0.98,
             "normal90": 0.98,
             "normal95": 0.99
           },
-          "bias_over_empirical_sd": -0.2357734570923181,
-          "crlb": 0.007955988481251095,
-          "empirical_sd_over_crlb": 0.6142753102102586,
-          "within_sd_over_crlb": 2.8383336275473514
+          "bias_over_empirical_sd": -0.23577346170671779,
+          "crlb": 0.007955984346052079,
+          "empirical_sd_over_crlb": 0.6142756295807246,
+          "within_sd_over_crlb": 2.8383351026074077
         }
       }
     }

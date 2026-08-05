@@ -96,6 +96,7 @@ SECTIONS = {
     "Step 12": ["step12_scenarios.json"],
     "Step 13": ["step13_known_answer.json"],
     "Step 14": ["step14_repeated_noise.json"],
+    "Step 15": ["step15_unit_equivalence.json"],
 }
 
 # Every result artifact must say which weighting produced it. Without this a table of numbers is
@@ -109,7 +110,8 @@ WEIGHTING_EXEMPT = {"cache_manifest.json", "step0_warmup_convergence.json",
                     "step7_fisher.json",         # a-priori Fisher/CRLB; ensemble SD is a side check
                     "step7b_profile.json", "step7c_ar1.json", "step7c_profile_ar1.json",
                     "step9_zeroclip.json",       # compares two formal likelihoods on one realisation
-                    "step13_known_answer.json"}
+                    "step13_known_answer.json",
+                    "step15_unit_equivalence.json"}   # raw fields, no ensemble weighting
 
 FIGURE_SOURCE = {
     "step0_warmup_convergence.png": "step0_warmup_convergence.json",
@@ -179,6 +181,11 @@ CLAIMS = [
     # --- sensor bias: displacement in posterior-SD units, primary rule ---
     ("RESULTS_LOG.md", r"\+0\.10 mg/L at node 15 moves[^\n]{0,60}?([0-9.]+)\s*posterior SD",
      "step8_sensor_bias.json", "rows[6]/shift_over_sd", 1),
+    # --- the unit correction: is it a relabelling, and what does getting it half-right cost? ---
+    ("RESULTS_LOG.md", r"unchanged to ([0-9.]+)\s*×\s*10⁻⁷ relative",
+     "step15_unit_equivalence.json", "comparisons/corrected_vs_legacy/max_rel_diff", 1e7),
+    ("RESULTS_LOG.md", r"introduces a ([0-9.]+)% maximum relative error",
+     "step15_unit_equivalence.json", "comparisons/units_only_vs_legacy/max_rel_diff", 100),
     # --- sensor drift: the ratio that decides whether a drift needs its own analysis at all ---
     ("RESULTS_LOG.md", r"the ratio reaches\s+\*\*([0-9.]+)\*\*\s+at D = \+0\.10",
      "step8d_sensor_drift.json", "equivalence/231/+0.100/drift_over_const_mean", 1),

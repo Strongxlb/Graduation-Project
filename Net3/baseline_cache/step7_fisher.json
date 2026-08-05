@@ -25,32 +25,32 @@
           "step": 0.005,
           "step_over_truth": 0.005,
           "is_default": false,
-          "crlb": 0.09481843560934067,
+          "crlb": 0.09481853246688843,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.01,
           "step_over_truth": 0.01,
           "is_default": false,
-          "crlb": 0.09481559693813324,
-          "rel_change_vs_previous": 2.993796624650713e-05
+          "crlb": 0.094815693795681,
+          "rel_change_vs_previous": 2.9937937142676674e-05
         },
         {
           "step": 0.02,
           "step_over_truth": 0.02,
           "is_default": true,
-          "crlb": 0.09473370015621185,
-          "rel_change_vs_previous": 0.0008637480204924941
+          "crlb": 0.09473375976085663,
+          "rel_change_vs_previous": 0.0008641399908810854
         },
         {
           "step": 0.04,
           "step_over_truth": 0.04,
           "is_default": false,
-          "crlb": 0.09472426772117615,
-          "rel_change_vs_previous": 9.956789290299639e-05
+          "crlb": 0.09472431242465973,
+          "rel_change_vs_previous": 9.97251263470389e-05
         }
       ],
-      "crlb_spread_over_sweep": 0.0009941263250692334
+      "crlb_spread_over_sweep": 0.0009946764438499844
     },
     "average": {
       "default_step": 0.005,
@@ -60,32 +60,32 @@
           "step": 0.002,
           "step_over_truth": 0.02,
           "is_default": false,
-          "crlb": 0.013534138910472393,
+          "crlb": 0.01353413611650467,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.005,
           "step_over_truth": 0.049999999999999996,
           "is_default": true,
-          "crlb": 0.013509090058505535,
-          "rel_change_vs_previous": 0.0018507902277633548
+          "crlb": 0.01350908912718296,
+          "rel_change_vs_previous": 0.0018506529740989208
         },
         {
           "step": 0.01,
           "step_over_truth": 0.09999999999999999,
           "is_default": false,
-          "crlb": 0.013487366028130054,
-          "rel_change_vs_previous": 0.0016081046778708696
+          "crlb": 0.013487355783581734,
+          "rel_change_vs_previous": 0.0016087942058220506
         },
         {
           "step": 0.02,
           "step_over_truth": 0.19999999999999998,
           "is_default": false,
-          "crlb": 0.013399886898696423,
-          "rel_change_vs_previous": 0.006486005615442991
+          "crlb": 0.013399878516793251,
+          "rel_change_vs_previous": 0.006485872436314821
         }
       ],
-      "crlb_spread_over_sweep": 0.010018891412362008
+      "crlb_spread_over_sweep": 0.010019314693275883
     },
     "new": {
       "default_step": 0.0025,
@@ -95,97 +95,97 @@
           "step": 0.001,
           "step_over_truth": 0.02,
           "is_default": false,
-          "crlb": 0.008030235767364502,
+          "crlb": 0.008030213415622711,
           "rel_change_vs_previous": null
         },
         {
           "step": 0.0025,
           "step_over_truth": 0.049999999999999996,
           "is_default": true,
-          "crlb": 0.007955988869071007,
-          "rel_change_vs_previous": 0.009245917201042175
+          "crlb": 0.007955984212458134,
+          "rel_change_vs_previous": 0.009243739768862724
         },
         {
           "step": 0.005,
           "step_over_truth": 0.09999999999999999,
           "is_default": false,
           "crlb": 0.007955021224915981,
-          "rel_change_vs_previous": 0.0001216246237163432
+          "rel_change_vs_previous": 0.00012103939661756158
         },
         {
           "step": 0.01,
           "step_over_truth": 0.19999999999999998,
           "is_default": false,
-          "crlb": 0.007939541712403297,
-          "rel_change_vs_previous": 0.0019458794267848134
+          "crlb": 0.007939540781080723,
+          "rel_change_vs_previous": 0.0019459965405985713
         }
       ],
-      "crlb_spread_over_sweep": 0.011423084385276283
+      "crlb_spread_over_sweep": 0.01142038778339094
     }
   },
   "fisher_geometry": {
     "note": "a condition number on the unnormalised matrix mixes units; the prior-scaled form is the dimensionless one",
     "eigenvalues_raw": [
-      23906.310147118846,
-      5106.338161990617,
-      111.32633825025188
+      23906.30328373978,
+      5106.34185936907,
+      111.32622512755805
     ],
-    "condition_number_raw": 214.7408288358461,
+    "condition_number_raw": 214.74098539088916,
     "eigenvalues_prior_scaled": [
-      24.53689915162767,
-      16.55293472773852,
-      7.560586874542517
+      24.53689407923598,
+      16.552908408391144,
+      7.5605960801822025
     ],
-    "condition_number_prior_scaled": 3.2453696464022666,
+    "condition_number_prior_scaled": 3.245365024002799,
     "sloppiest_direction_prior_sd_units": {
-      "old": -0.2967870564562104,
-      "average": -0.6627952140427921,
-      "new": 0.6874735975745015
+      "old": -0.29678812242938657,
+      "average": -0.6627949179818329,
+      "new": 0.6874734228188716
     }
   },
   "ensemble_sd_by_scheme": {
     "formal_censored": {
-      "old": 0.09380132722771606,
-      "average": 0.014158618960044042,
-      "new": 0.007763176179366474
+      "old": 0.09380132963004645,
+      "average": 0.014158620088993346,
+      "new": 0.007763174955186636
     },
     "formal_iid": {
-      "old": 0.09204021650366974,
-      "average": 0.01411739298584134,
-      "new": 0.007762360694871042
+      "old": 0.09204022417019059,
+      "average": 0.01411739461037047,
+      "new": 0.007762359746026954
     },
     "informal_glue": {
-      "old": 0.2667853615733704,
-      "average": 0.042404164211306765,
-      "new": 0.024188948713502578
+      "old": 0.2667853616521573,
+      "average": 0.04240416419979771,
+      "new": 0.024188948715919343
     }
   },
   "ensemble_diagnostics": {
     "formal_censored": {
       "n_candidates": 8192,
       "n_nonzero": 8192,
-      "ess": 156.70072738144714,
-      "ess_frac": 0.01912850676043056,
-      "max_weight": 0.017795531321543677,
-      "entropy_bits": 7.972558203635468,
+      "ess": 156.70066648599496,
+      "ess_frac": 0.01912849932690368,
+      "max_weight": 0.017795510086883362,
+      "entropy_bits": 7.972558001693333,
       "entropy_bits_if_uniform": 13.0
     },
     "formal_iid": {
       "n_candidates": 8192,
       "n_nonzero": 8192,
-      "ess": 153.52000226946816,
-      "ess_frac": 0.018740234652034688,
-      "max_weight": 0.018108768911911,
-      "entropy_bits": 7.940658465359671,
+      "ess": 153.519980216388,
+      "ess_frac": 0.0187402319600083,
+      "max_weight": 0.018108756417509426,
+      "entropy_bits": 7.940658405685896,
       "entropy_bits_if_uniform": 13.0
     },
     "informal_glue": {
       "n_candidates": 8192,
       "n_nonzero": 4786,
-      "ess": 4782.9101963652465,
-      "ess_frac": 0.583851342329742,
-      "max_weight": 0.00021992204694238986,
-      "entropy_bits": 12.224138452700037,
+      "ess": 4782.910196478075,
+      "ess_frac": 0.583851342343515,
+      "max_weight": 0.00021992204672639286,
+      "entropy_bits": 12.22413845271749,
       "entropy_bits_if_uniform": 13.0
     }
   },
@@ -193,76 +193,76 @@
   "crlb_agreement_claim": "the formal posterior spread is LOCALLY CONSISTENT with the Case-A CRLB. It is not a demonstration of frequentist efficiency: the CRLB bounds the variance of an unbiased estimator over repeated sampling, whereas the posterior SD here is the width from ONE noise realisation, and both use the same model, truth and error assumptions. Step 14 does the repeated-sampling test that efficiency and calibration actually require.",
   "cases": {
     "A: kw only": {
-      "condition_number": 214.74082883584597,
+      "condition_number": 214.740985390889,
       "eigenvalues": [
-        23906.310147118827,
-        5106.3381619906095,
-        111.32633825025187
+        23906.303283739766,
+        5106.341859369072,
+        111.32622512755806
       ],
       "coef": {
         "old": {
-          "crlb": 0.09473369006981404,
-          "crlb_over_prior": 0.25243625290677096,
+          "crlb": 0.09473373828904655,
+          "crlb_over_prior": 0.25243638139624885,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.01350909067881071,
-          "crlb_over_prior": 0.29248039274694104,
+          "crlb": 0.013509087998662104,
+          "crlb_over_prior": 0.29248033472002155,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.007955988481251095,
-          "crlb_over_prior": 0.2901089741886241,
+          "crlb": 0.007955984346052079,
+          "crlb_over_prior": 0.2901088234017863,
           "identifiable": true
         }
       }
     },
     "B: kw+kb": {
-      "condition_number": 100.52424968093337,
+      "condition_number": 100.524642538994,
       "eigenvalues": [
-        7733.5647993717375,
-        1978.2833601279872,
-        76.93233049655458
+        7733.585351870925,
+        1978.2728426244978,
+        76.93223429141794
       ],
       "coef": {
         "old": {
-          "crlb": 0.11314043489192105,
-          "crlb_over_prior": 0.3014845871126859,
+          "crlb": 0.11314050188148489,
+          "crlb_over_prior": 0.30148476561934456,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.024797172663785935,
-          "crlb_over_prior": 0.5368745367216914,
+          "crlb": 0.024797238383053234,
+          "crlb_over_prior": 0.5368759595855664,
           "identifiable": true
         },
         "new": {
-          "crlb": 0.01475038263104709,
-          "crlb_over_prior": 0.5378613083801064,
+          "crlb": 0.014750388759787942,
+          "crlb_over_prior": 0.5378615318599073,
           "identifiable": true
         }
       }
     },
     "C: kw+kb+6 offsets": {
-      "condition_number": 88.02508532226175,
+      "condition_number": 88.02553857729053,
       "eigenvalues": [
-        1392.9861604929897,
-        93.64865918973857,
-        15.82487714034286
+        1392.9880685926528,
+        93.64794159988553,
+        15.824817332637439
       ],
       "coef": {
         "old": {
-          "crlb": 0.25092776214681856,
-          "crlb_over_prior": 0.6686455893351512,
+          "crlb": 0.25092822947965293,
+          "crlb_over_prior": 0.6686468346339406,
           "identifiable": true
         },
         "average": {
-          "crlb": 0.10358119487077724,
-          "crlb_over_prior": 2.242598652810987,
+          "crlb": 0.10358159858626584,
+          "crlb_over_prior": 2.2426073935077127,
           "identifiable": false
         },
         "new": {
-          "crlb": 0.029898658619759835,
-          "crlb_over_prior": 1.0902314906859198,
+          "crlb": 0.029898683626109562,
+          "crlb_over_prior": 1.090232402523146,
           "identifiable": false
         }
       }
@@ -270,38 +270,38 @@
   },
   "crlbC_vs_sigma": {
     "0.05": {
-      "old": 0.12546388107340928,
-      "average": 0.05179059743538862,
-      "new": 0.014949329309879918
+      "old": 0.12546411473982647,
+      "average": 0.05179079929313292,
+      "new": 0.014949341813054781
     },
     "0.10": {
-      "old": 0.25092776214681856,
-      "average": 0.10358119487077724,
-      "new": 0.029898658619759835
+      "old": 0.25092822947965293,
+      "average": 0.10358159858626584,
+      "new": 0.029898683626109562
     },
     "0.15": {
-      "old": 0.3763916432202278,
-      "average": 0.15537179230616585,
-      "new": 0.044847987929639746
+      "old": 0.37639234421947937,
+      "average": 0.15537239787939874,
+      "new": 0.044848025439164343
     }
   },
   "kb_confounding": {
     "note": "jacobian_cosine_with_kb is a design collinearity; estimator_correlation_with_kb is how the estimates co-vary. They differ in sign and must not be interchanged: only the second is a parameter correlation.",
     "by_coef": {
       "old": {
-        "jacobian_cosine_with_kb": 0.3328115331825429,
-        "estimator_correlation_with_kb": -0.5467274369903502,
-        "crlb_inflation_when_kb_freed": 1.1942998822123592
+        "jacobian_cosine_with_kb": 0.3328122787748679,
+        "estimator_correlation_with_kb": -0.546727543545375,
+        "crlb_inflation_when_kb_freed": 1.1942999814519786
       },
       "average": {
-        "jacobian_cosine_with_kb": 0.769536789942605,
-        "estimator_correlation_with_kb": -0.8385767292746111,
-        "crlb_inflation_when_kb_freed": 1.8355915474518811
+        "jacobian_cosine_with_kb": 0.7695370126944336,
+        "estimator_correlation_with_kb": -0.8385777374706399,
+        "crlb_inflation_when_kb_freed": 1.8355967764447956
       },
       "new": {
-        "jacobian_cosine_with_kb": 0.8308584557275637,
-        "estimator_correlation_with_kb": -0.8420656430697129,
-        "crlb_inflation_when_kb_freed": 1.8539974845121399
+        "jacobian_cosine_with_kb": 0.8308580635994902,
+        "estimator_correlation_with_kb": -0.8420659661913067,
+        "crlb_inflation_when_kb_freed": 1.8539992184760123
       }
     }
   }

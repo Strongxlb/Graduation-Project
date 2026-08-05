@@ -9,25 +9,25 @@
   },
   "coef": {
     "old": {
-      "crlb_indep": 0.09473372250795364,
-      "crlb_ar1": 0.1406393768585147,
-      "widening": 1.4845756414428548,
-      "crlb_over_prior_indep": 0.25243633934447235,
-      "crlb_over_prior_ar1": 0.3747608404058062
+      "crlb_indep": 0.09473378211259842,
+      "crlb_ar1": 0.14063942574506702,
+      "widening": 1.4845752234182543,
+      "crlb_over_prior_indep": 0.25243649817258484,
+      "crlb_over_prior_ar1": 0.3747609706734869
     },
     "average": {
-      "crlb_indep": 0.013509086333215237,
-      "crlb_ar1": 0.020075859017747343,
-      "widening": 1.4861004306698498,
-      "crlb_over_prior_indep": 0.2924802986620392,
-      "crlb_over_prior_ar1": 0.43465509780410266
+      "crlb_indep": 0.013509088195860386,
+      "crlb_ar1": 0.02007585351072537,
+      "widening": 1.486099818111873,
+      "crlb_over_prior_indep": 0.2924803389894896,
+      "crlb_over_prior_ar1": 0.43465497857357943
     },
     "new": {
-      "crlb_indep": 0.007955987006425858,
-      "crlb_ar1": 0.011436616343311255,
-      "widening": 1.4374855481883237,
-      "crlb_over_prior_indep": 0.29010892041026104,
-      "crlb_over_prior_ar1": 0.4170273804902669
+      "crlb_indep": 0.007955984212458134,
+      "crlb_ar1": 0.011436611998917958,
+      "widening": 1.4374855069482881,
+      "crlb_over_prior_indep": 0.2901088185303863,
+      "crlb_over_prior_ar1": 0.4170272220753213
     }
   },
   "rho_sweep": [
@@ -37,19 +37,19 @@
       "ess_factor": 1.0,
       "coef": {
         "old": {
-          "crlb": 0.09473369006981414,
-          "widening_vs_indep": 0.999999657586141,
-          "crlb_over_prior": 0.25243625290677124
+          "crlb": 0.0947337382890466,
+          "widening_vs_indep": 0.9999995374031223,
+          "crlb_over_prior": 0.25243638139624897
         },
         "average": {
-          "crlb": 0.013509090678810717,
-          "widening_vs_indep": 1.0000003216794513,
-          "crlb_over_prior": 0.29248039274694115
+          "crlb": 0.013509087998662104,
+          "widening_vs_indep": 0.9999999854025469,
+          "crlb_over_prior": 0.29248033472002155
         },
         "new": {
-          "crlb": 0.007955988481251109,
-          "widening_vs_indep": 1.0000001853730092,
-          "crlb_over_prior": 0.2901089741886246
+          "crlb": 0.007955984346052084,
+          "widening_vs_indep": 1.000000016791631,
+          "crlb_over_prior": 0.29010882340178645
         }
       }
     },
@@ -59,19 +59,19 @@
       "ess_factor": 1.224744871391589,
       "coef": {
         "old": {
-          "crlb": 0.11504325164046392,
-          "widening_vs_indep": 1.2143854225806985,
-          "crlb_over_prior": 0.3065550106295617
+          "crlb": 0.11504330415527149,
+          "widening_vs_indep": 1.2143852128539916,
+          "crlb_over_prior": 0.3065551505654307
         },
         "average": {
-          "crlb": 0.016388006711527608,
-          "widening_vs_indep": 1.213109925223727,
-          "crlb_over_prior": 0.35481075323931965
+          "crlb": 0.016388002892100084,
+          "widening_vs_indep": 1.2131094752288232,
+          "crlb_over_prior": 0.35481067054628807
         },
         "new": {
-          "crlb": 0.009550177949598192,
-          "widening_vs_indep": 1.2003762627923782,
-          "crlb_over_prior": 0.34823986168480064
+          "crlb": 0.009550173363124864,
+          "widening_vs_indep": 1.2003761078573305,
+          "crlb_over_prior": 0.3482396944425937
         }
       }
     },
@@ -81,19 +81,19 @@
       "ess_factor": 1.5275252316519468,
       "coef": {
         "old": {
-          "crlb": 0.1406393768585147,
-          "widening_vs_indep": 1.4845756414428548,
-          "crlb_over_prior": 0.3747608404058062
+          "crlb": 0.14063942574506702,
+          "widening_vs_indep": 1.4845752234182543,
+          "crlb_over_prior": 0.3747609706734869
         },
         "average": {
-          "crlb": 0.020075859017747343,
-          "widening_vs_indep": 1.4861004306698498,
-          "crlb_over_prior": 0.43465509780410266
+          "crlb": 0.02007585351072537,
+          "widening_vs_indep": 1.486099818111873,
+          "crlb_over_prior": 0.43465497857357943
         },
         "new": {
-          "crlb": 0.011436616343311255,
-          "widening_vs_indep": 1.4374855481883237,
-          "crlb_over_prior": 0.4170273804902669
+          "crlb": 0.011436611998917958,
+          "widening_vs_indep": 1.4374855069482881,
+          "crlb_over_prior": 0.4170272220753213
         }
       }
     },
@@ -103,19 +103,19 @@
       "ess_factor": 2.0,
       "coef": {
         "old": {
-          "crlb": 0.1736497295939842,
-          "widening_vs_indep": 1.8330297279240233,
-          "crlb_over_prior": 0.4627233144267346
+          "crlb": 0.17364974698146457,
+          "widening_vs_indep": 1.833028758157976,
+          "crlb_over_prior": 0.4627233607590414
         },
         "average": {
-          "crlb": 0.02523829567870283,
-          "widening_vs_indep": 1.8682459387833357,
-          "crlb_over_prior": 0.5464251301494918
+          "crlb": 0.025238287612643056,
+          "widening_vs_indep": 1.8682450841039642,
+          "crlb_over_prior": 0.5464249555141749
         },
         "new": {
-          "crlb": 0.013545832488232499,
-          "widening_vs_indep": 1.7025961049574188,
-          "crlb_over_prior": 0.49393831790391224
+          "crlb": 0.013545831004073871,
+          "widening_vs_indep": 1.7025965163257484,
+          "crlb_over_prior": 0.4939382637852144
         }
       }
     },
@@ -125,19 +125,19 @@
       "ess_factor": 3.0000000000000004,
       "coef": {
         "old": {
-          "crlb": 0.20221297447697512,
-          "widening_vs_indep": 2.1345405746089807,
-          "crlb_over_prior": 0.5388356088365377
+          "crlb": 0.20221288343149124,
+          "widening_vs_indep": 2.134538270531051,
+          "crlb_over_prior": 0.538835366228224
         },
         "average": {
-          "crlb": 0.033346221661840904,
-          "widening_vs_indep": 2.4684290883426696,
-          "crlb_over_prior": 0.721966876984529
+          "crlb": 0.03334620835069395,
+          "widening_vs_indep": 2.468427762645912,
+          "crlb_over_prior": 0.7219665887897436
         },
         "new": {
-          "crlb": 0.014458796778121237,
-          "widening_vs_indep": 1.8173479627911933,
-          "crlb_over_prior": 0.5272288554951404
+          "crlb": 0.014458805612616216,
+          "widening_vs_indep": 1.8173497114254489,
+          "crlb_over_prior": 0.5272291776381755
         }
       }
     }
