@@ -25,9 +25,10 @@ number below).** Every concentration in this log is in **mg/L**, and that is now
 merely written. WNTR's Python API stores concentration internally in **kg/m³** whatever
 `options.quality.inpfile_units` says, so the conversion happens at the model boundary in
 `wq_common.build_model` (in) and `run_model` / `simulate_chlorine` (out), and nowhere else — which is
-why no step script carries a factor of 1000. EPANET's absolute quality tolerance scales with the
-unit (`QUALITY_TOLERANCE = 1e-5 kg/m³`), because a tolerance only means something next to the unit
-it is measured in. **Before Step 15 the same numbers were kg/m³ read as mg/L, i.e. 1000× too high**;
+why no step script carries a factor of 1000. Alongside it the solver runs at a **deliberately
+strict tolerance, `QUALITY_TOLERANCE = 1e-5 mg/L`** — note the unit: unlike concentrations this one
+is *not* converted, EPANET receives it verbatim in the file's quality unit, and it is 1000× stricter
+than EPANET's own 0.01 mg/L default. It is a chosen setting, not a converted one (§15.2). **Before Step 15 the same numbers were kg/m³ read as mg/L, i.e. 1000× too high**;
 Step 15 documents what that did and did not change, and measures it.
 
 **Naming the ensembles.** A weighting rule and the ensemble it produces are different things, and
@@ -2652,7 +2653,9 @@ conversion, which was documented in the inherited material and correct from the 
 it: under first-order kinetics the analytic check is a ratio, so it passes on either scale. This arm
 therefore pins the unit against `wntr.epanet.util.to_si` / `from_si` rather than against our belief
 about them — `to_si(1.0 mg/L) = 0.001 kg/m³`, `from_si(1.0 kg/m³) = 1000 mg/L`, the helpers in
-`wq_common` agree with both, and `QUALITY_TOLERANCE` is 1e-5 of a 1 mg/L source. A first-order
+`wq_common` agree with both. Arm 5 then reads the written `.inp` back and pins the asymmetry the
+description keeps drifting on: the source is written **converted** (`0.001 kg/m³ → River 1.0`) while
+`TOLERANCE` is written **verbatim** (`1e-05`), so EPANET reads the tolerance in mg/L. A first-order
 coefficient carries no mass unit, which is why arms 1–3 were unaffected by the error arm 4 exists to
 prevent.
 
@@ -2764,17 +2767,42 @@ operational threshold" 200 mg/L. After the fix the same probe shows `River 1.0`,
    concentrations themselves — where, under first order, it has no symptom. The one place the factor
    was visible is the one place it was patched.
 
-**The trap inside the fix.** EPANET's water-quality tolerance is an **absolute** concentration. At
-the old scale `0.01` was 1e-5 of the source; at the corrected scale it would be 1e-2 of it.
-Correcting the units alone would therefore not relabel the experiment, it would coarsen it by three
-orders of magnitude. `wq_common.QUALITY_TOLERANCE` scales with the unit for exactly this reason.
+### 15.2 The tolerance is a second, separate change — state it as one
+
+The fix has two parts and they are **not the same kind of change**, which an earlier version of this
+section got wrong by calling the second one a unit conversion.
+
+EPANET's water-quality `TOLERANCE` is an **absolute** concentration below which two water parcels
+are treated as identical. Unlike a concentration, WNTR does **not** convert it: `write_inpfile` puts
+`options.quality.tolerance` into the `.inp` verbatim and EPANET reads it in the file's declared
+quality unit. Reading the written file back (Step 13, arm 5) shows both behaviours side by side:
+
+```
+[OPTIONS]  QUALITY   Chlorine mg/L
+[OPTIONS]  TOLERANCE 1e-05          <- written verbatim  -> EPANET reads 1e-5 MG/L
+[QUALITY]  River     1.0            <- written converted from 0.001 kg/m^3
+```
+
+So `QUALITY_TOLERANCE = 1e-5` is **1e-5 mg/L**, and calling it "1e-5 kg/m³" or "0.01 mg/L expressed
+internally" is wrong on both counts. It is **1000× stricter than EPANET's 0.01 mg/L default**, and
+that is an active numerical choice which has to be declared as one.
+
+**Why this value was chosen.** The superseded configuration ran the 0.01 default against a
+1000 mg/L source — a tolerance/source ratio of 1e-5. Correcting the concentrations while leaving
+0.01 in place would have left 0.01 against 1 mg/L, a ratio of 1e-2: a solver three orders of
+magnitude coarser than the one every earlier result was computed on. Holding the *ratio* fixed is
+what lets Step 15 compare the corrected and superseded runs as the same numerical experiment and
+attribute their agreement to the units alone. A stricter tolerance is very likely also *more*
+accurate — it resolves the Lagrangian transport more finely — but that is not the argument being
+made here, and this log does not claim it: the argument is **comparability**, and the cost is
+runtime.
 
 **Formula** — the conversion, applied at the model boundary and nowhere else:
 
 ```
 internal (WNTR/EPANET)  =  reported (mg/L) / 1000        build_model, on the way in
 reported (mg/L)         =  internal × 1000              run_model / simulate_chlorine, on the way out
-QUALITY_TOLERANCE       =  0.01 / 1000  =  1e-5 kg/m³   holds the tolerance/source ratio fixed
+QUALITY_TOLERANCE       =  1e-5 mg/L (chosen, not converted; EPANET default 0.01 mg/L)
 ```
 
 **Properties**:
@@ -2826,8 +2854,18 @@ accuracy, the operational threshold, the dosing evaluation — was **not** suppo
 **is** supported now.
 
 **Guarded against return.** `step13` arm 4 pins the concentration unit against WNTR's own
-`to_si`/`from_si` rather than against our belief about them, and the unit convention and the
-tolerance are now part of the provenance config hash, so a cache built under a different convention
-can no longer be mistaken for this one.
+`to_si`/`from_si` rather than against our belief about them, and **arm 5 reads the written `.inp`
+back** and asserts the asymmetry that the prose of this section originally got wrong: the source is
+written converted (`1.0` mg/L from `0.001` kg/m³) while `TOLERANCE` is written verbatim (`1e-05`,
+read by EPANET as mg/L). The unit convention and the tolerance are also part of the provenance
+config hash, so a cache built under a different convention can no longer be mistaken for this one.
+
+**One label is still wrong and is deliberately left for the release re-run.** The hashed config
+records the tolerance under the key `quality_tolerance_kg_m3`; the *value* (`1e-5`) is correct and
+is what every result was computed with, but the unit in the key name is not — it is mg/L. Renaming
+it changes `config_sha256` (`c97826ac…` → `607f2034…`), which invalidates all six keyed array caches
+and forces a full pipeline re-run for a change that alters no number. It is therefore bundled with
+the clean-tree release re-run rather than done separately, and recorded here so the discrepancy is
+not silent.
 
 Outputs: `baseline_cache/step15_unit_equivalence.json`.

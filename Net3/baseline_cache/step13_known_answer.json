@@ -98,8 +98,17 @@
     "note": "WNTR stores concentration in kg/m^3 whatever inpfile_units says; checked against WNTR's own to_si/from_si, not against our assumption about them",
     "wntr_to_si_of_1_mg_L": 0.001,
     "wntr_from_si_of_1_kg_m3": 1000.0,
-    "quality_tolerance_kg_m3": 1e-05,
-    "tolerance_relative_to_1_mg_L_source": 0.01
+    "quality_tolerance_mg_L": 1e-05,
+    "tolerance_relative_to_1_mg_L_source": 1e-05
+  },
+  "epanet_input_arm": {
+    "pass": true,
+    "note": "read off the .inp WNTR actually writes. Concentrations are converted on write, the solver tolerance is not: EPANET receives TOLERANCE in the file's quality unit, so QUALITY_TOLERANCE is mg/L, not kg/m^3, and it is a chosen setting 1000x stricter than the EPANET default rather than a converted one",
+    "inp_quality_unit": "mg/L",
+    "inp_source_quality": 1.0,
+    "inp_tolerance": 1e-05,
+    "epanet_default_tolerance_mg_L": 0.01,
+    "tolerance_over_source": 1e-05
   },
   "all_pass": true
 }

@@ -168,12 +168,41 @@ conc_ok = (abs(si_of_1mgl - 0.001) < 1e-12
            and abs(B.internal_to_mgl(0.001) - 1.0) < 1e-12
            and abs(B.QUALITY_TOLERANCE - 1e-5) < 1e-18)
 print(f"arm 4 — WNTR to_si(1.0 mg/L) = {si_of_1mgl:.6g} kg/m3; from_si(1.0 kg/m3) = "
-      f"{mgl_of_1si:.6g} mg/L; helpers agree; tolerance {B.QUALITY_TOLERANCE:.1e} kg/m3 "
-      f"(= 1e-5 of a 1 mg/L source) -> {'PASS' if conc_ok else 'FAIL'}")
+      f"{mgl_of_1si:.6g} mg/L; helpers agree -> {'PASS' if conc_ok else 'FAIL'}")
 print("A first-order coefficient carries no mass unit (k_b is 1/time, k_w is length/time), so this")
 print("factor never touched them; it touched every concentration, which is why it was invisible.\n")
 
-all_ok = bulk_ok and monotone and kw0_matches_bulk and bounded and conv_ok and conc_ok
+# ---------------- arm 5: what actually reaches EPANET, read off the written .inp ----------------
+# Concentrations and the solver tolerance are NOT treated alike, and the difference is easy to state
+# backwards: WNTR converts concentration on write (kg/m^3 -> the file's mass unit) but writes
+# options.quality.tolerance verbatim. So a 0.001 kg/m^3 source appears as `1.0` mg/L while
+# QUALITY_TOLERANCE = 1e-5 appears as `TOLERANCE 1e-05` and is read by EPANET as 1e-5 MG/L -- 1000x
+# stricter than its 0.01 default. That is a chosen setting, not a converted one, and asserting it
+# here is what stops the description drifting back to "the tolerance was converted".
+import re as _re
+import tempfile as _tempfile
+_wn = B.build_model(B.KB_FIXED, 0.0)
+_d = _tempfile.mkdtemp()
+_f = os.path.join(_d, "arm5.inp")
+wntr.network.io.write_inpfile(_wn, _f)
+_txt = open(_f).read()
+_opts = _re.search(r"\[OPTIONS\](.*?)\[", _txt, _re.S).group(1)
+_tol_inp = float(_re.search(r"(?im)^\s*TOLERANCE\s+([0-9.eE+-]+)", _opts).group(1))
+_qual_unit = _re.search(r"(?im)^\s*QUALITY\s+\S+\s+(\S+)", _opts).group(1)
+_qsec = _re.search(r"\[QUALITY\](.*?)\[", _txt, _re.S).group(1)
+_src_inp = float(_re.search(r"(?im)^\s*River\s+([0-9.eE+-]+)", _qsec).group(1))
+inp_ok = (abs(_tol_inp - B.QUALITY_TOLERANCE) < 1e-18          # written verbatim, NOT converted
+          and abs(_src_inp - B.INLET_CHLORINE_MGL) < 1e-9      # written converted, in mg/L
+          and _qual_unit.lower() == "mg/l")
+print(f"arm 5 — written .inp: QUALITY unit {_qual_unit}, source River {_src_inp:g} (converted from "
+      f"{B.mgl_to_internal(B.INLET_CHLORINE_MGL):g} kg/m3), TOLERANCE {_tol_inp:g} (verbatim, so "
+      f"EPANET reads it as {_tol_inp:g} mg/L = {_tol_inp / B.INLET_CHLORINE_MGL:.0e} of the source, "
+      f"vs the 0.01 mg/L EPANET default) -> {'PASS' if inp_ok else 'FAIL'}")
+print("The strict tolerance is a CHOSEN setting that holds the tolerance/source ratio of the")
+print("superseded run fixed, so step15 compares like with like. It is not a unit conversion.\n")
+
+all_ok = (bulk_ok and monotone and kw0_matches_bulk and bounded and conv_ok and conc_ok
+          and inp_ok)
 report = {
     "purpose": "Priority-2 #7 known-answer test: confirm coefficients are realised as intended",
     "geometry": {"length_m": LENGTH_M, "diameter_m": DIAM_M, "demand_m3_s": DEMAND_M3S,
@@ -195,8 +224,20 @@ report = {
                 "WNTR's own to_si/from_si, not against our assumption about them",
         "wntr_to_si_of_1_mg_L": float(si_of_1mgl),
         "wntr_from_si_of_1_kg_m3": float(mgl_of_1si),
-        "quality_tolerance_kg_m3": float(B.QUALITY_TOLERANCE),
-        "tolerance_relative_to_1_mg_L_source": float(B.QUALITY_TOLERANCE * B.MG_L_PER_KG_M3)},
+        "quality_tolerance_mg_L": float(B.QUALITY_TOLERANCE),
+        "tolerance_relative_to_1_mg_L_source":
+            float(B.QUALITY_TOLERANCE / B.INLET_CHLORINE_MGL)},
+    "epanet_input_arm": {
+        "pass": bool(inp_ok),
+        "note": "read off the .inp WNTR actually writes. Concentrations are converted on write, the "
+                "solver tolerance is not: EPANET receives TOLERANCE in the file's quality unit, so "
+                "QUALITY_TOLERANCE is mg/L, not kg/m^3, and it is a chosen setting 1000x stricter "
+                "than the EPANET default rather than a converted one",
+        "inp_quality_unit": _qual_unit,
+        "inp_source_quality": float(_src_inp),
+        "inp_tolerance": float(_tol_inp),
+        "epanet_default_tolerance_mg_L": 0.01,
+        "tolerance_over_source": float(_tol_inp / B.INLET_CHLORINE_MGL)},
     "all_pass": bool(all_ok),
 }
 with open(os.path.join(OUT, "step13_known_answer.json"), "w") as f:

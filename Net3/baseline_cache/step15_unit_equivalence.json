@@ -3,11 +3,12 @@
   "n_candidates": 256,
   "arms": {
     "legacy": "initial_quality assigned raw (superseded), tolerance 0.01; its output is what the pre-correction cache stored and the log quoted as mg/L",
-    "corrected": "current configuration: mg/L -> kg/m^3 on the way in, kg/m^3 -> mg/L on the way out, tolerance 1e-05 kg/m^3",
-    "units_only": "units corrected but tolerance left at 0.01 \u2014 the fix done wrong, kept as the counterfactual"
+    "corrected": "current configuration: mg/L -> kg/m^3 on the way in, kg/m^3 -> mg/L on the way out, plus the CHOSEN strict tolerance 1e-05 mg/L (written verbatim to the .inp; EPANET's default is 0.01 mg/L)",
+    "units_only": "units corrected but tolerance left at the 0.01 mg/L default \u2014 the units fixed and the numerical resolution coarsened 1000x, kept as the counterfactual"
   },
-  "legacy_tolerance": 0.01,
-  "corrected_tolerance_kg_m3": 1e-05,
+  "legacy_tolerance_mg_L": 0.01,
+  "corrected_tolerance_mg_L": 1e-05,
+  "tolerance_note": "EPANET's TOLERANCE is written to the .inp verbatim and read in the file's quality unit, so both numbers are mg/L. 1e-5 mg/L is 1000x stricter than EPANET's 0.01 default: a chosen setting that holds the tolerance/source ratio of the superseded run fixed, NOT a unit conversion",
   "C_MIN_mg_L": 0.2,
   "comparisons": {
     "corrected_vs_legacy": {

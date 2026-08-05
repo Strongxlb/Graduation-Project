@@ -370,12 +370,23 @@ def internal_to_mgl(v):
     return v * MG_L_PER_KG_M3
 
 
-# EPANET's water-quality tolerance is an ABSOLUTE concentration below which differences are ignored.
-# It therefore has to be scaled with the concentration unit or the correction above would silently
-# coarsen the solution: at the old (1000x too high) scale, 0.01 was 1e-5 of the source; at the
-# correct scale it would be 1e-2 of it. Holding the RATIO fixed keeps the numerics identical, which
-# is what makes the unit fix a relabelling rather than a change of result.
-QUALITY_TOLERANCE = mgl_to_internal(0.01)      # = 1e-5 kg/m^3, i.e. 1e-5 of a 1 mg/L source
+# A DELIBERATELY STRICT SOLVER TOLERANCE, in mg/L. Read the unit twice: unlike concentrations, this
+# number is NOT converted. WNTR writes options.quality.tolerance into the .inp verbatim, and EPANET
+# reads it in the file's own quality unit, so the .inp receives `TOLERANCE 1e-05` and EPANET treats
+# it as 1e-5 MG/L -- a thousand times stricter than its 0.01 mg/L default. Verified by writing the
+# .inp and reading the [OPTIONS] block back; the same probe shows a 0.001 kg/m^3 source coming out
+# as `River 1.0`, i.e. concentrations converted, tolerance not.
+#
+# WHY THIS VALUE. The tolerance is an ABSOLUTE concentration below which EPANET treats two water
+# parcels as identical, so what it means depends entirely on the concentration scale beside it. The
+# superseded 1000x-too-high configuration ran the EPANET default 0.01 against a 1000 mg/L source, a
+# ratio of 1e-5. Correcting the concentrations while leaving 0.01 in place would have left 0.01
+# against 1 mg/L -- a ratio of 1e-2, i.e. a solver a thousand times coarser than every result
+# published before it. 1e-5 mg/L holds the ratio fixed, which is what lets step15 compare the
+# corrected and superseded runs as the SAME numerical experiment and attribute their agreement
+# (2.3e-07) to the units alone. That is a choice made for comparability, not a unit conversion, and
+# it is not the EPANET default -- state it as a chosen setting wherever the numerics are described.
+QUALITY_TOLERANCE = 1e-5      # mg/L, as EPANET receives it; 1e-5 of a 1 mg/L source
 
 
 def build_model(kb_per_day, kw_per_day, inp_file=NET3_INP, inlet_mgl=INLET_CHLORINE_MGL,
