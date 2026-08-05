@@ -200,6 +200,17 @@ CLAIMS = [
      "step12_scenarios.json", "severity_axis/risk_band_agreement_consumers/severity band lower", 1),
     ("RESULTS_LOG.md", r"in a lower one, ([0-9]+) in a higher one",
      "step12_scenarios.json", "severity_axis/risk_band_agreement_consumers/severity band higher", 1),
+    # --- Step 12's severity axis: the three statements an audit found overstated, each pinned to
+    # the artifact so the wording cannot drift back. Both the "0 inversions" count and the margin
+    # behind it are registered, because the count alone reads as a guarantee.
+    ("RESULTS_LOG.md", r"the nearest is \*\*([0-9.]+) h\*\*",
+     "step12_scenarios.json",
+     "severity_axis/observed_ordering/min_hours_of_E_duration_to_first_inversion", 1),
+    ("RESULTS_LOG.md", r"bound permits an inversion of ([0-9]+) band",
+     "step12_scenarios.json",
+     "severity_axis/ordering_is_not_guaranteed/max_inversion_permitted_by_the_bound", 1),
+    ("RESULTS_LOG.md", r"depth spans a factor of ([0-9.]+)",
+     "step12_scenarios.json", "severity_axis/depth_spread_over_movers/ratio", 1),
     # --- Step 15b: the whole-repository regression. Registered because these three counts are
     # exactly the ones that were quoted for a year without an artifact behind them.
     ("RESULTS_LOG.md", r"\*\*26 artifacts, ([0-9]+) numeric fields\*\*",

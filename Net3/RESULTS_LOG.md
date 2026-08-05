@@ -2461,9 +2461,10 @@ L/s; the frozen `Net3.inp` itself declares `Units GPM` — the conversion is fro
 value, not from the file's units). `d` is the **pattern-aware average expected demand**
 (`wntr.metrics.hydraulic.average_expected_demand`), not the `base_demand` field: four Net3
 junctions encode a large demand as 1 GPM times a large pattern, and reading the base value alone
-would put them in the *minor* band while they carry 70 % of the network's water. The risk score is
-`likelihood score × consequence score` (range `0–15`), mapped as `0 → not applicable`,
-`1–3 → low`, `4–6 → medium`, `7–9 → high`, `≥10 → very high`.
+would put them in the *minor* band while they carry 70 % of the network's water. The breach risk
+score is `likelihood score × consequence score` (range `0–15`), mapped as `0 → not applicable`,
+`1–3 → low`, `4–6 → medium`, `7–9 → high`, `≥10 → very high`. §12.5.1 adds a second product on the
+same consequence axis and a declared rule for which one drives the control measure.
 
 **What this score is, and what it is not.** Its likelihood axis is `P_min` — the probability of *any*
 breach in the 48 h window — so this product scores **whether a node breaches at all, weighted by how
@@ -2497,50 +2498,126 @@ an operational meaning that a `mg/L·h` integral does not. And because `E[D]` al
 long shallow excursion from a short deep one, the register also carries
 `E_depth_while_below_mgL = E[A]/E[D]`, the mean depth below the threshold while below it.
 
-**The two axes are not independent, and the direction of disagreement is constrained.** Since
-`D_i ≤ T_window · 1[member i breaches]`, taking weighted expectations gives
+**The two axes are not independent — but the constraint is weaker than it looks, and an earlier
+version of this section overstated it.** Since `D_i ≤ T_window · 1[member i breaches]`, taking
+weighted expectations gives
 
 ```
 E[D] ≤ T_window · P_min        equivalently   P_bar ≤ P_min
 ```
 
-so a high severity score cannot occur at a low breach probability, while the converse is entirely
-possible. Verified on the register: **0 of 92 junctions violate it**, and the tightest node reaches
-`E[D] / (T_window · P_min) = 0.97`. Disagreement between the two products should therefore be
-expected to be **one-sided**, and observing that is not a discovery.
+Verified on the register: **0 of 92 junctions violate it**, and the tightest node reaches
+`E[D] / (T_window · P_min) = 0.97`.
+
+This section previously read that as "the severity score can therefore never exceed the likelihood
+score, so the disagreement is necessarily one-sided". **That is wrong.** The inequality constrains
+the *continuous* quantities; the two scores are banded on **different and unaligned scales**, so the
+bound restricts an inversion without forbidding it. A counterexample inside the bound:
+
+```
+P_min = 0.03,  E[D] = 1.2 h        1.2 ≤ 48 × 0.03 = 1.44  ✓ satisfies the bound
+                                   likelihood band 1 (P < 0.05)
+                                   severity band   2 (E[D] ≥ 1 h)      -> severity is HIGHER
+```
+
+What the bound does buy is a **limit on the size** of an inversion, derived in the code from the
+edges themselves rather than asserted, so it stays true if either scale is ever changed:
+
+
+| likelihood band | sup `P_min` | ⇒ sup `E[D]` | max reachable severity band | max inversion |
+| --------------- | ----------- | ------------ | --------------------------- | ------------- |
+| 1               | 0.05        | 2.4 h        | 2                           | **+1**        |
+| 2               | 0.20        | 9.6 h        | 3                           | **+1**        |
+| 3               | 0.50        | 24.0 h       | 4                           | **+1**        |
+| 4               | 0.80        | 38.4 h       | 5                           | **+1**        |
+| 5               | 1.00        | 48.0 h       | 5                           | 0             |
+
+
+So severity can exceed likelihood by **at most one band**, and cannot exceed it at all once
+`P_min ≥ 0.80`. Everything below about the observed direction of disagreement is therefore an
+**empirical** statement about this field, not a consequence of the inequality.
+
+**And it is empirically close.** Measuring, for every consumer junction, how much more `E[D]` it
+would need before its severity score overtook its likelihood score: the nearest is **0.939 h** away
+— under an hour of additional below-threshold time in a 48 h window. Seventeen of the 59 consumers
+sit at a `P_min` high enough that they can never invert, but the rest are not protected by anything
+structural. "No inversions here" is a fact about this field with roughly an hour of margin, and it
+should never have been written as a theorem.
+
+**Why the duration edges are not aligned to the probability edges.** Setting them to
+`2.4 / 9.6 / 24 / 38.4 h` — the probability edges times the window — would make the ordering
+guaranteed. It is rejected for two reasons. It destroys the operational meaning of the severity
+bands, which was the entire argument for choosing `E[D]` over `E[A]`; and it would make the ordering
+a property of the *scales* rather than a finding about the network. A second axis that cannot
+disagree in one direction by construction is a weaker instrument, and "severity never exceeds
+breach" would then be a tautology rather than a result.
 
 **Result (scenario A, the 59 consumer junctions).** Severity bands: negligible 42, brief 1,
 sustained 6, prolonged 9, persistent 1. Against the breach product: **49 in the same risk band, 10
 in a lower one, 0 in a higher one.**
 
-All ten movers share a signature — `P_min = 1.000` (node 125: 0.998) with `E[D]` of 2.0–17.9 h and a
-mean depth of only **0.025–0.14 mg/L** below the threshold:
+What the ten share is the *probability* and the *duration*: `P_min = 1.000` (node 125: 0.998) with
+`E[D]` of 2.0–17.9 h out of 48. What they do **not** share is depth, and an earlier version of this
+section wrongly flattened them into "marginally below". Sorted by depth:
 
 
-| node | `P_min` | `E[D]` (h) | depth while below (mg/L) | demand (L/s) | breach band | severity band |
-| ---- | ------- | ---------- | ------------------------ | ------------ | ----------- | ------------- |
-| 247  | 1.000   | 2.00       | 0.0899                   | 4.75         | very high   | medium        |
-| 253  | 1.000   | 8.00       | 0.0947                   | 3.68         | very high   | medium        |
-| 255  | 1.000   | 8.00       | 0.0880                   | 2.73         | very high   | medium        |
-| 149  | 1.000   | 6.04       | 0.0487                   | 1.83         | very high   | medium        |
-| 151  | 1.000   | 7.48       | 0.0423                   | 9.75         | very high   | high          |
-| 153  | 1.000   | 17.89      | 0.0367                   | 2.98         | very high   | high          |
-| 125  | 0.998   | 17.12      | 0.0254                   | 3.08         | very high   | high          |
-| 145  | 1.000   | 12.02      | 0.1400                   | 1.86         | very high   | high          |
-| 147  | 1.000   | 7.45       | 0.0793                   | 0.58         | medium      | low           |
-| 251  | 1.000   | 6.00       | 0.0954                   | 1.63         | medium      | low           |
+| node | `P_min` | `E[D]` (h) | depth while below (mg/L) | mean C while below | `E[A]` (mg/L·h) | demand (L/s) | breach band | severity band |
+| ---- | ------- | ---------- | ------------------------ | ------------------ | --------------- | ------------ | ----------- | ------------- |
+| 145  | 1.000   | 12.02      | **0.1400**               | **0.0600**         | **1.6826**      | 1.86         | very high   | high          |
+| 251  | 1.000   | 6.00       | 0.0954                   | 0.1046             | 0.5727          | 1.63         | medium      | low           |
+| 253  | 1.000   | 8.00       | 0.0947                   | 0.1053             | 0.7577          | 3.68         | very high   | medium        |
+| 247  | 1.000   | 2.00       | 0.0899                   | 0.1101             | 0.1799          | 4.75         | very high   | medium        |
+| 255  | 1.000   | 8.00       | 0.0880                   | 0.1120             | 0.7039          | 2.73         | very high   | medium        |
+| 147  | 1.000   | 7.45       | 0.0793                   | 0.1207             | 0.5906          | 0.58         | medium      | low           |
+| 149  | 1.000   | 6.04       | 0.0487                   | 0.1513             | 0.2942          | 1.83         | very high   | medium        |
+| 151  | 1.000   | 7.48       | 0.0423                   | 0.1577             | 0.3164          | 9.75         | very high   | high          |
+| 153  | 1.000   | 17.89      | 0.0367                   | 0.1633             | 0.6567          | 2.98         | very high   | high          |
+| 125  | 0.998   | 17.12      | 0.0254                   | 0.1746             | 0.4343          | 3.08         | very high   | high          |
 
 
-These are junctions that go below 0.2 mg/L **with certainty but marginally** — reliably, briefly and
-shallowly. On the breach product they are indistinguishable from node 131, which is below the
-threshold for **46.6 of 48 h**; on the severity product they are two bands apart.
+**The depth spans a factor of 5.51 and must not be summarised as "shallow".** At one end node 125
+averages `0.1746 mg/L` while below — genuinely marginal. At the other, **node 145 averages
+`0.0600 mg/L`, less than a third of the threshold**, whenever it is under it. Calling both
+"marginally below" is exactly the flattening the severity axis was introduced to stop, committed one
+level down.
 
-**How to read the pair.** In this network the breach product never *under*-states severity and
+**And the severity band hides it.** Nodes 125, 145 and 153 are all *prolonged* (`E[D]` 12–24 h), yet
+their cumulative deficits are `0.4343`, `1.6826` and `0.6567 mg/L·h` — a factor of **3.9 inside a
+single band**. This is `E[D]`'s blind spot, stated in §12.5.1 as a reason for the depth column and
+now demonstrated on real nodes: the band answers "for how long", and only the depth column answers
+"how far below". A severity band must never be read as a statement about magnitude on its own.
+
+So the honest summary of the ten is: they breach with near-certainty for a limited part of the
+window, and their mean breach depth varies materially, from `0.025` to `0.14 mg/L`. On the breach
+product they are indistinguishable from node 131, which is below the threshold for **46.6 of 48 h**;
+the severity product separates them on duration, and the depth column separates them again.
+
+**How to read the pair.** In this field the breach product never *under*-states severity and
 over-states it for 10 of 59 consumer junctions. Neither ordering is the correct one: `P_min` is the
 right axis for "is this node compliant", severity for "how much chlorine is missing and for how
-long", and the register reports both plus the shift (`band_shift_severity_minus_breach`) rather than
-picking one. This is the same lesson Step 8b reached from the other direction — a shortlist is not
+long". This is the same lesson Step 8b reached from the other direction — a shortlist is not
 meaningful without naming the metric that produced it — applied to the register itself.
+
+**But "neither is correct" has to be a rule, not a stance.** A register exists to drive an action,
+so if it emits one `control_measure` column while claiming to prefer neither axis, it has silently
+made the breach axis operational. An earlier version of this register did exactly that: it sorted on
+`risk_score_breach` and derived every control measure from the breach band alone. The rule is now
+pre-declared:
+
+```
+governing band  =  the HIGHER of (breach band, severity band)
+control_measure =  from the governing band
+```
+
+i.e. **neither axis alone may reduce an action**. The per-axis measures are emitted alongside it
+(`control_measure_breach`, `control_measure_severity`) so the reason stays visible, and the register
+sorts on `risk_score_governing`.
+
+**In this baseline field the rule currently coincides with the breach axis**, because the severity
+band never exceeds the breach band here — the governing band equals the breach band at all 92
+junctions. That coincidence is *measured and reported* (`currently_equivalent_to_the_breach_axis`),
+not assumed: the reachability table above shows the bound permits an inversion of 1 band, so the
+rule is not vacuous in general and would bind on a field where it occurred.
 
 **What it still is not.** Both products are conditioned on the calibrated ensemble and on scenario A;
 neither is a measurement. And the severity axis inherits `E[D]`'s own blind spot, which is why the
@@ -2597,14 +2674,20 @@ altering the assumed age profile; calibration record exceeding its approved age.
   `T_ref` and `α_g` are assumptions; unlike the Step-11 LOO check, these projections cannot be
    verified against held-out chlorine observations. Absolute severity metrics are additionally
    horizon-dependent (paired warm-up test, §12.4).
-6. **A breach-probability register and a severity register disagree, and the disagreement is
-   one-sided.** Scoring `E[D]` on pre-declared absolute bands against the same consequence axis
-   puts **10 of 59** consumer junctions in a *lower* risk band and **none** in a higher one; the
-   ten all breach with certainty (`P_min = 1.000`) but only for 2.0–17.9 h and only 0.025–0.14 mg/L
-   below the threshold. The one-sidedness is expected rather than discovered — `E[D] ≤ T_window ·
-   P_min` bounds severity by likelihood, verified with 0 violations across 92 junctions — but the
-   *size* of the gap is not, and it is what separates "certainly but marginally below" from node
-   131's 46.6 h. Both products are reported; neither is the correct one (§12.5.1).
+6. **A breach-probability register and a severity register disagree, and in this field the
+   disagreement runs one way.** Scoring `E[D]` on pre-declared absolute bands against the same
+   consequence axis puts **10 of 59** consumer junctions in a *lower* risk band and **none** in a
+   higher one; the ten all breach with certainty (`P_min = 1.000`) but only for 2.0–17.9 h and only
+   a mean depth that **varies materially, 0.025–0.14 mg/L** — node 125 averages 0.175 mg/L while
+   below and is genuinely marginal, node 145 averages 0.060 mg/L and is not. Within the single
+   *prolonged* band the cumulative deficit still spans a factor of 3.9, so a severity band is a
+   statement about duration and never about magnitude. The direction of disagreement is
+   **empirical, not implied**: `E[D] ≤ T_window · P_min` holds (0 violations across 92 junctions)
+   but bounds the continuous quantities, not the banded scores, whose scales are not aligned — it
+   permits an inversion of one band, forbids one only once `P_min ≥ 0.80`, and the nearest consumer
+   junction is **0.939 h** of `E[D]` from inverting. Because neither product is the correct one, the register acts on the
+   **higher** of the two bands, a pre-declared rule that currently coincides with the breach axis
+   here and is reported as coinciding rather than assumed to (§12.5.1).
 
 Outputs: `figures/step12_scenario_maps.png`, `figures/step12_ageing_delta.png`,
 `figures/step12_summary.png`, `baseline_cache/step12_scenarios.json`,

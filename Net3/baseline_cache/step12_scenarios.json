@@ -190,7 +190,9 @@
         "node": "149",
         "P_min": 1.0,
         "E_duration_h": 6.04,
+        "E_deficit_mgL_h": 0.2942,
         "E_depth_while_below_mgL": 0.0487,
+        "mean_C_while_below_mgL": 0.1513,
         "demand_L_s": 1.83,
         "band_breach": "very high",
         "band_severity": "medium",
@@ -200,7 +202,9 @@
         "node": "247",
         "P_min": 1.0,
         "E_duration_h": 2.0,
+        "E_deficit_mgL_h": 0.1799,
         "E_depth_while_below_mgL": 0.0899,
+        "mean_C_while_below_mgL": 0.1101,
         "demand_L_s": 4.75,
         "band_breach": "very high",
         "band_severity": "medium",
@@ -210,7 +214,9 @@
         "node": "253",
         "P_min": 1.0,
         "E_duration_h": 8.0,
+        "E_deficit_mgL_h": 0.7577,
         "E_depth_while_below_mgL": 0.0947,
+        "mean_C_while_below_mgL": 0.1053,
         "demand_L_s": 3.68,
         "band_breach": "very high",
         "band_severity": "medium",
@@ -220,7 +226,9 @@
         "node": "255",
         "P_min": 1.0,
         "E_duration_h": 8.0,
+        "E_deficit_mgL_h": 0.7039,
         "E_depth_while_below_mgL": 0.088,
+        "mean_C_while_below_mgL": 0.112,
         "demand_L_s": 2.73,
         "band_breach": "very high",
         "band_severity": "medium",
@@ -230,7 +238,9 @@
         "node": "125",
         "P_min": 0.998,
         "E_duration_h": 17.12,
+        "E_deficit_mgL_h": 0.4343,
         "E_depth_while_below_mgL": 0.0254,
+        "mean_C_while_below_mgL": 0.1746,
         "demand_L_s": 3.08,
         "band_breach": "very high",
         "band_severity": "high",
@@ -240,7 +250,9 @@
         "node": "145",
         "P_min": 1.0,
         "E_duration_h": 12.02,
+        "E_deficit_mgL_h": 1.6826,
         "E_depth_while_below_mgL": 0.14,
+        "mean_C_while_below_mgL": 0.06,
         "demand_L_s": 1.86,
         "band_breach": "very high",
         "band_severity": "high",
@@ -250,7 +262,9 @@
         "node": "147",
         "P_min": 1.0,
         "E_duration_h": 7.45,
+        "E_deficit_mgL_h": 0.5906,
         "E_depth_while_below_mgL": 0.0793,
+        "mean_C_while_below_mgL": 0.1207,
         "demand_L_s": 0.58,
         "band_breach": "medium",
         "band_severity": "low",
@@ -260,7 +274,9 @@
         "node": "151",
         "P_min": 1.0,
         "E_duration_h": 7.48,
+        "E_deficit_mgL_h": 0.3164,
         "E_depth_while_below_mgL": 0.0423,
+        "mean_C_while_below_mgL": 0.1577,
         "demand_L_s": 9.75,
         "band_breach": "very high",
         "band_severity": "high",
@@ -270,7 +286,9 @@
         "node": "153",
         "P_min": 1.0,
         "E_duration_h": 17.89,
+        "E_deficit_mgL_h": 0.6567,
         "E_depth_while_below_mgL": 0.0367,
+        "mean_C_while_below_mgL": 0.1633,
         "demand_L_s": 2.98,
         "band_breach": "very high",
         "band_severity": "high",
@@ -280,15 +298,114 @@
         "node": "251",
         "P_min": 1.0,
         "E_duration_h": 6.0,
+        "E_deficit_mgL_h": 0.5727,
         "E_depth_while_below_mgL": 0.0954,
+        "mean_C_while_below_mgL": 0.1046,
         "demand_L_s": 1.63,
         "band_breach": "medium",
         "band_severity": "low",
         "direction": "severity lower"
       }
     ],
+    "depth_spread_over_movers": {
+      "min_depth_mgL": 0.0254,
+      "max_depth_mgL": 0.14,
+      "ratio": 5.51,
+      "min_mean_C_while_below_mgL": 0.06,
+      "max_mean_C_while_below_mgL": 0.1746,
+      "note": "the movers share a probability and a limited duration, NOT a depth. Summarising them as 'marginally below' flattens a factor-of-several spread and repeats, one level down, the conflation the severity axis exists to prevent"
+    },
+    "deficit_spread_within_one_severity_band": {
+      "band": "prolonged",
+      "members": [
+        "125",
+        "145",
+        "153"
+      ],
+      "E_deficit_mgL_h": [
+        0.4343,
+        1.6826,
+        0.6567
+      ],
+      "note": "E[D] bands cannot separate depth; this is the blind spot the depth column exists for, measured inside a single band"
+    },
     "n_nodes_that_move": 10,
-    "reading": "the two products are not interchangeable: where the severity band is LOWER the node breaches reliably but only briefly, and where it is HIGHER the breach is less certain but long when it happens. Neither ordering is the correct one \u2014 the pair is the result"
+    "reading": "the two products are not interchangeable: where the severity band is LOWER the node breaches reliably but only briefly, and where it is HIGHER the breach is less certain but long when it happens. Neither ordering is the correct one \u2014 the pair is the result",
+    "ordering_is_not_guaranteed": {
+      "bound": "E[D] <= T_window * P_min, from D_i <= T_window * 1[member i breaches]",
+      "bound_violations_over_all_junctions": 0,
+      "what_it_does_NOT_imply": "an ordering of the two banded SCORES. The scales are not aligned, so the bound constrains an inversion without forbidding it",
+      "counterexample": {
+        "P_min": 0.03,
+        "E_duration_h": 1.2,
+        "bound_at_this_P_min_h": 1.44,
+        "satisfies_bound": true,
+        "likelihood_band": 1,
+        "severity_band": 2
+      },
+      "what_it_DOES_imply": "an inversion of at most one band, and none once P_min >= the top likelihood edge \u2014 see reachability below",
+      "reachability": [
+        {
+          "likelihood_band": 1,
+          "sup_P_min": 0.05,
+          "sup_E_duration_h": 2.4,
+          "max_reachable_severity_band": 2,
+          "max_inversion": 1
+        },
+        {
+          "likelihood_band": 2,
+          "sup_P_min": 0.2,
+          "sup_E_duration_h": 9.6,
+          "max_reachable_severity_band": 3,
+          "max_inversion": 1
+        },
+        {
+          "likelihood_band": 3,
+          "sup_P_min": 0.5,
+          "sup_E_duration_h": 24.0,
+          "max_reachable_severity_band": 4,
+          "max_inversion": 1
+        },
+        {
+          "likelihood_band": 4,
+          "sup_P_min": 0.8,
+          "sup_E_duration_h": 38.4,
+          "max_reachable_severity_band": 5,
+          "max_inversion": 1
+        },
+        {
+          "likelihood_band": 5,
+          "sup_P_min": 1.0,
+          "sup_E_duration_h": 48.0,
+          "max_reachable_severity_band": 5,
+          "max_inversion": 0
+        }
+      ],
+      "max_inversion_permitted_by_the_bound": 1
+    },
+    "governance_rule": {
+      "rule": "act on the higher of the breach band and the severity band; neither axis alone may reduce an action",
+      "applies_to": "the control_measure column and the register's sort order",
+      "why_not_pick_an_axis": "the register says neither product is the correct one; that has to be a rule rather than a stance, or a single control_measure silently reinstates one axis as the operational one",
+      "columns": {
+        "control_measure": "from risk_band_governing (the higher of the two)",
+        "control_measure_breach": "from risk_band_current, for visibility",
+        "control_measure_severity": "from risk_band_severity, for visibility"
+      },
+      "n_junctions_where_severity_governs": 0,
+      "n_consumer_junctions_where_severity_governs": 0,
+      "currently_equivalent_to_the_breach_axis": true,
+      "equivalence_is_measured_not_assumed": "in this baseline field the severity band never exceeds the breach band, so the governing band equals the breach band everywhere. The bound E[D] <= T_window * P_min permits an inversion of one band, so the rule is not vacuous in general"
+    },
+    "observed_ordering": {
+      "note": "EMPIRICAL, not implied by the bound",
+      "consumer_junctions": 59,
+      "n_severity_score_above_likelihood_score": 0,
+      "n_equal": 43,
+      "n_severity_score_below": 16,
+      "min_hours_of_E_duration_to_first_inversion": 0.939,
+      "n_consumers_that_can_never_invert_at_their_P_min": 17
+    }
   },
   "scenario_summary": [
     {
@@ -603,5 +720,5 @@
     "mains rehabilitation or burst altering the assumed age profile",
     "calibration record exceeds its approved age"
   ],
-  "runtime_s": 576.6
+  "runtime_s": 581.1
 }

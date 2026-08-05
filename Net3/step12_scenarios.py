@@ -111,6 +111,19 @@ CONTROL = {
     "low": "No action beyond routine monitoring",
     "not applicable": "Not applicable",
 }
+# GOVERNANCE RULE, pre-declared. The register carries two risk products -- breach probability x
+# consequence and severity x consequence -- and says that neither is the correct one. A register
+# still has to drive a single action, so "neither is correct" has to be a RULE and not an evasion:
+# the action is taken on the HIGHER of the two bands, i.e. neither axis alone is allowed to reduce
+# an action. Both per-axis control measures are emitted alongside it so the reason stays visible.
+#
+# The rule is not the same thing as choosing the breach axis, even where the two coincide. In this
+# baseline field the severity band never exceeds the breach band, so the governing band equals the
+# breach band at every junction -- but that is measured (and reported as such), not assumed: the
+# bound E[D] <= T_window * P_min permits an inversion of one band, so the rule can bind elsewhere.
+BAND_ORDER = {"not applicable": 0, "low": 1, "medium": 2, "high": 3, "very high": 4}
+GOVERNANCE_RULE = ("act on the higher of the breach band and the severity band; neither axis alone "
+                   "may reduce an action")
 
 trapz = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
 
@@ -121,16 +134,41 @@ def arrhenius_factor(t_c, ea, t_ref_c=T_REF_C):
     return np.exp(-(np.asarray(ea, dtype=float) / R_GAS) * (1.0 / t - 1.0 / t_ref))
 
 
+LIK_EDGES = (0.05, 0.20, 0.50, 0.80)     # < 0.05 | 0.05-0.20 | 0.20-0.50 | 0.50-0.80 | >= 0.80
+
+
 def likelihood_band(p):
-    if p < 0.05:
-        return 1
-    if p < 0.20:
-        return 2
-    if p < 0.50:
-        return 3
-    if p < 0.80:
-        return 4
+    """Likelihood score 1-5 from P_min, the probability of ANY breach in the window."""
+    for i, edge in enumerate(LIK_EDGES):
+        if float(p) < edge:
+            return i + 1
     return 5
+
+
+def severity_reachability(t_window):
+    """What E[D] <= T_window * P_min does and does NOT guarantee about the two banded scores.
+
+    The inequality is real: D_i <= T_window * 1[member i breaches], so taking weighted expectations
+    bounds E[D] by T_window * P_min. It is tempting -- and wrong -- to read that as "the severity
+    score can never exceed the likelihood score". The two axes are banded on DIFFERENT and
+    unaligned scales, so the bound constrains the inversion without forbidding it: with the edges
+    used here, P_min = 0.03 with E[D] = 1.2 h satisfies the bound (1.2 <= 1.44) yet scores
+    likelihood 1 and severity 2.
+
+    What the bound does buy is a limit on how large an inversion can be, computed here from the
+    edges themselves rather than asserted, so it stays true if either scale is ever changed.
+    """
+    sup_p = list(LIK_EDGES) + [1.0]
+    rows = []
+    for L in range(1, len(sup_p) + 1):
+        d_sup = t_window * sup_p[L - 1]
+        # the supremum is not attained for L < 5 (strict <), so probe just below it
+        s_max = severity_band(d_sup if L == len(sup_p) else d_sup - 1e-12)
+        rows.append({"likelihood_band": L, "sup_P_min": sup_p[L - 1],
+                     "sup_E_duration_h": round(float(d_sup), 4),
+                     "max_reachable_severity_band": int(s_max),
+                     "max_inversion": int(max(0, s_max - L))})
+    return rows
 
 
 def severity_band(d_hours):
@@ -586,8 +624,9 @@ SEV_BANDS = np.array([risk_band(int(s)) for s in SEV_RISK])
 # mean depth below the threshold while below it; undefined (0) where the node never goes below
 DEPTH_A = np.where(DBAR_A > 1e-9, ABAR_A / np.maximum(DBAR_A, 1e-9), 0.0)
 
-BAND_ORDER = {"not applicable": 0, "low": 1, "medium": 2, "high": 3, "very high": 4}
 shift = np.array([BAND_ORDER[SEV_BANDS[j]] - BAND_ORDER[bands_A[j]] for j in range(len(ALL_NODES))])
+GOV_BANDS = np.array([bands_A[j] if BAND_ORDER[bands_A[j]] >= BAND_ORDER[SEV_BANDS[j]]
+                      else SEV_BANDS[j] for j in range(len(ALL_NODES))])
 
 register = pd.DataFrame([{
     "node": n,
@@ -606,14 +645,20 @@ register = pd.DataFrame([{
     "risk_score_severity": int(SEV_RISK[j]),
     "risk_band_current": bands_A[j],
     "risk_band_severity": SEV_BANDS[j],
+    "risk_band_governing": GOV_BANDS[j],
+    "risk_score_governing": int(max(int(likelihood_band(float(P_A[j])) * int(CONSEQUENCE[n])),
+                                    int(SEV_RISK[j]))),
     "band_shift_severity_minus_breach": int(shift[j]),
     "risk_band_heat_ageing": bands_D[j],
     "escalates_under_heat": bool(bands_A[j] != bands_D[j]),
     "monitored": n in B.MONITOR_NODES,
     "sampling_priority": round(float(prio[j]), 3),
-    "control_measure": CONTROL.get(bands_A[j], "Not applicable"),
+    "control_measure": CONTROL.get(GOV_BANDS[j], "Not applicable"),          # the governing rule
+    "control_measure_breach": CONTROL.get(bands_A[j], "Not applicable"),
+    "control_measure_severity": CONTROL.get(SEV_BANDS[j], "Not applicable"),
 } for j, n in enumerate(ALL_NODES)])
-register = register.sort_values(["risk_score_breach", "P_min_current"], ascending=False)
+register = register.sort_values(["risk_score_governing", "risk_score_breach", "P_min_current"],
+                                ascending=False)
 
 # how much the two axes disagree, and in which direction; a node is only interesting here if it
 # serves demand, since a zero-demand node scores 0 on both by construction
@@ -624,16 +669,40 @@ sev_up = int((shift[cons_mask] > 0).sum())
 sev_dn = int((shift[cons_mask] < 0).sum())
 mov = np.where(cons_mask & (shift != 0))[0]
 mov = mov[np.argsort(-np.abs(shift[mov]))]
+# Every column the log tabulates for these nodes is written here, including the two derived ones,
+# so the table has a single source. The depth spread is the point: "brief" is a statement about
+# duration and says nothing about how far below the threshold a node sits while it is under it.
 severity_moves = [{
     "node": ALL_NODES[j],
     "P_min": round(float(P_A[j]), 3),
     "E_duration_h": round(float(DBAR_A[j]), 2),
+    "E_deficit_mgL_h": round(float(ABAR_A[j]), 4),
     "E_depth_while_below_mgL": round(float(DEPTH_A[j]), 4),
+    "mean_C_while_below_mgL": round(float(C_CRIT - DEPTH_A[j]), 4),
     "demand_L_s": round(float(DEM[j]), 2),
     "band_breach": bands_A[j],
     "band_severity": SEV_BANDS[j],
     "direction": "severity higher" if shift[j] > 0 else "severity lower",
 } for j in mov[:12]]
+_depths = [m["E_depth_while_below_mgL"] for m in severity_moves]
+_defs = [m["E_deficit_mgL_h"] for m in severity_moves]
+# How far each consumer junction is from scoring HIGHER on severity than on likelihood. This is the
+# empirical counterpart of the reachability table: the ordering is not guaranteed, so the question
+# is not "can it invert" (it can) but "how close does this field come".
+LIK_SCORE = np.array([likelihood_band(float(p_)) for p_ in P_A])
+sev_minus_lik = SEV_SCORE - LIK_SCORE
+hours_to_inversion = []
+for j in range(len(ALL_NODES)):
+    if not cons_mask[j]:
+        continue
+    if sev_minus_lik[j] > 0:
+        hours_to_inversion.append(0.0)
+        continue
+    need = next((e for e in SEV_EDGES_H
+                 if e > DBAR_A[j] and severity_band(e) > LIK_SCORE[j]), None)
+    hours_to_inversion.append(float(need - DBAR_A[j]) if need is not None else float("inf"))
+finite_gaps = [g for g in hours_to_inversion if g != float("inf")]
+
 severity_axis = {
     "axis": "expected below-threshold duration E[D] in the assessment window, banded on absolute "
             "pre-declared hours",
@@ -644,11 +713,78 @@ severity_axis = {
     "risk_band_agreement_consumers": {"same band": agree, "severity band higher": sev_up,
                                       "severity band lower": sev_dn},
     "nodes_that_move": severity_moves,
+    "depth_spread_over_movers": {
+        "min_depth_mgL": min(_depths) if _depths else None,
+        "max_depth_mgL": max(_depths) if _depths else None,
+        "ratio": round(max(_depths) / min(_depths), 2) if _depths and min(_depths) > 0 else None,
+        "min_mean_C_while_below_mgL": round(C_CRIT - max(_depths), 4) if _depths else None,
+        "max_mean_C_while_below_mgL": round(C_CRIT - min(_depths), 4) if _depths else None,
+        "note": "the movers share a probability and a limited duration, NOT a depth. Summarising "
+                "them as 'marginally below' flattens a factor-of-several spread and repeats, one "
+                "level down, the conflation the severity axis exists to prevent",
+    },
+    "deficit_spread_within_one_severity_band": {
+        "band": "prolonged",
+        "members": [m["node"] for m in severity_moves if m["band_severity"] and
+                    m["E_duration_h"] >= SEV_EDGES_H[2] and m["E_duration_h"] < SEV_EDGES_H[3]],
+        "E_deficit_mgL_h": [m["E_deficit_mgL_h"] for m in severity_moves
+                            if m["E_duration_h"] >= SEV_EDGES_H[2]
+                            and m["E_duration_h"] < SEV_EDGES_H[3]],
+        "note": "E[D] bands cannot separate depth; this is the blind spot the depth column exists "
+                "for, measured inside a single band",
+    },
     "n_nodes_that_move": int(len(mov)),
     "reading": "the two products are not interchangeable: where the severity band is LOWER the node "
                "breaches reliably but only briefly, and where it is HIGHER the breach is less "
                "certain but long when it happens. Neither ordering is the correct one — the pair is "
                "the result",
+    "ordering_is_not_guaranteed": {
+        "bound": "E[D] <= T_window * P_min, from D_i <= T_window * 1[member i breaches]",
+        "bound_violations_over_all_junctions": int(
+            (DBAR_A > T_WINDOW * np.clip(P_A, 0.0, 1.0) + 1e-9).sum()),
+        "what_it_does_NOT_imply": "an ordering of the two banded SCORES. The scales are not "
+                                  "aligned, so the bound constrains an inversion without "
+                                  "forbidding it",
+        "counterexample": {"P_min": 0.03, "E_duration_h": 1.2,
+                           "bound_at_this_P_min_h": 48 * 0.03,
+                           "satisfies_bound": True,
+                           "likelihood_band": likelihood_band(0.03),
+                           "severity_band": severity_band(1.2)},
+        "what_it_DOES_imply": "an inversion of at most one band, and none once P_min >= the top "
+                              "likelihood edge — see reachability below",
+        "reachability": severity_reachability(T_WINDOW),
+        "max_inversion_permitted_by_the_bound": max(
+            r["max_inversion"] for r in severity_reachability(T_WINDOW)),
+    },
+    "governance_rule": {
+        "rule": GOVERNANCE_RULE,
+        "applies_to": "the control_measure column and the register's sort order",
+        "why_not_pick_an_axis": "the register says neither product is the correct one; that has to "
+                                "be a rule rather than a stance, or a single control_measure "
+                                "silently reinstates one axis as the operational one",
+        "columns": {"control_measure": "from risk_band_governing (the higher of the two)",
+                    "control_measure_breach": "from risk_band_current, for visibility",
+                    "control_measure_severity": "from risk_band_severity, for visibility"},
+        "n_junctions_where_severity_governs": int((shift > 0).sum()),
+        "n_consumer_junctions_where_severity_governs": int((shift[cons_mask] > 0).sum()),
+        "currently_equivalent_to_the_breach_axis": bool((shift > 0).sum() == 0),
+        "equivalence_is_measured_not_assumed": "in this baseline field the severity band never "
+                                               "exceeds the breach band, so the governing band "
+                                               "equals the breach band everywhere. The bound "
+                                               "E[D] <= T_window * P_min permits an inversion of "
+                                               "one band, so the rule is not vacuous in general",
+    },
+    "observed_ordering": {
+        "note": "EMPIRICAL, not implied by the bound",
+        "consumer_junctions": int(cons_mask.sum()),
+        "n_severity_score_above_likelihood_score": int((sev_minus_lik[cons_mask] > 0).sum()),
+        "n_equal": int((sev_minus_lik[cons_mask] == 0).sum()),
+        "n_severity_score_below": int((sev_minus_lik[cons_mask] < 0).sum()),
+        "min_hours_of_E_duration_to_first_inversion": (round(min(finite_gaps), 3)
+                                                       if finite_gaps else None),
+        "n_consumers_that_can_never_invert_at_their_P_min": int(
+            sum(1 for g in hours_to_inversion if g == float("inf"))),
+    },
 }
 print(f"\nseverity axis on E[D] (consumer junctions only, n={int(cons_mask.sum())}):")
 print("  band counts   " + ", ".join(f"{k} {v}" for k, v in sev_counts.items()))
