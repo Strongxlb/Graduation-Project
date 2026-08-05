@@ -2860,12 +2860,17 @@ written converted (`1.0` mg/L from `0.001` kg/m³) while `TOLERANCE` is written 
 read by EPANET as mg/L). The unit convention and the tolerance are also part of the provenance
 config hash, so a cache built under a different convention can no longer be mistaken for this one.
 
-**One label is still wrong and is deliberately left for the release re-run.** The hashed config
-records the tolerance under the key `quality_tolerance_kg_m3`; the *value* (`1e-5`) is correct and
-is what every result was computed with, but the unit in the key name is not — it is mg/L. Renaming
-it changes `config_sha256` (`c97826ac…` → `607f2034…`), which invalidates all six keyed array caches
-and forces a full pipeline re-run for a change that alters no number. It is therefore bundled with
-the clean-tree release re-run rather than done separately, and recorded here so the discrepancy is
-not silent.
+**One label is still wrong, and correcting it is deliberately deferred.** The hashed config records
+the tolerance under the key `quality_tolerance_kg_m3`. The *value* (`1e-5`) is correct and is what
+every result in this log was computed with; only the unit in the key **name** is wrong — it is mg/L.
+
+Renaming it changes `config_sha256` (`c97826ac…` → `607f2034…`). No stored result would become
+wrong, because no step JSON embeds that hash — but the six `*.key.json` files would then record a
+superseded config, so the keyed arrays (`step4d`, `step7b`, `step7c`, `step8b`) would silently cold-
+rebuild on next use and `step9` would raise until `step7c` had been re-run. That is a re-run whose
+entire output is numerically identical to what is already here. It is therefore **not** done as its
+own task; it belongs with the clean-tree release re-run, which is separately required anyway. It is
+recorded here so the discrepancy is not silent, which is the point of writing it down rather than
+paying for it twice.
 
 Outputs: `baseline_cache/step15_unit_equivalence.json`.
