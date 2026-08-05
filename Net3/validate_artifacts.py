@@ -511,6 +511,7 @@ def check_release_provenance(release=False):
     alone -> this check -> tag.
     """
     path = os.path.join(CACHE, "cache_manifest.json")
+    MANIFEST_REL = "Net3/baseline_cache/cache_manifest.json"
     if not os.path.exists(path):
         return ["cache_manifest.json missing"], []
     with open(path) as f:
@@ -525,12 +526,27 @@ def check_release_provenance(release=False):
         n = len(git.get("dirty_files") or [])
         msgs.append(f"manifest was written on a DIRTY tree ({n} modified file(s)); the diff is "
                     f"identified by hash, not stored")
+    # The manifest cannot record the commit that contains it: writing it dirties the tree, and
+    # committing it advances HEAD. Requiring recorded == HEAD makes the release state unreachable.
+    # The rule that is both correct and attainable: HEAD may differ from the recorded commit ONLY by
+    # the manifest file itself, so every hash the manifest asserts about the code still holds.
     if recorded and head and recorded != head:
-        msgs.append(f"manifest records commit {recorded[:12]}, HEAD is {head[:12]} — it does not "
-                    f"describe the current tree")
+        diff = subprocess.run(["git", "-C", os.path.dirname(HERE), "diff", "--name-only",
+                               recorded, head], capture_output=True, text=True)
+        changed = [f for f in diff.stdout.split() if f] if diff.returncode == 0 else None
+        manifest_only = changed is not None and set(changed) <= {MANIFEST_REL}
+        if changed is None:
+            msgs.append(f"manifest records commit {recorded[:12]}, HEAD is {head[:12]}, and the "
+                        f"difference could not be read from git")
+        elif not manifest_only:
+            others = [f for f in changed if f != MANIFEST_REL]
+            msgs.append(f"manifest records commit {recorded[:12]}, HEAD is {head[:12]}, and they "
+                        f"differ in {len(others)} file(s) besides the manifest "
+                        f"({', '.join(others[:3])}{'…' if len(others) > 3 else ''})")
     if not msgs:
-        notes.append(f"release-grade: manifest records a clean tree at {(recorded or '?')[:12]}"
-                     + (" (= HEAD)" if recorded == head else ""))
+        how = "= HEAD" if recorded == head else "HEAD differs only by the manifest itself"
+        notes.append(f"release-grade: manifest records a clean tree at {(recorded or '?')[:12]} "
+                     f"({how})")
         return [], notes
     msgs.append("release sequence: commit everything -> python provenance.py on a clean tree -> "
                 "commit the manifest alone -> python validate_artifacts.py --release -> tag")
