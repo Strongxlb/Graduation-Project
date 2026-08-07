@@ -109,6 +109,8 @@ WEIGHTING_KEYS = ("primary_weighting", "weighting")
 # Artifacts that hold no weighted ensemble and so have no weighting to declare: a warm-up
 # convergence test, Fisher/profile geometry, and an analytic known-answer test.
 WEIGHTING_EXEMPT = {"cache_manifest.json", "step0_warmup_convergence.json",
+                    # properties of the deterministic noise-free truth: no ensemble is weighted
+                    "forward_baseline.json",
                     "step4b_sensitivity.json",   # single-parameter RMSE curves; no ensemble weights
                     "step7_fisher.json",         # a-priori Fisher/CRLB; ensemble SD is a side check
                     "step7b_profile.json", "step7c_ar1.json", "step7c_profile_ar1.json",

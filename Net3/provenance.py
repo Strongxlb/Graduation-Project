@@ -174,7 +174,7 @@ def frozen_config():
         # concentration, so it only means anything alongside the unit it is measured in.
         "concentration_unit": "mg/L at every interface; kg/m^3 inside WNTR, converted in "
                               "wq_common.build_model / run_model / simulate_chlorine",
-        "quality_tolerance_kg_m3": B.QUALITY_TOLERANCE,
+        "quality_tolerance_mg_L": B.QUALITY_TOLERANCE,
     }
 
 

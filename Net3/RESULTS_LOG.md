@@ -885,7 +885,11 @@ near 1.
 **The comparator does not reproduce this, and the difference is a factor of two for `old`.** Under
 the informal score the old-zone median falls from +0.65 to +0.34 as `CORR` grows, i.e. it reads as
 "the fit tracks only a third of the gap" exactly where the formal rule reads "essentially all of
-it", and the direction with `CORR` is opposite. This is the same inertia as Steps 3, 5c, 8 and 8b:
+it". Both rules report a FALLING fraction as `CORR` grows (formal +1.10 -> +0.86 -> +0.74; informal
++0.65 -> +0.43 -> +0.34), so the trend direction is the same, not opposite; and because the gap
+itself widens (0.120 -> 0.240 -> 0.361 m/day for old) the ABSOLUTE displacement rises under both
+(formal 0.132 -> 0.207 -> 0.268; informal 0.078 -> 0.104 -> 0.123). What the comparator does is
+attenuate consistently, to 0.59, 0.50 and 0.46 of the formal fraction. This is the same inertia as Steps 3, 5c, 8 and 8b:
 a score that is nearly flat inside its behavioural set cannot follow a systematic displacement. The
 statement "the fit tracks the length-weighted proxy" is therefore a **formal-likelihood** statement
 and must be quoted as one.
@@ -931,7 +935,7 @@ Fix for the draft: present the grid only as an implementation/plausibility check
 ### Step 5 — overall
 
 - **Uncorrelated within-zone heterogeneity (±20–50%, Step 5c)**: the grouped model is **robust**. The posterior mean stays at the arithmetic mean to within the field-to-field scatter, and the risk ranking is preserved. Across 25 independent fields at ±20% the structural increment is `+0.0107 ± 0.0335` (|mean|/sd = 0.32), i.e. undetectable.
-- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at the realised window noise RMSE while the coefficient moves toward a length-weighted proxy — 60% of the gap for old under the primary rule, 1.29 posterior SD. What the fit converges to is a direction, not an identified effective coefficient.
+- **Length-correlated within-zone heterogeneity (Step 5d)**: **precise but biased**. The fit stays at the realised window noise RMSE while every zone's coefficient moves toward the length-weighted proxy. Over 30 noise realisations the median fraction of the arithmetic → proxy gap travelled is **0.74–1.26 in every zone at every `CORR` level**, and at `CORR = 0.75` all three intervals exclude zero. The single-realisation 60% / 147% / 45% must **not** be quoted as the finding or used to order the zones: it is one draw of a quantity whose 5–95 interval at `CORR = 0.50` spans [0.12, 1.46] for old, [−0.07, 2.43] for average and [−0.03, 1.78] for new, and the zone that appears to pass the proxy changes between the draw and the median. On magnitude, the old-zone shift of −0.1444 is 1.29 posterior SD, i.e. comparable with the posterior width rather than buried inside it. What the fit converges to is a direction, not an identified effective coefficient.
 - **Grid search (Step 5e)**: recovery to the nearest grid node is guaranteed by the grid being centred on the truth, so the deterministic "recovery of all three coefficients" is an artefact of grid placement; only a weighted ensemble can speak to identifiability.
 - Directly answers §3.3 ("report how far the behavioural ensemble sits from any simple average of the
 true field"): the distance is ≈0 when heterogeneity is uncorrelated and a clear, resolved shift

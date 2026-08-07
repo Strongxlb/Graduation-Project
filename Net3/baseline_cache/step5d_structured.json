@@ -4,7 +4,7 @@
     "informal_glue"
   ],
   "design": "within-zone length-correlated heterogeneity (CORR=0.50)",
-  "target_semantics": "length-weighted is an illustrative proxy target, NOT the residence-weighted or hydraulically effective coefficient; only the DIRECTION of the shift is established here",
+  "target_semantics": "the length-weighted value is an illustrative DIRECTIONAL comparator, not an estimand or a bound; it is NOT the residence-weighted or hydraulically effective coefficient. The single-realisation gap fractions below order the zones only for THIS noise draw; the 30-realisation dose-response is what supports a median fraction near 1, and its 5-95 intervals overlap across zones, so only the DIRECTION is established here",
   "informal_threshold": 0.107,
   "structural_residual": 0.006334339268505573,
   "behavioural_informal": 4543,

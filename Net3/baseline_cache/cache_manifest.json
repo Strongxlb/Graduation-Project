@@ -1,11 +1,30 @@
 {
-  "generated_utc": "2026-08-05T17:05:32+00:00",
+  "generated_utc": "2026-08-06T23:33:58+00:00",
   "git": {
-    "commit": "085dc245a789ace203d69ba673315faf052c8cf9",
-    "dirty": false,
-    "dirty_files": [],
-    "tree_sha256": "79d26c00297849087e8853e68166c7654c6e12c7ddaf79790be9cc833fe73d12",
-    "uncommitted_diff_sha256": null
+    "commit": "b40532df36075ff34f4e99ac521ac3ba1d2aa248",
+    "dirty": true,
+    "dirty_files": [
+      "Net3/Figures/paper/",
+      "Net3/Figures/step5d_structured.png",
+      "Net3/RESULTS_LOG.md",
+      "Net3/RESULTS_LOG.zh.md",
+      "Net3/baseline_cache/baseline_meta.json",
+      "Net3/baseline_cache/forward_baseline.json",
+      "Net3/baseline_cache/step5d_structured.json",
+      "Net3/paper_figs.py",
+      "Net3/provenance.py",
+      "Net3/step5d_structured.py",
+      "Net3/validate_artifacts.py",
+      "PAPER_PLAN.zh.md",
+      "thesis/build.sh",
+      "thesis/figures/paper/",
+      "thesis/paper.docx",
+      "thesis/paper.gen.md",
+      "thesis/paper.md",
+      "thesis/reference.docx"
+    ],
+    "tree_sha256": "958149300b73753dc535a17ae0d4d8c64e0e8f48110521b9711c299b0f983890",
+    "uncommitted_diff_sha256": "c15f2746fde1e0e6eaedd707ae4ccd89fc81b686c8a57b4ef98e3b29cbf70404"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
@@ -58,13 +77,13 @@
       "cross_zone": "weaker (newer) side wins"
     },
     "concentration_unit": "mg/L at every interface; kg/m^3 inside WNTR, converted in wq_common.build_model / run_model / simulate_chlorine",
-    "quality_tolerance_kg_m3": 1e-05
+    "quality_tolerance_mg_L": 1e-05
   },
-  "config_sha256": "c97826acf77701e06874f6ffdd5bd42d10af6d0cb7d0fff6109e2153b1dc69d9",
+  "config_sha256": "607f2034a7204b3e50512e7ba597d290d8d469024b4d2af920c583201775e782",
   "wq_common_sha256": "3da32537931b7dfbca05aa62eff45545fdbb620c676b41b85add2558ecfaed5b",
   "code": {
     "wq_common_sha256": "3da32537931b7dfbca05aa62eff45545fdbb620c676b41b85add2558ecfaed5b",
-    "provenance_sha256": "32947f408f974ef537abe0f179fc51c0c1f518b5b673b10c5489b8aade02ffaa",
+    "provenance_sha256": "b344742dc4ae18b00b09f4d9aa3b4f8ba891f740860a7a51271ddafd74ba338a",
     "step_scripts_sha256": {
       "step0_warmup_convergence.py": "b5159780738b92748a79258584335ed79c6f61e83e5cef2a55e0422d44f0ccea",
       "step10_risk_metrics.py": "34b014eb9f48e18b39d1ae57c899cf69ff5b1a8a5336b6bc1403ff0079915715",
@@ -81,7 +100,7 @@
       "step4d_displaced_robust.py": "acc98f05648e12291c0cef9fe0ca33b27b4b183d3053d7e52aca4e95fc47f299",
       "step5_structural_error.py": "d0068b3bd6ab31a9af634465fb87743385a07167b2c81c014793c317d159e198",
       "step5c_jitter_sweep.py": "453c3ab8391a8f0f45c5ad4c14cb9764cf2114c2d391ef926d62983a45240657",
-      "step5d_structured.py": "f520631ebebbdcc1314b0d4c5ddac63378ddefe704ab46ca72882aa71884baaf",
+      "step5d_structured.py": "b19435afd251e92a6583314b74999ecac62f3c23abe6145fcd65d1a72647363b",
       "step6_noise_sensitivity.py": "c6355a601f9a619b50a77357ab61dfa5dc261f47a270be8833ea632d70711ec8",
       "step7_fisher.py": "ef637ff8e6049ee6255f825412b041a6baaf18c70ef91cdf6f11c2844b4a920f",
       "step7_verify.py": "3ffafc40ff22d4218753dae01f3ba77eb87634facbf387994ec6d4cde858109f",
@@ -94,7 +113,7 @@
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "b909d957e3ee882bd3dcd81c117df4ff806fb980ba2f93c3c16a94235e81f481"
+    "step_scripts_combined_sha256": "c269dfd7258c012a98d9f89e1f3444699899234f0b1cea2101cbfbd596d90963"
   },
   "critical_fields": [
     "config_sha256",

@@ -11,10 +11,13 @@ effective one. The reaction weight of a pipe also depends on its flow, direction
 residence time and on how strongly the monitors see it, so "length-weighted" must never be read as
 "residence-weighted" or as "the" effective mean — they are different quantities that happen to be
 separated from the arithmetic mean in the same direction here. What this step establishes is a
-DIRECTION of travel, not a target that is recovered: the fitted coefficient moves off the arithmetic
-mean toward the length-weighted value without landing on it. Identifying the genuinely effective
-weighting needs a sensitivity/Jacobian-weighted mean, which this step does not compute, so the
-claim available from it is bounded accordingly.
+DIRECTION of travel, not a target that is recovered: all three fitted coefficients move off their
+arithmetic means in the length-weighted direction by a fraction of the gap whose median over 30 noise
+realisations is near 1 (0.74-1.26 raw, every zone and every CORR level). A SINGLE realisation cannot
+order the zones against each other: at CORR = 0.50 one draw reads 60/147/45% raw while the 30-draw
+medians read 86/112/92%, and the 5-95 intervals overlap heavily, so which zone appears to pass the
+proxy is a property of the draw and not of the network. Identifying the genuinely effective weighting needs a sensitivity/Jacobian-weighted mean, which this
+step does not compute, so the claim available from it is bounded accordingly.
 
 PRIMARY: formal censored likelihood. COMPARATOR: informal GLUE at the primary threshold. This
 matters for the size of the effect as well as its direction: on the homogeneous baseline the
@@ -204,9 +207,13 @@ print("row is the homogeneous control and no fraction is defined.")
 GRID_AXES = {"old": kw_old_grid, "average": kw_avg_grid, "new": kw_new_grid}
 report = {**B.weighting_provenance(comparators=["informal_glue"]),
           "design": "within-zone length-correlated heterogeneity (CORR=%.2f)" % CORR,
-          "target_semantics": "length-weighted is an illustrative proxy target, NOT the "
-                              "residence-weighted or hydraulically effective coefficient; only the "
-                              "DIRECTION of the shift is established here",
+          "target_semantics": "the length-weighted value is an illustrative DIRECTIONAL "
+                              "comparator, not an estimand or a bound; it is NOT the "
+                              "residence-weighted or hydraulically effective coefficient. The "
+                              "single-realisation gap fractions below order the zones only for "
+                              "THIS noise draw; the 30-realisation dose-response is what supports "
+                              "a median fraction near 1, and its 5-95 intervals overlap across "
+                              "zones, so only the DIRECTION is established here",
           "informal_threshold": B.RMSE_THR, "structural_residual": float(struct),
           "behavioural_informal": int(beh.sum()), "rmse_min": float(RMSE.min()),
           "homogeneous_baseline_offset": base_offset,
@@ -282,16 +289,21 @@ for ax, z in zip(axes, ZKEYS):
     ax.axhline(fit["informal_glue"][z]["mean"], color="0.35", lw=1.2, ls=":",
                label="posterior mean, informal GLUE")
     frac = (m_prim - true_ref[z]["arith"]) / (true_ref[z]["lenwt"] - true_ref[z]["arith"])
+    # the defensible number is net of the homogeneous control; the raw one is kept beside it
+    # so the size of that correction stays visible
+    frac_net = report["zones"][z]["by_scheme"][B.PRIMARY_WEIGHTING][
+        "shift_frac_net_of_baseline"]
     ax.set_xlabel("pipe length")
     ax.set_ylabel("k_w (m/day)")
-    ax.set_title(f"{z} zone\nfit moved {100 * frac:.0f}% of the arith. -> length-weighted gap",
-                 fontsize=10)
+    ax.set_title(f"{z} zone\nnet of control {100 * frac_net:.0f}% of the arith. -> "
+                 f"length-weighted gap (raw {100 * frac:.0f}%)", fontsize=10)
     ax.grid(alpha=0.3)
 axes[0].legend(fontsize=6.5)
-fig.suptitle("Step 5d — structured (length-correlated) heterogeneity: the fit moves off the "
-             "arithmetic mean toward a length-weighted proxy without landing on it\n"
-             "(the proxy is an illustrative target, not the residence-weighted coefficient)",
-             y=1.04)
+fig.suptitle("Step 5d — structured (length-correlated) heterogeneity: the fitted coefficients move "
+             "away from the arithmetic mean in the length-weighted direction\n"
+             "(ONE noise draw — the zone ordering below is not resolved; see the 30-realisation "
+             "dose-response, whose median fraction is near 1 in every zone)",
+             y=1.06)
 plt.tight_layout()
 figpath = os.path.join(FIGDIR, "step5d_structured.png")
 plt.savefig(figpath, dpi=130, bbox_inches="tight")
