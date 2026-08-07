@@ -384,8 +384,11 @@ def fig6():
     fig.legend(handles=handles, loc="lower center", ncol=5, bbox_to_anchor=(0.5, 0.085),
                columnspacing=1.6, handlelength=1.8)
     fig.text(0.5, 0.955, "zone left unobserved", ha="center", fontsize=8.5, color=INK)
-    fig.text(0.5, 0.015, "The coefficient of an unobserved zone returns to its prior; "
-             "prediction at the same dropped monitors stays at the noise floor.",
+    # Not "returns to its prior" without qualification: old and average retain ~100% of the
+    # prior SD, but new retains 57%, so the third panel contradicts a universal statement.
+    fig.text(0.5, 0.015, "An unobserved zone's coefficient loses most or all of its constraint "
+             "— fully for old and average, partly for new; prediction at the same dropped "
+             "monitors stays at the noise floor throughout.",
              ha="center", fontsize=6.5, color=INK3)
     return finish(fig, "fig6_prediction_without_identification")
 
@@ -461,21 +464,19 @@ def fig5():
 
     # ---- C: structured case, where the estimate lands ----
     ax = axes[2]
-    # The reported quantity is the 30-realisation median, not the single draw. A single draw
-    # cannot order the zones: at CORR = 0.50 one draw puts the average zone past the proxy and
-    # the 30-draw median puts the new zone there instead, with 5-95 intervals that overlap
-    # across all three. The single draw is kept, faint, only to show that spread is real.
-    # Medians are shift-equivariant, so the homogeneous-control offset (a constant per zone,
-    # expressed as a fraction of that zone's gap) can be subtracted from the stored median and
-    # percentiles exactly.
+    # The reported quantity is the 30-realisation median of the RAW fraction f_j, exactly as
+    # defined in 2.6.3 and quoted in the text and the Table 4 note (0.86/1.12/0.92). Do not
+    # subtract the homogeneous-control offset here: that yields a different estimand, and
+    # plotting it against text and table that quote the raw one made the figure contradict
+    # the paper (it also flipped which zone sits past the proxy). The faint open marker is
+    # the single paired reference realisation, which IS control-adjusted; it is kept only to
+    # show that the spread across draws is real, and the caption says so.
     dose = [r for r in st["correlation_dose_response"]["rows"] if r["corr"] == 0.50][0]
-    off = st["homogeneous_baseline_offset"]["formal_censored"]
     for i, (k, zn) in enumerate(zmap):
         s = st["zones"][zn]["by_scheme"]["formal_censored"]
-        c = off[zn] / st["zones"][zn]["lenwt_minus_arith"]
         m = dose["by_scheme"]["formal_censored"][zn]
-        med = m["shift_frac_med"] - c
-        lo, hi = [v - c for v in m["shift_frac_5_95"]]
+        med = m["shift_frac_med"]
+        lo, hi = m["shift_frac_5_95"]
         ax.plot([lo, hi], [y[i]] * 2, color=ZONE[zn], linewidth=2.6,
                 solid_capstyle="butt", alpha=0.85, zorder=3)
         ax.plot([med], [y[i]], marker="s", color=ZONE[zn], markersize=6.2,
@@ -483,16 +484,20 @@ def fig5():
         ax.plot([s["shift_frac_net_of_baseline"]], [y[i] + 0.26], marker="o",
                 markerfacecolor="white", markeredgecolor=ZONE[zn], markeredgewidth=0.9,
                 markersize=3.8, zorder=4)
-        ax.annotate(f"{med * 100:.0f}%", xy=(med, y[i]), xytext=(0, 7),
-                    textcoords="offset points", ha="center", va="bottom",
+        # Beside the bar's left end, not above the square: the single-draw circle sits at +0.26
+        # and the raw median can land directly under it. Going sideways also keeps this panel's
+        # row spacing identical to A and B, which carry the shared zone labels.
+        ax.annotate(f"{med * 100:.0f}%", xy=(lo, y[i]), xytext=(-5, 0),
+                    textcoords="offset points", ha="right", va="center",
                     fontsize=6.3, color=ZONE[zn], fontweight="bold")
     ax.axvline(0, color=INK, linewidth=0.9, zorder=1)
     ax.axvline(1, color=INK, linewidth=0.9, linestyle=(0, (3, 2)), zorder=1)
     ax.set_yticks(y)
     ax.set_yticklabels([])
     ax.tick_params(axis="y", length=0)
-    ax.set_ylim(-0.6, 2.6)
-    ax.set_xlim(-0.65, 2.25)
+    # left margin holds the percentage labels; the right end is set by the raw average-zone
+    # 95th percentile, which reaches 2.43
+    ax.set_xlim(-0.85, 2.60)
     ax.set_ylim(-1.15, 2.6)
     ax.set_title("C  length-correlated, 30 draws", loc="left", pad=4)
     ax.set_xlabel("position between the two targets")
@@ -574,7 +579,10 @@ def fig4():
     W = np.array([[s6[0.15][zn]["sd_ret_med"] / s6[0.1][zn]["sd_ret_med"],
                    ar1[zn]["widening"]] for _, zn in zmap])
 
-    shift_cols = ["$k_b$ = −0.4", "$k_b$ = −0.6", "sensor bias\n(worst arm)",
+    # The sensor-bias column takes the maximum SEPARATELY for each coefficient, so its three
+    # cells generally come from three different arms (here node 15 +0.10, node 231 -0.10 and
+    # node 113 -0.10). Labelling it "worst arm" implied one offset produced all three at once.
+    shift_cols = ["$k_b$ = −0.4", "$k_b$ = −0.6", "sensor bias\n(max over arms,\nper coefficient)",
                   "zero\ncensoring", "symmetric\nheterogeneity", "structured\nheterogeneity"]
     S = np.array([[
         kb[-0.4]["shift_over_own_sd"][k],
@@ -616,9 +624,11 @@ def fig4():
             axes[1].text(j, i, f"{v:+.2f}", ha="center", va="center", fontsize=6.8,
                          color="white" if abs(v) / 6.0 > 0.55 else INK)
 
-    fig.text(0.5, 0.035, "Sign is printed, not encoded by colour. Drift is omitted: it runs at two "
-             "monitors only and reproduces 0.89–0.99 of the mean-equivalent bias already in column "
-             "3. The structured-heterogeneity column is a single noise draw (see Fig. 5C).",
+    fig.text(0.5, 0.035, "Sign is printed, not encoded by colour. Column 3 maximises over the 24 "
+             "bias arms separately for each coefficient, so its three cells need not share an arm. "
+             "Drift is omitted: it runs at two monitors only and reproduces 0.89–0.99 of the "
+             "mean-equivalent bias already in column 3. The structured-heterogeneity column is a "
+             "single noise draw (see Fig. 5C).",
              ha="center", fontsize=6.3, color=INK3)
     return finish(fig, "fig4_standardised_effects")
 
@@ -957,13 +967,17 @@ def tables():
               f"{row['deficit_top6_jaccard_vs_kb_ref']:.2f}")
         L.append(f"| {lab} (D) | " + " | ".join(f"{row['shift_over_own_sd'][k]:+.2f}"
                  for k, _ in zmap) + f" | {rk} | 30 real. |")
-    L.append("| sensor bias, worst arm (D) | " + " | ".join(f"{worst[k]:+.2f}" for k, _ in zmap)
-             + f" | rho_s >= {rho_min:.4f}; E[A] top-6 held in {ndef}/{nb} | {nb} arms x 30 |")
+    L.append("| sensor bias, max over arms (D) | " + " | ".join(f"{worst[k]:+.2f}" for k, _ in zmap)
+             + f" | rho_s >= {rho_min:.4f}; E[A] top-6 held in {ndef}/{nb} "
+             + f"| {nb} arms x 30; max taken per coefficient |")
     L.append("| sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | unchanged "
              "| 2 nodes x 4 |")
+    # Two different bases in one row, so say so: the count censuses the reference seed's
+    # observation set, the displacement is a median over 30 seeds.
     L.append("| zero censoring (D) | " + " | ".join(
         f"{zc['coef'][zn]['delta_median'] / sd[k]:+.2f}" for k, zn in zmap)
-        + f" | top-3 unchanged | {zc['cal_zero']}/{meta['n_resid']} clipped |")
+        + f" | top-3 unchanged | 30 real.; reference seed has "
+        + f"{zc['cal_zero']}/{meta['n_resid']} clipped |")
     L.append("| symmetric heterogeneity (D) | " + " | ".join(
         f"{j20['field_ensemble'][zn]['increment_mean'] / sd[k]:+.2f}" for k, zn in zmap)
         + " | — | 25 fields |")

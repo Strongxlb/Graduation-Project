@@ -45,9 +45,12 @@ sensors) and an inference rule (the informal score) at once, and since the prima
 formal likelihood those two meanings have come apart. Where the *configuration* is meant, write
 "the baseline model"; where the *rule* is meant, name the rule.
 
-Every artifact in `baseline_cache/` carries a `primary_weighting` (or `weighting`) field, and
-`validate_artifacts.py` fails if one does not, so no table in this log can be read under the wrong
-rule by accident. Two sections are **deliberately and wholly informal**, because their subject is the
+Every artifact in `baseline_cache/` that holds a weighted ensemble carries a `primary_weighting` (or
+`weighting`) field, and `validate_artifacts.py` fails if one does not, so no table in this log can be
+read under the wrong rule by accident. Artifacts that hold no weighted ensemble at all — the cache
+manifest, the warm-up convergence test, the single-parameter objective curves, the Fisher/profile
+geometry and the analytic known-answer test — are exempt **by name**, and the validator prints that
+exemption list rather than passing silently. Two sections are **deliberately and wholly informal**, because their subject is the
 comparator itself: Step 3 (how much does the answer depend on the analyst's threshold?) and the
 superseded first looks in Steps 4 and 5. Everywhere else the informal numbers appear beside the
 formal ones and are labelled *comparator*.
@@ -918,14 +921,21 @@ The 7×7×7 grid ranges are chosen around the true values, so the nearest grid n
 | new   | 0.016     | -0.052                | 0.002    | 0.008     |
 
 
-The grid best fit found in every run — `(-1.067, -0.093, -0.052)` — is **exactly** these nearest
-nodes, so "recovery to the nearest grid node" is guaranteed by the grid placement, not by the data.
-Consequences:
+The **noise-free** best homogeneous fit — `(-1.067, -0.093, -0.052)`, stored as
+`structural_best_homogeneous` — is **exactly** these nearest nodes, so for a clean objective
+"recovery to the nearest grid node" is guaranteed by the grid placement, not by the data. **The
+noisy grid fits agree on `old` and disagree on the other two**, which is the more informative half
+and was previously written as if every run returned the nearest-node triple: Step 5a records
+`(-1.067, -0.120, -0.037)` and Step 5d records `(-1.067, -0.147, -0.052)`. Consequences:
 
-- The deterministic grid **cannot distinguish identifiable from unidentifiable coefficients**: it
-snaps every parameter to its nearest node, so even avg/new (shown unidentifiable by GLUE)
-"recover" to the truth. This is why the draft's grid looked like successful recovery of all
-three, masking what GLUE reveals.
+- The deterministic grid **cannot distinguish identifiable from unidentifiable coefficients**, and it
+fails in two opposite ways at once. For `old` it lands on the nearest node whatever the data say, so
+a hit there is guaranteed by placement. For avg/new the fitted node instead wanders one to two steps
+between runs (avg returns -0.093, -0.120 or -0.147 depending on the truth field and the noise draw),
+because the objective is nearly flat across their whole prior (Step 4b) and the grid step is coarser
+than anything that separates them. Either way the grid emits a triple that *reads* as a recovered
+answer. This is why the draft's grid looked like successful recovery of all three, masking what GLUE
+reveals.
 - The draft's reported 10-realisation spread for old (±0.12 m/day) ≈ **half a grid step** (0.108),
 i.e. largely quantisation, not genuine estimation uncertainty.
 
@@ -1264,18 +1274,21 @@ the censored and the iid likelihood.
 
 | coefficient | grid 95%         | continuous 95%         | grid half-width | continuous half-width | change     | endpoint move   |
 | ----------- | ---------------- | ---------------------- | --------------- | --------------------- | ---------- | --------------- |
-| old         | [−1.110, −0.850] | **[−1.1720, −0.8106]** | ±0.1300         | ±0.1807               | **+39.0%** | ~0.8 grid steps |
-| average     | [−0.136, −0.088] | **[−0.1373, −0.0821]** | ±0.0240         | ±0.0276               | **+14.8%** | ~0.8 grid steps |
-| new         | [−0.057, −0.034] | **[−0.0599, −0.0294]** | ±0.0119         | ±0.0152               | **+28.2%** | ~0.8 grid steps |
+| old         | [−1.110, −0.850] | **[−1.1720, −0.8106]** | ±0.1300         | ±0.1807               | **+39.0%** | 0.78 grid steps |
+| average     | [−0.136, −0.088] | **[−0.1373, −0.0821]** | ±0.0240         | ±0.0276               | **+14.8%** | 0.45 grid steps |
+| new         | [−0.057, −0.034] | **[−0.0599, −0.0294]** | ±0.0119         | ±0.0152               | **+28.2%** | 0.70 grid steps |
 
 
 Primary continuous profile uses the **censored** likelihood; the iid continuous curve is retained as
 a local-identifiability benchmark (censoring impact is isolated in Step 9). The continuous 95% interval for `k_w,old` is [−1.1720, −0.8106].
 
-**The grid understated every interval, by ~15–39% under the primary rule.** The endpoints move by
-about 0.8 of a grid step in all three cases and always outward, which is the signature of
-quantisation rather than of noise: a grid cannot find a crossing that falls between nodes, so it
-stops at the last node inside.
+**The grid understated every interval, by ~15–39% under the primary rule.** Each endpoint moves
+outward by a **sub-step** distance — 0.78 of a grid step for `old`, 0.45 for `average` and 0.70 for
+`new` (the half-width change divided by that coefficient's own grid step) — and the direction is
+**always outward**. Both properties are the signature of quantisation rather than of noise: a grid
+cannot find a crossing that falls between nodes, so it stops at the last node inside, and the miss is
+therefore bounded by one step. The fraction is **not** the same in all three, so it must not be
+quoted as a single figure.
 
 The truth −1.0 / −0.1 / −0.05 lies inside every interval under both versions. Only the continuous
 intervals should be quoted, and the same caution applies to anything else read off that grid — which
@@ -1345,10 +1358,10 @@ Findings:
    because the temporal Jacobian shape is similar across the six sensors; the covariance route is
    the defensible one and would separate the factors more where sensitivities differ in time.
 2. **AR(1) alone is a *modest* caveat.** Even at ρ = 0.4 the ideal identifiability survives
-   (CRLB/prior-SD old 0.37, avg 0.43, new 0.41 — all still < 1). So autocorrelation *inflates* the
+   (CRLB/prior-SD old 0.37, avg 0.43, new 0.42 — all still < 1). So autocorrelation *inflates* the
    idealised intervals ~1.5× but does **not** by itself destroy identifiability.
 3. **The dominant realism weakening is k_b + offsets, not AR(1).** Compare: Case C (k_b + 6 offsets)
-   pushes avg to 2.30 and new to 1.10 (unidentifiable), an order of magnitude larger effect than
+   pushes avg to 2.24 and new to 1.09 (unidentifiable; Step 7), an order of magnitude larger effect than
    AR(1)'s ×1.5. AR(1) is therefore reported as a quantified *caveat*, not the leading realism term.
 
 **AR(1) profile likelihood — a coarse sensitivity, not a second primary interval.** Read the
@@ -1906,7 +1919,8 @@ operational answer, which is the question the review asked:
 | informal GLUE             | 4783 | 3.417                 | 0.2207            | Jaccard 0.82                |
 
 
-The aggregate severity differs by 1.2% between schemes and eight of ten hot-spot nodes are shared.
+The aggregate severity differs by 1.2% between schemes and nine of ten hot-spot nodes are shared
+(top-10 Jaccard 0.82; the two lists differ only in node 50 against node 243).
 The node identities are, however, **more sensitive to the warm-up than to the weighting**: node 243,
 previously ranked worst by deficit, leaves the top ten entirely at the corrected 120 h warm-up.
 
@@ -2010,7 +2024,7 @@ Findings:
    avg/new coefficients. That buys less than the earlier version of this paragraph claimed:
 
    - **Robust.** The broad risk pattern is essentially unchanged between the formal and informal
-     weighting schemes (network-mean `E[A]` differs by 1.2%, eight of ten hot-spots shared), and it
+     weighting schemes (network-mean `E[A]` differs by 1.2%, nine of ten hot-spots shared), and it
      stays strongly rank-correlated under every single-sensor bias tested — Spearman ≥ 0.999 across
      all 24 arms of Step 8c, with the top-6 set intact at every negative offset.
    - **Metric-dependent, and this table's metric is the milder one.** Fixing `k_b` 20% off its true
