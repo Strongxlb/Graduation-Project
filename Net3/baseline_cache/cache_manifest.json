@@ -1,30 +1,11 @@
 {
-  "generated_utc": "2026-08-06T23:33:58+00:00",
+  "generated_utc": "2026-08-09T23:29:14+00:00",
   "git": {
-    "commit": "b40532df36075ff34f4e99ac521ac3ba1d2aa248",
-    "dirty": true,
-    "dirty_files": [
-      "Net3/Figures/paper/",
-      "Net3/Figures/step5d_structured.png",
-      "Net3/RESULTS_LOG.md",
-      "Net3/RESULTS_LOG.zh.md",
-      "Net3/baseline_cache/baseline_meta.json",
-      "Net3/baseline_cache/forward_baseline.json",
-      "Net3/baseline_cache/step5d_structured.json",
-      "Net3/paper_figs.py",
-      "Net3/provenance.py",
-      "Net3/step5d_structured.py",
-      "Net3/validate_artifacts.py",
-      "PAPER_PLAN.zh.md",
-      "thesis/build.sh",
-      "thesis/figures/paper/",
-      "thesis/paper.docx",
-      "thesis/paper.gen.md",
-      "thesis/paper.md",
-      "thesis/reference.docx"
-    ],
-    "tree_sha256": "958149300b73753dc535a17ae0d4d8c64e0e8f48110521b9711c299b0f983890",
-    "uncommitted_diff_sha256": "c15f2746fde1e0e6eaedd707ae4ccd89fc81b686c8a57b4ef98e3b29cbf70404"
+    "commit": "d1656ec87286638016e64d63a0f20f1a3073754b",
+    "dirty": false,
+    "dirty_files": [],
+    "tree_sha256": "fad1c4e90b62f819c5abed2dde76f3255ef9ef111135e849220825117ac9fc5e",
+    "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",
