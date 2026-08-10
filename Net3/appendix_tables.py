@@ -247,6 +247,30 @@ add("E3",
     table(rows, ["Zone", "Rule", "Arithmetic mean", "Length-weighted proxy", "Posterior mean",
                  "Shift", "Homogeneous offset", "Fraction of gap"]))
 
+# The amplitude sweep had no appendix table, so Section 3.4.2 was the only place the repeated
+# realisation intervals appeared. Cutting them from the body without this would have left the
+# zone-ordering claim resting on medians alone.
+ZS = (("old", "old"), ("average", "average"), ("new", "new"))
+rows = []
+for r in load("step5d_structured.json")["correlation_dose_response"]["rows"]:
+    cells = []
+    for _, z in ZS:
+        for s in ("formal_censored", "informal_glue"):
+            c = r["by_scheme"][s][z]
+            if c.get("shift_frac_med") is None:
+                cells.append("—")
+            else:
+                lo, hi = c["shift_frac_5_95"]
+                cells.append("%.2f [%.2f, %.2f]" % (c["shift_frac_med"], lo, hi))
+    rows.append(["%.2f" % r["corr"]] + cells)
+add("E4",
+    "Table E4. Length-structured amplitude sweep over 30 noise realisations. Entries are the "
+    "median raw displacement fraction with its 5 to 95% range, where 0 is the arithmetic zone "
+    "mean and 1 the length-weighted reference. The fraction is undefined at an amplitude of zero "
+    "because the two references coincide.",
+    table(rows, ["Amplitude"] + ["%s %s" % (z, s) for _, z in ZS
+                                 for s in ("formal", "informal")]))
+
 # ---------------------------------------------------------------- F: per-arm sensor error
 s8c = load("step8c_bias_bynode.json")
 rows = []

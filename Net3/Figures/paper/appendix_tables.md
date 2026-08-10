@@ -184,6 +184,17 @@ Table E3. Length-structured heterogeneity in the reference realisation. The homo
 | new | formal censored | -0.0500 | -0.0659 | -0.0571 | -0.0071 | +0.0060 | 45% |
 | new | informal glue | -0.0500 | -0.0659 | -0.0593 | -0.0093 | +0.0008 | 58% |
 
+## E4
+
+Table E4. Length-structured amplitude sweep over 30 noise realisations. Entries are the median raw displacement fraction with its 5 to 95% range, where 0 is the arithmetic zone mean and 1 the length-weighted reference. The fraction is undefined at an amplitude of zero because the two references coincide.
+
+| Amplitude | old formal | old informal | average formal | average informal | new formal | new informal |
+|---|---|---|---|---|---|---|
+| 0.00 | — | — | — | — | — | — |
+| 0.25 | 1.10 [-0.29, 2.47] | 0.65 [-0.05, 1.11] | 1.26 [-0.95, 3.72] | 2.00 [1.12, 2.77] | 0.98 [-0.89, 2.66] | 0.89 [0.29, 1.52] |
+| 0.50 | 0.86 [0.12, 1.46] | 0.43 [0.16, 0.69] | 1.12 [-0.07, 2.43] | 1.22 [0.98, 1.66] | 0.92 [-0.03, 1.78] | 0.78 [0.40, 1.08] |
+| 0.75 | 0.74 [0.23, 1.06] | 0.34 [0.16, 0.52] | 1.07 [0.22, 1.93] | 0.97 [0.74, 1.26] | 0.89 [0.26, 1.46] | 0.72 [0.43, 0.92] |
+
 ## F1
 
 Table F1. Every arm of the sensor-bias sweep under the primary rule, as the displacement of each coefficient in baseline posterior standard deviations. Rank statistics compare the 92-junction risk field with the unbiased case.
