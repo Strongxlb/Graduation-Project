@@ -274,7 +274,33 @@ Table G3. Scenario draw specification. One draw per retained ensemble member is 
 
 ## H1
 
-Table H1. The complete risk register, all 92 junctions, ordered by expected cumulative deficit. Banding rules are given in the main text; the governing band is the higher of the breach and severity bands.
+Table H1. Risk banding. The likelihood and severity axes are scored 1 to 5 on the criteria below and consequence 0 to 3; a risk score is the axis score times the consequence score, and the band follows from that score. The severity edges are pre-declared hours rather than quantiles of this network's own results, so the same scale applies across scenarios. The governing band is the higher of the breach-probability band and the severity band, since neither axis alone may reduce an action.
+
+| Axis | Band | Criterion |
+|---|---|---|
+| Likelihood, from $P_{\min}$ | rare | P_min < 0.05 |
+|  | unlikely | 0.05 <= P_min < 0.20 |
+|  | possible | 0.20 <= P_min < 0.50 |
+|  | likely | 0.50 <= P_min < 0.80 |
+|  | almost certain | P_min >= 0.80 |
+| Severity, from E[D] | negligible | E[D] < 1 h |
+|  | brief | 1 <= E[D] < 6 h |
+|  | sustained | 6 <= E[D] < 12 h |
+|  | prolonged | 12 <= E[D] < 24 h |
+|  | persistent | E[D] >= 24 h (half the assessment window or more) |
+| Consequence, from demand | non-consumer | d = 0, a non-consumer junction |
+|  | minor | 0 < d <= 1.67 L/s |
+|  | moderate | 1.67 < d <= 4.38 L/s |
+|  | major | d > 4.38 L/s |
+| Risk band, from score | not applicable | score = 0 |
+|  | low | 1 <= score <= 3 |
+|  | medium | 4 <= score <= 6 |
+|  | high | 7 <= score <= 9 |
+|  | very high | score >= 10 |
+
+## H2
+
+Table H2. The complete risk register, all 92 junctions, ordered by expected cumulative deficit. Bands are defined in Table H1.
 
 | node | P min current | P min heatwave | P min heat ageing | demand L s | risk band severity | risk band governing |
 |---|---|---|---|---|---|---|

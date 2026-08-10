@@ -719,7 +719,7 @@ difference in this experiment.
 
 Table 3. **Baseline inference comparison.** Four weighting rules applied to the same 294 residuals and the same 8192 Sobol candidates. SD retained is the weighted-ensemble standard deviation as a percentage of the prior; it is a posterior standard deviation only under the two formal rules, since the informal score is not a likelihood.
 
-![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the posterior standard deviation as a percentage of the prior.](figures/paper/fig2_inference_rule_dependence.png)
+![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the weighted-ensemble standard deviation as a percentage of the prior, which is a posterior standard deviation only under the two formal likelihoods.](figures/paper/fig2_inference_rule_dependence.png)
 
 The weights show why, and the reason is arithmetic. The formal weights concentrate on an
 effective sample of about 157 of 8192 draws (1.9%), whereas the informal effective sample size
@@ -1362,9 +1362,11 @@ coincide.
 
 {{A:G3}}
 
-## Appendix H. Full risk register
+## Appendix H. Risk banding and the full register
 
 {{A:H1}}
+
+{{A:H2}}
 
 ## Appendix I. Section-to-script map and reproduction
 

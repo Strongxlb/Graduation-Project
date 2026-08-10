@@ -337,7 +337,37 @@ add("G3",
            ["Common random numbers", u["common_random_numbers"]]],
           ["Quantity", "Specification"]))
 
-# ---------------------------------------------------------------- H: risk register
+# ---------------------------------------------------------------- H: banding, then the register
+# The register's last three columns were uninterpretable on their own: the caption used to say the
+# banding rules were in the main text, and they were not there. They are generated here from the
+# artifact rather than transcribed, so the table cannot drift from the scale the code applied.
+s12 = load("step12_scenarios.json")
+d12 = s12["definitions"]
+q1, q2 = s12["consequence_terciles_L_s"]
+brows = []
+for band, crit in d12["likelihood_bands_on_P_min"].items():
+    brows.append(["Likelihood, from $P_{\\min}$" if not brows else "", band, crit])
+n = len(brows)
+for band, crit in d12["severity_bands_on_E_duration_h"].items():
+    brows.append(["Severity, from E[D]" if len(brows) == n else "", band, crit])
+n = len(brows)
+for label, score in d12["consequence_scores"].items():
+    name = label.split(" (")[0]
+    rng = {0: "d = 0, a non-consumer junction", 1: "0 < d <= %.2f L/s" % q1,
+           2: "%.2f < d <= %.2f L/s" % (q1, q2), 3: "d > %.2f L/s" % q2}[score]
+    brows.append(["Consequence, from demand" if len(brows) == n else "", name, rng])
+n = len(brows)
+for band, crit in d12["risk_band_mapping"].items():
+    brows.append(["Risk band, from score" if len(brows) == n else "", band, crit])
+add("H1",
+    "Table H1. Risk banding. The likelihood and severity axes are scored 1 to 5 on the criteria "
+    "below and consequence 0 to 3; a risk score is the axis score times the consequence score, "
+    "and the band follows from that score. The severity edges are pre-declared hours rather than "
+    "quantiles of this network's own results, so the same scale applies across scenarios. The "
+    "governing band is the higher of the breach-probability band and the severity band, since "
+    "neither axis alone may reduce an action.",
+    table(brows, ["Axis", "Band", "Criterion"]))
+
 with open(os.path.join(CACHE, "step12_risk_register.csv")) as f:
     reg = list(csv.DictReader(f))
 keep = ["node", "P_min_current", "P_min_heatwave", "P_min_heat_ageing", "P_bar",
@@ -348,10 +378,9 @@ hdr = [k.replace("_", " ") for k in keep]
 rows = []
 for r in sorted(reg, key=lambda x: -float(x.get("E_deficit_mgL_h") or 0)):
     rows.append([r[k] for k in keep])
-add("H1",
-    "Table H1. The complete risk register, all 92 junctions, ordered by expected cumulative "
-    "deficit. Banding rules are given in the main text; the governing band is the higher of the "
-    "breach and severity bands.",
+add("H2",
+    "Table H2. The complete risk register, all 92 junctions, ordered by expected cumulative "
+    "deficit. Bands are defined in Table H1.",
     table(rows, hdr))
 
 # ---------------------------------------------------------------- write
