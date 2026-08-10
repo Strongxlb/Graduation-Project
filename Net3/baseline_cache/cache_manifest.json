@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-08-10T18:21:14+00:00",
+  "generated_utc": "2026-08-10T18:36:50+00:00",
   "git": {
-    "commit": "48bd3be5c3e92e53c5369a5daad7de51794d4494",
+    "commit": "019a6b400ee2d890b8ab1d66623737ed46d21b59",
     "dirty": false,
     "dirty_files": [],
-    "tree_sha256": "84bece346d990af8b7ffd1a30377a693945e057c383712cf90d93ada53c7bda6",
+    "tree_sha256": "a20424199d0537cc339e2c8e4a681a185da0889059c17e4ea490852ada113dcc",
     "uncommitted_diff_sha256": null
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
@@ -90,11 +90,11 @@
       "step7c_profile_ar1.py": "baf9e19f77e7ffa1d3814f4eab54da8d631faaf009dd8be1704c5db64de6ba53",
       "step8_sensor_bias.py": "d2df80954270a912abf9e8d4757ec5f698e9c7c461ff86033e23253bba188dd3",
       "step8b_kb_sensitivity.py": "002759f07ca1ba0bf4cb1333f11050832e2854f05f461a1e5f9b7f5774c95882",
-      "step8c_bias_bynode.py": "8a0ce5c90f07c8e2ea90f6f481f1c48b09c6e2b4fa37455235f27be1be1114c0",
+      "step8c_bias_bynode.py": "511fe7128d1d47ec18d786778d3f2d34a7bbb965517d6a67ef72b98db869a9dd",
       "step8d_sensor_drift.py": "df945d64ce8b618dca16a43c264d78b47b990f83869c7c6429bfaaf76b46635a",
       "step9_zeroclip.py": "ebbb23bab41673f9365c947f6e3ea6c18d9ef4043526140290829803667ca925"
     },
-    "step_scripts_combined_sha256": "773034843056b2c191bf0c1e5e24e7d705501426ccbc7770d529eddff5bb99f6"
+    "step_scripts_combined_sha256": "6ceb3978a92336dc2162b74616bf93a1fccfc6a6d22eb5d3aaf14b82a690aa24"
   },
   "critical_fields": [
     "config_sha256",
