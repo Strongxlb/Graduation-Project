@@ -55,7 +55,7 @@ Under known bulk decay and unbiased sensors, the formal rule contracted all thre
 so the difference is produced by the weighting alone. Treating bulk decay and monitor offsets as
 jointly unknown withdrew practical identifiability from the average and new coefficients.
 Recalibration over 100 noise realisations gave estimator spreads 1.04 to 1.12 times the
-Cramér–Rao bound. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
+Cramér–Rao bound, with 90% interval coverage of 0.85 to 0.89 against a nominal 0.90. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
 largely preserved whole-network rank order, with Spearman rank correlation of 0.93 to 0.98 under bulk-decay misspecification, but they altered the six-node operational shortlist under one risk metric and not another.
 
 Parameter identification, predictive adequacy and decision stability therefore require separate
@@ -565,7 +565,7 @@ For the 30-realisation amplitude sweep, the displacement fraction gives the posi
 fraction is **raw rather than control-adjusted**, and is summarised by its median and 5–95%
 range across realisations. At $\lambda = 0$ the two means coincide and $f$ is undefined, so that arm serves only as the control.
 
-## 2.7 Prediction validation
+## 2.7 Internal prediction validation
 
 Four complementary validation designs were used to separate predictive performance from
 parameter identification. Leave-one-monitor-out withheld each of the six monitors in turn while
@@ -1132,15 +1132,17 @@ specific informal weighting rather than from an absence of information in the mo
 At the level of robustness the error sources act in three ways, and a single verdict would
 mislead. Larger random error and an assumed AR(1) correlation mainly reduce precision.
 Systematic sensor error and structured heterogeneity instead introduce potentially large bias
-while leaving the fit apparently precise. Bulk-decay uncertainty does both, disproportionately
+while leaving two separate things intact: the posterior stays narrow, and the aggregate residual
+stays near the noise level. Neither is evidence about the other, and neither reveals the bias. Bulk-decay uncertainty does both, disproportionately
 for the average and new coefficients; once it and six monitor offsets are all unknown, the
 Fisher analysis no longer supports practical identification of those two from this design.
 
 At the level of decisions, neither predictive accuracy nor the whole-network risk pattern tracks
 parameter error reliably. Coefficients can become effectively prior-dominated while held-out
-prediction errors stay close to the observation-noise scale, and displacements of several
-posterior standard deviations often left the leading set ranked by cumulative deficit unchanged
-while the ranking by time-averaged breach probability was considerably more sensitive.
+prediction errors stay close to the observation-noise scale, and under bulk-decay misspecification
+and sensor bias, displacements of several posterior standard deviations often left the leading set
+ranked by cumulative deficit unchanged while the ranking by time-averaged breach probability was
+considerably more sensitive.
 
 A study reporting only a fit statistic, a held-out prediction error or a rank correlation cannot
 distinguish a calibration that has learned its parameters from one that has learned to predict
@@ -1148,8 +1150,8 @@ without them, or one whose broad ranking is stable while its shortlist is not.
 
 ### 3.7.2 Methodological implications
 
-Four safeguards proved necessary, each following from a result above rather than from general
-good practice. *Paired controls*: a structural increment is interpretable only against a
+Four safeguards were necessary in these experiments, each following from a result above rather
+than from general good practice. *Paired controls*: a structural increment is interpretable only against a
 homogeneous run sharing the same noise, since part of any apparent shift is the inference rule's
 own offset. *Replication*: the structural increment in one heterogeneity field reversed sign
 relative to the 25-field mean, and an apparent overshoot past the length-weighted comparator in
@@ -1200,8 +1202,8 @@ propagating hydraulic uncertainty and a real network with independent observatio
 Under the controlled baseline assumptions, six monitored chlorine series carry identifiable
 information about all three grouped wall-decay coefficients. The formal censored likelihood
 contracted each coefficient to roughly a quarter to a third of its prior standard deviation,
-recovered a displaced prior, and agreed with an independent Fisher bound, a continuous profile
-likelihood and a repeated-noise experiment. The much wider distributions obtained previously on
+recovered a displaced prior, and agreed with a separately computed local Fisher bound, a
+continuous profile likelihood and a repeated-noise experiment. The much wider distributions obtained previously on
 the same system reflect the specific informal weighting used rather than an absence of
 information in the observations, and tightening its behavioural threshold does not close the
 gap, because a threshold cannot restore an omitted information factor.
@@ -1212,8 +1214,8 @@ uncertainty does both and falls disproportionately on the two weakly decaying zo
 local Fisher analysis and the study-specific criterion that the Cramér–Rao bound stay below the
 prior standard deviation, those two coefficients cease to be practically identifiable from this
 six-monitor design once bulk decay and monitor-specific offsets are treated as unknown together.
-Structured heterogeneity displaced all three coefficients comparably, although the zones
-could not be ordered against one another across noise realisations, and the length-weighted
+In the paired reference realisation structured heterogeneity displaced all three coefficients
+comparably, although across noise realisations the zones could not be ordered against one another, and the length-weighted
 value used to separate the candidate targets is a directional comparator rather than the
 quantity a grouped fit estimates.
 
