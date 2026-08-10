@@ -17,6 +17,11 @@ STILL TO CONFIRM BEFORE SUBMISSION (values not derivable from the repository):
   - The generative-AI statement below is written from the facts recorded in PAPER_PLAN.zh.md
     section 11. The departmental Policy Guidance note had not been obtained when it was
     drafted, so its FORMAT may need to change; the factual content should not.
+    It and the Acknowledgements sit inside EXCLUDE markers, so build.sh strips both and
+    paper.docx does NOT contain them. That is deliberate while the format is unsettled, but it
+    means the declaration exists only in this source: it must be carried into the submitted
+    Word file by hand. The word-count block prints both as held out, so a build that has lost
+    them says so.
   - Title page must follow the course template and must not use the College crest.
   - The repository URL and release tag in Appendix I. Deliberately left as a placeholder: the
     Imperial-hosted repository is created and the release tagged only once the paper is final,

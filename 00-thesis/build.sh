@@ -74,15 +74,10 @@ def sub(m):
 atabs = open('../Net3/Figures/paper/appendix_tables.md').read()
 ablocks = {}
 for m in re.finditer(r'^## (\w+)\b.*?$(.*?)(?=^## |\Z)', atabs, re.M | re.S):
-    body, run = [], []
-    for l in m.group(2).split('\n'):
-        if l.strip().startswith('|'):
-            run.append(l)
-        elif run:
-            body.append('\n'.join(run)); run = []
-    if run:
-        body.append('\n'.join(run))
-    ablocks[m.group(1)] = '\n\n'.join(body)
+    # the whole block, not just the pipe rows. Main-body tables carry a hand-written caption in
+    # paper.md and would be duplicated, but an appendix table's only caption is the one the
+    # generator writes, so filtering to pipe rows shipped twenty untitled grids of numbers.
+    ablocks[m.group(1)] = m.group(2).strip()
 def asub(m):
     if m.group(1) not in ablocks:
         raise SystemExit('appendix table %s not found in appendix_tables.md' % m.group(1))

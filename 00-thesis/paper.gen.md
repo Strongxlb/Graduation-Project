@@ -17,6 +17,11 @@ STILL TO CONFIRM BEFORE SUBMISSION (values not derivable from the repository):
   - The generative-AI statement below is written from the facts recorded in PAPER_PLAN.zh.md
     section 11. The departmental Policy Guidance note had not been obtained when it was
     drafted, so its FORMAT may need to change; the factual content should not.
+    It and the Acknowledgements sit inside EXCLUDE markers, so build.sh strips both and
+    paper.docx does NOT contain them. That is deliberate while the format is unsettled, but it
+    means the declaration exists only in this source: it must be carried into the submitted
+    Word file by hand. The word-count block prints both as held out, so a build that has lost
+    them says so.
   - Title page must follow the course template and must not use the College crest.
   - The repository URL and release tag in Appendix I. Deliberately left as a placeholder: the
     Imperial-hosted repository is created and the release tagged only once the paper is final,
@@ -1335,6 +1340,8 @@ integrated severity is still drifting at the horizon, and water age is horizon-d
 construction in this network. Table A2 shows why the severity criterion fails, with the
 network-mean deficit falling after the start-up transient and then rising monotonically.
 
+Table A1. Cyclostationarity diagnostics. Worst value across the truth and both corners of the prior box, for each pair of successive 24 h cycles. Tolerances were declared before the values were seen.
+
 | Criterion | Tolerance | 0-24 | 24-48 | 48-72 | 72-96 | 96-120 | 120-144 | Earliest warm-up satisfying it |
 |---|---|---|---|---|---|---|---|---|
 | Tank level (m) | 0.05 | 0.8185 | 0.0496 | 0.0070 | 0.0009 | 8.8e-05 | 8.4e-05 | 24 h (verified) |
@@ -1343,6 +1350,8 @@ network-mean deficit falling after the start-up transient and then rising monoto
 | Tank chlorine (mg L-1) | 0.01 | 0.2457 | 0.0787 | 0.0416 | 0.0219 | 0.0115 | 0.0061 | 120 h (verified) |
 | Risk severity, relative change in E[A] | 0.02 | 0.8983 | 0.6104 | 0.1206 | 0.1897 | 0.0978 | 0.0509 | not met within 168 h; extrapolates to ~168 h (unverified) |
 | Water age, 95th percentile (h) | 1.0 | 23.9990 | 21.6756 | 19.0425 | 16.6924 | 14.6298 | 12.8149 | not met within 168 h; extrapolates to ~600 h (unverified) |
+
+Table A2. Network-mean cumulative deficit for the truth, by cycle. The integrated severity falls after the start-up transient and then rises monotonically, which is why the 2% criterion is not met inside the model horizon.
 
 | Cycle | Net-mean deficit (mg L-1 h) | Relative change |
 |---|---|---|
@@ -1355,11 +1364,15 @@ network-mean deficit falling after the start-up transient and then rising monoto
 
 ## Appendix B. Numerical and unit verification
 
+Table B1. Bulk-decay arm of the known-answer test against the analytic first-order solution at the far end of a single pipe. The relative error grows with the amount of decay, which is the signature of the quality solver's time discretisation; a wrong conversion factor would instead give a constant relative offset.
+
 | k_b (1/day) | Residence time (h) | EPANET C | Analytic C | Relative error |
 |---|---|---|---|---|
 | -0.50 | 0.3927 | 0.991846 | 0.991852 | 6.7e-06 |
 | -1.00 | 0.3927 | 0.983744 | 0.983771 | 2.7e-05 |
 | -2.00 | 0.3927 | 0.967699 | 0.967805 | 1.1e-04 |
+
+Table B2. Wall-decay arm. The exact concentration cannot be predicted from the wall coefficient alone because EPANET's first-order wall reaction is also limited by mass transfer, so what is asserted is the sign, monotonicity, and that the result stays above the mass-transfer-free limit.
 
 | k_w (m/day) | EPANET C | Extra decay vs k_w=0 | Mass-transfer-free bound | Above bound |
 |---|---|---|---|---|
@@ -1368,6 +1381,8 @@ network-mean deficit falling after the start-up transient and then rising monoto
 | -0.50 | 0.905719 | 0.086127 | 0.889350 | yes |
 | -1.00 | 0.849034 | 0.142812 | 0.797441 | yes |
 | -2.00 | 0.779180 | 0.212665 | 0.641136 | yes |
+
+Table B3. Unit-equivalence test over 256 leading Sobol candidates. The corrected implementation reproduces the superseded one to floating-point precision. The units-only arm shows what correcting the concentrations while leaving the solver tolerance at the EPANET default would have cost.
 
 | Comparison | Max absolute difference (mg L-1) | Max relative difference | Points below threshold | Duration cells that differ |
 |---|---|---|---|---|
@@ -1390,11 +1405,15 @@ in Tables B1 and B2 pass either way.
 
 ## Appendix C. Threshold sweep and displaced-prior matrices
 
+Table C1. Behavioural-threshold sweep for the informal comparator. Tightening the cut-off removes candidates but cannot restore the information factor the score omits, so the retained widths stay far above the formal values.
+
 | Threshold (mg L-1) | Retained | Retention | SD above sigma | old SD (retained) | average SD (retained) | new SD (retained) |
 |---|---|---|---|---|---|---|
 | 0.107 | 4786 | 58.4% | 1.70 | 0.2668 (71.1%) | 0.0424 (91.8%) | 0.0242 (88.2%) |
 | 0.110 | 5668 | 69.2% | 2.42 | 0.2844 (75.8%) | 0.0437 (94.5%) | 0.0254 (92.7%) |
 | 0.120 | 7084 | 86.5% | 4.85 | 0.3220 (85.8%) | 0.0455 (98.4%) | 0.0269 (98.0%) |
+
+Table C2. Displaced-prior recovery over 30 noise realisations, as the median fraction of the imposed displacement recovered with its interquartile range, and the retained prior width. DOWN displaces every coefficient towards stronger decay; OLDUP displaces the old coefficient the other way.
 
 | Design | Rule | Coefficient | Displacement recovered [IQR] | Prior SD retained |
 |---|---|---|---|---|
@@ -1425,11 +1444,15 @@ marginal information, that is the Schur complement $\mathbf{F}_{pp} - \mathbf{F}
 nuisance parameters admitted in that case. This is the bound on the wall coefficients after the
 nuisance parameters have been accounted for, not the bound that would apply if they were known.
 
+Table D1. Cramer-Rao bounds under nested nuisance models, obtained from the marginal (Schur) information. Percentages are the bound as a fraction of the prior standard deviation.
+
 | Case | Condition number | old | average | new |
 |---|---|---|---|---|
 | A: kw only | 214.7 | 0.0947 (25%) | 0.0135 (29%) | 0.0080 (29%) |
 | B: kw+kb | 100.5 | 0.1131 (30%) | 0.0248 (54%) | 0.0148 (54%) |
 | C: kw+kb+6 offsets | 88.0 | 0.2509 (67%) | 0.1036 (224%) | 0.0299 (109%) |
+
+Table D2. Finite-difference step convergence for the Jacobian. Steps are scale-dependent rather than shared, because one absolute step would be a 2% perturbation of the old coefficient and a 40% perturbation of the new one.
 
 | Coefficient | Step | As % of truth | Default | Case-A bound |
 |---|---|---|---|---|
@@ -1446,10 +1469,14 @@ nuisance parameters have been accounted for, not the bound that would apply if t
 | new | 0.005 | 10.0% |  | 0.007955 |
 | new | 0.01 | 20.0% |  | 0.007940 |
 
+Table D3. Eigenvalues of the Case-A information matrix in raw and prior-scaled form. The raw condition number is dominated by the factor of twenty between the coefficient scales; on the dimensionless matrix the spread is far smaller.
+
 | Form | Eigenvalue 1 | Eigenvalue 2 | Eigenvalue 3 | Condition number |
 |---|---|---|---|---|
 | Raw | 23906 | 5106 | 111 | 215 |
 | Prior-scaled | 24.5 | 16.6 | 7.6 | 3.2 |
+
+Table D4. Case-A bounds under an assumed AR(1) residual covariance, swept over the correlation parameter. The correlation is assumed rather than estimated, since the baseline observations are generated independently; the sweep therefore bounds how much the reported precision would degrade if the residuals were in fact correlated. Widening is the bound relative to the independent case, given for old, average and new. The three coefficients widen almost together up to a correlation of 0.4 and separate beyond it, the new coefficient least and the average coefficient most.
 
 | Correlation | Effective n | old | average | new | Widening (old / avg / new) |
 |---|---|---|---|---|---|
@@ -1470,6 +1497,8 @@ unperturbed reference. The displacement fraction is the position of the fit betw
 candidate targets, the arithmetic mean and the length-weighted value, and is undefined where they
 coincide.
 
+Table E1. Symmetric within-zone heterogeneity under the primary rule. The increment is the bias net of a paired homogeneous control run on the same noise, which is the part that can be attributed to the imposed structure.
+
 | Jitter | Zone | True arithmetic mean | Raw bias | In posterior SD | Increment over control |
 |---|---|---|---|---|---|
 | 0% | old | -1.0000 | +0.0124 | +0.13 | +0.0000 |
@@ -1485,11 +1514,15 @@ coincide.
 | 50% | average | -0.0946 | -0.0107 | -0.79 | -0.0016 |
 | 50% | new | -0.0468 | +0.0089 | +1.18 | +0.0029 |
 
+Table E2. The same design repeated over 25 independent heterogeneity fields at plus or minus 20%. The mean increment is a fraction of the field-to-field scatter in every zone, so no systematic bias is distinguishable from the choice of field.
+
 | Zone | Bias mean | Bias SD | Increment mean | Increment SD | |mean| / SD |
 |---|---|---|---|---|---|
 | old | +0.0231 | 0.0335 | +0.0107 | 0.0335 | 0.32 |
 | average | -0.0089 | 0.0046 | +0.0002 | 0.0046 | 0.04 |
 | new | +0.0055 | 0.0021 | -0.0005 | 0.0021 | 0.24 |
+
+Table E3. Length-structured heterogeneity in the reference realisation. The homogeneous baseline offset is what the same rule returns with no structural error at all and must be subtracted before a shift is read as structural.
 
 | Zone | Rule | Arithmetic mean | Length-weighted proxy | Posterior mean | Shift | Homogeneous offset | Fraction of gap |
 |---|---|---|---|---|---|---|---|
@@ -1501,6 +1534,8 @@ coincide.
 | new | informal glue | -0.0500 | -0.0659 | -0.0593 | -0.0093 | +0.0008 | 58% |
 
 ## Appendix F. Per-arm sensor error and drift results
+
+Table F1. Every arm of the sensor-bias sweep under the primary rule, as the displacement of each coefficient in baseline posterior standard deviations. Rank statistics compare the 92-junction risk field with the unbiased case.
 
 | Node | Zone | Offset (mg L-1) | old | average | new | Censored points | Spearman | Top-6 Jaccard (duration) | Top-6 Jaccard (deficit) |
 |---|---|---|---|---|---|---|---|---|---|
@@ -1529,6 +1564,8 @@ coincide.
 | 209 | average | +0.100 | -0.82 | +1.10 | +2.58 | 7 | 0.9997 | 0.71 | 1.00 |
 | 231 | average | +0.100 | +0.05 | +4.22 | -0.58 | 7 | 1.0000 | 1.00 | 1.00 |
 
+Table F2. Sensor drift against its mean-equivalent and end-equivalent constant-bias controls on identical noise. A monotone drift acts, to within about a tenth, as a constant bias at its mean over the window.
+
 | Node | End offset D | Drift shift | const(D/2) | const(D) | Drift / const(D/2) | Drift / const(D) |
 |---|---|---|---|---|---|---|
 | 15 | -0.100 | -0.2370 | -0.2623 | -0.3869 | 0.90 | 0.61 |
@@ -1542,6 +1579,8 @@ coincide.
 
 ## Appendix G. Risk-assessment mechanics
 
+Table G1. Water-age association and the resampling design behind its interval. Whole spatial blocks are resampled rather than individual junctions, because junctions sharing pipes, flow paths and tank states are not independent samples. The interval is a descriptive width, not a significance test.
+
 | Quantity | Value |
 |---|---|
 | Spearman, duration | 0.7285 |
@@ -1553,11 +1592,15 @@ coincide.
 | Resamples | 2000 |
 | 95% interval, Spearman duration | [0.455, 0.897] |
 
+Table G2. Three network averages for each risk metric. Consumer-only is worse than unweighted while demand-weighted is better, which can only happen if the risk concentrates at small consumers.
+
 | Metric | Unweighted (all 92) | Consumer-only (59) | Demand-weighted |
 |---|---|---|---|
 | E duration h | 3.4309 | 4.4610 | 1.2311 |
 | E deficit | 0.2181 | 0.3053 | 0.0798 |
 | min C | 0.4922 | 0.4412 | 0.6348 |
+
+Table G3. Scenario draw specification. One draw per retained ensemble member is reused across every scenario and dose as a common random number, so scenario differences are physical rather than Monte Carlo noise.
 
 | Quantity | Specification |
 |---|---|
@@ -1573,6 +1616,8 @@ coincide.
 | Common random numbers | True |
 
 ## Appendix H. Full risk register
+
+Table H1. The complete risk register, all 92 junctions, ordered by expected cumulative deficit. Banding rules are given in the main text; the governing band is the higher of the breach and severity bands.
 
 | node | P min current | P min heatwave | P min heat ageing | demand L s | risk band severity | risk band governing |
 |---|---|---|---|---|---|---|
