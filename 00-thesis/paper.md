@@ -1400,22 +1400,30 @@ The analysis code, the cached result artifacts and this paper's figure and table
 
 and every number in this paper was produced at that release. The frozen Net3 input file is hash-checked on import, and the environment is pinned to exact library versions, which matters here because the study documents version-specific WNTR behaviour. The verification checks of Section 2.2.4 are runnable: `provenance.py --check` confirms that the environment matches the one that produced the cached results, and `validate_artifacts.py` cross-checks the written numbers against the artifacts.
 
-| Paper section | Script | Artifact |
-|---|---|---|
-| 2.2.2, Appendix A | `step0_warmup_convergence.py` | `step0_warmup_convergence.json` |
-| 2.2.4, Appendix B | `step13_known_answer.py`, `step15_unit_equivalence.py` | `step13_known_answer.json`, `step15_unit_equivalence.json` |
-| 2.3, 3.2.1 | `step1_freeze_baseline.py` | `baseline_meta.json`, `baseline.npz` |
-| 3.2.2, Appendix C | `step3_threshold_sensitivity.py`, `step4d_displaced_robust.py` | `step3_threshold.json`, `step4d_displaced_robust.json` |
-| 2.4.3, 3.3.3, Appendix D | `step7_fisher.py` | `step7_fisher.json` |
-| 2.4.4, 3.2.3 | `step7b_profile.py` | `step7b_profile.json` |
-| 2.5.1, 3.3.1 | `step6_noise_sensitivity.py` | `step6_noise_sensitivity.json` |
-| 2.5.2, 3.3.1 | `step7c_ar1.py`, `step7c_profile_ar1.py` | `step7c_ar1.json`, `step7c_profile_ar1.json` |
-| 2.5.3, 3.3.2, Appendix F | `step8_sensor_bias.py`, `step8c_bias_bynode.py`, `step8d_sensor_drift.py` | `step8_sensor_bias.json`, `step8c_bias_bynode.json`, `step8d_sensor_drift.json` |
-| 2.5.5, 3.3.3 | `step8b_kb_sensitivity.py` | `step8b_kb_sensitivity.json` |
-| 2.6, 3.4, Appendix E | `step5_structural_error.py`, `step5c_jitter_sweep.py`, `step5d_structured.py` | `step5c_jitter_sweep.json`, `step5d_structured.json` |
-| 2.7, 3.5 | `step11_loo.py` | `step11_loo.json` |
-| 2.8, 3.6, Appendices G and H | `step10_risk_metrics.py`, `step12_scenarios.py` | `step10_risk_metrics.json`, `step12_scenarios.json`, `step12_risk_register.csv` |
-| 3.2.3 (repeated-noise calibration) | `step14_repeated_noise.py` | `step14_repeated_noise.json` |
-| Figures 1 to 7, Tables 1 and 3 to 5 | `paper_figs.py` | `Figures/paper/` |
-| Appendix tables | `appendix_tables.py` | `Figures/paper/appendix_tables.md` |
-| Provenance and verification | `provenance.py`, `validate_artifacts.py` | `cache_manifest.json` |
+Each script writes `Net3/baseline_cache/<script name>.json`, so the artifact column that would
+otherwise repeat this table is omitted. Five entries depart from that rule:
+`step1_freeze_baseline.py` writes `baseline_meta.json` and `baseline.npz`;
+`step3_threshold_sensitivity.py` writes `step3_threshold.json`; `step12_scenarios.py` also writes
+`step12_risk_register.csv`; `paper_figs.py` and `appendix_tables.py` write into
+`Net3/Figures/paper/`; and `provenance.py` writes `cache_manifest.json`, which
+`validate_artifacts.py` reads without writing an artifact of its own.
+
+| Paper section | Script |
+|--------------------|-----------------------------------------------------|
+| 2.2.2, Appendix A | `step0_warmup_convergence.py` |
+| 2.2.4, Appendix B | `step13_known_answer.py`, `step15_unit_equivalence.py` |
+| 2.3, 3.2.1 | `step1_freeze_baseline.py` |
+| 3.2.2, Appendix C | `step3_threshold_sensitivity.py`, `step4d_displaced_robust.py` |
+| 2.4.3, 3.3.3, Appendix D | `step7_fisher.py` |
+| 2.4.4, 3.2.3 | `step7b_profile.py` |
+| 2.5.1, 3.3.1 | `step6_noise_sensitivity.py` |
+| 2.5.2, 3.3.1 | `step7c_ar1.py`, `step7c_profile_ar1.py` |
+| 2.5.3, 3.3.2, Appendix F | `step8_sensor_bias.py`, `step8c_bias_bynode.py`, `step8d_sensor_drift.py` |
+| 2.5.5, 3.3.3 | `step8b_kb_sensitivity.py` |
+| 2.6, 3.4, Appendix E | `step5_structural_error.py`, `step5c_jitter_sweep.py`, `step5d_structured.py` |
+| 2.7, 3.5 | `step11_loo.py` |
+| 2.8, 3.6, Appendices G and H | `step10_risk_metrics.py`, `step12_scenarios.py` |
+| 3.2.3 (repeated-noise calibration) | `step14_repeated_noise.py` |
+| Figures 1 to 7, Tables 1 and 3 to 5 | `paper_figs.py` |
+| Appendix tables | `appendix_tables.py` |
+| Provenance and verification | `provenance.py`, `validate_artifacts.py` |
