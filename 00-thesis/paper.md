@@ -678,11 +678,10 @@ the true series at the six monitors and flooring the result at zero, giving 6 x 
 residuals. The realised noise RMSE over the window was 0.0973 mg L^-1^, while the minimum RMSE
 anywhere in the 8192-member candidate library was 0.0971 mg L^-1^: the best candidate therefore
 fits the observations to approximately the imposed noise floor. This establishes that a low
-aggregate residual is attainable, not that the corresponding parameter vector is correctly identified. Small residual differences accumulated over 294 observations may still carry
+aggregate residual is attainable, not that the corresponding parameter vector is correctly
+identified. Small residual differences accumulated over 294 observations may still carry
 substantial inferential information, and Section 3.2 measures how much of it the competing
-weighting rules actually extract. It also motivates, without establishing, the
-precise-but-biased case of Section 3.4, where good residual fit survives a structurally
-displaced coefficient.
+weighting rules extract.
 
 The same absolute error represents very different relative perturbations across the network: at
 node 107 a standard deviation of 0.1 mg L^-1^ is about 12% of the mean concentration, against
@@ -690,9 +689,8 @@ roughly 40% at node 15. The low-concentration old-zone monitors therefore operat
 concentration-scale signal-to-noise ratio, although parameter information ultimately depends on
 the concentration Jacobian rather than relative concentration alone (Section 3.2.3). In the
 reference realisation, ten of the 294 observations were floored at zero. Six of these were at node 15, three at node 145 and one at node 231, that is nine in the old zone and one in the average zone, none
-in the new zone. Censoring is thus concentrated in the low-residual part of the network, the
-region most relevant to the threshold-based risk analysis that follows, and is handled
-explicitly in the primary likelihood.
+in the new zone. Censoring is thus concentrated in the part of the network most relevant to the threshold-based
+risk analysis that follows, and is handled explicitly in the primary likelihood.
 
 ![Figure 1. **Study system and forward baseline.** (A) Net3 with pipes coloured by synthetic reaction zone. (B) True concentration at the monitors over the assessment window, with the noisy calibration observations. (C) Per-junction window minimum over the deterministic truth.](figures/paper/fig1_study_design.png)
 
@@ -926,8 +924,7 @@ zones. The full amplitude sweep is reported in Table E4.
 
 ### 3.5.1 Leaving out one monitor
 
-If a calibrated model predicts well at a sensor it never saw, the calibration is often taken to
-be validated. Withholding each of the six monitors in turn and refitting gives held-out RMSEs
+Withholding each of the six monitors in turn and refitting gives held-out RMSEs
 between 0.092 and 0.103 mg L^-1^ against an observation noise standard deviation of 0.1, with
 90% predictive interval coverage between 0.90 and 0.94 (Table 5). Taken at face value, these
 diagnostics indicate good held-out predictive performance at all six monitors.
@@ -938,8 +935,7 @@ observed; it does not test whether that zone's coefficient can be identified wit
 monitoring. Second, the informal comparator achieved almost the same held-out RMSE, 0.092 to
 0.102 mg L^-1^, despite producing the much broader and more prior-sensitive parameter
 distributions of Section 3.2. A weighting rule can therefore extract very little parameter
-information and still predict concentrations about as well, which is a first indication that
-predictive adequacy and parameter identification are distinct properties.
+information and still predict concentrations about as well.
 
 ### 3.5.2 Leaving out a whole zone
 
@@ -969,16 +965,11 @@ its own zone. Good held-out prediction therefore did not imply local parameter i
 
 ### 3.5.3 What predictive validation does and does not license
 
-The two claims support different uses. Held-out prediction supports spatial prediction at unseen
+Held-out prediction supports spatial prediction at unseen
 locations within the same simulated operating regime. It does not support physical
 interpretation of the coefficients, attribution of decay to particular assets, or any
-intervention whose design depends on which zone is reactive. For those, Section 3.5.2 shows the evidence may be absent while every predictive diagnostic passes. A model adequate for
-concentration screening may still be inadequate for asset diagnosis.
-
-Nor is this an external validation. Even the heterogeneous-truth extension retains the same
-underlying hydraulics, the same first-order reaction family and the same solver, and no field
-observations are used. The exercise establishes internal predictive consistency, not
-real-network validity.
+intervention whose design depends on which zone is reactive. For those, Section 3.5.2 shows the evidence may be absent while every predictive diagnostic
+passes. Nor is any of this an external validation, for the reasons set out in Section 3.7.3.
 
 ![Figure 6. **Leave-one-zone-out parameter and prediction results.** Left, median coefficient over 30 realisations against prior support, midpoint and truth; the bar is the median within-realisation posterior standard deviation at a Gaussian 90% width. Right, held-out RMSE against the 0.1 mg L^-1^ noise scale, bars showing the interquartile range.](figures/paper/fig6_prediction_without_identification.png)
 
@@ -990,10 +981,9 @@ Table 5. **Held-out validation under the primary likelihood.** Own-coefficient e
 
 ### 3.6.1 Duration, depth and hydraulic interpretation
 
-Calibration uncertainty matters operationally when it changes estimated risk or the
-prioritisation of locations for action, so the ensemble was propagated to the network and
-summarised with several metrics rather than one. The values in this section carry the baseline
-weights and are conditional on its single reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^,
+The ensemble was propagated to all 92 junctions and summarised with several metrics rather than
+one. The values in this section carry the baseline weights and are conditional on its single
+reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^,
 accumulates a deficit of 1.68 mg L^-1^ h and has a median window minimum of 0.031 mg L^-1^; node
 129 spends twice as long below the threshold yet accumulates only 0.84 mg L^-1^ h, with a median
 minimum of 0.147. Duration measures persistence, deficit combines persistence with depth, and
@@ -1040,10 +1030,9 @@ deficit ranking retains a more clearly separated leading core.
 ### 3.6.3 Temperature, ageing and dosing stress tests
 
 Propagating the same ensemble through warmer conditions illustrates the machinery under
-illustrative stress-test assumptions. Scenario A reproduces the 12 degree Celsius baseline but
-includes the prescribed temperature uncertainty around that reference, shifting the network-mean
-cumulative deficit from the fixed-temperature 0.218 mg L^-1^ h of Section 3.6.1 to 0.222 while
-leaving the 21-junction breach count and 55.4 L s^-1^ of demand at risk unchanged.
+illustrative stress-test assumptions. Adding the prescribed temperature uncertainty at the 12
+degree Celsius baseline moves the network-mean cumulative deficit only from 0.218 to
+0.222 mg L^-1^ h, leaving the breach count and demand at risk unchanged.
 
 Raising the water temperature to 16 and then 20 degrees Celsius with Arrhenius scaling increases
 the number of junctions more likely than not to breach from 21 to 28 and 29, the demand they
@@ -1056,9 +1045,8 @@ concentration and to the tank initial concentration together so that the whole s
 moves consistently, reduces the network-mean expected
 duration from 5.22 to 4.63 and 4.29 h and the deficit from 0.522 to 0.453 and 0.396 mg L^-1^ h,
 but demand at risk falls only to 64.7 L s^-1^ at both doses and never returns to the baseline
-55.4. Dosing improves the continuous severity metrics without restoring the baseline
-demand-at-risk level; the identical figure at both doses is a plateau of the binary
-classification, not evidence that the extra 15% achieved nothing. The ageing multipliers are illustrative, no by-product, taste or booster constraint is represented, and absolute severities inherit the horizon dependence of Section 3.1.2. Maps
+55.4. The identical figure at both doses is a plateau of the binary classification, not evidence
+that the extra 15% achieved nothing. The ageing multipliers are illustrative, no by-product, taste or booster constraint is represented, and absolute severities inherit the horizon dependence of Section 3.1.2. Maps
 and the full register are in Appendix H.
 
 ![Figure 7. **Risk robustness is metric-specific.** (A) Rank of the leading nodes under $\bar{P} = E[D]/48$ against cumulative deficit $E[A]$. (B) Top-six overlap with the reference ranking under three selected perturbations, both metrics. (C) Expected duration against deficit for all 92 junctions.](figures/paper/fig7_metric_specific_risk.png)
