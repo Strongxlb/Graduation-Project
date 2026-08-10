@@ -44,13 +44,24 @@ def run(bcol, off):
     out = {s: {"means": {z: [] for z in ZKEYS}, "sds": {z: [] for z in ZKEYS}, "P": [], "A": []}
            for s in SCHEMES}
     n_clipped = []
+    rmse_mins, noise_rmses = [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
-        obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
+        eps = rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
+        obs = truth_mon + eps
         if bcol is not None:
             obs[:, bcol] += off
         n_clipped.append(int((obs[B.WARMUP_H:] < 0).sum()))
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
+        # Aggregate fit against the noise floor, for every arm rather than for node 15 alone
+        # (Step 8). The paper pairs the largest displacement, which comes from this sweep, with
+        # a statement about the residual; that pairing is only honest if the residual is
+        # measured over the same 24 arms. rmse_min is the best RMSE any candidate achieves
+        # against the biased observations; noise_rmse is what the unbiased observations
+        # themselves score against the truth.
+        obs_unbiased = np.clip(truth_mon + eps, 0, None)[B.WARMUP_H:]
+        rmse_mins.append(float(B.rmse_of(C_all_mon, obs).min()))
+        noise_rmses.append(float(np.sqrt(((obs_unbiased - truth_mon[B.WARMUP_H:]) ** 2).mean())))
         wts = B.all_weightings(C_all_mon, obs, threshold=B.RMSE_THR, schemes=SCHEMES)
         for s in SCHEMES:
             w, _ = wts[s]
@@ -71,10 +82,14 @@ def run(bcol, off):
                   "P": P_med, "A": A_med,
                   "top": [ALL_NODES[i] for i in np.argsort(P_med)[::-1][:TOP_K]],
                   "top_deficit": [ALL_NODES[i] for i in np.argsort(A_med)[::-1][:TOP_K]]}
-    return res, float(np.median(n_clipped))
+    fit = {"rmse_min_med": float(np.median(rmse_mins)),
+           "noise_rmse_med": float(np.median(noise_rmses)),
+           "rmse_min_over_noise_med": float(np.median(np.array(rmse_mins)
+                                                      / np.array(noise_rmses)))}
+    return res, float(np.median(n_clipped)), fit
 
 
-base, base_clip = run(None, 0.0)
+base, base_clip, base_fit = run(None, 0.0)
 
 print("=== Step 8c: sensor-bias location sweep (both signs, 30 noise realisations) ===")
 for s in SCHEMES:
@@ -96,7 +111,7 @@ report = {**B.weighting_provenance(comparators=["informal_glue"]),
                      "disagree about which nodes lead"},
           "baseline": {s: {"means": base[s]["means"], "sds": base[s]["sds"],
                            f"top{TOP_K}": base[s]["top"]} for s in SCHEMES},
-          "baseline_censored_med": base_clip, "rows": []}
+          "baseline_censored_med": base_clip, "baseline_fit": base_fit, "rows": []}
 
 for s in SCHEMES:
     tag = "PRIMARY" if s == B.PRIMARY_WEIGHTING else "comparator"
@@ -106,7 +121,7 @@ for s in SCHEMES:
     for off in OFFSETS:
         for node in B.MONITOR_NODES:
             bcol = B.MONITOR_NODES.index(node)
-            res, clip = run(bcol, off)
+            res, clip, fit = run(bcol, off)
             r = res[s]
             d = {z: r["means"][z] - base[s]["means"][z] for z in ZKEYS}
             dsd = {z: d[z] / base[s]["sds"][z] for z in ZKEYS}
@@ -122,7 +137,7 @@ for s in SCHEMES:
                 "d_old": d["old"], "d_avg": d["average"], "d_new": d["new"],
                 "d_old_over_sd": dsd["old"], "d_avg_over_sd": dsd["average"],
                 "d_new_over_sd": dsd["new"], "own_shift_over_sd": dsd[own],
-                "n_censored_med": clip, "risk_spearman_vs_unbiased": rho,
+                "n_censored_med": clip, **fit, "risk_spearman_vs_unbiased": rho,
                 f"risk_top{TOP_K}_jaccard_vs_unbiased": jac, f"top{TOP_K}": r["top"],
                 "deficit_spearman_vs_unbiased": rho_A,
                 f"deficit_top{TOP_K}_jaccard_vs_unbiased": jac_A,
@@ -137,6 +152,11 @@ report["summary"] = {
     "max_own_shift_over_sd": {"node": worst["node"], "zone": worst["zone"],
                               "offset": worst["offset"],
                               "value": worst["own_shift_over_sd"]},
+    # the paper quotes this as the bound on how far the aggregate residual rises under any bias
+    # arm, so it is stored rather than left to be re-derived from the rows
+    "max_rmse_min_over_noise": max(r["rmse_min_over_noise_med"] for r in prim),
+    # the same bound as a percentage excess, which is the form the paper states it in
+    "max_residual_excess_pct": 100 * (max(r["rmse_min_over_noise_med"] for r in prim) - 1),
     "min_risk_spearman": min(r["risk_spearman_vs_unbiased"] for r in prim),
     f"min_risk_top{TOP_K}_jaccard": min(r[f"risk_top{TOP_K}_jaccard_vs_unbiased"] for r in prim),
     "min_deficit_spearman": min(r["deficit_spearman_vs_unbiased"] for r in prim),

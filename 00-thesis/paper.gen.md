@@ -50,7 +50,7 @@ Under known bulk decay and unbiased sensors, the formal rule contracted all thre
 so the difference is produced by the weighting alone. Treating bulk decay and monitor offsets as
 jointly unknown withdrew practical identifiability from the average and new coefficients.
 Recalibration over 100 noise realisations gave estimator spreads 1.04 to 1.12 times the
-Cramér–Rao bound. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 3.4%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
+Cramér–Rao bound. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
 largely preserved whole-network rank order, with Spearman rank correlation of 0.93 to 0.98 under bulk-decay misspecification, but they altered the six-node operational shortlist under one risk metric and not another.
 
 Parameter identification, predictive adequacy and decision stability therefore require separate
@@ -948,7 +948,7 @@ instruments.
 | AR(1) rho = 0.4 (W) | x1.48 | x1.49 | x1.44 | — | — | Fisher |
 | k_b = -0.4 (D) | -0.66 | -1.53 | -1.58 | 0.996 | rho_s 0.976; top-6 0.50 / 1.00 | 30 real. |
 | k_b = -0.6 (D) | +0.56 | +1.41 | +1.49 | 0.997 | rho_s 0.933; top-6 0.50 / 0.71 | 30 real. |
-| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | 0.993-1.034 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
+| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | 0.995-1.062 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
 | sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | — | unchanged | 2 nodes x 4 |
 | zero censoring (D) | -0.11 | -0.00 | +0.01 | — | top-3 unchanged | 30 real.; reference seed has 10/294 clipped |
 | symmetric heterogeneity (D) | +0.11 | +0.02 | -0.06 | — | — | 25 fields |
@@ -1012,7 +1012,7 @@ stable: across noise realisations the interval spans both sides of unity. At $\l
 all three intervals exclude zero, so the displacement away from the arithmetic mean in the
 length-weighted direction is resolved at the tested noise level, even though its size is not.
 
-The informal comparator attenuates the effect in the old zone, but not uniformly across zones. Its median fraction for the old zone is 0.65, 0.43 and 0.34 at $\lambda = 0.25$, 0.50 and 0.75, against formal medians of 1.10, 0.86 and 0.74, that is between 0.46 and 0.59 of the formal value at every strength. The other two zones do not follow that pattern. The average-zone informal fraction *exceeds* the formal one at $\lambda = 0.25$ and 0.50, at 1.58 and 1.10 times it, and falls only slightly below at 0.75; the new-zone attenuation is milder throughout, at 0.81 to 0.91 of the formal value. The experiment therefore supports a zone-specific statement rather than a general one: where the informal score does attenuate, a study relying on it would understate how far structural misspecification moves that grouped coefficient, but the halving seen for old cannot be assumed to hold for the weakly decaying zones.
+The informal comparator attenuates the effect in the old zone, but not uniformly across zones. Its median fraction for the old zone is 0.65, 0.43 and 0.34 at $\lambda = 0.25$, 0.50 and 0.75, against formal medians of 1.10, 0.86 and 0.74, that is between 0.46 and 0.59 of the formal value at every strength. The other two zones do not follow that pattern. The average-zone informal fraction *exceeds* the formal one at $\lambda = 0.25$ and 0.50, at 1.58 and 1.09 times it, and falls only slightly below at 0.75; the new-zone attenuation is milder throughout, at 0.81 to 0.91 of the formal value. The experiment therefore supports a zone-specific statement rather than a general one: where the informal score does attenuate, a study relying on it would understate how far structural misspecification moves that grouped coefficient, but the halving seen for old cannot be assumed to hold for the weakly decaying zones.
 
 ### 3.4.3 What a grouped coefficient represents
 
@@ -1279,7 +1279,7 @@ information in the observations, and tightening its behavioural threshold does n
 gap, because a threshold cannot restore an omitted information factor.
 
 That baseline result is conditional, and the conditions matter unequally. Larger random
-measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor error and structured within-zone heterogeneity instead displace the estimate by several posterior standard deviations while the best achievable aggregate residual stays within 3.4% of the realised observation-noise RMSE, so in the cases tested here neither was revealed by that statistic. A 20% error in the fixed bulk coefficient is the clearest case, leaving the best residual indistinguishable from the noise floor while displacing the average and new coefficients by 1.4 to 1.6 posterior standard deviations. Bulk-decay
+measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor error and structured within-zone heterogeneity instead displace the estimate by several posterior standard deviations while the best achievable aggregate residual stays within 6.2% of the realised observation-noise RMSE across all 24 bias arms and all structured amplitudes, so in the cases tested here neither was revealed by that statistic. A 20% error in the fixed bulk coefficient is the clearest case, leaving the best residual indistinguishable from the noise floor while displacing the average and new coefficients by 1.4 to 1.6 posterior standard deviations. Bulk-decay
 uncertainty does both and falls disproportionately on the two weakly decaying zones; under the
 local Fisher analysis and the study-specific criterion that the Cramér–Rao bound stay below the
 prior standard deviation, those two coefficients cease to be practically identifiable from this

@@ -976,7 +976,11 @@ def tables():
         L.append(f"| {lab} (D) | " + " | ".join(f"{row['shift_over_own_sd'][k]:+.2f}"
                  for k, _ in zmap)
                  + f" | {kb_fit[kbv]:.3f} | {rk} | 30 real. |")
-    bias_ratios = [r["rmse_min_over_noise_med"] for r in sb["rows"]]
+    # from `bias`, not from step8: this row's displacements are the maximum over the 24 arms of
+    # the location sweep, so the fit ratio has to be measured over those same arms. Step 8 covers
+    # node 15 only and reports a narrower range, which read as if the largest displacement had
+    # left the residual almost untouched.
+    bias_ratios = [r["rmse_min_over_noise_med"] for r in bias]
     L.append("| sensor bias, max over arms (D) | " + " | ".join(f"{worst[k]:+.2f}" for k, _ in zmap)
              + f" | {min(bias_ratios):.3f}-{max(bias_ratios):.3f} "
              + f"| rho_s >= {rho_min:.4f}; E[A] top-6 held in {ndef}/{nb} "

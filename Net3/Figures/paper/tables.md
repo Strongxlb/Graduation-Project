@@ -52,7 +52,7 @@ ESS is out of 8192: the formal weights concentrate on about 157 effective draws 
 | AR(1) rho = 0.4 (W) | x1.48 | x1.49 | x1.44 | — | — | Fisher |
 | k_b = -0.4 (D) | -0.66 | -1.53 | -1.58 | 0.996 | rho_s 0.976; top-6 0.50 / 1.00 | 30 real. |
 | k_b = -0.6 (D) | +0.56 | +1.41 | +1.49 | 0.997 | rho_s 0.933; top-6 0.50 / 0.71 | 30 real. |
-| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | 0.993-1.034 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
+| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | 0.995-1.062 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
 | sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | — | unchanged | 2 nodes x 4 |
 | zero censoring (D) | -0.11 | -0.00 | +0.01 | — | top-3 unchanged | 30 real.; reference seed has 10/294 clipped |
 | symmetric heterogeneity (D) | +0.11 | +0.02 | -0.06 | — | — | 25 fields |

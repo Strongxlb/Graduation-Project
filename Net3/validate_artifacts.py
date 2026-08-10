@@ -256,6 +256,13 @@ CLAIMS = [
      "baseline_meta.json", "summary/schemes/formal_censored/coef/avg/sd_retained", 100),
     ("paper.md", r"displaced coefficients by as much as ([0-9.]+) baseline",
      "step8c_bias_bynode.json", "summary/max_own_shift_over_sd/value", -1),
+    # measured over all 24 arms of the location sweep. An earlier version quoted the node-15
+    # figure from step 8, which understated it: the arm producing the largest displacement is
+    # not the arm producing the largest residual.
+    ("paper.md", r"never exceeded the realised observation-noise RMSE by more than ([0-9.]+)%",
+     "step8c_bias_bynode.json", "summary/max_residual_excess_pct", 1),
+    ("paper.md", r"stays within ([0-9.]+)% of the realised observation-noise RMSE",
+     "step8c_bias_bynode.json", "summary/max_residual_excess_pct", 1),
     ("paper.md", r"estimator spreads ([0-9.]+) to [0-9.]+ times",
      "step14_repeated_noise.json", "by_scheme/formal_censored/coef/old/empirical_sd_over_crlb", 1),
     ("paper.md", r"estimator spreads [0-9.]+ to ([0-9.]+) times",
