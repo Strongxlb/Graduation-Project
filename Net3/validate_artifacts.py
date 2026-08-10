@@ -259,18 +259,18 @@ CLAIMS = [
     # measured over all 24 arms of the location sweep. An earlier version quoted the node-15
     # figure from step 8, which understated it: the arm producing the largest displacement is
     # not the arm producing the largest residual.
-    ("paper.md", r"never exceeded the realised observation-noise RMSE by more than ([0-9.]+)%",
+    ("paper.md", r"never exceeded the realised\s+observation-noise RMSE by more than ([0-9.]+)%",
      "step8c_bias_bynode.json", "summary/max_residual_excess_pct", 1),
-    ("paper.md", r"stays within ([0-9.]+)% of the realised observation-noise RMSE",
-     "step8c_bias_bynode.json", "summary/max_residual_excess_pct", 1),
-    ("paper.md", r"estimator spreads ([0-9.]+) to [0-9.]+ times",
+    # re-anchored to Section 3.2.3 when the Abstract dropped the figures for length. The numbers
+    # are unchanged; only the sentence carrying them moved.
+    ("paper.md", r"Cram\u00e9r\u2013Rao bound of ([0-9.]+), [0-9.]+ and [0-9.]+",
      "step14_repeated_noise.json", "by_scheme/formal_censored/coef/old/empirical_sd_over_crlb", 1),
-    ("paper.md", r"estimator spreads [0-9.]+ to ([0-9.]+) times",
+    ("paper.md", r"Cram\u00e9r\u2013Rao bound of [0-9.]+, [0-9.]+ and ([0-9.]+)",
      "step14_repeated_noise.json", "by_scheme/formal_censored/coef/new/empirical_sd_over_crlb", 1),
     ("paper.md", r"median normalised mean absolute error of ([0-9.]+)%",
      "step11_loo.json",
      "unmonitored_validation/by_scheme/formal_censored/mean_abs_rel_error[0]", 100),
-    ("paper.md", r"Spearman rank correlation of ([0-9.]+) to",
+    ("paper.md", r"rank correlation stays between ([0-9.]+)\s+and",
      "step8b_kb_sensitivity.json", "rows[2]/by_scheme/formal_censored/risk_spearman_vs_kb_ref", 1),
     # --- scenarios: the node counts the Discussion leans on ---
     ("README.md", r"baseline ([0-9]+) nodes", "step12_scenarios.json",

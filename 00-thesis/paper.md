@@ -54,9 +54,15 @@ Under known bulk decay and unbiased sensors, the formal rule contracted all thre
 0.120 mg L^-1^ behavioural threshold retained 86–98%. Both rules used the same 294 observations,
 so the difference is produced by the weighting alone. Treating bulk decay and monitor offsets as
 jointly unknown withdrew practical identifiability from the average and new coefficients.
-Recalibration over 100 noise realisations gave estimator spreads 1.04 to 1.12 times the
-Cramér–Rao bound, with 90% interval coverage of 0.85 to 0.89 against a nominal 0.90. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
-largely preserved whole-network rank order, with Spearman rank correlation of 0.93 to 0.98 under bulk-decay misspecification, but they altered the six-node operational shortlist under one risk metric and not another.
+Recalibration over 100 noise realisations gave spreads closely matching the Cramér–Rao bound, at
+near-nominal 90% coverage. Systematic sensor error, bulk-decay misspecification and
+length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior
+standard deviations, while the best achievable aggregate residual never exceeded the realised
+observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its
+coefficient returned to the prior midpoint and retained essentially the whole prior width, while
+held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise
+scale. Displacements of several standard deviations largely preserved whole-network rank order,
+but they altered the six-node operational shortlist under one risk metric and not another.
 
 Parameter identification, predictive adequacy and decision stability therefore require separate
 validation. All conclusions are bounded by a synthetic known-truth design with internal hold-out
@@ -105,13 +111,10 @@ Cramér–Rao bounds quantify under an assumed observation model [@Brun2001]. Pr
 identifiability additionally concerns whether the finite, noisy observations actually available
 constrain the parameters sufficiently, for which profile likelihood gives a direct
 likelihood-based diagnostic [@Raue2009]; repeated-sampling experiments can then test whether the
-resulting intervals show the bias and coverage the assumed model implies.
-
-No single diagnostic suffices, and the reasons differ. A posterior mean close to the truth may
-simply reflect favourable prior placement. A narrow posterior may instead reflect a restrictive
-prior or a misspecified likelihood, and so does not establish physical correctness. And good
-prediction establishes neither, when the predicted concentration is only weakly sensitive to the
-parameter concerned.
+resulting intervals show the bias and coverage the assumed model implies. No single diagnostic
+suffices. A posterior mean close to the truth may simply reflect favourable prior placement, and
+a narrow posterior may reflect a restrictive prior or a misspecified likelihood rather than
+physical correctness.
 
 Uncertainty surviving calibration must finally be propagated to whatever decision the model
 supports, where stability is again not a single property: preservation of the whole-network
@@ -128,21 +131,20 @@ interpretation depends on their relationship to the assumed error process [@Beve
 critiques have shown that a measure not representing the sampling distribution of model errors
 need not deliver formally calibrated parameter or prediction uncertainty [@MantovanTodini2006;
 @Stedinger2008]. The controlled setting used here sidesteps that broader debate rather than
-resolving it: because the synthetic observation model is known, the specific informal weighting
+resolving it. Because the synthetic observation model is known, the specific informal weighting
 previously applied to this system can be compared directly with the corresponding formal
-likelihood on identical observations and candidate draws, separating limitations of the data
-from effects of the weighting rule.
+likelihood on identical observations and candidate draws.
 
 Second, an identifiability result obtained under a favourable baseline does not establish that
 the same parameters remain recoverable once further uncertainty sources are admitted.
 Measurement precision, temporal dependence, systematic sensor error, bulk-decay uncertainty and
-within-group heterogeneity act on the inverse problem in different ways, so their effects need to be distinguished, separating loss of precision from displacement of the estimate, and placed on a common scale.
+within-group heterogeneity act in different ways, so loss of precision has to be separated from
+displacement of the estimate and both placed on a common scale.
 
 Third, parameter identification, predictive adequacy and decision robustness answer different
-questions. A held-out prediction error cannot by itself establish that the parameter governing a
-physical process has been identified, and a high whole-network rank correlation cannot establish
-that a small hot-spot set is unchanged. A controlled experiment with a known truth tests
-directly when these diagnostics agree and when they diverge.
+questions. A held-out prediction error cannot establish that the parameter governing a physical
+process has been identified, and a high whole-network rank correlation cannot establish that a
+small hot-spot set is unchanged.
 
 ## 1.4 Aim, research questions and scope
 
@@ -172,11 +174,9 @@ repeated-noise calibration; a separation of precision loss from parameter displa
 measurement, nuisance and structural perturbations on common reference scales; and an explicit
 distinction between parameter identification, predictive adequacy and decision robustness.
 
-The scope is deliberately bounded. Network, zoning and truths are synthetic; the hydraulic model
-is treated as known rather than calibrated; chemistry is first-order in both bulk and wall
-reactions; six monitors are used; and no field observations enter the analysis. The temperature,
-ageing and dosing analyses are calibration-conditioned stress tests under stated assumptions,
-not forecasts of field behaviour.
+The scope is deliberately bounded. Network, zoning and truths are synthetic, the hydraulic model
+is treated as known rather than calibrated, chemistry is first-order in both bulk and wall
+reactions, and no field observations enter the analysis.
 
 # 2. Method and approach
 
@@ -694,7 +694,7 @@ in the new zone. Censoring is thus concentrated in the low-residual part of the 
 region most relevant to the threshold-based risk analysis that follows, and is handled
 explicitly in the primary likelihood.
 
-![Figure 1. **Study system and forward baseline.** (A) Net3 with pipes coloured by synthetic reaction zone, and the six monitors, sources and tanks. (B) True concentration at the monitors over the assessment window, with the noisy calibration observations. (C) Per-junction window minimum over the deterministic truth.](figures/paper/fig1_study_design.png)
+![Figure 1. **Study system and forward baseline.** (A) Net3 with pipes coloured by synthetic reaction zone. (B) True concentration at the monitors over the assessment window, with the noisy calibration observations. (C) Per-junction window minimum over the deterministic truth.](figures/paper/fig1_study_design.png)
 
 ## 3.2 Inference formulation determines apparent identifiability
 
@@ -941,7 +941,7 @@ condition of individual assets is not supported here. And unlike the measurement
 Section 3.3, this discrepancy cannot be removed by improving sensor precision, because its
 source is the grouped model rather than the observation process, though better instruments would make it easier to detect.
 
-![Figure 5. **Symmetric and structured within-zone heterogeneity.** (A) Structural increment over 25 independent ±20% fields, in baseline posterior standard deviations. (B) One field against the 25-field mean, showing sign reversal. (C) Raw displacement fraction $f_j$, median and 5–95% range over 30 noise realisations, with the single control-adjusted reference realisation marked faintly. (D) Structural residual against the largest standardised displacement.](figures/paper/fig5_symmetric_vs_structured.png)
+![Figure 5. **Symmetric and structured within-zone heterogeneity.** Increments in (A) and (B) are in baseline posterior standard deviations. The displacement fraction $f_j$ in (C) is raw, summarised by median and 5–95% range over 30 noise realisations, with the single control-adjusted reference realisation marked faintly.](figures/paper/fig5_symmetric_vs_structured.png)
 
 ## 3.5 Predictive accuracy is not parameter identification
 
@@ -1006,11 +1006,11 @@ underlying hydraulics, the same first-order reaction family and the same solver,
 observations are used. The exercise establishes internal predictive consistency, not
 real-network validity.
 
-![Figure 6. **A zone coefficient can remain at its prior while prediction stays near the noise scale.** For each withheld zone, the median inferred coefficient over 30 realisations against prior support, prior midpoint and truth. The bar is the median within-realisation posterior standard deviation scaled to a Gaussian 90% width, not a quantile of the 30 medians. Right, held-out RMSE at the dropped monitors against the noise level, bars showing the interquartile range over the 30 realisations.](figures/paper/fig6_prediction_without_identification.png)
+![Figure 6. **Leave-one-zone-out parameter and prediction results.** Left, median coefficient over 30 realisations against prior support, midpoint and truth; the bar is the median within-realisation posterior standard deviation at a Gaussian 90% width. Right, held-out RMSE against the 0.1 mg L^-1^ noise scale, bars showing the interquartile range.](figures/paper/fig6_prediction_without_identification.png)
 
 {{TABLE5}}
 
-Table 5. **Held-out validation under the primary likelihood.** Leave-one-monitor-out rows withhold a single sensor, leave-one-zone-out rows both sensors of a zone. Own-coefficient error is measured against the true zone value.
+Table 5. **Held-out validation under the primary likelihood.** Own-coefficient error is measured against the true zone value.
 
 ## 3.6 Propagation to operational low-chlorine risk
 
@@ -1186,26 +1186,23 @@ information in the observations, and tightening its behavioural threshold does n
 gap, because a threshold cannot restore an omitted information factor.
 
 That baseline result is conditional, and the conditions matter unequally. Larger random
-measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor error and structured within-zone heterogeneity instead displace the estimate by several posterior standard deviations while the best achievable aggregate residual stays within 6.2% of the realised observation-noise RMSE across all 24 bias arms and all structured amplitudes, so in the cases tested here neither was revealed by that statistic. A 20% error in the fixed bulk coefficient is the clearest case, leaving the best residual indistinguishable from the noise floor while displacing the average and new coefficients by 1.4 to 1.6 posterior standard deviations. Bulk-decay
-uncertainty does both and falls disproportionately on the two weakly decaying zones; under the
-local Fisher analysis and the study-specific criterion that the Cramér–Rao bound stay below the
-prior standard deviation, those two coefficients cease to be practically identifiable from this
-six-monitor design once bulk decay and monitor-specific offsets are treated as unknown together.
-In the paired reference realisation structured heterogeneity displaced all three coefficients
-comparably, although across noise realisations the zones could not be ordered against one another, and the length-weighted
-value used to separate the candidate targets is a directional comparator rather than the
-quantity a grouped fit estimates.
+measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor
+error, bulk-decay misspecification and structured within-zone heterogeneity instead displace the
+estimate by several posterior standard deviations while leaving the aggregate residual near the
+noise level, so in the cases tested here none of the three was revealed by that statistic.
+Bulk-decay uncertainty costs precision as well, disproportionately for the two weakly decaying
+zones; under the local Fisher analysis and the study-specific criterion that the Cramér–Rao bound
+stay below the prior standard deviation, those two coefficients cease to be practically
+identifiable from this six-monitor design once bulk decay and monitor-specific offsets are
+treated as unknown together.
 
 Neither predictive accuracy nor the whole-network risk pattern is a reliable proxy for parameter
 recovery. When a zone's monitors were withheld, the old- and average-zone coefficients returned
-to their prior midpoints and retained essentially the whole prior standard deviation, while the
-new-zone coefficient stayed partly constrained by the remaining monitors and retained 57% of it.
-In all three cases held-out prediction at those same monitors stayed at the observation-noise
-scale, and across the 20 never-calibrated junctions and 30 noise realisations the median node-level normalised mean absolute error was 0.83%, with an interquartile range of 0.41–1.45%.
-Parameter displacements of several standard deviations left whole-network
-rank correlations high, but the six-node shortlist an operator would act on changed under some
-perturbations and not others, and which it was depended on whether the ranking used expected
-duration or cumulative deficit.
+to their prior midpoints and retained essentially the whole prior standard deviation, yet held-out
+prediction at those same monitors stayed at the observation-noise scale. Parameter displacements
+of several standard deviations left whole-network rank correlations high, but the six-node
+shortlist an operator would act on changed under some perturbations and not others, and which it
+was depended on whether the ranking used expected duration or cumulative deficit.
 
 Three practical conclusions follow for calibration practice. The inference rule should be
 audited before a wide parameter distribution is read as evidence about the monitoring array.
