@@ -244,23 +244,17 @@ its observation model explicitly.
 
 ### 2.2.2 Warm-up and assessment-window selection
 
-Because storage and recirculation make the chlorine field approach its repeating diurnal
-behaviour only gradually, the warm-up was assessed by an explicit cyclostationarity test rather
-than chosen by convention. Demands and pump operation are 24 h periodic, so each 24 h cycle was
-compared directly with its successor.
+Because storage makes the chlorine field settle slowly, warm-up was assessed by an explicit
+cyclostationarity test rather than chosen by convention. Demands and pump operation are 24 h
+periodic, so each cycle was compared with its successor against six diagnostics whose tolerances
+were declared in advance, evaluated at the synthetic truth and at both corners of the prior box.
 
-Six diagnostics were evaluated, each with a tolerance declared in advance, covering chlorine at
-the monitors, across the network and in the tanks, tank level, water age and the network-mean
-cumulative chlorine deficit. Each was evaluated at the synthetic truth and at both corners of the
-prior box. Definitions, tolerances and per-cycle values are given in Appendix A.
-
-The pre-defined rule required every diagnostic to pass, and no cycle pair satisfied it within
-the 168 h model horizon. Because the inverse analyses depend directly on the chlorine field, a
-pragmatic 120 h warm-up was adopted instead, as the earliest point at which all three
-chlorine-concentration diagnostics were satisfied across the tested parameter sets. The
-assessment window is therefore 120–168 h, comprising 49 hourly reporting points and 48 one-hour
-intervals. Which diagnostics remain unmet under this finite horizon, and what that bounds, is
-reported in Section 3.1.2 rather than treated here as evidence of full periodic convergence.
+The rule required every diagnostic to pass, and no cycle pair satisfied it within the 168 h model
+horizon. Because the inverse analyses depend directly on the chlorine field, 120 h was adopted
+instead, the earliest warm-up at which all three chlorine-concentration diagnostics passed. The
+assessment window is therefore 120–168 h, with 49 hourly reporting points per monitor.
+Definitions, tolerances and per-cycle values are in Appendix A; what the unmet diagnostics bound
+is reported in Section 3.1.2.
 
 ### 2.2.3 Synthetic measurement-error model
 
@@ -395,24 +389,22 @@ beyond it.
 
 ### 2.4.3 Fisher information and Cramér–Rao bounds
 
-A priori local identifiability was assessed from the sensitivity Jacobian of the 294 monitored
-values with respect to the parameters. For independent homoscedastic Gaussian errors,
+Local identifiability was assessed from the sensitivity Jacobian of the 294 monitored values.
+For independent homoscedastic Gaussian errors,
 
 $$\mathbf{F}=\frac{1}{\sigma^{2}}\mathbf{J}^{\mathsf{T}}\mathbf{J},  J_{ij}=\frac{\partial C_i}{\partial\theta_j}.$$
 
-The Jacobian was evaluated at the synthetic truth using coefficient-specific central finite
-differences. This calculation assumes independent Gaussian errors at $\sigma = 0.1$ mg L^-1^ and
-does **not** include the censoring correction, so it serves as a local information benchmark
-rather than as a duplicate of the primary likelihood.
+evaluated at the synthetic truth by finite differences. The calculation assumes errors at $\sigma
+= 0.1$ mg L^-1^ and does **not** include the censoring correction, so it is a local information
+benchmark rather than a duplicate of the primary likelihood.
 
 Three nested parameterisations were examined: (A) the three wall-decay coefficients alone; (B)
 those plus bulk decay; and (C) those plus bulk decay and six monitor-specific offsets, each
-constant across that monitor's 49 observations. In cases B and C the nuisance parameters were
-marginalised, and the marginal Cramér–Rao standard deviations were normalised by the
-corresponding prior standard deviation, with a ratio below one adopted as the diagnostic
-criterion for local practical identifiability. This is a study-specific benchmark relative to the
-chosen prior scale, not a universal identifiability threshold. The marginalisation and the
-step-size convergence check are given in Appendix D.
+constant across that monitor's 49 observations. In B and C the nuisance parameters were
+marginalised and the marginal Cramér–Rao standard deviations normalised by the corresponding
+prior standard deviation, a ratio below one being the criterion for local practical
+identifiability adopted here. This is a benchmark relative to the chosen prior scale, not a
+universal threshold. Marginalisation and the step-size check are in Appendix D.
 
 ### 2.4.4 Continuous profile likelihood
 
@@ -482,15 +474,13 @@ effective-sample-size correction. The principal case used $\rho = 0.4$, with a s
 Systematic error was added to the synthetic measurement before the non-negativity floor,
 $C_{\mathrm{obs}} = \max\left[0, C_{\mathrm{true}} + \epsilon + b\right]$, so that a negative
 offset pushes more readings onto the floor than a positive one of the same size. Offsets were
-applied first at old-zone monitor 15 and then separately at each of the six monitors, giving 24
-arms of 30 noise realisations each. Candidate predictions were unchanged because only the
-observations are perturbed. The offsets tested and the per-arm results are in Appendix F.
+applied at each of the six monitors, giving 24 bias arms of 30 noise realisations each; only the
+observations are perturbed, so candidate predictions are unchanged.
 
 Drift was examined at monitors 15 and 231 as a linear ramp $b(t) = D (t-t_0)/48$ over the
-120–168 h window, so the sensor is correct at the start and off by $D$ at the end. Each ramp was
-paired, under identical noise, with two
-constant-offset controls: $b = D/2$, its mean offset, and $b = D$, its endpoint offset. This
-separates the effect of the drift's temporal shape from that of its mean magnitude.
+window, correct at the start and off by $D$ at the end, paired under identical noise with
+constant-offset controls at its mean and endpoint values. This separates the drift's temporal
+shape from its mean magnitude. Offsets, arm definitions and per-arm results are in Appendix F.
 
 ### 2.5.4 Zero-floor censoring
 
@@ -554,16 +544,13 @@ model with one fitted coefficient per zone.
 
 ### 2.6.3 Structural-effect metrics
 
-Four quantities are reported because they answer different questions, and Table 2 defines them.
-The raw bias measures the fitted coefficient against the arithmetic mean of the heterogeneous
-truth. For paired experiments the structural contribution is isolated by subtracting the offset
-the same rule produces on a homogeneous truth under the same noise realisation, and that paired
-shift is standardised on the scale of Section 2.5 using the repeated-baseline denominator rather
-than the structured run's own posterior standard deviation.
-
-For the 30-realisation amplitude sweep, the displacement fraction gives the position of the fit between the two candidate targets, so 0 is the arithmetic mean and 1 the length-weighted reference. Appendix E sets the four quantities out together and gives the per-design results. Unlike the standardised displacement, this
-fraction is **raw rather than control-adjusted**, and is summarised by its median and 5–95%
-range across realisations. At $\lambda = 0$ the two means coincide and $f$ is undefined, so that arm serves only as the control.
+Structural effects were summarised by the four quantities Table 2 defines, because they answer
+different questions. Raw bias measures the fitted coefficient against the realised arithmetic zone
+mean; the paired structural increment removes the offset the same rule produces on a homogeneous
+truth under the same noise; the standardised displacement puts that paired shift on the scale of
+Section 2.5 using the repeated-baseline denominator; and the displacement fraction locates the fit
+between the arithmetic and length-weighted references, reported **raw rather than
+control-adjusted**. Full definitions and per-design results are in Appendix E.
 
 ## 2.7 Internal prediction validation
 
@@ -605,17 +592,13 @@ comparisons of Section 3.6.2.
 
 ### 2.8.2 Water age and demand weighting
 
-Water age was computed over the same assessment window from the same hydraulic model as a
-reaction-independent diagnostic, and its spatial association with expected duration and
-cumulative deficit described by Spearman rank correlation. Because the 92 junctions share pipes,
-tanks, flow paths and demand patterns they are not independent samples, so no junction-level
-p-value is reported. For the duration association only, a descriptive width was obtained by
-resampling whole spatial blocks rather than individual junctions. It is a descriptive width, not
-a significance interval. The resampling design is given in Appendix G.
-
-Network summaries were reported unweighted over all 92 junctions, unweighted over the 59
-junctions with non-zero demand, and demand-weighted using the pattern-aware average expected
-demand, because the three answer different questions.
+Water age was computed over the same window as a reaction-independent diagnostic, and its spatial
+association with expected duration and cumulative deficit described by Spearman rank correlation.
+The 92 junctions share pipes, tanks, flow paths and demand patterns and are not independent
+samples, so no junction-level p-value is reported; for the duration association a descriptive
+width was obtained by resampling whole spatial blocks, with the design in Appendix G. Network
+summaries were reported over all 92 junctions, over the 59 with non-zero demand, and
+demand-weighted, because the three answer different questions.
 
 ### 2.8.3 Ranking robustness
 
@@ -635,20 +618,17 @@ The ensemble was propagated through four scenarios using Arrhenius scaling,
 
 $$k(T)=k(T_{\mathrm{ref}})\exp\left[-\frac{E_a}{R}\left(\frac{1}{T_K}-\frac{1}{T_{\mathrm{ref},K}}\right)\right],$$
 
-with $T_{\mathrm{ref}} = 12$ °C. Activation energies for bulk and wall reaction, and a
-temperature deviation added to each scenario mean, were drawn from truncated normals constrained
-to keep simulated temperatures within the stated 8–24 °C validity range. The distributions and
-the realised ranges are given in Appendix G. The
-scenarios were: (A) 12 °C baseline; (B) 16 °C; (C) 20 °C heatwave; and (D) 20 °C with
-illustrative ageing multipliers of 1.00, 1.35 and 1.85 for the new, average and old zones. Milder
-and more severe multiplier sets are recorded in the configuration for future use but were not
-run, so the ageing result below rests on the single central set.
+with $T_{\mathrm{ref}} = 12$ °C. Activation energies and a temperature deviation added to each
+scenario mean were drawn from truncated normals keeping simulated temperatures inside the stated
+8–24 °C validity range, with the distributions in Appendix G. The scenarios were: (A) 12 °C
+baseline; (B) 16 °C; (C) 20 °C heatwave; and (D) 20 °C with illustrative ageing multipliers of
+1.00, 1.35 and 1.85 for the new, average and old zones.
 
-Activation-energy and temperature draws were assigned once per retained member and reused across
-scenarios, so that pairwise differences are not contaminated by independent Monte Carlo
+Draws were reused across scenarios, so pairwise differences are not contaminated by Monte Carlo
 variation. Only candidates whose weight was at least $10^{-6}$ of the **maximum** weight were
-propagated, with weights renormalised and the discarded mass recorded; this is a numerical
-truncation, not a behavioural acceptance threshold. Corrective dosing was evaluated under Scenario C, the 20 °C heatwave *without* ageing: reservoir source chlorine was raised from 1.00 to 1.15 and 1.30 mg L^-1^, with tank initial chlorine scaled by the same factor.
+propagated, a numerical truncation rather than an acceptance threshold. Corrective dosing was
+evaluated under Scenario C, the heatwave *without* ageing, raising reservoir source chlorine from
+1.00 to 1.15 and 1.30 mg L^-1^ with tank initial chlorine scaled by the same factor.
 
 {{DEFTABLE}}
 
@@ -678,21 +658,18 @@ property of the truth and is not the ensemble-weighted breach count reported in 
 
 ### 3.1.2 Warm-up and assessment-window adequacy
 
-Six cyclostationarity criteria were declared in advance, each comparing a 24 h cycle with its
-successor; tank level converged first, within 24 h. The three concentration criteria, at the
-monitors, in the network 95th percentile and in the tanks, were all first satisfied at 120 h,
-which is why the assessment window begins there.
+The three concentration criteria, at the monitors, in the network 95th percentile and in the
+tanks, were all first satisfied at 120 h, which is why the assessment window begins there.
 
 Two criteria were never satisfied inside the model horizon. The 95th-percentile water age was
-still changing by 12.8 h between the last two available cycles against a 1 h tolerance, and the
-network-mean cumulative deficit by as much as 5.1% against a 2% tolerance. The hotspot pattern
-moves with it. Over the same comparison the top-10 cumulative-deficit sets at the truth had a
-Jaccard overlap of 0.818, one node in ten differing. The horizon could not be extended without
-modifying the model, because the existing pump controls are specified only within the 168 h
-simulation period (Appendix A). Parameter inference is therefore supported by a
-concentration-stable window, whereas absolute water ages, absolute risk severities and some
-hotspot-boundary decisions in Section 3.6 inherit a residual dependence on the 120–168 h horizon.
-Those are used for comparison between conditions rather than as calibrated magnitudes.
+still changing by 12.8 h between the last two available cycles, and the network-mean cumulative
+deficit by as much as 5.1%. The hotspot pattern moves with it. Over the same comparison the
+top-10 cumulative-deficit sets at the truth had a Jaccard overlap of 0.818, one node in ten
+differing. The horizon could not be extended without modifying the model (Appendix A). Parameter
+inference is therefore supported by a concentration-stable window, whereas absolute water ages,
+absolute risk severities and some hotspot boundaries in Section 3.6 retain a residual dependence
+on the horizon and are used for comparison between conditions rather than as calibrated
+magnitudes.
 
 ### 3.1.3 Signal and noise characteristics of the synthetic observations
 
