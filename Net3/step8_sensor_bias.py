@@ -82,13 +82,23 @@ rows = []
 P_ref = None
 for off in OFFSETS:
     old_means, old_sds, avg_means, new_means, ranks, Ps, n_clipped = [], [], [], [], [], [], []
-    As = []
+    As, rmse_mins, noise_rmses = [], [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
-        obs = truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
+        eps = rng.normal(0, B.SIGMA_OBS, truth_mon.shape)
+        obs = truth_mon + eps
         obs[:, bcol] += off                            # inject systematic bias at node 15
         raw_neg = int((obs[B.WARMUP_H:] < 0).sum())
         obs = np.clip(obs, 0, None)[B.WARMUP_H:]
+        # Best achievable aggregate fit over the whole candidate library against the BIASED
+        # observations, against the noise floor the SAME draw would have produced with no offset.
+        # This is what decides whether the aggregate residual reveals the perturbation at all: if
+        # the bias is absorbed into the coefficients, the best residual stays at the noise scale.
+        # Comparing instead with RMSE(biased obs - truth) would fold the bias into the comparator
+        # and make the test vacuous.
+        obs_unbiased = np.clip(truth_mon + eps, 0, None)[B.WARMUP_H:]
+        rmse_mins.append(float(B.rmse_of(C_all_mon, obs).min()))
+        noise_rmses.append(float(np.sqrt(((obs_unbiased - truth_mon[B.WARMUP_H:]) ** 2).mean())))
         means, sds, rank, P, rank_A, A = posterior_means(obs)
         old_means.append(means["old"]); old_sds.append(sds["old"])
         avg_means.append(means["average"]); new_means.append(means["new"])
@@ -109,6 +119,9 @@ for off in OFFSETS:
            # more observations onto the sensor floor, a positive one lifts them off it
            "n_censored_med": float(np.median(n_clipped)),
            "deficit_top6": [str(ALL_NODES[i]) for i in np.argsort(A_med)[::-1][:6]],
+           "rmse_min_med": med(rmse_mins),
+           "noise_rmse_med": med(noise_rmses),
+           "rmse_min_over_noise_med": med([a / b for a, b in zip(rmse_mins, noise_rmses)]),
            "_P": P_med, "_A": A_med}
     rows.append(row)
 

@@ -50,10 +50,7 @@ Under known bulk decay and unbiased sensors, the formal rule contracted all thre
 so the difference is produced by the weighting alone. Treating bulk decay and monitor offsets as
 jointly unknown withdrew practical identifiability from the average and new coefficients.
 Recalibration over 100 noise realisations gave estimator spreads 1.04 to 1.12 times the
-Cramér–Rao bound. Systematic sensor error, bulk-decay misspecification and length-structured
-heterogeneity displaced coefficients by up to six posterior standard deviations while aggregate
-fit remained at the noise floor. Yet a withheld zone's coefficient could revert entirely to its
-prior with held-out prediction unchanged, and displacements of several standard deviations
+Cramér–Rao bound. Systematic sensor error, bulk-decay misspecification and length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior standard deviations, while the best achievable aggregate residual never exceeded the realised observation-noise RMSE by more than 3.4%. Yet when the old or average zone was withheld its coefficient returned to the prior midpoint and retained essentially the whole prior width, while held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise scale. Displacements of several standard deviations
 largely preserved whole-network rank order, with Spearman rank correlation of 0.93 to 0.98 under bulk-decay misspecification, but they altered the six-node operational shortlist under one risk metric and not another.
 
 Parameter identification, predictive adequacy and decision stability therefore require separate
@@ -381,13 +378,7 @@ identifiability test on its own, which is why the four further analyses below ar
 
 To separate information supplied by the observations from favourable prior placement, the
 calibration was repeated over 30 independent noise realisations using displaced prior boxes of
-unchanged width. In the DOWN design all three prior midpoints were moved by one prior standard
-deviation towards stronger decay. In the OLDUP design only the old-zone prior changed direction,
-towards weaker decay, while the average and new priors kept their DOWN positions; OLDUP is
-therefore a directional check for the old coefficient rather than a second like-for-like
-three-parameter test. An upper cap of −0.005 m day^-1^, imposed to keep the old prior in the
-non-positive decay domain, reduced its realised midpoint displacement to about 0.92 prior
-standard deviations.
+unchanged width. In the DOWN design each box retained its original width but was re-centred at the known synthetic truth minus one original-prior standard deviation, so the displacement is defined relative to the truth rather than to the original midpoint. In the OLDUP design only the old-zone box changed direction, being centred at the truth plus one original-prior standard deviation, while the average and new boxes kept their DOWN positions; OLDUP is therefore a directional check for the old coefficient rather than a second like-for-like three-parameter test. An upper cap of −0.005 m day^-1^, imposed to keep the old prior in the non-positive decay domain, then shifted that box down to a realised midpoint of −0.655 m day^-1^, about 0.92 original-prior standard deviations from the truth rather than the intended one.
 
 Recovery was measured as the fraction of the imposed displacement closed,
 
@@ -479,7 +470,7 @@ residuals were assigned a first-order autoregressive covariance $\Sigma_m(t,s) =
 information recomputed as $\mathbf{F}_{\mathrm{AR1}} =
 \mathbf{J}^{\mathsf{T}}\mathbf{\Sigma}^{-1}\mathbf{J}$ rather than by a scalar
 effective-sample-size correction. The principal case used $\rho = 0.4$, with a sweep over $\rho
-= 0$, 0.2, 0.4, 0.6 and 0.8.
+= 0$, 0.2, 0.4, 0.6 and 0.8 reported in Appendix D.
 
 ### 2.5.3 Sensor bias and drift
 
@@ -584,7 +575,7 @@ empirical coverage; leave-one-zone-out additionally reports the withheld zone's 
 error and SD retained.
 
 A separate spatial validation calibrated on all six monitors and predicted at 20 junctions that
-never entered any calibration, scored against the *noise-free* truth and summarised by mean absolute relative error and coverage. Its bands therefore carry ensemble parameter uncertainty only, without the $\sigma^2$ term. Finally, leave-one-zone-out was repeated under ±20%
+never entered any calibration, scored against the *noise-free* truth and summarised by coverage and by the normalised mean absolute error, $\mathrm{NMAE}=\sum_t|\hat{C}_t-C_t| \big/ \sum_t|C_t|$, evaluated per junction over the assessment window. This normalises by the mean of the truth rather than averaging pointwise ratios, which would be unstable where the true concentration approaches zero. Its bands therefore carry ensemble parameter uncertainty only, without the $\sigma^2$ term. Finally, leave-one-zone-out was repeated under ±20%
 within-zone heterogeneity across eight independently generated fields, each with its own noise
 draw, with coefficient error measured against that field's own arithmetic zone mean.
 
@@ -601,6 +592,11 @@ minimum describe different aspects of low-chlorine behaviour: the first records 
 threshold was crossed, whereas the deficit combines how long and how far. Duration and deficit
 were integrated by trapezoid over the 48 one-hour intervals, and the per-member minimum was
 summarised by weighted means and quantiles rather than reported as a single deterministic value.
+The weights propagated here are those of the baseline calibration, which was conditioned on one
+reference observation realisation. Every risk figure quoted below is therefore conditional on
+that realisation and is not a median over the 30 noise realisations used for the inference
+diagnostics; observation-noise variability enters the risk results only through the perturbation
+comparisons of Section 3.6.2.
 
 ### 2.8.2 Water age and demand weighting
 
@@ -639,8 +635,9 @@ temperature deviation added to each scenario mean, were drawn from truncated nor
 to keep simulated temperatures within the stated 8–24 °C validity range. The distributions and
 the realised ranges are given in Appendix G. The
 scenarios were: (A) 12 °C baseline; (B) 16 °C; (C) 20 °C heatwave; and (D) 20 °C with
-illustrative ageing multipliers of 1.00, 1.35 and 1.85 for the new, average and old zones, with
-mild and severe multiplier sets retained as sensitivities.
+illustrative ageing multipliers of 1.00, 1.35 and 1.85 for the new, average and old zones. Milder
+and more severe multiplier sets are recorded in the configuration for future use but were not
+run, so the ageing result below rests on the single central set.
 
 Activation-energy and temperature draws were assigned once per retained member and reused across
 scenarios, so that pairwise differences are not contaminated by independent Monte Carlo
@@ -738,7 +735,7 @@ difference in this experiment.
 
 {{TABLE3}}
 
-Table 3. **Baseline inference comparison.** Four weighting rules applied to the same 294 residuals and the same 8192 Sobol candidates. SD retained is the posterior standard deviation as a percentage of the prior.
+Table 3. **Baseline inference comparison.** Four weighting rules applied to the same 294 residuals and the same 8192 Sobol candidates. SD retained is the weighted-ensemble standard deviation as a percentage of the prior; it is a posterior standard deviation only under the two formal rules, since the informal score is not a likelihood.
 
 ![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the posterior standard deviation as a percentage of the prior.](figures/paper/fig2_inference_rule_dependence.png)
 
@@ -769,8 +766,7 @@ standard deviations fell only to 71.1%, 91.8% and 88.2%, still two to three time
 weighting omits.
 
 A complementary concern is that the formal contraction might reflect a prior centred near the
-truth rather than genuine learning. All three priors were therefore displaced downward by one
-prior standard deviation and the calibration repeated over 30 noise realisations. The formal
+truth rather than genuine learning. All three prior boxes were therefore re-centred at the truth minus one original-prior standard deviation, keeping their width, and the calibration repeated over 30 noise realisations. The formal
 likelihood recovered a median of 88%, 95% and 96% of the imposed displacement for old, average
 and new, while retaining only 27.1%, 28.9% and 28.4% of the displaced prior's standard deviation. This is the same contraction as at baseline, now achieved from a prior centred away from the truth.
 The prior width was held fixed and each displaced box still contains the true value, so this
@@ -779,9 +775,7 @@ The informal comparator recovered 27.5%, 43.5% and 78.0% at a threshold of
 0.107, and 9.4%, 14.5% and 22.9% at 0.120.
 
 A second displacement was then applied to the old coefficient alone, upward towards weaker
-decay, with the average and new priors left at their downward positions; this arm is a direction
-check for old rather than a second three-parameter test, and the non-positivity constraint
-truncated the realised shift to about 0.92 prior standard deviations. Formal recovery for old
+decay, with the average and new priors left at their downward positions; this arm is a direction check for old rather than a second three-parameter test, and the non-positivity constraint shifted its realised midpoint to −0.655 m day^-1^, about 0.92 original-prior standard deviations from the truth. Formal recovery for old
 was 88% downward and 112% upward, symmetric within the noise, whereas informal recovery moved
 from 27.5% to 84.9% at a threshold of 0.107 and from 9.4% to 61.1% at 0.120. Its answer
 therefore depends on the direction of displacement, a property of the score rather than of the
@@ -809,7 +803,7 @@ repeating the calibration over 100 independent noise realisations gave a mean bi
 0.15 times the empirical sampling standard deviation, a ratio of empirical spread to the
 Cramér–Rao bound of 1.04, 1.06 and 1.12, and 90% interval coverage of 0.89, 0.88 and 0.85, close to nominal, with the new coefficient slightly under-covered.
 
-![Figure 3. **Three further diagnostics agree with the baseline result.** Intervals from the likelihood-weighted ensemble (5–95%), continuous profile likelihood (95%), the Fisher bound (95%) and 100 repeated-noise calibrations (mean +/- SD).](figures/paper/fig3_triangulated_identifiability.png)
+![Figure 3. **Three further diagnostics agree with the baseline result.** Intervals from the likelihood-weighted ensemble (5–95%), continuous profile likelihood (95%), the Fisher bound (95%) and 100 repeated-noise calibrations (mean ± SD).](figures/paper/fig3_triangulated_identifiability.png)
 
 Their agreement is convergent evidence of practical identifiability under the controlled
 baseline, and each would fail differently were that result an artefact, being insensitive
@@ -851,7 +845,7 @@ converse. Modelling correlation that is present widens the intervals, whereas fi
 independent-error likelihood to observations that are genuinely correlated would narrow them,
 reporting a precision the data do not support.
 
-### 3.3.2 Systematic sensor error dominates random uncertainty
+### 3.3.2 Systematic sensor error produces large coefficient displacement
 
 Systematic error behaves differently. Constant offsets of +0.05 and +0.10 mg L^-1^ at node 15
 alone moved the old-zone estimate by 2.19 and 3.87 baseline posterior standard deviations: with
@@ -884,8 +878,8 @@ understate the apparent sensitivity to bulk-decay misspecification.
 
 The Fisher analysis explains the pattern and extends it. Admitting bulk decay as a fourth
 unknown raises the Cramér–Rao bound from 25%, 29% and 29% of the prior standard deviation to
-30%, 54% and 54%: the old coefficient is affected more modestly, whereas the average and new
-coefficients lose roughly half their information to the bulk term. Admitting six
+30%, 54% and 54%: the old bound widens by a factor of 1.2, whereas the average and new bounds
+widen by 1.8 and 1.9. Admitting six
 monitor-specific offsets as further nuisance parameters raises the ratios to 67%, 224% and 109%,
 so their local bounds equal or exceed the prior standard deviation. Under the identifiability
 criterion adopted here, the average and new coefficients are therefore not practically
@@ -893,9 +887,7 @@ identifiable from this six-monitor design once both bulk decay and monitor offse
 sensitivities do not separate the weakly decaying zones' wall coefficients from bulk decay and
 monitor-specific offsets under a six-monitor design.
 
-These displacements are large in parameter terms, but Section 3.6 shows that they do not
-translate into proportionate changes in the network-wide risk pattern, and that whether an
-operational shortlist changes at all depends on which risk metric defines it. Before that,
+None of these perturbations is visible in the aggregate residual: the best fit reachable anywhere in the candidate library stays within a few percent of the realised observation-noise RMSE in every case, as the Best fit column of Table 4 records. These displacements are large in parameter terms, but Section 3.6 shows that they do not translate into proportionate changes in the network-wide risk pattern, and that whether an operational shortlist changes at all depends on which risk metric defines it. Before that,
 Section 3.4 turns to the one error source that is internal to the model rather than to the
 instruments.
 
@@ -907,7 +899,7 @@ Table 4. **Robustness summary across error sources.** Standardisation follows Fi
 
 ## 3.4 Structural heterogeneity and grouped effective parameters
 
-### 3.4.1 Symmetric within-zone heterogeneity averages out
+### 3.4.1 Symmetric within-zone heterogeneity leaves no resolvable bias
 
 Sections 3.2 and 3.3 treated each synthetic zone as internally homogeneous, whereas in the field
 wall reactivity is unlikely to be uniform within any practical grouping. Whether that variation
@@ -915,17 +907,19 @@ biases the grouped estimate turns out to depend on whether it has directional st
 
 With per-pipe coefficients jittered symmetrically about each zone mean, the grouped estimate
 stayed at the zone arithmetic mean to within the scatter between realisations. Across 25
-independent fields at +/-20%, the structural increment, defined as the shift relative to a homogeneous control run with the same noise, was +0.011 +/- 0.033 m day^-1^ for old, +0.0002 +/- 0.005 for
-average and −0.0005 +/- 0.002 for new. Each mean increment is a fraction of the field-to-field
+independent fields at ±20%, the structural increment, defined as the shift relative to a homogeneous control run with the same noise, was +0.011 ± 0.033 m day^-1^ for old, +0.0002 ± 0.005 for
+average and −0.0005 ± 0.002 for new. Each mean increment is a fraction of the field-to-field
 standard deviation (0.32, 0.04 and 0.24), so no systematic bias is distinguishable from the
 scatter; standardised as in Figure 4 they are +0.11, +0.02 and −0.06.
 
 Fit quality gives no warning: the grid-based residual rises from its homogeneous resolution
 floor of 0.0055 mg L^-1^ to 0.0068, leaving only 0.0013 attributable to the imposed
 heterogeneity, and the best achievable fit stays at the noise floor. Nor would one field have sufficed. The realisation examined first gave an old-zone increment of −0.032 m day^-1^,
-opposite in sign to the 25-field mean, as did the other two coefficients. Symmetric +/-20%
-heterogeneity therefore produced no detectable systematic bias in this controlled case, but
-establishing that required a paired control and replication over fields.
+opposite in sign to the 25-field mean, as did the other two coefficients. What these 25 fields
+establish is therefore a negative result at the resolution of this design. No systematic mean
+displacement was resolvable against the field-to-field scatter under the fixed observation-noise
+realisation used throughout, which is weaker than a demonstration that symmetric jitter cancels
+exactly, and establishing even that required a paired control and replication over fields.
 
 ### 3.4.2 Structured heterogeneity displaces all three grouped coefficients
 
@@ -936,7 +930,7 @@ and a length-weighted mean, the latter shifted to −1.240, −0.124 and −0.06
 average and new.
 
 In the paired reference realisation, subtracting the corresponding homogeneous-control offset
-gives displacements of −1.55, −1.89 and −1.65 baseline posterior standard deviations for old, average and new, comparable in magnitude across all three coefficients, while the fit remains at the noise floor, with a best RMSE of 0.0968 against a realised noise RMSE of 0.0973.
+gives displacements of −1.55, −1.89 and −1.65 baseline posterior standard deviations for old, average and new. These three values are close to one another in this draw, but that closeness is a property of the draw rather than a resolved ordering, as the repeated-realisation ranges below show. The fit meanwhile remains at the noise floor, with a best RMSE of 0.0968 against a realised noise RMSE of 0.0973.
 
 A separate sensitivity test over 30 noise realisations then asked whether that displacement is a
 property of the imposed structure or of the particular noise draw. This test reports the raw
@@ -951,12 +945,7 @@ stable: across noise realisations the interval spans both sides of unity. At $\l
 all three intervals exclude zero, so the displacement away from the arithmetic mean in the
 length-weighted direction is resolved at the tested noise level, even though its size is not.
 
-The informal comparator attenuates the effect substantially and consistently. Its median
-fraction for the old zone is 0.65, 0.43 and 0.34 at $\lambda = 0.25$, 0.50 and 0.75, against formal medians of 1.10, 0.86 and 0.74, that is between 0.46 and 0.59 of the formal value at every strength. Both rules report a falling fraction as $\lambda$ grows, but because the gap itself
-widens the absolute displacement rises under both; the informal weighting simply recovers about
-half as much of it. A score that is nearly flat inside its behavioural set cannot follow a
-systematic displacement, so a study relying on it would materially understate how far structural
-misspecification moves a grouped coefficient.
+The informal comparator attenuates the effect in the old zone, but not uniformly across zones. Its median fraction for the old zone is 0.65, 0.43 and 0.34 at $\lambda = 0.25$, 0.50 and 0.75, against formal medians of 1.10, 0.86 and 0.74, that is between 0.46 and 0.59 of the formal value at every strength. The other two zones do not follow that pattern. The average-zone informal fraction *exceeds* the formal one at $\lambda = 0.25$ and 0.50, at 1.58 and 1.10 times it, and falls only slightly below at 0.75; the new-zone attenuation is milder throughout, at 0.81 to 0.91 of the formal value. The experiment therefore supports a zone-specific statement rather than a general one: where the informal score does attenuate, a study relying on it would understate how far structural misspecification moves that grouped coefficient, but the halving seen for old cannot be assumed to hold for the weakly decaying zones.
 
 ### 3.4.3 What a grouped coefficient represents
 
@@ -970,7 +959,7 @@ condition of individual assets is not supported here. And unlike the measurement
 Section 3.3, this discrepancy cannot be removed by improving sensor precision, because its
 source is the grouped model rather than the observation process, though better instruments would make it easier to detect.
 
-![Figure 5. **Symmetric and structured within-zone heterogeneity.** (A) Structural increment over 25 independent +/-20% fields, in baseline posterior standard deviations. (B) One field against the 25-field mean, showing sign reversal. (C) Raw displacement fraction $f_j$, median and 5–95% range over 30 noise realisations, with the single control-adjusted reference realisation marked faintly. (D) Structural residual against the largest standardised displacement.](figures/paper/fig5_symmetric_vs_structured.png)
+![Figure 5. **Symmetric and structured within-zone heterogeneity.** (A) Structural increment over 25 independent ±20% fields, in baseline posterior standard deviations. (B) One field against the 25-field mean, showing sign reversal. (C) Raw displacement fraction $f_j$, median and 5–95% range over 30 noise realisations, with the single control-adjusted reference realisation marked faintly. (D) Structural residual against the largest standardised displacement.](figures/paper/fig5_symmetric_vs_structured.png)
 
 ## 3.5 Predictive accuracy is not parameter identification
 
@@ -1002,27 +991,20 @@ consistent with the upstream position of the new zone and with the cross-zone se
 visible in the Fisher analysis of Section 3.3.3.
 
 Predictive performance barely notices. Held-out RMSE at the dropped monitors is 0.0999, 0.0988 and 0.1006 mg L^-1^, comparable to the leave-one-monitor-out values and to the observation-noise scale, with coverage between 0.90 and 0.96 (Figure 6). Repeating
-leave-one-zone-out under +/-20% per-pipe heterogeneity across eight independent fields changes
+leave-one-zone-out under ±20% per-pipe heterogeneity across eight independent fields changes
 little: coefficient errors relative to each field's own arithmetic mean are +0.139, −0.020 and
 +0.012 m day^-1^, and errors at unmonitored junctions remain between 0.8% and 1.2%. As a
 separate spatial validation using all six monitors, predictions at twenty junctions that never
-entered any calibration had a median mean-absolute relative error of 0.83% under the primary
-likelihood, with an interquartile range of 0.41% to 1.45% across junctions and noise
-realisations; the median is well inside one per cent but the upper quartile is not.
+entered any calibration had a median normalised mean absolute error of 0.83% under the primary likelihood, with an interquartile range of 0.41% to 1.45% across junctions and noise realisations; the median is well inside one per cent but the upper quartile is not.
 
 The predictive bands at those same junctions are a less flattering result and are reported here
 for that reason. Against a nominal 90%, the median pointwise coverage was 1.00 for both the
 normal-approximation and the weighted-quantile band, under the formal rule as well as the
-informal comparator. That is over-coverage: the bands are conservative rather than calibrated,
-which is exactly what an inflated parameter spread produces, and it is flattered further because
-the targets were generated by the same hydraulic and reaction model that produced the
-predictions. Coverage at these junctions therefore does not establish that the reported
+informal comparator. That is over-coverage: the bands are conservative rather than calibrated. A broad parameter ensemble is a plausible contributor, but this design does not isolate a cause, and the result is flattered further because the targets were generated by the same hydraulic and reaction model that produced the predictions. Coverage at these junctions therefore does not establish that the reported
 uncertainty is correctly sized, and the same caution applies to the nominally well-calibrated
 coverage of the held-out monitor designs.
 
-The mechanism differs by zone, and it is not mutual compensation between coefficients: when one
-zone is withheld the other two coefficients barely move, changing by less than 0.005 m day^-1^
-from their six-monitor values. For old and average, the prior midpoints already lie close enough
+The mechanism differs by zone, and it is not mutual compensation between coefficients: when one zone is withheld the other two coefficients barely move. Five of the six cross-coefficient shifts are below 0.005 m day^-1^ from their six-monitor medians, and the largest is 0.0086 m day^-1^, for the old coefficient when the new zone is withheld. For old and average, the prior midpoints already lie close enough
 to the imposed truths that a prior-dominated coefficient still produces concentrations whose
 discrepancies are small relative to the 0.1 mg L^-1^ observation noise. The new coefficient is
 different in kind, retaining genuine information from monitors outside its own zone. A zone
@@ -1042,7 +1024,7 @@ underlying hydraulics, the same first-order reaction family and the same solver,
 observations are used. The exercise establishes internal predictive consistency, not
 real-network validity.
 
-![Figure 6. **A zone coefficient can remain at its prior while prediction stays near the noise scale.** For each withheld zone, the median inferred coefficient over 30 realisations with a 90% width, against prior support, prior midpoint and truth. Right, held-out RMSE at the dropped monitors against the noise level.](figures/paper/fig6_prediction_without_identification.png)
+![Figure 6. **A zone coefficient can remain at its prior while prediction stays near the noise scale.** For each withheld zone, the median inferred coefficient over 30 realisations against prior support, prior midpoint and truth. The bar is the median within-realisation posterior standard deviation scaled to a Gaussian 90% width, not a quantile of the 30 medians. Right, held-out RMSE at the dropped monitors against the noise level, bars showing the interquartile range over the 30 realisations.](figures/paper/fig6_prediction_without_identification.png)
 
 {{TABLE5}}
 
@@ -1054,7 +1036,8 @@ Table 5. **Held-out validation under the primary likelihood.** Leave-one-monitor
 
 Calibration uncertainty matters operationally when it changes estimated risk or the
 prioritisation of locations for action, so the ensemble was propagated to the network and
-summarised with several metrics rather than one. Node 145 spends 12.0 h below 0.2 mg L^-1^,
+summarised with several metrics rather than one. The values in this section carry the baseline
+weights and are conditional on its single reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^,
 accumulates a deficit of 1.68 mg L^-1^ h and has a median window minimum of 0.031 mg L^-1^; node
 129 spends twice as long below the threshold yet accumulates only 0.84 mg L^-1^ h, with a median
 minimum of 0.147. Duration measures persistence, deficit combines persistence with depth, and
@@ -1112,7 +1095,9 @@ serve from 55.4 to 64.7 and 67.8 L s^-1^, and the network-mean cumulative defici
 0.365 and 0.522 mg L^-1^ h. Adding illustrative zone-specific ageing multipliers at 20 degrees, 1.35 for the average zone and 1.85 for the old zone with the new zone unchanged, raises these to 31 junctions, 69.4 L s^-1^ and 0.579 mg L^-1^ h. The continuous severity measures respond
 more smoothly than the binary count, which is threshold-sensitive by construction.
 
-Raising the source dose by 15% and 30% under the heatwave reduces the network-mean expected
+Raising the source dose by 15% and 30% under the heatwave, applied to the reservoir boundary
+concentration and to the tank initial concentration together so that the whole source regime
+moves consistently, reduces the network-mean expected
 duration from 5.22 to 4.63 and 4.29 h and the deficit from 0.522 to 0.453 and 0.396 mg L^-1^ h,
 but demand at risk falls only to 64.7 L s^-1^ at both doses and never returns to the baseline
 55.4. Dosing improves the continuous severity metrics without restoring the baseline
@@ -1120,7 +1105,7 @@ demand-at-risk level; the identical figure at both doses is a plateau of the bin
 classification, not evidence that the extra 15% achieved nothing. The ageing multipliers are illustrative, no by-product, taste or booster constraint is represented, and absolute severities inherit the horizon dependence of Section 3.1.2. Maps
 and the full register are in Appendix H.
 
-![Figure 7. **Risk robustness is metric-specific.** (A) Rank of the leading nodes under $\bar{P} = E[D]/48$ against cumulative deficit $E[A]$. (B) Top-six overlap with the reference ranking under each perturbation, both metrics. (C) Expected duration against deficit for all 92 junctions.](figures/paper/fig7_metric_specific_risk.png)
+![Figure 7. **Risk robustness is metric-specific.** (A) Rank of the leading nodes under $\bar{P} = E[D]/48$ against cumulative deficit $E[A]$. (B) Top-six overlap with the reference ranking under three selected perturbations, both metrics. (C) Expected duration against deficit for all 92 junctions.](figures/paper/fig7_metric_specific_risk.png)
 
 ## 3.7 Integrated implications, limitations and future work
 
@@ -1217,10 +1202,7 @@ information in the observations, and tightening its behavioural threshold does n
 gap, because a threshold cannot restore an omitted information factor.
 
 That baseline result is conditional, and the conditions matter unequally. Larger random
-measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor
-error and structured within-zone heterogeneity instead displace the estimate by several
-posterior standard deviations while aggregate fit remains at the noise floor, so in the cases
-tested here neither was revealed by the aggregate residual statistic used. Bulk-decay
+measurement error and an assumed temporal correlation mainly cost precision. Systematic sensor error and structured within-zone heterogeneity instead displace the estimate by several posterior standard deviations while the best achievable aggregate residual stays within 3.4% of the realised observation-noise RMSE, so in the cases tested here neither was revealed by that statistic. A 20% error in the fixed bulk coefficient is the clearest case, leaving the best residual indistinguishable from the noise floor while displacing the average and new coefficients by 1.4 to 1.6 posterior standard deviations. Bulk-decay
 uncertainty does both and falls disproportionately on the two weakly decaying zones; under the
 local Fisher analysis and the study-specific criterion that the Cramér–Rao bound stay below the
 prior standard deviation, those two coefficients cease to be practically identifiable from this
@@ -1235,8 +1217,7 @@ recovery. When a zone's monitors were withheld, the old- and average-zone coeffi
 to their prior midpoints and retained essentially the whole prior standard deviation, while the
 new-zone coefficient stayed partly constrained by the remaining monitors and retained 57% of it.
 In all three cases held-out prediction at those same monitors stayed at the observation-noise
-scale, and across the 20 never-calibrated junctions and 30 noise realisations the median
-node-level mean absolute relative error was 0.83%, with an interquartile range of 0.41–1.45%.
+scale, and across the 20 never-calibrated junctions and 30 noise realisations the median node-level normalised mean absolute error was 0.83%, with an interquartile range of 0.41–1.45%.
 Parameter displacements of several standard deviations left whole-network
 rank correlations high, but the six-node shortlist an operator would act on changed under some
 perturbations and not others, and which it was depended on whether the ranking used expected
@@ -1366,6 +1347,8 @@ nuisance parameters have been accounted for, not the bound that would apply if t
 {{A:D2}}
 
 {{A:D3}}
+
+{{A:D4}}
 
 ## Appendix E. Structural heterogeneity: definitions and per-design results
 

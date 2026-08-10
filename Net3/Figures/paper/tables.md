@@ -46,21 +46,22 @@ ESS is out of 8192: the formal weights concentrate on about 157 effective draws 
 
 ## Table 4 — Robustness summary
 
-| Error source | old | average | new | Risk | Basis |
-|---|---:|---:|---:|---|---|
-| sigma 0.10 to 0.15 (W) | x1.41 | x1.52 | x1.48 | — | 30 real. |
-| AR(1) rho = 0.4 (W) | x1.48 | x1.49 | x1.44 | — | Fisher |
-| k_b = -0.4 (D) | -0.66 | -1.53 | -1.58 | rho_s 0.976; top-6 0.50 / 1.00 | 30 real. |
-| k_b = -0.6 (D) | +0.56 | +1.41 | +1.49 | rho_s 0.933; top-6 0.50 / 0.71 | 30 real. |
-| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
-| sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | unchanged | 2 nodes x 4 |
-| zero censoring (D) | -0.11 | -0.00 | +0.01 | top-3 unchanged | 30 real.; reference seed has 10/294 clipped |
-| symmetric heterogeneity (D) | +0.11 | +0.02 | -0.06 | — | 25 fields |
-| structured heterogeneity (D) | -1.55 | -1.89 | -1.65 | — | 1 design, single draw |
+| Error source | old | average | new | Best fit | Risk | Basis |
+|---|---:|---:|---:|---:|---|---|
+| sigma 0.10 to 0.15 (W) | x1.41 | x1.52 | x1.48 | — | — | 30 real. |
+| AR(1) rho = 0.4 (W) | x1.48 | x1.49 | x1.44 | — | — | Fisher |
+| k_b = -0.4 (D) | -0.66 | -1.53 | -1.58 | 0.996 | rho_s 0.976; top-6 0.50 / 1.00 | 30 real. |
+| k_b = -0.6 (D) | +0.56 | +1.41 | +1.49 | 0.997 | rho_s 0.933; top-6 0.50 / 0.71 | 30 real. |
+| sensor bias, max over arms (D) | +3.87 | -5.94 | -4.44 | 0.993-1.034 | rho_s >= 0.9993; E[A] top-6 held in 23/24 | 24 arms x 30; max taken per coefficient |
+| sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | — | unchanged | 2 nodes x 4 |
+| zero censoring (D) | -0.11 | -0.00 | +0.01 | — | top-3 unchanged | 30 real.; reference seed has 10/294 clipped |
+| symmetric heterogeneity (D) | +0.11 | +0.02 | -0.06 | — | — | 25 fields |
+| structured heterogeneity (D) | -1.55 | -1.89 | -1.65 | 0.995 | — | 1 design, single draw |
 
 | Notes |
 |---|
 | (W) widening, a factor on the interval; (D) displacement, in baseline posterior standard deviations. |
+| Best fit: the smallest RMSE reachable anywhere in the candidate library under that perturbation, as a multiple of the realised observation-noise RMSE of the same draw. A value near one means the perturbation is not visible in the aggregate residual. |
 | Risk column: whole-network Spearman, then top-6 Jaccard under $\bar{P}$ / $E[A]$. |
 | Structured-heterogeneity displacements are a single noise draw. Over 30 draws the median proxy-gap fraction is 0.86/1.12/0.92 (raw), with 5-95% intervals that overlap across zones, so the zones cannot be ordered against one another. |
 | Length is one correlate; the length-weighted proxy is not the effective coefficient. |
@@ -79,4 +80,4 @@ ESS is out of 8192: the formal weights concentrate on about 157 effective draws 
 | leave-one-zone-out | average zone (209, 231) | -0.0200 | 100% | 0.0988 | 0.92 |
 | leave-one-zone-out | new zone (107, 113) | +0.0007 | 57% | 0.1006 | 0.90 |
 
-At the 20 never-calibrated junctions the mean absolute relative error is 0.83% (formal censored). Noise floor sigma = 0.1 mg/L.
+At the 20 never-calibrated junctions the median normalised mean absolute error, sum|error| / sum|truth| per junction, is 0.83% (formal censored). Noise floor sigma = 0.1 mg/L.

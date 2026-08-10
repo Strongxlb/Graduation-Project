@@ -82,6 +82,9 @@
   "rows": [
     {
       "kb": -0.4,
+      "rmse_min_med": 0.09775920754444745,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9956147377448381,
       "by_scheme": {
         "formal_censored": {
           "old": -1.1077636373996964,
@@ -269,6 +272,9 @@
     },
     {
       "kb": -0.5,
+      "rmse_min_med": 0.09767875257976971,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9946452148565481,
       "by_scheme": {
         "formal_censored": {
           "old": -1.0405139423326144,
@@ -412,6 +418,9 @@
     },
     {
       "kb": -0.6,
+      "rmse_min_med": 0.09772893031899953,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9968240620667796,
       "by_scheme": {
         "formal_censored": {
           "old": -0.9834731814392882,

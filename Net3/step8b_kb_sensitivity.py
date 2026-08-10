@@ -89,9 +89,16 @@ for kb in KBS:
     ess_acc = {s: [] for s in SCHEMES}
     P_acc = {s: [] for s in SCHEMES}
     A_acc = {s: [] for s in SCHEMES}
+    rmse_mins, noise_rmses = [], []
     for seed in SEEDS:
         rng = np.random.default_rng(seed)
         obs = np.clip(truth_mon + rng.normal(0, B.SIGMA_OBS, truth_mon.shape), 0, None)[B.WARMUP_H:]
+        # Best achievable aggregate fit over the candidate library BUILT AT THIS k_b, against
+        # observations generated at the true k_b, and the realised noise floor of the same draw.
+        # This is what decides whether a wrong fixed bulk coefficient is visible in the aggregate
+        # residual at all, or is absorbed into the wall coefficients without trace.
+        rmse_mins.append(float(B.rmse_of(Cmon, obs).min()))
+        noise_rmses.append(float(np.sqrt(((obs - truth_mon[B.WARMUP_H:]) ** 2).mean())))
         wts = B.all_weightings(Cmon, obs, threshold=B.RMSE_THR, schemes=SCHEMES)
         for s in SCHEMES:
             w, diag = wts[s]
@@ -106,7 +113,11 @@ for kb in KBS:
             # rather than whatever one arbitrary seed happened to give
             P_acc[s].append(np.tensordot(w, below, axes=(0, 0)).mean(axis=0))
             A_acc[s].append(np.tensordot(w, defc, axes=(0, 0)))
-    row = {"kb": kb, "by_scheme": {}}
+    row = {"kb": kb,
+           "rmse_min_med": med(rmse_mins),
+           "noise_rmse_med": med(noise_rmses),
+           "rmse_min_over_noise_med": med([a / b for a, b in zip(rmse_mins, noise_rmses)]),
+           "by_scheme": {}}
     for s in SCHEMES:
         P_med = np.median(np.vstack(P_acc[s]), axis=0)
         A_med = np.median(np.vstack(A_acc[s]), axis=0)

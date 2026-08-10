@@ -183,6 +183,26 @@ add("D3",
            ["%.1f" % g["condition_number_prior_scaled"]]],
           ["Form", "Eigenvalue 1", "Eigenvalue 2", "Eigenvalue 3", "Condition number"]))
 
+ar1 = load("step7c_ar1.json")
+rows = []
+for r in ar1["rho_sweep"]:
+    rows.append(["%.1f" % r["rho"], "%.0f" % r["n_eff"]] +
+                ["%.4f (%.0f%%)" % (r["coef"][z]["crlb"],
+                                    100 * r["coef"][z]["crlb_over_prior"])
+                 for z in ("old", "average", "new")] +
+                [" / ".join("%.2f" % r["coef"][z]["widening_vs_indep"]
+                            for z in ("old", "average", "new"))])
+add("D4",
+    "Table D4. Case-A bounds under an assumed AR(1) residual covariance, swept over the "
+    "correlation parameter. The correlation is assumed rather than estimated, since the "
+    "baseline observations are generated independently; the sweep therefore bounds how much "
+    "the reported precision would degrade if the residuals were in fact correlated. Widening "
+    "is the bound relative to the independent case, given for old, average and new. The three "
+    "coefficients widen almost together up to a correlation of 0.4 and separate beyond it, "
+    "the new coefficient least and the average coefficient most.",
+    table(rows, ["Correlation", "Effective n", "old", "average", "new",
+                 "Widening (old / avg / new)"]))
+
 # ---------------------------------------------------------------- E: structural heterogeneity
 s5c = load("step5c_jitter_sweep.json")
 rows = []

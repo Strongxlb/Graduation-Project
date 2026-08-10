@@ -130,6 +130,18 @@ Table D3. Eigenvalues of the Case-A information matrix in raw and prior-scaled f
 | Raw | 23906 | 5106 | 111 | 215 |
 | Prior-scaled | 24.5 | 16.6 | 7.6 | 3.2 |
 
+## D4
+
+Table D4. Case-A bounds under an assumed AR(1) residual covariance, swept over the correlation parameter. The correlation is assumed rather than estimated, since the baseline observations are generated independently; the sweep therefore bounds how much the reported precision would degrade if the residuals were in fact correlated. Widening is the bound relative to the independent case, given for old, average and new. The three coefficients widen almost together up to a correlation of 0.4 and separate beyond it, the new coefficient least and the average coefficient most.
+
+| Correlation | Effective n | old | average | new | Widening (old / avg / new) |
+|---|---|---|---|---|---|
+| 0.0 | 294 | 0.0947 (25%) | 0.0135 (29%) | 0.0080 (29%) | 1.00 / 1.00 / 1.00 |
+| 0.2 | 196 | 0.1150 (31%) | 0.0164 (35%) | 0.0096 (35%) | 1.21 / 1.21 / 1.20 |
+| 0.4 | 126 | 0.1406 (37%) | 0.0201 (43%) | 0.0114 (42%) | 1.48 / 1.49 / 1.44 |
+| 0.6 | 74 | 0.1736 (46%) | 0.0252 (55%) | 0.0135 (49%) | 1.83 / 1.87 / 1.70 |
+| 0.8 | 33 | 0.2022 (54%) | 0.0333 (72%) | 0.0145 (53%) | 2.13 / 2.47 / 1.82 |
+
 ## E1
 
 Table E1. Symmetric within-zone heterogeneity under the primary rule. The increment is the bias net of a paired homogeneous control run on the same noise, which is the part that can be attributed to the imposed structure.

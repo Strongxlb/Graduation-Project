@@ -49,7 +49,11 @@ LOG = os.path.join(HERE, "RESULTS_LOG.md")
 DOCS = {"RESULTS_LOG.md": LOG,
         "README.md": os.path.join(REPO, "README.md"),
         "README.en.md": os.path.join(REPO, "README.en.md"),
-        "REVISION_RESPONSE_MATRIX.md": os.path.join(REPO, "REVISION_RESPONSE_MATRIX.md")}
+        "REVISION_RESPONSE_MATRIX.md": os.path.join(REPO, "REVISION_RESPONSE_MATRIX.md"),
+        # The submitted paper is the document that matters most and was the last to be covered.
+        # Its headline numbers are now pinned to named JSON paths like any other claim, so a
+        # rebuild cannot quietly carry a figure the artifacts no longer support.
+        "paper.md": os.path.join(REPO, "00-thesis", "paper.md")}
 
 # figures/ and Figures/ are the same directory on a case-insensitive filesystem; resolve whichever
 # name exists so the check also works on Linux.
@@ -245,6 +249,22 @@ CLAIMS = [
     ("RESULTS_LOG.md", r"continuous 95% interval for `k_w,old` is \[−([0-9.]+),",
      "step7b_profile.json",
      "continuous_profile/by_likelihood/censored/coef/old/lo", -1),
+    # --- the submitted paper: the headline numbers of the abstract and conclusions ---
+    ("paper.md", r"contracted all three coefficients to\s*\n?\s*([0-9.]+)[–-]",
+     "baseline_meta.json", "summary/schemes/formal_censored/coef/old/sd_retained", 100),
+    ("paper.md", r"contracted all three coefficients to\s*\n?\s*[0-9.]+[–-]([0-9.]+)%",
+     "baseline_meta.json", "summary/schemes/formal_censored/coef/avg/sd_retained", 100),
+    ("paper.md", r"displaced coefficients by as much as ([0-9.]+) baseline",
+     "step8c_bias_bynode.json", "summary/max_own_shift_over_sd/value", -1),
+    ("paper.md", r"estimator spreads ([0-9.]+) to [0-9.]+ times",
+     "step14_repeated_noise.json", "by_scheme/formal_censored/coef/old/empirical_sd_over_crlb", 1),
+    ("paper.md", r"estimator spreads [0-9.]+ to ([0-9.]+) times",
+     "step14_repeated_noise.json", "by_scheme/formal_censored/coef/new/empirical_sd_over_crlb", 1),
+    ("paper.md", r"median normalised mean absolute error of ([0-9.]+)%",
+     "step11_loo.json",
+     "unmonitored_validation/by_scheme/formal_censored/mean_abs_rel_error[0]", 100),
+    ("paper.md", r"Spearman rank correlation of ([0-9.]+) to",
+     "step8b_kb_sensitivity.json", "rows[2]/by_scheme/formal_censored/risk_spearman_vs_kb_ref", 1),
     # --- scenarios: the node counts the Discussion leans on ---
     ("README.md", r"baseline ([0-9]+) nodes", "step12_scenarios.json",
      "scenario_summary[0]/P_min_gt_0.5_nodes", 1),

@@ -882,8 +882,11 @@ def tables():
     cfg = load("baseline_meta.json")["config"]
     sd = base_sd()
     loo = load("step11_loo.json")
-    kb = {r["kb"]: r["by_scheme"]["formal_censored"] for r in
-          load("step8b_kb_sensitivity.json")["rows"]}
+    _kb_rows = load("step8b_kb_sensitivity.json")["rows"]
+    kb = {r["kb"]: r["by_scheme"]["formal_censored"] for r in _kb_rows}
+    # the aggregate-fit statistic is a property of the candidate library at that k_b, not of a
+    # weighting scheme, so it sits at row level rather than inside by_scheme
+    kb_fit = {r["kb"]: r["rmse_min_over_noise_med"] for r in _kb_rows}
     bias = [r for r in load("step8c_bias_bynode.json")["rows"]
             if r["scheme"] == "formal_censored"]
     s6 = {r["sigma"]: r["by_scheme"]["formal_censored"] for r in
@@ -891,7 +894,12 @@ def tables():
     ar1 = load("step7c_ar1.json")["coef"]
     zc = load("step9_zeroclip.json")
     j20 = [r for r in load("step5c_jitter_sweep.json")["rows"] if r["jitter"] == 0.2][0]
-    st = load("step5d_structured.json")["zones"]
+    _st_full = load("step5d_structured.json")
+    st = _st_full["zones"]
+    # Best achievable aggregate fit under the structured truth, against the baseline realisation's
+    # noise RMSE. Same quantity the sensor-bias and k_b rows now carry, so the column is comparable.
+    st_rmse = _st_full["rmse_min"] / meta["noise_rmse"]
+    sb = load("step8_sensor_bias.json")
     zmap = [("old", "old"), ("avg", "average"), ("new", "new")]
     bkey = {"old": "d_old_over_sd", "avg": "d_avg_over_sd", "new": "d_new_over_sd"}
     L = []
@@ -956,37 +964,44 @@ def tables():
     rho_min = min(r["risk_spearman_vs_unbiased"] for r in bias)
 
     L += ["## Table 4 — Robustness summary", "",
-          "| Error source | old | average | new | Risk | Basis |",
-          "|---|---:|---:|---:|---|---|"]
-    L.append(f"| sigma 0.10 to 0.15 (W) | {wide[0]} | {wide[1]} | {wide[2]} | — | 30 real. |")
+          "| Error source | old | average | new | Best fit | Risk | Basis |",
+          "|---|---:|---:|---:|---:|---|---|"]
+    L.append(f"| sigma 0.10 to 0.15 (W) | {wide[0]} | {wide[1]} | {wide[2]} | — | — | 30 real. |")
     L.append("| AR(1) rho = 0.4 (W) | " + " | ".join(f"x{ar1[zn]['widening']:.2f}" for _, zn in zmap)
-             + " | — | Fisher |")
-    for lab, row in (("k_b = -0.4", kb[-0.4]), ("k_b = -0.6", kb[-0.6])):
+             + " | — | — | Fisher |")
+    for lab, kbv, row in (("k_b = -0.4", -0.4, kb[-0.4]), ("k_b = -0.6", -0.6, kb[-0.6])):
         rk = (f"rho_s {row['risk_spearman_vs_kb_ref']:.3f}; top-6 "
               f"{row['risk_top6_jaccard_vs_kb_ref']:.2f} / "
               f"{row['deficit_top6_jaccard_vs_kb_ref']:.2f}")
         L.append(f"| {lab} (D) | " + " | ".join(f"{row['shift_over_own_sd'][k]:+.2f}"
-                 for k, _ in zmap) + f" | {rk} | 30 real. |")
+                 for k, _ in zmap)
+                 + f" | {kb_fit[kbv]:.3f} | {rk} | 30 real. |")
+    bias_ratios = [r["rmse_min_over_noise_med"] for r in sb["rows"]]
     L.append("| sensor bias, max over arms (D) | " + " | ".join(f"{worst[k]:+.2f}" for k, _ in zmap)
-             + f" | rho_s >= {rho_min:.4f}; E[A] top-6 held in {ndef}/{nb} "
+             + f" | {min(bias_ratios):.3f}-{max(bias_ratios):.3f} "
+             + f"| rho_s >= {rho_min:.4f}; E[A] top-6 held in {ndef}/{nb} "
              + f"| {nb} arms x 30; max taken per coefficient |")
-    L.append("| sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | unchanged "
+    L.append("| sensor drift (D) | 0.89-0.99 of the mean-equivalent bias | | | — | unchanged "
              "| 2 nodes x 4 |")
     # Two different bases in one row, so say so: the count censuses the reference seed's
     # observation set, the displacement is a median over 30 seeds.
     L.append("| zero censoring (D) | " + " | ".join(
         f"{zc['coef'][zn]['delta_median'] / sd[k]:+.2f}" for k, zn in zmap)
-        + f" | top-3 unchanged | 30 real.; reference seed has "
+        + f" | — | top-3 unchanged | 30 real.; reference seed has "
         + f"{zc['cal_zero']}/{meta['n_resid']} clipped |")
     L.append("| symmetric heterogeneity (D) | " + " | ".join(
         f"{j20['field_ensemble'][zn]['increment_mean'] / sd[k]:+.2f}" for k, zn in zmap)
-        + " | — | 25 fields |")
+        + " | — | — | 25 fields |")
     L.append("| structured heterogeneity (D) | " + " | ".join(
         f"{st[zn]['by_scheme']['formal_censored']['bias_net_of_baseline'] / sd[k]:+.2f}"
-        for k, zn in zmap) + " | — | 1 design, single draw |")
+        for k, zn in zmap)
+        + f" | {st_rmse:.3f} | — | 1 design, single draw |")
     L += ["", "| Notes |", "|---|",
           "| (W) widening, a factor on the interval; (D) displacement, in baseline posterior "
           "standard deviations. |",
+          "| Best fit: the smallest RMSE reachable anywhere in the candidate library under that "
+          "perturbation, as a multiple of the realised observation-noise RMSE of the same draw. "
+          "A value near one means the perturbation is not visible in the aggregate residual. |",
           "| Risk column: whole-network Spearman, then top-6 Jaccard under "
           "$\\bar{P}$ / $E[A]$. |",
           "| Structured-heterogeneity displacements are a single noise draw. Over 30 draws the "
@@ -1013,7 +1028,8 @@ def tables():
     u = loo["unmonitored_validation"]["by_scheme"]["formal_censored"]
     L += ["",
           f"At the {loo['unmonitored_validation']['n_junctions']} never-calibrated junctions "
-          f"the mean absolute relative error is {u['mean_abs_rel_error'][0] * 100:.2f}% "
+          f"the median normalised mean absolute error, sum|error| / sum|truth| per junction, "
+          f"is {u['mean_abs_rel_error'][0] * 100:.2f}% "
           f"(formal censored). Noise floor sigma = {loo['sigma']} mg/L.", ""]
 
     os.makedirs(OUTDIR, exist_ok=True)

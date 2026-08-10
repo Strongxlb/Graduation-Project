@@ -61,6 +61,9 @@
         "145",
         "143"
       ],
+      "rmse_min_med": 0.09914437144089341,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 1.0134905548536102,
       "old_shift": -0.3868915421307144,
       "shift_over_sd": -3.824129262959284,
       "spearman_vs_unbiased": 0.9995023686171003,
@@ -100,6 +103,9 @@
         "15",
         "143"
       ],
+      "rmse_min_med": 0.09768926363430622,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9946507827426672,
       "old_shift": -0.2623155056291875,
       "shift_over_sd": -2.5927896890173465,
       "spearman_vs_unbiased": 0.9996897902206366,
@@ -139,6 +145,9 @@
         "15",
         "143"
       ],
+      "rmse_min_med": 0.09748144133121131,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.993275703044667,
       "old_shift": -0.13394952711349584,
       "shift_over_sd": -1.3239894146386197,
       "spearman_vs_unbiased": 0.9997414918505306,
@@ -178,6 +187,9 @@
         "15",
         "143"
       ],
+      "rmse_min_med": 0.09767875257976971,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9946452148565481,
       "old_shift": 0.0,
       "shift_over_sd": 0.0,
       "spearman_vs_unbiased": 1.0,
@@ -217,6 +229,9 @@
         "15",
         "143"
       ],
+      "rmse_min_med": 0.09819488596490904,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 0.9999241748115677,
       "old_shift": 0.11740051681456176,
       "shift_over_sd": 1.1604150076907758,
       "spearman_vs_unbiased": 0.9996897902206366,
@@ -256,6 +271,9 @@
         "15",
         "143"
       ],
+      "rmse_min_med": 0.099038831141996,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 1.0065397512023608,
       "old_shift": 0.22131106785940113,
       "shift_over_sd": 2.1874919419457535,
       "spearman_vs_unbiased": 0.9994571328861143,
@@ -295,6 +313,9 @@
         "15",
         "129"
       ],
+      "rmse_min_med": 0.10218448508227686,
+      "noise_rmse_med": 0.09811954422134325,
+      "rmse_min_over_noise_med": 1.0338825556407094,
       "old_shift": 0.39187254051418907,
       "shift_over_sd": 3.8733626516554955,
       "spearman_vs_unbiased": 0.9993278788113794,
