@@ -594,8 +594,7 @@ comparisons of Section 3.6.2.
 
 Water age was computed over the same window as a reaction-independent diagnostic, and its spatial
 association with expected duration and cumulative deficit described by Spearman rank correlation.
-The 92 junctions share pipes, tanks, flow paths and demand patterns and are not independent
-samples, so no junction-level p-value is reported; for the duration association a descriptive
+The 92 junctions are not independent samples, so no junction-level p-value is reported; for the duration association a descriptive
 width was obtained by resampling whole spatial blocks, with the design in Appendix G. Network
 summaries were reported over all 92 junctions, over the 59 with non-zero demand, and
 demand-weighted, because the three answer different questions.
@@ -715,9 +714,9 @@ difference in this experiment.
 
 {{TABLE3}}
 
-Table 3. **Baseline inference comparison.** Four weighting rules applied to the same 294 residuals and the same 8192 Sobol candidates. SD retained is the weighted-ensemble standard deviation as a percentage of the prior; it is a posterior standard deviation only under the two formal rules, since the informal score is not a likelihood.
+Table 3. **Baseline inference comparison.** Three weighting rules on the same 294 residuals and 8192 Sobol candidates, the informal score at both thresholds, for the reference noise realisation. SD retained is the weighted-ensemble standard deviation as a percentage of the prior; it is a posterior standard deviation only under the two formal rules, since the informal score is not a likelihood.
 
-![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the weighted-ensemble standard deviation as a percentage of the prior, which is a posterior standard deviation only under the two formal likelihoods.](figures/paper/fig2_inference_rule_dependence.png)
+![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities for the reference noise realisation under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the weighted-ensemble standard deviation as a percentage of the prior, which is a posterior standard deviation only under the two formal likelihoods.](figures/paper/fig2_inference_rule_dependence.png)
 
 The weights show why, and the reason is arithmetic. The formal weights concentrate on an
 effective sample of about 157 of 8192 draws (1.9%), whereas the informal effective sample size
@@ -864,7 +863,7 @@ None of these perturbations is visible in the aggregate residual: the best fit r
 Section 3.4 turns to the one error source that is internal to the model rather than to the
 instruments.
 
-![Figure 4. **Standardised effect of each error source.** (A) Interval widening where an uncertainty source is represented in the model. (B) Displacement where a perturbation is imposed but not represented, in baseline posterior standard deviations.](figures/paper/fig4_standardised_effects.png)
+![Figure 4. **Standardised effect of each error source.** (A) Interval widening where an uncertainty source is represented in the model. (B) Displacement where a perturbation is imposed but not represented, in baseline posterior standard deviations. Columns aggregate differently, over 30 realisations, 25 fields, 24 bias arms and one paired draw, as the figure note defines.](figures/paper/fig4_standardised_effects.png)
 
 {{TABLE4}}
 
@@ -929,13 +928,11 @@ between 0.092 and 0.103 mg L^-1^ against an observation noise standard deviation
 90% predictive interval coverage between 0.90 and 0.94 (Table 5). Taken at face value, these
 diagnostics indicate good held-out predictive performance at all six monitors.
 
-Two observations qualify that reading. First, each zone retains its second monitor throughout,
-so the test establishes prediction at an unseen monitor while its reaction zone remains locally
-observed; it does not test whether that zone's coefficient can be identified without local
-monitoring. Second, the informal comparator achieved almost the same held-out RMSE, 0.092 to
-0.102 mg L^-1^, despite producing the much broader and more prior-sensitive parameter
-distributions of Section 3.2. A weighting rule can therefore extract very little parameter
-information and still predict concentrations about as well.
+Two observations qualify that reading. Each zone retains its second monitor throughout, so the
+test establishes prediction at an unseen monitor while its zone remains locally observed. And the
+informal comparator achieved almost the same held-out RMSE, 0.092 to 0.102 mg L^-1^, despite the
+much broader parameter distributions of Section 3.2, so a weighting rule can extract very little
+parameter information and still predict concentrations about as well.
 
 ### 3.5.2 Leaving out a whole zone
 
@@ -945,7 +942,7 @@ the prior standard deviation. The new coefficient retained about 57%, consistent
 upstream position and with the cross-zone sensitivity visible in the Fisher analysis of Section
 3.3.3.
 
-Held-out prediction nevertheless stayed close to the observation-noise scale, with RMSEs of
+Held-out prediction nevertheless stayed near the noise scale, with RMSEs of
 0.0999, 0.0988 and 0.1006 mg L^-1^ and coverage between 0.90 and 0.96 (Figure 6). Repeating the
 design under ±20% per-pipe heterogeneity across eight independent fields produced the same
 qualitative separation, with errors at unmonitored junctions between 0.8% and 1.2%. In a separate
@@ -953,8 +950,8 @@ spatial validation using all six monitors, predictions at twenty junctions that 
 calibration had a median normalised mean absolute error of 0.83% under the primary likelihood,
 with an interquartile range of 0.41% to 1.45%.
 
-The predictive bands at those junctions are a less flattering result and are reported here for
-that reason. Against a nominal 90%, median pointwise coverage was 1.00 under both band
+The predictive bands at those junctions are less flattering and are reported for that reason.
+Against a nominal 90%, median pointwise coverage was 1.00 under both band
 constructions and both weighting rules, so the bands are conservative rather than calibrated in
 this model-matched design, and the same caution applies to the nominally well-calibrated coverage
 of the held-out monitor designs. Cross-coefficient compensation was small, the largest shift in a
@@ -986,8 +983,8 @@ one. The values in this section carry the baseline weights and are conditional o
 reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^,
 accumulates a deficit of 1.68 mg L^-1^ h and has a median window minimum of 0.031 mg L^-1^; node
 129 spends twice as long below the threshold yet accumulates only 0.84 mg L^-1^ h, with a median
-minimum of 0.147. Duration measures persistence, deficit combines persistence with depth, and
-the two therefore rank the network differently; a window-breach probability distinguishes
+minimum of 0.147. Duration measures persistence and deficit combines it with depth, so the two rank the network
+differently; a window-breach probability distinguishes
 neither, collapsing both to whether the threshold is crossed at all.
 
 The population matters as much as the metric. Averaged over all 92 junctions the expected
@@ -1049,7 +1046,7 @@ but demand at risk falls only to 64.7 L s^-1^ at both doses and never returns to
 that the extra 15% achieved nothing. The ageing multipliers are illustrative, no by-product, taste or booster constraint is represented, and absolute severities inherit the horizon dependence of Section 3.1.2. Maps
 and the full register are in Appendix H.
 
-![Figure 7. **Risk robustness is metric-specific.** (A) Rank of the leading nodes under $\bar{P} = E[D]/48$ against cumulative deficit $E[A]$. (B) Top-six overlap with the reference ranking under three selected perturbations, both metrics. (C) Expected duration against deficit for all 92 junctions.](figures/paper/fig7_metric_specific_risk.png)
+![Figure 7. **Risk robustness is metric-specific.** (A) Rank of the leading nodes under $\bar{P} = E[D]/48$ against cumulative deficit $E[A]$. (B) Top-six overlap with the reference ranking under three selected perturbations, each over 30 noise realisations, both metrics. (C) Expected duration against deficit for all 92 junctions.](figures/paper/fig7_metric_specific_risk.png)
 
 ## 3.7 Integrated implications, limitations and future work
 
@@ -1341,7 +1338,10 @@ The analysis code, the cached result artifacts and this paper's figure and table
 and every number in this paper was produced at that release. The frozen Net3 input file is hash-checked on import, and the environment is pinned to exact library versions, which matters here because the study documents version-specific WNTR behaviour. The verification checks of Section 2.2.4 are runnable: `provenance.py --check` confirms that the environment matches the one that produced the cached results, and `validate_artifacts.py` cross-checks the written numbers against the artifacts.
 
 Each script writes `Net3/baseline_cache/<script name>.json`, so the artifact column that would
-otherwise repeat this table is omitted. Five entries depart from that rule:
+otherwise repeat this table is omitted. One cross-section dependency is worth naming: every
+displacement reported in baseline posterior standard deviations is divided by the median
+posterior standard deviation over 30 noise realisations at the baseline noise level, which
+`step6_noise_sensitivity.py` writes, not by the standard deviation of the run being reported. Five entries depart from that rule:
 `step1_freeze_baseline.py` writes `baseline_meta.json` and `baseline.npz`;
 `step3_threshold_sensitivity.py` writes `step3_threshold.json`; `step12_scenarios.py` also writes
 `step12_risk_register.csv`; `paper_figs.py` and `appendix_tables.py` write into
@@ -1356,10 +1356,10 @@ otherwise repeat this table is omitted. Five entries depart from that rule:
 | 3.2.2, Appendix C | `step3_threshold_sensitivity.py`, `step4d_displaced_robust.py` |
 | 2.4.3, 3.3.3, Appendix D | `step7_fisher.py` |
 | 2.4.4, 3.2.3 | `step7b_profile.py` |
-| 2.5.1, 3.3.1 | `step6_noise_sensitivity.py` |
+| 2.5.1, 3.3.1, and the standardising denominator for 3.3.2, 3.4 and 3.6.2 | `step6_noise_sensitivity.py` |
 | 2.5.2, 3.3.1 | `step7c_ar1.py`, `step7c_profile_ar1.py` |
-| 2.5.3, 3.3.2, Appendix F | `step8_sensor_bias.py`, `step8c_bias_bynode.py`, `step8d_sensor_drift.py` |
-| 2.5.5, 3.3.3 | `step8b_kb_sensitivity.py` |
+| 2.5.3, 3.3.2, 3.6.2, Appendix F | `step8_sensor_bias.py`, `step8c_bias_bynode.py`, `step8d_sensor_drift.py` |
+| 2.5.5, 3.3.3, 3.6.2 | `step8b_kb_sensitivity.py` |
 | 2.6, 3.4, Appendix E | `step5_structural_error.py`, `step5c_jitter_sweep.py`, `step5d_structured.py` |
 | 2.7, 3.5 | `step11_loo.py` |
 | 2.8, 3.6, Appendices G and H | `step10_risk_metrics.py`, `step12_scenarios.py` |

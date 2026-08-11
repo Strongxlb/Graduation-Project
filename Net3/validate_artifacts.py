@@ -904,6 +904,165 @@ def check_env_claims(text):
 
 
 # ---------------------------------------------------------------- driver
+def _paper_section_artifacts():
+    """Paper section -> the artifacts that section may quote, read from Appendix I.
+
+    The paper already publishes this mapping for the reader; using the same table as the check's
+    binding means the two cannot silently disagree.
+    """
+    doc = read_doc("paper.md") or ""
+    m = re.search(r"^\| Paper section \| Script \|$(.*?)(?=\n[ \t]*\n|\Z)", doc, re.M | re.S)
+    if not m:
+        return {}
+    out = {}
+    for line in m.group(1).splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) != 2 or set(cells[0]) <= set("-: "):
+            continue
+        arts = []
+        for script in re.findall(r"`([a-z0-9_]+)\.py`", cells[1]):
+            for cand in (script + ".json", EXTRA_ARTIFACTS.get(script)):
+                if cand and os.path.exists(os.path.join(CACHE, cand)):
+                    arts.append(cand)
+        for sec in re.findall(r"\d+\.\d+(?:\.\d+)?", cells[0]):
+            out.setdefault(sec, set()).update(arts)
+    return out
+
+
+EXTRA_ARTIFACTS = {"step1_freeze_baseline": "baseline_meta.json",
+                   "step3_threshold_sensitivity": "step3_threshold.json"}
+
+
+def check_paper_numbers(verbose=False):
+    """Hold each paper section's numbers to the artifacts Appendix I says produced it.
+
+    A global pool over every artifact was tried first and thrown away: with 30,000 pooled values a
+    random two-decimal figure matches by coincidence 93% of the time, so it passed a deliberately
+    corrupted number and would have given false confidence. Binding a section to its own artifacts
+    is the same discipline check_log_numbers applies to RESULTS_LOG, and it is what gives either
+    check teeth.
+
+    Sections Appendix I does not map are not checked, and the note says how many those are. This
+    still does not prove provenance; it detects drift in the numbers it covers.
+    """
+    doc = read_doc("paper.md")
+    if doc is None:
+        return ["paper.md not found"], []
+    mapping = _paper_section_artifacts()
+    if not mapping:
+        return ["Appendix I section-to-script table not found; paper numbers unchecked"], []
+
+    body = re.sub(r"<!--.*?-->", "", doc, flags=re.S)
+    body = re.split(r"^## Appendix A\.", body, flags=re.M)[0]
+    body = re.sub(r"\A---\n.*?\n---\n", "", body, flags=re.S)
+
+    pools = {}
+    def pool_for(arts):
+        key = tuple(sorted(arts))
+        if key in pools:
+            return pools[key]
+        pool = set()
+        def add(v):
+            # store the raw magnitude only. Pre-expanding each value over seven rounding levels
+            # and three scalings was tried and abandoned: it inflated the pool until three
+            # deliberately corrupted numbers all passed. Matching happens at the precision the
+            # paper actually writes, which is where the discrimination is.
+            try:
+                f = float(v)
+            except (TypeError, ValueError):
+                return
+            if f == f:
+                pool.add(abs(f))
+        def walk(o):
+            if isinstance(o, dict):
+                for v in o.values():
+                    walk(v)
+            elif isinstance(o, (list, tuple)):
+                for v in o:
+                    walk(v)
+            elif isinstance(o, bool):
+                pass
+            elif isinstance(o, (int, float)):
+                add(o)
+            elif isinstance(o, str):
+                for t in re.findall(r"-?\d+\.?\d*", o):
+                    add(t)
+        for a in arts:
+            try:
+                walk(json.load(open(os.path.join(CACHE, a))))
+            except Exception:
+                pass
+        # The generated tables belong in every pool. Ratios such as a displacement divided by the
+        # repeated-baseline SD exist in no single artifact; paper_figs.py computes them, and the
+        # property worth checking is that the prose agrees with what it computed.
+        # tables.md only. appendix_tables.md carries the 92-row risk register, and pooling ~8000
+        # values from it let two deliberately corrupted numbers match by coincidence.
+        f = os.path.join(FIGDIR, "paper", "tables.md")
+        if os.path.exists(f):
+            for t in re.findall(r"-?\d+\.?\d*", open(f).read()):
+                add(t)
+        # index by written precision so a lookup is a set hit rather than a scan of the pool
+        idx = {}
+        for d in range(0, 7):
+            idx[d] = {round(x, d) for x in pool} | {round(x * 100, d) for x in pool}
+        pools[key] = idx
+        return idx
+
+    SKIP = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "12", "20", "24",
+            "30", "48", "49", "92", "100", "120", "168", "294", "0.5"}
+    # Numbers the paper derives in the text rather than reading from an artifact. Listing them
+    # with a reason is the point: an unexplained exemption is how a wrong number survives.
+    DERIVED = {
+        "0.1068": "one-sided 95% band of the RMSE objective, 0.1 * (1 + 1.645 / sqrt(2*294)), "
+                  "stated in Section 2.3.4 with its inputs",
+        "0.0086": "largest of the six leave-one-zone-out cross-coefficient shifts, a difference "
+                  "between two step11_loo medians rather than a stored field",
+    }
+    problems = []
+    checked = covered = probes = caught = 0
+    cur = None
+    for i, line in enumerate(body.split("\n"), 1):
+        h = re.match(r"^#{2,4}\s+(\d+\.\d+(?:\.\d+)?)\s", line)
+        if h:
+            cur = h.group(1)
+            continue
+        if not cur or line.startswith("|") or line.lstrip().startswith("{{"):
+            continue
+        arts = mapping.get(cur) or mapping.get(cur.rsplit(".", 1)[0])
+        if not arts:
+            continue
+        covered += 1
+        pool = pool_for(arts)
+        txt = re.sub(r"\$\$.*?\$\$", " ", line, flags=re.S)
+        txt = re.sub(r"\$[^$]*\$", " ", txt)
+        for m in re.finditer(r"(?<![\w.])(\d+\.\d+)(?![\w])", txt):
+            v = m.group(1)
+            if v in SKIP or _dp(v) < 2 or v in DERIVED:
+                continue
+            checked += 1
+            f, d = float(v), _dp(v)
+            # accept the value as written, as a percentage of a stored fraction, and one unit
+            # low at the written precision, which is half-even rounding of a stored 0.3645
+            at = pool.get(min(d, 6), set())
+            # power: would this number still pass if it were wrong by one unit in its last place?
+            # Reported below, because a membership test can match by coincidence and a reader is
+            # entitled to know how often before trusting a pass.
+            probes += 2
+            caught += sum(1 for q in (f + 10 ** -d, f - 2 * 10 ** -d)
+                          if q not in at and round(q - 10 ** -d, d) not in at)
+            if f in at or round(f - 10 ** -d, d) in at:
+                continue
+            problems.append(f"paper.md line {i} (Section {cur}): {v} is not in "
+                            f"{'/'.join(sorted(arts))} — {line.strip()[:64]}")
+    power = (100.0 * caught / probes) if probes else 0.0
+    notes = [f"{checked} number(s) in {len(mapping)} mapped section(s) held to their own artifacts; "
+             f"{len(DERIVED)} derived value(s) exempt by name; sections Appendix I does not map "
+             f"are not covered",
+             f"measured power {power:.0f}%: that share of last-digit corruptions would be caught, "
+             f"so a pass here is weak evidence and the CLAIMS registry remains the strong check"]
+    return problems, notes
+
+
 def main(verbose=False, release=False):
     sections, text = log_sections()
     checks = [
@@ -918,6 +1077,7 @@ def main(verbose=False, release=False):
         ("every step script is reproducible", lambda: check_reproduce_list()),
         ("numerical guards record their activation", lambda: check_guards()),
         ("log numbers vs artifacts", lambda: check_log_numbers(sections, verbose)),
+        ("paper numbers vs artifacts", lambda: check_paper_numbers(verbose)),
         ("units and paths", lambda: check_text_rules(text)),
         ("environment claims", lambda: check_env_claims(text)),
     ]
