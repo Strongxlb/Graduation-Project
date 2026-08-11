@@ -344,8 +344,8 @@ primary analysis.
 
 ### 2.3.4 Informal GLUE behavioural comparator
 
-The specific informal GLUE weighting used in the original analysis of this system was retained
-as a comparator, so that its effect could be measured on the same observations and predictions
+The specific informal GLUE weighting [@BevenBinley1992] used in the original analysis of this
+system was retained as a comparator, so that its effect could be measured on the same observations and predictions
 as the formal rules. Candidate $i$ received weight
 
 $$w_i^{\mathrm{GLUE}} \propto \exp\left[-\frac{1}{2}\left(\frac{\mathrm{RMSE}_i}{\sigma}\right)^{2}\right]\mathbf{1}\left(\mathrm{RMSE}_i < T\right),$$
@@ -394,7 +394,8 @@ beyond it.
 
 ### 2.4.3 Fisher information and Cramér–Rao bounds
 
-Local identifiability was assessed from the sensitivity Jacobian of the 294 monitored values.
+Local identifiability was assessed from the sensitivity Jacobian of the 294 monitored values
+[@Brun2001].
 For independent homoscedastic Gaussian errors,
 
 $$\mathbf{F}=\frac{1}{\sigma^{2}}\mathbf{J}^{\mathsf{T}}\mathbf{J},  J_{ij}=\frac{\partial C_i}{\partial\theta_j}.$$
@@ -413,7 +414,7 @@ universal threshold. Marginalisation and the step-size check are in Appendix D.
 
 ### 2.4.4 Continuous profile likelihood
 
-Likelihood geometry was assessed by continuous single-parameter profiles: each wall coefficient
+Likelihood geometry was assessed by continuous single-parameter profiles [@Raue2009]: each wall coefficient
 was fixed in turn while the other two were re-optimised by Nelder–Mead within their prior
 bounds, and the endpoints of the 95% interval were located by Brent bisection at
 
