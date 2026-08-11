@@ -690,7 +690,7 @@ L^-1^ (Figure 1B, C).
 The six monitors sample most of that range rather than replicating one another. Mean window
 concentrations are 0.845 and 0.827 mg L^-1^ at nodes 107 and 113 in the new zone, 0.717 and
 0.374 at nodes 209 and 231 in the average zone, and 0.251 and 0.355 at nodes 15 and 145 in the
-old zone. The zonal pattern follows the imposed reactivity contrast, but the coefficient does not set the
+old zone. The zonal pattern follows the imposed reactivity contrast, but it does not set the
 level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest old-zone monitor by only 0.019 mg L^-1^, because residence time
 and position also modulate the accumulated decay. In the noise-free reference trajectory, 21 of the 92 junctions cross below the 0.2 mg L^-1^
 threshold at least once in the window. That is a property of the truth, not the

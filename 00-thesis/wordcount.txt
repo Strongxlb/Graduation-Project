@@ -1,3 +1,3 @@
-body 11,507 + captions 495 (12 caption(s)) = 12,002 counted
-OVER the 12,000 limit by 2   (table rows excluded: 0)
+body 11,506 + captions 495 (12 caption(s)) = 12,001 counted
+OVER the 12,000 limit by 1   (table rows excluded: 0)
   held out of the build, not counted above -- Acknowledgements; Statement on the use of generative AI: 380 words
