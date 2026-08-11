@@ -657,7 +657,7 @@ concentrations are 0.845 and 0.827 mg L^-1^ at nodes 107 and 113 in the new zone
 old zone. The zonal pattern follows the imposed reactivity contrast, but it does not set the
 level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest old-zone monitor by only 0.019 mg L^-1^, because residence time
 and position also modulate the accumulated decay. In the noise-free reference trajectory, 21 of the 92 junctions cross below the 0.2 mg L^-1^
-threshold at least once in the window. That is a property of the truth, not the
+threshold at least once in the window, a property of the truth and not the
 ensemble-weighted breach count of Section 3.6.
 
 ### 3.1.2 Warm-up and assessment-window adequacy
