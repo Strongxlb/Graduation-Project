@@ -300,7 +300,8 @@ second, independent error. The Net3 input file is frozen and hash-checked, and t
 
 ### 2.3.1 Priors and Sobol candidate library
 
-The three-dimensional baseline prior box was sampled with $8192 = 2^{13}$ scrambled Sobol draws.
+The three-dimensional baseline prior box was sampled with $8192 = 2^{13}$ scrambled Sobol draws
+[@Sobol1967; @Owen1998].
 Each baseline candidate was simulated once and its predictions at all 92 junctions cached.
 Experiments that changed only the observation realisation or the weighting rule reused this
 common library. The censored Gaussian, iid Gaussian and informal GLUE formulations were evaluated

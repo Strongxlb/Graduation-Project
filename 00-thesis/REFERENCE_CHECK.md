@@ -1,29 +1,35 @@
 # 参考文献一手核对清单
 
-由 `00-thesis/refs.bib` 生成。**每条打开链接，逐字段对照落地页**，一致就把 `[ ]` 改成 `[x]`。
 
-只有对着一手来源才查得出这类错。到目前为止发现的三处冲突，两处是二手信息错、原始页面对：
+由 `00-thesis/refs.bib` 生成。**打开链接逐字段对照落地页**，一致就把 `[ ]` 改成 `[x]`。
 
-- Hua 1999 的 DOI，仓库索引写成 `(99)00094-4`，PDF 原文 PII 是 `(98)00519-3`
-- Powell 2000 的 DOI，索引写成 `(99)00297-9`，PDF 原文是 `(99)00097-4`
-- CCWI 会议名，原写 *Computing and Control **in** the Water Industry*，实际是 ***for***
+已发现的四处冲突，三处是二手信息错、原始页面对：
+
+- Hua 1999 DOI，索引 `(99)00094-4` vs PDF 原文 `(98)00519-3`
+- Powell 2000 DOI，索引 `(99)00297-9` vs PDF 原文 `(99)00097-4`
+- CCWI 会议名，`Computing and Control **in** the Water Industry` 实为 ***for***
+- Hallam 2002 作者，某份列表漏了通讯作者 C. F. Forster，标题也少了 *water*
 
 ---
 
-## 已核（对过 PDF 原文，无需再查）
+## 已核，无需再查
 
-| 条目 | 核验依据 |
+| 条目 | 依据 |
 |---|---|
-| `BevenBinley1992` | PDF 前页 DOI / PII |
-| `Hallam2002` | PDF 前页 DOI / PII |
-| `Hua1999` | PDF 前页 DOI / PII |
-| `Klise2017WNTR` | PDF 前页 DOI / PII |
-| `Powell2000` | PDF 前页 DOI / PII |
-| `Vasconcelos1997` | PDF 前页 DOI / PII |
+| `BevenBinley1992` | 仓库 PDF 前页 DOI / PII |
+| `Hallam2002` | 仓库 PDF 前页 DOI / PII |
+| `Hua1999` | 仓库 PDF 前页 DOI / PII |
+| `Klise2017WNTR` | 仓库 PDF 前页 DOI / PII |
+| `Powell2000` | 仓库 PDF 前页 DOI / PII |
+| `Vasconcelos1997` | 仓库 PDF 前页 DOI / PII |
+| `Jenks2025BayesianDisinfectant` | 出版方落地页截图 |
+| `Owen1998` | 出版方落地页截图 |
+| `Sobol1967` | 出版方落地页截图 |
 
 ---
 
-## 待核 — 14 条
+
+## 待核 — 13 条
 
 ### 1. [ ] `BevenBinley2014`
 
@@ -83,20 +89,7 @@
 | 年 | 2014 |
 | 出版方 | American Society of Civil Engineers |
 
-### 5. [ ] `Jenks2025BayesianDisinfectant`
-
-**https://doi.org/10.15131/shef.data.29921225**
-
-| 字段 | refs.bib 现值 |
-|---|---|
-| 作者 | Jenks, Bradley and Ulusoy, Aly-Joy and Stoianov, Ivan |
-| 标题 | Bayesian Inference for Quantifying Parameter Uncertainty in Disinfectant Decay Models |
-| 会议 | Proceedings of the 21st {Computing and Control for the Water Industry Conference} (CCWI 2025) |
-| 年 | 2025 |
-| 出版方 | The University of Sheffield |
-| 地点 | Sheffield, UK |
-
-### 6. [ ] `MantovanTodini2006`
+### 5. [ ] `MantovanTodini2006`
 
 **https://doi.org/10.1016/j.jhydrol.2006.04.046**
 
@@ -110,7 +103,7 @@
 | 页 | 368--381 |
 | 年 | 2006 |
 
-### 7. [ ] `Munavalli2003SteadyState`
+### 6. [ ] `Munavalli2003SteadyState`
 
 **https://doi.org/10.1061/(ASCE)0733-9496(2003)129:2(124)**
 
@@ -125,7 +118,7 @@
 | 年 | 2003 |
 | 出版方 | American Society of Civil Engineers |
 
-### 8. [ ] `Nejjari2014ChlorineCalibration`
+### 7. [ ] `Nejjari2014ChlorineCalibration`
 
 **https://doi.org/10.1016/j.proeng.2014.02.135**
 
@@ -139,7 +132,7 @@
 | 年 | 2014 |
 | 出版方 | Elsevier |
 
-### 9. [ ] `PeiroviMinaee2019GAPSO`
+### 8. [ ] `PeiroviMinaee2019GAPSO`
 
 **https://doi.org/10.1016/j.mex.2019.03.008**
 
@@ -153,7 +146,7 @@
 | 年 | 2019 |
 | 出版方 | Elsevier |
 
-### 10. [ ] `Rajakumar2019EnKF`
+### 9. [ ] `Rajakumar2019EnKF`
 
 **https://doi.org/10.1061/(ASCE)WR.1943-5452.0001118**
 
@@ -168,7 +161,7 @@
 | 年 | 2019 |
 | 出版方 | American Society of Civil Engineers |
 
-### 11. [ ] `Raue2009`
+### 10. [ ] `Raue2009`
 
 **https://doi.org/10.1093/bioinformatics/btp358**
 
@@ -182,11 +175,11 @@
 | 页 | 1923--1929 |
 | 年 | 2009 |
 
-### 12. [ ] `Rossman1994`
+### 11. [ ] `Rossman1994`
 
 **https://doi.org/10.1061/(ASCE)0733-9372(1994)120:4(803)**
 
-> 仓库里有 PDF，但是扫描件，没有文字层，无法自动提取。需人工打开原文核对。
+> 仓库有 PDF，但为扫描件、无文字层，需人工开原文核对。
 
 | 字段 | refs.bib 现值 |
 |---|---|
@@ -198,7 +191,7 @@
 | 页 | 803--820 |
 | 年 | 1994 |
 
-### 13. [ ] `Stedinger2008`
+### 12. [ ] `Stedinger2008`
 
 **https://doi.org/10.1029/2008WR006822**
 
@@ -212,7 +205,7 @@
 | 页 | W00B06 |
 | 年 | 2008 |
 
-### 14. [ ] `Wu2022BEAR`
+### 13. [ ] `Wu2022BEAR`
 
 **https://doi.org/10.5194/hess-26-1203-2022**
 
@@ -231,4 +224,4 @@
 
 ## 不适用
 
-`Rossman2000` 与 `Rossman2020` 是 EPA 技术报告，本来就没有 DOI，不属于缺失。
+`Rossman2000` 与 `Rossman2020` 是 EPA 技术报告，本无 DOI。
