@@ -283,9 +283,8 @@ The EPANET absolute quality tolerance was set to $1\times10^{-5}$ mg L^-1^. It i
 implementations are the same numerical experiment.
 
 Three checks support the implementation. A single-pipe bulk-only configuration was compared with
-the analytic first-order solution $C = C_0\exp(k_b t_{\mathrm{res}})$. Wall-reaction behaviour
-was checked for the expected sign, for monotonic response, and against the limiting case without
-mass-transfer resistance. A unit-equivalence test confirmed that the
+the analytic first-order solution $C = C_0\exp(k_b t_{\mathrm{res}})$. Wall-reaction behaviour was checked for the expected sign, for monotonic response, and against
+the limiting case without mass transfer. A unit-equivalence test confirmed that the
 corrected implementation reproduces the previously generated field to within a maximum relative
 difference of $2.3\times10^{-7}$, with no change in any of the below-threshold duration
 classifications tested. Agreement at this level is expected rather than fortuitous. First-order
@@ -655,11 +654,10 @@ L^-1^ (Figure 1B, C).
 The six monitors sample most of that range rather than replicating one another. Mean window
 concentrations are 0.845 and 0.827 mg L^-1^ at nodes 107 and 113 in the new zone, 0.717 and
 0.374 at nodes 209 and 231 in the average zone, and 0.251 and 0.355 at nodes 15 and 145 in the
-old zone. The broad zonal pattern follows the imposed reactivity contrast, but the coefficient does not
-set the level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest
-old-zone monitor by only 0.019 mg L^-1^, because residence time and network position also
-modulate the accumulated decay. In the deterministic noise-free reference trajectory, 21 of the 92 junctions cross below the
-0.2 mg L^-1^ threshold at least once in the window. That is a property of the truth, not the
+old zone. The zonal pattern follows the imposed reactivity contrast, but the coefficient does not set the
+level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest old-zone monitor by only 0.019 mg L^-1^, because residence time
+and position also modulate the accumulated decay. In the noise-free reference trajectory, 21 of the 92 junctions cross below the 0.2 mg L^-1^
+threshold at least once in the window. That is a property of the truth, not the
 ensemble-weighted breach count of Section 3.6.
 
 ### 3.1.2 Warm-up and assessment-window adequacy
