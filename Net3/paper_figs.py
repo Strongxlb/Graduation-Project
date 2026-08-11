@@ -106,6 +106,18 @@ def npz():
     return np.load(os.path.join(CACHE, "baseline.npz"))
 
 
+def note(fig, text, y=0.02, size=6.4, width=118):
+    """Figure footnote, wrapped to the canvas width.
+
+    savefig.bbox is "tight", so a single line that overruns the figure widens the saved image
+    instead of being clipped. Figure 4's note stretched it to 8.7:1 against a designed 3.1:1, and
+    the panels shrank to fit the page. Wrapping keeps the canvas the size it was laid out at.
+    """
+    import textwrap
+    fig.text(0.5, y, "\n".join(textwrap.wrap(" ".join(text.split()), width)),
+             ha="center", va="bottom", fontsize=size, color=INK3, linespacing=1.35)
+
+
 def finish(fig, stem):
     os.makedirs(OUTDIR, exist_ok=True)
     path = os.path.join(OUTDIR, stem + ".png")
@@ -386,10 +398,9 @@ def fig6():
     fig.text(0.5, 0.955, "zone left unobserved", ha="center", fontsize=8.5, color=INK)
     # Not "returns to its prior" without qualification: old and average retain ~100% of the
     # prior SD, but new retains 57%, so the third panel contradicts a universal statement.
-    fig.text(0.5, 0.015, "An unobserved zone's coefficient loses most or all of its constraint "
-             "— fully for old and average, partly for new; prediction at the same dropped "
-             "monitors stays at the noise floor throughout.",
-             ha="center", fontsize=6.5, color=INK3)
+    note(fig, "An unobserved zone's coefficient loses most or all of its constraint, fully for "
+               "old and average and partly for new; prediction at the same dropped monitors "
+               "stays at the noise floor throughout.")
     return finish(fig, "fig6_prediction_without_identification")
 
 
@@ -550,10 +561,10 @@ def fig5():
     ]
     fig.legend(handles=handles, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0.10),
                columnspacing=1.5, handletextpad=0.3)
-    fig.text(0.5, 0.02, "Symmetric mean-zero heterogeneity averages out over fields. A "
-             "length-correlated field displaces all three coefficients at the same residual, by a "
-             "median fraction near 1; the intervals overlap, so the zones are not ordered.",
-             ha="center", fontsize=6.5, color=INK3)
+    note(fig, "Symmetric mean-zero heterogeneity leaves no bias resolvable against the "
+               "field-to-field scatter. A length-correlated field displaces all three "
+               "coefficients at the same residual, by a median fraction near 1; the intervals "
+               "overlap, so the zones are not ordered.")
     return finish(fig, "fig5_symmetric_vs_structured")
 
 
@@ -593,9 +604,11 @@ def fig4():
         st[zn]["by_scheme"]["formal_censored"]["bias_net_of_baseline"] / sd[k],
     ] for k, zn in zmap])
 
-    fig, axes = plt.subplots(1, 2, figsize=(W_FULL, 2.05),
+    # tall enough for a two-line tick label under the matrix AND a wrapped note under that;
+    # at 2.05 in the note ran into the labels
+    fig, axes = plt.subplots(1, 2, figsize=(W_FULL, 2.55),
                              gridspec_kw={"width_ratios": [2.0, 6.0], "wspace": 0.09})
-    fig.subplots_adjust(left=0.115, right=0.985, top=0.70, bottom=0.235)
+    fig.subplots_adjust(left=0.115, right=0.985, top=0.80, bottom=0.30)
 
     for ax, M, cols, cmap, vmax, title, vmin in (
             (axes[0], W, wide_cols, "Blues", 2.0, "A  interval widening (×)", 1.0),
@@ -624,12 +637,11 @@ def fig4():
             axes[1].text(j, i, f"{v:+.2f}", ha="center", va="center", fontsize=6.8,
                          color="white" if abs(v) / 6.0 > 0.55 else INK)
 
-    fig.text(0.5, 0.035, "Sign is printed, not encoded by colour. Column 3 maximises over the 24 "
-             "bias arms separately for each coefficient, so its three cells need not share an arm. "
-             "Drift is omitted: it runs at two monitors only and reproduces 0.89–0.99 of the "
-             "mean-equivalent bias already in column 3. The structured-heterogeneity column is a "
-             "single noise draw (see Fig. 5C).",
-             ha="center", fontsize=6.3, color=INK3)
+    note(fig, "Sign is printed, not encoded by colour. Column 3 maximises over the 24 bias arms "
+               "separately for each coefficient, so its three cells need not share an arm. Drift "
+               "is omitted: two monitors only, and it reproduces 0.89–0.99 of the mean-equivalent "
+               "bias already in column 3. The structured column is a single noise draw (Fig. 5C).",
+         y=0.015)
     return finish(fig, "fig4_standardised_effects")
 
 
@@ -745,9 +757,7 @@ def fig7():
             va="top", fontsize=6.3, color=INK2)
     tidy(ax, "both")
 
-    fig.text(0.5, 0.025, "Network-wide rank correlation stays high in every case; the "
-             "six-node shortlist does not, and which nodes it keeps depends on the metric.",
-             ha="center", fontsize=6.5, color=INK3)
+    note(fig, "Network-wide rank correlation stays high in every case; the  six-node shortlist does not, and which nodes it keeps depends on the metric. center", y=0.02, size=6.5)
     return finish(fig, "fig7_metric_specific_risk")
 
 
