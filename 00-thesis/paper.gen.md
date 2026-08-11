@@ -682,7 +682,7 @@ Table 2. **Symbols and metric definitions.** Integrals run over the 120–168 h 
 ### 3.1.1 Baseline chlorine dynamics across the monitored network
 
 The baseline inverse problem is anchored to a single reference forward field, described here;
-Sections 3.3 and 3.4 perturb that field or its observation model explicitly. Under the imposed
+Sections 3.3 and 3.4 perturb that field or its observation model. Under the imposed
 truth, concentrations across the assessment window follow the 24 h demand and pump cycle with a
 network-wide median of 0.761 mg L^-1^ and a 5th-to-95th percentile range of 0.168 to 0.956 mg
 L^-1^ (Figure 1B, C).
