@@ -636,7 +636,8 @@ the same leading junctions.
 
 ### 2.8.4 Temperature, ageing and dosing scenarios
 
-The ensemble was propagated through four scenarios using Arrhenius scaling,
+The ensemble was propagated through four scenarios using Arrhenius temperature scaling for
+chlorine decay [@Hua1999; @Powell2000; @Vasconcelos1997],
 
 $$k(T)=k(T_{\mathrm{ref}})\exp\left[-\frac{E_a}{R}\left(\frac{1}{T_K}-\frac{1}{T_{\mathrm{ref},K}}\right)\right],$$
 
