@@ -757,7 +757,8 @@ def fig7():
             va="top", fontsize=6.3, color=INK2)
     tidy(ax, "both")
 
-    note(fig, "Network-wide rank correlation stays high in every case; the  six-node shortlist does not, and which nodes it keeps depends on the metric. center", y=0.02, size=6.5)
+    note(fig, "Network-wide rank correlation stays high in every case; the six-node shortlist "
+               "does not, and which nodes it keeps depends on the metric.", y=0.02, size=6.5)
     return finish(fig, "fig7_metric_specific_risk")
 
 
