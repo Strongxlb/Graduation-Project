@@ -692,9 +692,9 @@ The six monitors sample most of that range rather than replicating one another. 
 concentrations are 0.845 and 0.827 mg L^-1^ at nodes 107 and 113 in the new zone, 0.717 and
 0.374 at nodes 209 and 231 in the average zone, and 0.251 and 0.355 at nodes 15 and 145 in the
 old zone. The broad zonal pattern follows the imposed reactivity contrast, but the coefficient does not
-set the level on its own. The two average-zone monitors differ by nearly a factor of two, and
-node 231 sits only 0.019 mg L^-1^ above the highest old-zone monitor, because hydraulic residence
-and network position also modulate the accumulated decay. In the deterministic noise-free reference trajectory, 21 of the 92 junctions cross below the
+set the level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest
+old-zone monitor by only 0.019 mg L^-1^, because residence time and network position also
+modulate the accumulated decay. In the deterministic noise-free reference trajectory, 21 of the 92 junctions cross below the
 0.2 mg L^-1^ threshold at least once in the window. That is a property of the truth, not the
 ensemble-weighted breach count of Section 3.6.
 
