@@ -1338,15 +1338,17 @@ The analysis code, the cached result artifacts and this paper's figure and table
 and every number in this paper was produced at that release. The frozen Net3 input file is hash-checked on import, and the environment is pinned to exact library versions, which matters here because the study documents version-specific WNTR behaviour. The verification checks of Section 2.2.4 are runnable: `provenance.py --check` confirms that the environment matches the one that produced the cached results, and `validate_artifacts.py` cross-checks the written numbers against the artifacts.
 
 Each script writes `Net3/baseline_cache/<script name>.json`, so the artifact column that would
-otherwise repeat this table is omitted. One cross-section dependency is worth naming: every
-displacement reported in baseline posterior standard deviations is divided by the median
-posterior standard deviation over 30 noise realisations at the baseline noise level, which
-`step6_noise_sensitivity.py` writes, not by the standard deviation of the run being reported. Five entries depart from that rule:
+otherwise repeat this table is omitted. Five entries depart from that naming rule.
 `step1_freeze_baseline.py` writes `baseline_meta.json` and `baseline.npz`;
 `step3_threshold_sensitivity.py` writes `step3_threshold.json`; `step12_scenarios.py` also writes
 `step12_risk_register.csv`; `paper_figs.py` and `appendix_tables.py` write into
 `Net3/Figures/paper/`; and `provenance.py` writes `cache_manifest.json`, which
 `validate_artifacts.py` reads without writing an artifact of its own.
+
+One dependency crosses sections and is easy to miss when reproducing a single result. Every
+displacement reported in baseline posterior standard deviations is divided by the median
+posterior standard deviation over 30 noise realisations at the baseline noise level, which
+`step6_noise_sensitivity.py` writes, and not by the standard deviation of the run being reported.
 
 | Paper section | Script |
 |--------------------|-----------------------------------------------------|
