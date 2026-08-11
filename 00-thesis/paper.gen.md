@@ -42,12 +42,11 @@ Grouped wall-decay coefficients are routinely calibrated from a handful of chlor
 but the uncertainty reported can reflect the inference rule as much as the data, and whether
 parameter error reaches prediction or operational decisions is seldom tested. This study
 separates these effects in a controlled EPANET Net3 experiment with three synthetic reaction
-zones, known coefficients and six monitors. A censored Gaussian likelihood is compared with the
-informal weighting previously applied to the same system on identical observations and candidate
-draws; identifiability is triangulated across prior contraction, displaced priors, Fisher
-information, profile likelihood and repeated-noise calibration; and measurement, nuisance and
-structural errors are placed on common scales before propagation to prediction and low-chlorine
-risk.
+zones, known coefficients and six monitors. A censored Gaussian likelihood is compared with the informal weighting previously applied to the
+same system, on identical observations and candidate draws. Identifiability is triangulated
+across prior contraction, displaced priors, Fisher information, profile likelihood and
+repeated-noise calibration. Measurement, nuisance and structural errors are then placed on common
+scales before propagation to prediction and low-chlorine risk.
 
 Under known bulk decay and unbiased sensors, the formal rule contracted all three coefficients to
 25–31% of their prior standard deviation, whereas the informal score at its original
@@ -75,10 +74,9 @@ evaluation and no field data.
 A chlorine residual is maintained through a distribution network to provide continuing
 disinfection after treatment, and its concentration at any location reflects reaction in the
 bulk water, reaction at the pipe wall, and the transport and residence time that determine
-exposure to both [@Rossman1994; @Vasconcelos1997]. In the first-order representation implemented
-in EPANET, bulk decay is described by a coefficient $k_b$ in day^-1^ and wall decay by $k_w$ in
-m day^-1^, the wall reaction coupled to mass transfer from the bulk so that diameter and flow
-regime also affect its effective contribution [@Rossman2000].
+exposure to both [@Rossman1994; @Vasconcelos1997]. In the first-order representation implemented in EPANET, bulk decay is described by a coefficient
+$k_b$ in day^-1^ and wall decay by $k_w$ in m day^-1^. The wall reaction is coupled to mass
+transfer from the bulk, so diameter and flow regime also affect its effective contribution [@Rossman2000].
 
 The two components are not equally accessible to measurement. Bulk decay can be estimated
 independently from controlled bottle tests, whereas wall decay is less directly observable. It depends on pipe-surface condition, corrosion products, deposits and biofilm, and generally has to be inferred from pipe-loop or field concentration data after accounting for bulk decay
@@ -131,12 +129,11 @@ holding at another.
 ## 1.3 Methodological gap
 
 Three methodological questions motivate this study. First, conclusions about parameter
-uncertainty can depend on the inference formulation itself. GLUE-type environmental analyses may
-combine behavioural thresholds with informal likelihood measures whose statistical
-interpretation depends on their relationship to the assumed error process [@BevenBinley1992], and
-critiques have shown that a measure not representing the sampling distribution of model errors
-need not deliver formally calibrated parameter or prediction uncertainty [@MantovanTodini2006;
-@Stedinger2008]. The controlled setting here sidesteps that broader debate rather than resolving it. Because the
+uncertainty can depend on the inference formulation itself. GLUE-type environmental analyses may combine behavioural thresholds with informal likelihood
+measures whose statistical interpretation depends on their relationship to the assumed error
+process [@BevenBinley1992]. Critiques have shown that a measure not representing the sampling
+distribution of model errors need not deliver formally calibrated parameter or prediction
+uncertainty [@MantovanTodini2006; @Stedinger2008]. The controlled setting here sidesteps that broader debate rather than resolving it. Because the
 synthetic observation model is known, the informal weighting previously applied to this system
 can be compared directly with the corresponding formal likelihood on identical observations and
 candidate draws.
@@ -171,13 +168,13 @@ within-zone structural heterogeneity?
 **RQ3.** Do errors in the inferred parameters necessarily degrade spatial prediction or
 operational prioritisation, and how does the answer depend on the risk metric used?
 
-The study makes four contributions: a controlled comparison of a formal censored Gaussian
-likelihood against the specific informal weighting previously applied to this system, on
-identical observations and candidate draws; an identifiability assessment triangulated across
-posterior contraction, displaced priors, Fisher information, continuous profile likelihood and
-repeated-noise calibration; a separation of precision loss from parameter displacement across
-measurement, nuisance and structural perturbations on common reference scales; and an explicit
-distinction between parameter identification, predictive adequacy and decision robustness.
+The study makes four contributions. It compares a formal censored Gaussian likelihood with the
+specific informal weighting previously applied to this system, on identical observations and
+candidate draws. It triangulates identifiability across posterior contraction, displaced priors,
+Fisher information, continuous profile likelihood and repeated-noise calibration. It separates
+precision loss from parameter displacement across measurement, nuisance and structural
+perturbations on common scales. And it distinguishes parameter identification, predictive
+adequacy and decision robustness.
 
 The scope is deliberately bounded. Network, zoning and truths are synthetic, the hydraulic model
 is treated as known rather than calibrated, chemistry is first-order in both bulk and wall
@@ -325,10 +322,10 @@ second, independent error. The Net3 input file is frozen and hash-checked, and t
 The three-dimensional baseline prior box was sampled with $8192 = 2^{13}$ scrambled Sobol draws.
 Each baseline candidate was simulated once and its predictions at all 92 junctions cached.
 Experiments that changed only the observation realisation or the weighting rule reused this
-common library; in particular the censored Gaussian, iid Gaussian and informal GLUE formulations
-were evaluated on identical prior draws and identical model predictions, so any difference
-between those baseline inference results is attributable to the weighting formulation rather
-than to sampling or to different forward simulations. Experiments that altered the prior domain or a forward-model parameter generated their own prediction libraries under the same sampling principles. These were the displaced-prior tests of Section 2.4.2, the bulk-decay cases of Section 2.5.5 and the scenarios of Section 2.8.4.
+common library. The censored Gaussian, iid Gaussian and informal GLUE formulations were evaluated
+on identical prior draws and identical model predictions, so any difference between those
+baseline results is attributable to the weighting formulation rather than to sampling or to
+different forward simulations. Experiments that altered the prior domain or a forward-model parameter generated their own prediction libraries under the same sampling principles. These were the displaced-prior tests of Section 2.4.2, the bulk-decay cases of Section 2.5.5 and the scenarios of Section 2.8.4.
 
 Sampling convergence of the baseline weighted ensemble was assessed on the nested leading Sobol
 subsets of 1024, 2048, 4096 and 8192 candidates, comparing posterior medians, quantiles and
@@ -401,7 +398,10 @@ identifiability test on its own, which is why the four further analyses below ar
 
 To separate information supplied by the observations from favourable prior placement, the
 calibration was repeated over 30 independent noise realisations using displaced prior boxes of
-unchanged width. In the DOWN design each box retained its original width but was re-centred at the known synthetic truth minus one original-prior standard deviation, so the displacement is defined relative to the truth rather than to the original midpoint. In the OLDUP design only the old-zone box changed direction, being centred at the truth plus one original-prior standard deviation, while the average and new boxes kept their DOWN positions; OLDUP is therefore a directional check for the old coefficient rather than a second like-for-like three-parameter test. An upper cap of −0.005 m day^-1^, imposed to keep the old prior in the non-positive decay domain, then shifted that box down to a realised midpoint of −0.655 m day^-1^, about 0.92 original-prior standard deviations from the truth rather than the intended one.
+unchanged width. In the DOWN design each box retained its original width but was re-centred at the known synthetic truth minus one original-prior standard deviation, so the displacement is defined relative to the truth rather than to the original midpoint. In the OLDUP design only the old-zone box changed direction, being centred at the truth plus one
+original-prior standard deviation, while the average and new boxes kept their DOWN positions.
+OLDUP is therefore a directional check for the old coefficient rather than a second like-for-like
+three-parameter test. An upper cap of −0.005 m day^-1^, imposed to keep the old prior in the non-positive decay domain, then shifted that box down to a realised midpoint of −0.655 m day^-1^, about 0.92 original-prior standard deviations from the truth rather than the intended one.
 
 Recovery was measured as the fraction of the imposed displacement closed,
 
@@ -476,11 +476,10 @@ generated noise realisations at each level. The same $\sigma$ was used both to g
 observations and in the corresponding likelihood, and the informal comparator used the
 $\sigma$-dependent threshold of Section 2.3.4.
 
-Effective sample size distinguishes inferential change from inadequate numerical resolution. A
-row was flagged as sampling-limited when its median ESS fell below 100, or when any realisation
-produced an empty behavioural set; contraction from such rows is not interpreted as a
-quantitative estimate of the benefit of that sensor precision, because a sharper likelihood
-concentrates on a library drawn for the baseline noise level.
+Effective sample size distinguishes inferential change from inadequate numerical resolution. A row was flagged as sampling-limited when its median ESS fell below 100, or when any realisation
+produced an empty behavioural set. Contraction from such rows is not read as a quantitative
+estimate of the benefit of that sensor precision, because a sharper likelihood concentrates on a
+library drawn for the baseline noise level.
 
 ### 2.5.2 Temporal autocorrelation
 
@@ -570,9 +569,9 @@ model with one fitted coefficient per zone.
 
 Structural effects were summarised by the four quantities Table 2 defines, because they answer
 different questions. Raw bias measures the fitted coefficient against the realised arithmetic zone
-mean; the paired structural increment removes the offset the same rule produces on a homogeneous
-truth under the same noise; the standardised displacement puts that paired shift on the scale of
-Section 2.5 using the repeated-baseline denominator; and the displacement fraction locates the fit
+mean. The paired structural increment removes the offset the same rule produces on a homogeneous
+truth under the same noise, and the standardised displacement puts that paired shift on the scale
+of Section 2.5 using the repeated-baseline denominator. The displacement fraction locates the fit
 between the arithmetic and length-weighted references, reported **raw rather than
 control-adjusted**. Full definitions and per-design results are in Appendix E.
 
@@ -744,11 +743,10 @@ observations, prior and candidate set were identical and only the weighting chan
 
 The three rules disagree sharply (Table 3, Figure 2). Under the primary censored Gaussian
 likelihood the posterior standard deviation was 25.0%, 30.7% and 28.3% of the prior standard
-deviation for the old, average and new coefficients respectively. Under the informal GLUE score
-at the threshold used in the original analysis, RMSE < 0.120 mg L^-1^, the same 294 residuals
-left 85.8%, 98.4% and 98.0% of the prior standard deviation intact: the average and new
-behavioural distributions retained essentially the full prior dispersion and were effectively
-prior-dominated under this rule. The formal iid comparator, which differs from the primary rule
+deviation for the old, average and new coefficients respectively. Under the informal GLUE score at the threshold used in the original analysis, RMSE < 0.120 mg
+L^-1^, the same 294 residuals left 85.8%, 98.4% and 98.0% of the prior standard deviation intact.
+The average and new behavioural distributions retained essentially the full prior dispersion and
+were effectively prior-dominated under this rule. The formal iid comparator, which differs from the primary rule
 only in treating a floored reading as an exact zero, returned 24.5%, 30.6% and 28.3%; the
 treatment of the ten floored observations therefore cannot explain the formal–informal
 difference in this experiment.
@@ -772,13 +770,14 @@ Table 3. **Baseline inference comparison.** Three weighting rules on the same 29
 
 ![Figure 2. **Inference formulation determines apparent identifiability.** Weighted densities for the reference noise realisation under the uniform prior, the primary censored likelihood and the informal score at two thresholds, with dashed rules at the true values. Bars give the weighted-ensemble standard deviation as a percentage of the prior, which is a posterior standard deviation only under the two formal likelihoods.](figures/paper/fig2_inference_rule_dependence.png)
 
-The weights show why, and the reason is arithmetic. The formal weights concentrate on an
-effective sample of about 157 of 8192 draws (1.9%), whereas the informal effective sample size
-almost equalled the number of retained candidates, at 4783 of 4786 for a threshold of 0.107 and 7062 of 7084 at 0.120, so the weights were nearly uniform within the accepted set. For an iid
+The weights show why, and the reason is arithmetic. The formal weights concentrate on an effective sample of about 157 of 8192 draws (1.9%). The
+informal effective sample size almost equalled the number of retained candidates, at 4783 of 4786
+for a threshold of 0.107 and 7062 of 7084 at 0.120, so its weights were nearly uniform within the
+accepted set. For an iid
 Gaussian residual model the informal log-weight is the Gaussian log-likelihood divided by $N$,
-up to a constant: equivalently it weights residuals as though the standard deviation were
-$\sigma\sqrt{N} = 1.71$ mg L^-1^ at $N = 294$, seventeen times the assumed sensor noise and
-above the 1.0 mg L^-1^ source concentration.
+up to a constant. Equivalently it weights residuals as though the standard deviation were
+$\sigma\sqrt{N} = 1.71$ mg L^-1^ at $N = 294$. That is seventeen times the assumed sensor noise,
+and above the 1.0 mg L^-1^ source concentration.
 
 This is consistent with published criticisms of informal likelihood measures, which do not
 accumulate information at the rate implied by the number of observations, so their distributions
@@ -821,13 +820,13 @@ its own, so the baseline was checked against three diagnostics that fail in diff
 (Figure 3). The Cramér–Rao bound computed from the Fisher information for the three wall-decay
 coefficients alone gives standard deviations of 0.095, 0.014 and 0.008 m day^-1^, equivalent to
 25.2%, 29.2% and 29.0% of the prior standard deviation and matching the ensemble result to
-within about 1.5 percentage points. Continuous profile likelihood intervals at the 95% level are
-[-1.172, -0.811], [-0.137, -0.082] and [-0.060, -0.029] m day^-1^, each covering its true value;
-endpoints obtained by bisection are quoted rather than grid endpoints, which understate the
-half-width by 39.0%, 14.9% and 28.1% and are used here only for visualisation. Finally,
-repeating the calibration over 100 independent noise realisations gave a mean bias of at most
-0.15 times the empirical sampling standard deviation, a ratio of empirical spread to the
-Cramér–Rao bound of 1.04, 1.06 and 1.12, and 90% interval coverage of 0.89, 0.88 and 0.85, close to nominal, with the new coefficient slightly under-covered.
+within about 1.5 percentage points. Continuous profile likelihood intervals at the 95% level are [-1.172, -0.811], [-0.137, -0.082]
+and [-0.060, -0.029] m day^-1^, each covering its true value. Endpoints obtained by bisection are
+quoted rather than grid endpoints, which understate the half-width by 39.0%, 14.9% and 28.1% and
+are used here only for visualisation. Finally, repeating the calibration over 100 independent noise realisations gave a mean bias of at
+most 0.15 times the empirical sampling standard deviation. The ratio of empirical spread to the
+Cramér–Rao bound of 1.04, 1.06 and 1.12, and 90% interval coverage of 0.89, 0.88 and 0.85, are
+close to nominal, with the new coefficient slightly under-covered.
 
 ![Figure 3. **Three further diagnostics agree with the baseline result.** Intervals from the likelihood-weighted ensemble (5–95%), continuous profile likelihood (95%), the Fisher bound (95%) and 100 repeated-noise calibrations (mean ± SD).](figures/paper/fig3_triangulated_identifiability.png)
 
@@ -862,10 +861,10 @@ median effective sample size falls to 21 and 2 draws, and those rows are reporte
 sampling-limited.
 
 Temporal correlation is an assumed sensitivity, not an estimated property, since the
-observations are independent by construction. The usual scalar approximation would put the
-effective sample size at about 126 of 294 at a correlation of 0.4; recomputing the Fisher
-information from the full block covariance instead widened the three bounds by 1.48, 1.49 and
-1.44 times, to 37.5%, 43.5% and 41.7% of the prior standard deviation. Correlation at this
+observations are independent by construction. The usual scalar approximation would put the effective sample size at about 126 of 294 at a
+correlation of 0.4. Recomputing the Fisher information from the full block covariance instead
+widened the three bounds by 1.48, 1.49 and 1.44 times, to 37.5%, 43.5% and 41.7% of the prior
+standard deviation. Correlation at this
 strength inflates uncertainty without removing information. The field-relevant case is the
 converse. Modelling correlation that is present widens the intervals, whereas fitting an
 independent-error likelihood to observations that are genuinely correlated would narrow them,
@@ -879,14 +878,14 @@ no sensor-offset parameter in the calibration, instrument error is absorbed into
 coefficients rather than represented. The response is asymmetric in sign, because a downward bias pushes more readings onto the censoring floor. The same offsets applied negatively gave 2.59 and 3.82.
 
 Sweeping the offset across all six monitors, 24 arms, shows the damage depends on where the
-biased sensor sits: the largest displacement for any coefficient in any arm was 3.87 standard
-deviations for old (node 15, +0.10 mg L^-1^), 5.94 for average (node 231, −0.10) and 4.44 for
-new (node 113, −0.10). Contamination crosses zone boundaries. A −0.10 offset at new-zone node 107 displaced the average coefficient by 1.59. Per-arm results are in Appendix F.
+biased sensor sits. The largest displacement for any coefficient in any arm was 3.87 standard
+deviations for old (node 15, +0.10 mg L^-1^), 5.94 for average (node 231, −0.10) and 4.44 for new
+(node 113, −0.10). Contamination crosses zone boundaries. A −0.10 offset at new-zone node 107 displaced the average coefficient by 1.59. Per-arm results are in Appendix F.
 
-Drift is governed by its mean, not its endpoint. A ramp reaching a given offset by the end of
-the window displaced the estimate by 0.89 to 0.99 times a constant offset at half that value,
-but only 0.45 to 0.64 times one at the endpoint value: a sensor drifting to +0.10 mg L^-1^
-behaves much more like a constant +0.05 than a constant +0.10. By comparison the censored
+Drift is governed by its mean, not its endpoint. A ramp reaching a given offset by the end of the window displaced the estimate by 0.89 to 0.99
+times a constant offset at half that value, but only 0.45 to 0.64 times one at the endpoint
+value. A sensor drifting to +0.10 mg L^-1^ therefore behaves much more like a constant +0.05 than
+a constant +0.10. By comparison the censored
 readings are a small correction. Across 30 independent noise realisations, treating them as
 exact zeros rather than as left-censored moves the old coefficient by a median of 0.11 baseline
 posterior standard deviations and the other two by less than 0.01, leaving the top-three risk
@@ -1062,10 +1061,9 @@ Table 5. **Held-out validation under the primary likelihood.** Own-coefficient e
 
 The ensemble was propagated to all 92 junctions and summarised with several metrics rather than
 one. The values in this section carry the baseline weights and are conditional on its single
-reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^,
-accumulates a deficit of 1.68 mg L^-1^ h and has a median window minimum of 0.031 mg L^-1^; node
-129 spends twice as long below the threshold yet accumulates only 0.84 mg L^-1^ h, with a median
-minimum of 0.147. Duration measures persistence and deficit combines it with depth, so the two rank the network
+reference observation realisation. Node 145 spends 12.0 h below 0.2 mg L^-1^, accumulates a deficit of 1.68 mg L^-1^ h and has a
+median window minimum of 0.031 mg L^-1^. Node 129 spends twice as long below the threshold yet
+accumulates only 0.84 mg L^-1^ h, with a median minimum of 0.147. Duration measures persistence and deficit combines it with depth, so the two rank the network
 differently; a window-breach probability distinguishes
 neither, collapsing both to whether the threshold is crossed at all.
 
@@ -1114,17 +1112,16 @@ degree Celsius baseline moves the network-mean cumulative deficit only from 0.21
 0.222 mg L^-1^ h, leaving the breach count and demand at risk unchanged.
 
 Raising the water temperature to 16 and then 20 degrees Celsius with Arrhenius scaling increases
-the number of junctions more likely than not to breach from 21 to 28 and 29, the demand they
-serve from 55.4 to 64.7 and 67.8 L s^-1^, and the network-mean cumulative deficit from 0.222 to
-0.365 and 0.522 mg L^-1^ h. Adding illustrative zone-specific ageing multipliers at 20 degrees, 1.35 for the average zone and 1.85 for the old zone with the new zone unchanged, raises these to 31 junctions, 69.4 L s^-1^ and 0.579 mg L^-1^ h. The continuous severity measures respond
+the number of junctions more likely than not to breach from 21 to 28 and 29. The demand they
+serve rises from 55.4 to 64.7 and 67.8 L s^-1^, and the network-mean cumulative deficit from
+0.222 to 0.365 and 0.522 mg L^-1^ h. Adding illustrative zone-specific ageing multipliers at 20 degrees, 1.35 for the average zone and 1.85 for the old zone with the new zone unchanged, raises these to 31 junctions, 69.4 L s^-1^ and 0.579 mg L^-1^ h. The continuous severity measures respond
 more smoothly than the binary count, which is threshold-sensitive by construction.
 
-Raising the source dose by 15% and 30% under the heatwave, applied to the reservoir boundary
-concentration and to the tank initial concentration together so that the whole source regime
-moves consistently, reduces the network-mean expected
-duration from 5.22 to 4.63 and 4.29 h and the deficit from 0.522 to 0.453 and 0.396 mg L^-1^ h,
-but demand at risk falls only to 64.7 L s^-1^ at both doses and never returns to the baseline
-55.4. The identical figure at both doses is a plateau of the binary classification, not evidence
+Raising the source dose by 15% and 30% under the heatwave reduces the network-mean expected
+duration from 5.22 to 4.63 and 4.29 h and the deficit from 0.522 to 0.453 and 0.396 mg L^-1^ h.
+The dose scales the reservoir boundary concentration and the tank initial concentration together,
+so the whole source regime moves consistently. Demand at risk falls only to 64.7 L s^-1^ at both
+doses, however, and never returns to the baseline 55.4. The identical figure at both doses is a plateau of the binary classification, not evidence
 that the extra 15% achieved nothing. The ageing multipliers are illustrative, no by-product, taste or booster constraint is represented, and absolute severities inherit the horizon dependence of Section 3.1.2. Maps
 and the full register are in Appendix H.
 
@@ -1156,11 +1153,11 @@ for the average and new coefficients; once it and six monitor offsets are all un
 Fisher analysis no longer supports practical identification of those two from this design.
 
 At the level of decisions, neither predictive accuracy nor the whole-network risk pattern tracks
-parameter error reliably. Coefficients can become effectively prior-dominated while held-out
-prediction errors stay close to the observation-noise scale, and under bulk-decay misspecification
-and sensor bias, displacements of several posterior standard deviations often left the leading set
-ranked by cumulative deficit unchanged while the ranking by time-averaged breach probability was
-considerably more sensitive.
+parameter error reliably. Coefficients can become effectively prior-dominated while held-out prediction errors stay close
+to the observation-noise scale. Under bulk-decay misspecification and sensor bias, displacements
+of several posterior standard deviations often left the leading set ranked by cumulative deficit
+unchanged, while the ranking by time-averaged breach probability was considerably more
+sensitive.
 
 A study reporting only a fit statistic, a held-out prediction error or a rank correlation cannot
 distinguish a calibration that has learned its parameters from one that has learned to predict
@@ -1196,10 +1193,10 @@ sensitivity rather than inferred.
 tested, and the effective weighting the fit estimates was not identified. Hydraulic uncertainty was not propagated at all, because demands, roughness, controls and the flow field were treated as known. The identifiability reported here is therefore likely optimistic relative to a field
 application where hydraulic and reaction parameters are uncertain together.
 
-*Bounded numerical and operational scope.* The 120 h warm-up satisfies the
-chlorine-concentration criteria but not the water-age or cumulative-deficit criteria within the
-168 h horizon, so absolute water-age and severity magnitudes remain horizon-dependent even
-though the concentration field underlying the inference results is stable. The baseline weighted
+*Bounded numerical and operational scope.* The 120 h warm-up satisfies the chlorine-concentration criteria but not the water-age or
+cumulative-deficit criteria within the 168 h horizon. Absolute water-age and severity magnitudes
+therefore remain horizon-dependent, even though the concentration field underlying the inference
+results is stable. The baseline weighted
 ensemble has an effective sample size of about 157, and the sigma <= 0.05 mg L^-1^ rows are
 sampling-limited. Scenario inputs are illustrative, and 0.2 mg L^-1^ is a representative
 operational threshold, not a compliance limit.
@@ -1232,8 +1229,8 @@ error, bulk-decay misspecification and structured within-zone heterogeneity inst
 estimate by several posterior standard deviations while leaving the aggregate residual near the
 noise level, so in the cases tested here none of the three was revealed by that statistic.
 Bulk-decay uncertainty costs precision as well, disproportionately for the two weakly decaying
-zones; under the local Fisher analysis and the study-specific criterion that the Cramér–Rao bound
-stay below the prior standard deviation, those two coefficients cease to be practically
+zones. Under the local Fisher analysis, and the study-specific criterion that the Cramér–Rao
+bound stay below the prior standard deviation, those two coefficients cease to be practically
 identifiable from this six-monitor design once bulk decay and monitor-specific offsets are
 treated as unknown together.
 

@@ -310,10 +310,10 @@ CLAIMS = [
      "step7_fisher.json", "cases/A: kw only/coef/old/crlb_over_prior", 100),
     ("paper.md", r"equivalent to\s+[0-9.]+%, ([0-9.]+)% and [0-9.]+% of the prior",
      "step7_fisher.json", "cases/A: kw only/coef/average/crlb_over_prior", 100),
-    ("paper.md", r"coverage of ([0-9.]+), [0-9.]+ and [0-9.]+, close to nominal",
+    ("paper.md", r"coverage of ([0-9.]+), [0-9.]+ and [0-9.]+",
      "step14_repeated_noise.json",
      "by_scheme/formal_censored/coef/old/coverage/q90", 1),
-    ("paper.md", r"coverage of [0-9.]+, [0-9.]+ and ([0-9.]+), close to nominal",
+    ("paper.md", r"coverage of [0-9.]+, [0-9.]+ and ([0-9.]+)",
      "step14_repeated_noise.json",
      "by_scheme/formal_censored/coef/new/coverage/q90", 1),
     # 3.3.1 noise and assumed autocorrelation
@@ -369,7 +369,7 @@ CLAIMS = [
     # middles of the reported triples. The first destructive test anchored first and third and
     # left the centre value free, so a corrupted middle passed; anchoring one element of a triple
     # does not anchor the triple.
-    ("paper.md", r"coverage of [0-9.]+, ([0-9.]+) and [0-9.]+, close to nominal",
+    ("paper.md", r"coverage of [0-9.]+, ([0-9.]+) and [0-9.]+",
      "step14_repeated_noise.json",
      "by_scheme/formal_censored/coef/average/coverage/q90", 1),
     ("paper.md", r"posterior standard deviation was ([0-9.]+)%,", "baseline_meta.json",
