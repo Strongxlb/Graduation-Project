@@ -51,20 +51,20 @@ scales before propagation to prediction and low-chlorine risk.
 Under known bulk decay and unbiased sensors, the formal rule contracted all three coefficients to
 25–31% of their prior standard deviation, whereas the informal score at its original
 0.120 mg L^-1^ behavioural threshold retained 86–98%. Both rules used the same 294 observations,
-so the difference is produced by the weighting alone. Treating bulk decay and monitor offsets as
-jointly unknown withdrew practical identifiability from the average and new coefficients.
+so the difference is produced by the weighting alone. The average and new coefficients no longer met the study identifiability criterion once bulk
+decay and monitor offsets were treated as jointly unknown.
 Recalibration over 100 noise realisations gave spreads closely matching the Cramér–Rao bound, at
 near-nominal 90% coverage. Systematic sensor error, bulk-decay misspecification and
 length-structured heterogeneity displaced coefficients by as much as 5.94 baseline posterior
-standard deviations, while the best achievable aggregate residual never exceeded the realised
-observation-noise RMSE by more than 6.2%. Yet when the old or average zone was withheld its
+standard deviations, while the minimum candidate-library RMSE never exceeded the realised observation-noise RMSE by
+more than 6.2%. Yet when the old or average zone was withheld its
 coefficient returned to the prior midpoint and retained essentially the whole prior width, while
 held-out prediction at the omitted monitors stayed close to the 0.1 mg L^-1^ observation-noise
 scale. Displacements of several standard deviations largely preserved whole-network rank order,
 but they altered the six-node operational shortlist under one risk metric and not another.
 
-Parameter identification, predictive adequacy and decision stability therefore require separate
-validation. All conclusions are bounded by a synthetic known-truth design with internal hold-out
+Parameter identification, predictive adequacy and decision stability should be assessed
+separately. All conclusions are bounded by a synthetic known-truth design with internal hold-out
 evaluation and no field data.
 
 # 1. Introduction
@@ -83,10 +83,10 @@ independently from controlled bottle tests, whereas wall decay is less directly 
 [@Hallam2002; @Powell2000]. Because networks contain far more pipes than monitors, wall
 coefficients are commonly estimated for groups of pipes rather than individually, with grouping
 based on whatever physical or spatial information is available [@Nejjari2014ChlorineCalibration;
-@Munavalli2003SteadyState]. Those groups are usually fitted by global search, with genetic and
-particle-swarm algorithms minimising concentration misfit [@PeiroviMinaee2019GAPSO;
-@GomezCoronel2023GAChlorine], which returns a point estimate rather than a statement about how
-well the data constrain it.
+@Munavalli2003SteadyState]. Grouped coefficients have been calibrated by global optimisation heuristics, genetic and
+particle-swarm among them [@PeiroviMinaee2019GAPSO;
+@GomezCoronel2023GAChlorine], Such calibrations target best-fitting values but do not themselves quantify how strongly the data
+identify them.
 
 Chlorine calibration is therefore an inverse problem rather than a curve-fitting exercise, and
 the distinction matters because the coefficients are not the only quantity of interest.
@@ -96,19 +96,17 @@ failures need not occur together.
 
 ## 1.2 Uncertainty, identifiability and their propagation
 
-Several uncertainty sources act on such a problem. Measurement noise and temporal dependence
-reduce the effective information in monitored series, and readings at a reporting boundary are
-censored rather than exact. Systematic offsets or drift bias the inferred parameters while remaining hard to diagnose from
-fit quality, and online free-chlorine sensors degrade in exactly that way
-[@Hutton2014Uncertainty; @Aisopou2024]. Bulk decay is often characterised separately and held fixed during wall-decay calibration, so an
+Several uncertainty sources act on such a problem. Measurement noise and temporal dependence reduce the effective information in monitored series,
+and readings at a reporting boundary are censored, not exact. Systematic offsets or drift bias the inferred parameters while remaining hard to diagnose from
+fit quality, and online free-chlorine sensors degrade that way [@Aisopou2024]. Bulk decay is often characterised separately and held fixed during wall-decay calibration, so an
 error in it is absorbed by the wall coefficients, and grouping is an approximation where wall
-reactivity varies between pipes [@Powell2000; @Hallam2002; @Nejjari2014ChlorineCalibration]. A close fit therefore does not establish that the inferred coefficients represent the underlying
-reaction process.
+reactivity varies [@Powell2000; @Hallam2002; @Nejjari2014ChlorineCalibration]. A close fit therefore does not establish that the coefficients represent the underlying reaction
+process.
 
-Uncertainty here has been approached by assimilating observations in real time, updating states
-and parameters together [@Hutton2014Uncertainty; @Rajakumar2019EnKF], by treating
-input error explicitly in water-quality calibration [@Wu2022BEAR], and by formal Bayesian
-inference on disinfectant decay parameters [@Jenks2025BayesianDisinfectant].
+Uncertainty here has been addressed through real-time data assimilation
+[@Hutton2014Uncertainty], including joint state and parameter estimation by ensemble Kalman
+filtering [@Rajakumar2019EnKF], through explicit input error [@Wu2022BEAR], and through formal
+Bayesian inference on disinfectant decay [@Jenks2025BayesianDisinfectant].
 
 Identifiability analysis addresses how strongly the observations constrain those parameters.
 Local sensitivity-based diagnostics examine whether nearby parameter changes produce
@@ -255,8 +253,8 @@ The rule required every diagnostic to pass, and no cycle pair satisfied it withi
 horizon. Because the inverse analyses depend directly on the chlorine field, 120 h was adopted
 instead, the earliest warm-up at which all three chlorine-concentration diagnostics passed. The
 assessment window is therefore 120–168 h, with 49 hourly reporting points per monitor.
-Definitions, tolerances and per-cycle values are in Appendix A; what the unmet diagnostics bound
-is reported in Section 3.1.2.
+Definitions, tolerances and per-cycle values are in Appendix A, and Section 3.1.2 reports what
+the unmet diagnostics bound.
 
 ### 2.2.3 Synthetic measurement-error model
 
@@ -280,7 +278,7 @@ All concentrations are reported in mg L^-1^, converted to WNTR's internal kg m^-
 on model input and back on output [@Klise2017WNTR; @WNTRdocs].
 The EPANET absolute quality tolerance was set to $1\times10^{-5}$ mg L^-1^. It is a chosen setting, a thousand times stricter than the EPANET default of 0.01 mg L^-1^
 [@Rossman2020], holding the tolerance-to-source ratio fixed so that the corrected and superseded
-implementations are the same numerical experiment.
+implementations are one numerical experiment.
 
 Three checks support the implementation. A single-pipe bulk-only configuration was compared with
 the analytic first-order solution $C = C_0\exp(k_b t_{\mathrm{res}})$. Wall-reaction behaviour was checked for the expected sign, for monotonic response, and against
@@ -655,8 +653,9 @@ The six monitors sample most of that range rather than replicating one another. 
 concentrations are 0.845 and 0.827 mg L^-1^ at nodes 107 and 113 in the new zone, 0.717 and
 0.374 at nodes 209 and 231 in the average zone, and 0.251 and 0.355 at nodes 15 and 145 in the
 old zone. The zonal pattern follows the imposed reactivity contrast, but it does not set the
-level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest old-zone monitor by only 0.019 mg L^-1^, because residence time
-and position also modulate the accumulated decay. In the noise-free reference trajectory, 21 of the 92 junctions cross below the 0.2 mg L^-1^
+level on its own. The two average-zone monitors differ by nearly a factor of two, and node 231 clears the highest
+old-zone monitor by only 0.019 mg L^-1^, because residence time and position also modulate the
+decay. In the noise-free reference trajectory, 21 of the 92 junctions cross below the 0.2 mg L^-1^
 threshold at least once in the window, a property of the truth and not the
 ensemble-weighted breach count of Section 3.6.
 
@@ -753,7 +752,7 @@ boxes were re-centred at the truth minus one original-prior standard deviation, 
 original width, and the calibration repeated over 30 noise realisations. The formal likelihood
 recovered 88%, 95% and 96% of the imposed displacement for old, average and new while retaining
 27.1%, 28.9% and 28.4% of the displaced prior's standard deviation, matching the baseline
-contraction from a prior no longer centred on the truth. The informal comparator recovered
+contraction despite the deliberately truth-displaced prior. The informal comparator recovered
 substantially less at both thresholds.
 
 The OLDUP check reversed the old-zone displacement alone. Because the non-positivity constraint
@@ -816,8 +815,8 @@ Temporal correlation is an assumed sensitivity, not an estimated property, since
 observations are independent by construction. The usual scalar approximation would put the effective sample size at about 126 of 294 at a
 correlation of 0.4. Recomputing the Fisher information from the full block covariance instead
 widened the three bounds by 1.48, 1.49 and 1.44 times, to 37.5%, 43.5% and 41.7% of the prior
-standard deviation. Correlation at this
-strength inflates uncertainty without removing information. The field-relevant case is the
+standard deviation. At this strength correlation reduces precision without removing identifiability under the study
+criterion. The field-relevant case is the
 converse. Modelling correlation that is present widens the intervals, whereas fitting an
 independent-error likelihood to observations that are genuinely correlated would narrow them,
 reporting a precision the data do not support.
@@ -827,14 +826,14 @@ reporting a precision the data do not support.
 Systematic error behaves differently. Constant offsets of +0.05 and +0.10 mg L^-1^ at node 15
 alone moved the old-zone estimate by 2.19 and 3.87 baseline posterior standard deviations: with
 no sensor-offset parameter in the calibration, instrument error is absorbed into the wall
-coefficients rather than represented. The response is asymmetric in sign, because a downward bias pushes more readings onto the censoring floor. The same offsets applied negatively gave 2.59 and 3.82.
+coefficients rather than represented. The sign asymmetry is consistent with a downward bias pushing more readings onto the floor. The same offsets applied negatively gave 2.59 and 3.82.
 
 Sweeping the offset across all six monitors, 24 arms, shows the damage depends on where the
 biased sensor sits. The largest displacement for any coefficient in any arm was 3.87 standard
 deviations for old (node 15, +0.10 mg L^-1^), 5.94 for average (node 231, −0.10) and 4.44 for new
 (node 113, −0.10). Contamination crosses zone boundaries. A −0.10 offset at new-zone node 107 displaced the average coefficient by 1.59. Per-arm results are in Appendix F.
 
-Drift is governed by its mean, not its endpoint. A ramp reaching a given offset by the end of the window displaced the estimate by 0.89 to 0.99
+In the tested ramps drift tracked the mean offset far more closely than the endpoint. A ramp reaching a given offset by the end of the window displaced the estimate by 0.89 to 0.99
 times a constant offset at half that value, but only 0.45 to 0.64 times one at the endpoint
 value. A sensor drifting to +0.10 mg L^-1^ therefore behaves much more like a constant +0.05 than
 a constant +0.10. By comparison the censored
@@ -890,9 +889,9 @@ average and −0.0005 ± 0.002 for new. Each mean increment is a fraction of the
 standard deviation (0.32, 0.04 and 0.24), so no systematic bias is distinguishable from the
 scatter; standardised as in Figure 4 they are +0.11, +0.02 and −0.06.
 
-Fit quality gives no warning: the grid-based residual rises from its homogeneous resolution
-floor of 0.0055 mg L^-1^ to 0.0068, leaving only 0.0013 attributable to the imposed
-heterogeneity, and the best achievable fit stays at the noise floor. Nor would one field have sufficed. The realisation examined first gave an old-zone increment of −0.032 m day^-1^,
+Aggregate fit quality gave little warning here. The grid-based residual rises from its
+homogeneous resolution floor of 0.0055 mg L^-1^ to 0.0068, leaving 0.0013 attributable to the
+imposed heterogeneity, and the best fit stays at the noise floor. Nor would one field have sufficed. The realisation examined first gave an old-zone increment of −0.032 m day^-1^,
 opposite in sign to the 25-field mean, as did the other two coefficients. What these 25 fields
 establish is therefore a negative result at the resolution of this design. No systematic mean
 displacement was resolvable against the field-to-field scatter under the fixed observation-noise
@@ -959,8 +958,8 @@ with an interquartile range of 0.41% to 1.45%.
 The predictive bands at those junctions are less flattering and are reported for that reason.
 Against a nominal 90%, median pointwise coverage was 1.00 under both band
 constructions and both weighting rules, so the bands are conservative rather than calibrated in
-this model-matched design, and the same caution applies to the nominally well-calibrated coverage
-of the held-out monitor designs. Cross-coefficient compensation was small, the largest shift in a
+this model-matched design, and the same caution applies to the apparently near-nominal coverage of the held-out monitor
+designs. Cross-coefficient compensation was small, the largest shift in a
 retained coefficient being 0.0086 m day^-1^. For old and average the prior midpoints lie close
 enough to the imposed truths that a prior-dominated coefficient still predicts within the 0.1 mg
 L^-1^ noise scale, whereas the new coefficient retains genuine information from monitors outside
@@ -1010,7 +1009,7 @@ remain horizon-dependent (Section 3.1.2), so the association is descriptive only
 The parameter displacements of Section 3.3 are large, but they do not propagate proportionately
 (Table 4). Under a 20% error in bulk decay the whole-network rank correlation stays between 0.93
 and 0.98 on both risk metrics, and under any of the 24 sensor-bias arms it never falls below
-0.9993. On that evidence the risk map looks robust.
+0.9993. On that evidence the whole-network ranking appears stable.
 
 The six-node shortlist an operator would act on behaves differently, and differently again by
 metric. Ranked by time-averaged below-threshold probability, a 20% bulk-decay error retains only

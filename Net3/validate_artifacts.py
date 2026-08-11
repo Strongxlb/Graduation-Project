@@ -937,6 +937,12 @@ def check_claims():
     loaded, checked = {}, 0
     for doc, pattern, artifact, path, scale in CLAIMS:
         text = read_doc(doc)
+        if text is not None:
+            # Collapse whitespace before matching. An anchor is a sentence, and a sentence wraps
+            # wherever the line happens to end, so a literal space in a pattern would otherwise
+            # stop matching the moment an edit reflowed the paragraph. That has now silently
+            # unanchored a claim twice, once on a re-anchoring and once on a style pass.
+            text = re.sub(r"\s+", " ", text)
         if text is None:
             problems.append(f"claim document missing: {doc}")
             continue
