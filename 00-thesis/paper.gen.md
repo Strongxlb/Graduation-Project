@@ -98,12 +98,12 @@ failures need not occur together.
 
 Several uncertainty sources act on such a problem. Measurement noise and temporal dependence
 reduce the effective information in monitored series, and readings at a reporting boundary are
-censored rather than exact. Systematic sensor offsets or drift bias the inferred parameters while
-remaining difficult to diagnose from fit quality. Bulk decay is often estimated separately and
-held fixed during wall-decay calibration, so an error in it is absorbed by the wall coefficients,
-and any grouped representation is an approximation when reactivity varies between pipes. A close
-fit to monitored concentrations therefore does not establish that the inferred coefficients
-represent the underlying reaction process.
+censored rather than exact. Systematic offsets or drift bias the inferred parameters while remaining hard to diagnose from
+fit quality, and online free-chlorine sensors degrade in exactly that way
+[@Hutton2014Uncertainty; @Aisopou2024]. Bulk decay is often characterised separately and held fixed during wall-decay calibration, so an
+error in it is absorbed by the wall coefficients, and grouping is an approximation where wall
+reactivity varies between pipes [@Powell2000; @Hallam2002; @Nejjari2014ChlorineCalibration]. A close fit therefore does not establish that the inferred coefficients represent the underlying
+reaction process.
 
 Uncertainty here has been approached by assimilating observations in real time, updating states
 and parameters together [@Hutton2014Uncertainty; @Rajakumar2019EnKF], by treating
@@ -295,17 +295,16 @@ than a change in the random draw.
 
 ### 2.2.4 Numerical and unit verification
 
-All concentrations reported by the analysis are expressed in mg L^-1^, converted to WNTR's
-internal kg m^-3^ representation on model input and back on output. The EPANET absolute quality
-tolerance was set to $1\times10^{-5}$ mg L^-1^. This is a chosen setting rather than a unit
-conversion: it is a thousand times stricter than the EPANET default of 0.01 mg L^-1^, and holds
-the tolerance-to-source ratio fixed so that the corrected and superseded implementations can be
-compared as the same numerical experiment.
+All concentrations are reported in mg L^-1^, converted to WNTR's internal kg m^-3^ representation
+on model input and back on output [@Klise2017WNTR; @WNTRdocs].
+The EPANET absolute quality tolerance was set to $1\times10^{-5}$ mg L^-1^. It is a chosen setting, a thousand times stricter than the EPANET default of 0.01 mg L^-1^
+[@Rossman2020], holding the tolerance-to-source ratio fixed so that the corrected and superseded
+implementations are the same numerical experiment.
 
 Three checks support the implementation. A single-pipe bulk-only configuration was compared with
 the analytic first-order solution $C = C_0\exp(k_b t_{\mathrm{res}})$. Wall-reaction behaviour
-was checked for the expected sign, for monotonic response to the coefficient, and against the
-limiting case without mass-transfer resistance. A unit-equivalence test confirmed that the
+was checked for the expected sign, for monotonic response, and against the limiting case without
+mass-transfer resistance. A unit-equivalence test confirmed that the
 corrected implementation reproduces the previously generated field to within a maximum relative
 difference of $2.3\times10^{-7}$, with no change in any of the below-threshold duration
 classifications tested. Agreement at this level is expected rather than fortuitous. First-order
@@ -643,9 +642,10 @@ chlorine decay [@Hua1999; @Powell2000; @Vasconcelos1997],
 
 $$k(T)=k(T_{\mathrm{ref}})\exp\left[-\frac{E_a}{R}\left(\frac{1}{T_K}-\frac{1}{T_{\mathrm{ref},K}}\right)\right],$$
 
-with $T_{\mathrm{ref}} = 12$ °C. Activation energies and a temperature deviation added to each
-scenario mean were drawn from truncated normals keeping simulated temperatures inside the stated
-8–24 °C validity range, with the distributions in Appendix G. The scenarios were: (A) 12 °C
+with $T_{\mathrm{ref}} = 12$ °C. The activation-energy distributions and the temperature
+perturbation are illustrative settings prescribed here rather than measured values. Draws were
+truncated to keep simulated temperatures inside the pre-defined 8–24 °C range, and the
+distributions are in Appendix G. The scenarios were: (A) 12 °C
 baseline; (B) 16 °C; (C) 20 °C heatwave; and (D) 20 °C with illustrative ageing multipliers of
 1.00, 1.35 and 1.85 for the new, average and old zones.
 
@@ -947,8 +947,9 @@ Table 4. **Robustness summary across error sources.** Standardisation follows Fi
 
 ### 3.4.1 Symmetric within-zone heterogeneity leaves no resolvable bias
 
-Sections 3.2 and 3.3 treated each synthetic zone as internally homogeneous, whereas in the field
-wall reactivity is unlikely to be uniform within any practical grouping. Whether that variation
+Sections 3.2 and 3.3 treated each synthetic zone as internally homogeneous, whereas field wall
+reactivity varies with pipe condition [@Hallam2002] and is unlikely to be uniform within any
+practical grouping. Whether that variation
 biases the grouped estimate turns out to depend on whether it has directional structure.
 
 With per-pipe coefficients jittered symmetrically about each zone mean, the grouped estimate
