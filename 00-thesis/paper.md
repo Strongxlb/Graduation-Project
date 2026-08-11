@@ -85,42 +85,48 @@ independently from controlled bottle tests, whereas wall decay is less directly 
 [@Hallam2002; @Powell2000]. Because networks contain far more pipes than monitors, wall
 coefficients are commonly estimated for groups of pipes rather than individually, with grouping
 based on whatever physical or spatial information is available [@Nejjari2014ChlorineCalibration;
-@Munavalli2003SteadyState].
+@Munavalli2003SteadyState]. Those groups are usually fitted by global search, with genetic and
+particle-swarm algorithms minimising concentration misfit [@PeiroviMinaee2019GAPSO;
+@GomezCoronel2023GAChlorine], which returns a point estimate rather than a statement about how
+well the data constrain it.
 
 Chlorine calibration is therefore an inverse problem rather than a curve-fitting exercise, and
 the distinction matters because the coefficients are not the only quantity of interest.
-Calibrated models are also used to predict concentrations at unmonitored locations, to identify
-areas susceptible to low residuals, and to support monitoring or control decisions. A
-calibration may therefore fail at several distinct levels. It may recover its parameters poorly, predict poorly, or give an unstable operational prioritisation, and these failures need not occur together.
+Calibrated models are also used to predict concentrations at unmonitored locations and to support
+monitoring or control decisions, so a calibration may fail at several distinct levels, and those
+failures need not occur together.
 
 ## 1.2 Uncertainty, identifiability and their propagation
 
-Several uncertainty sources act on such a problem. Random measurement noise and temporal
-dependence reduce the effective information in monitored series. Systematic sensor offsets or
-drift can bias inferred parameters while remaining difficult to diagnose from fit quality.
-Readings at a reporting boundary are censored rather than exact. Bulk decay is often estimated
-separately and then held fixed during wall-decay calibration, so an error in it can be absorbed
-by the wall coefficients. And any grouped representation is an approximation when reactivity
-varies between individual pipes. A close fit to monitored concentrations therefore does not by
-itself establish that the inferred coefficients represent the underlying reaction process.
+Several uncertainty sources act on such a problem. Measurement noise and temporal dependence
+reduce the effective information in monitored series, and readings at a reporting boundary are
+censored rather than exact. Systematic sensor offsets or drift bias the inferred parameters while
+remaining difficult to diagnose from fit quality. Bulk decay is often estimated separately and
+held fixed during wall-decay calibration, so an error in it is absorbed by the wall coefficients,
+and any grouped representation is an approximation when reactivity varies between pipes. A close
+fit to monitored concentrations therefore does not establish that the inferred coefficients
+represent the underlying reaction process.
+
+Uncertainty here has been approached by assimilating observations in real time, updating states
+and parameters together [@Hutton2014Uncertainty; @Rajakumar2019EnKF], by treating
+input error explicitly in water-quality calibration [@Wu2022BEAR], and by formal Bayesian
+inference on disinfectant decay parameters [@Jenks2025BayesianDisinfectant].
 
 Identifiability analysis addresses how strongly the observations constrain those parameters.
 Local sensitivity-based diagnostics examine whether nearby parameter changes produce
 distinguishable changes in the monitored outputs, which Fisher information and the associated
 Cramér–Rao bounds quantify under an assumed observation model [@Brun2001]. Practical
-identifiability additionally concerns whether the finite, noisy observations actually available
-constrain the parameters sufficiently, for which profile likelihood gives a direct
-likelihood-based diagnostic [@Raue2009]; repeated-sampling experiments can then test whether the
-resulting intervals show the bias and coverage the assumed model implies. No single diagnostic
+identifiability concerns whether the finite, noisy observations available constrain the
+parameters sufficiently, for which profile likelihood is a direct diagnostic [@Raue2009], and
+repeated sampling then tests whether the resulting intervals show the bias and coverage the
+assumed model implies. No single diagnostic
 suffices. A posterior mean close to the truth may simply reflect favourable prior placement, and
 a narrow posterior may reflect a restrictive prior or a misspecified likelihood rather than
 physical correctness.
 
 Uncertainty surviving calibration must finally be propagated to whatever decision the model
-supports, where stability is again not a single property: preservation of the whole-network
-spatial ranking, of a small operational shortlist, and of the absolute severity assigned to
-those locations are different questions, and stability at one scale does not imply stability at
-another.
+supports, where stability is again not a single property and holding at one scale does not imply
+holding at another.
 
 ## 1.3 Methodological gap
 
@@ -130,16 +136,15 @@ combine behavioural thresholds with informal likelihood measures whose statistic
 interpretation depends on their relationship to the assumed error process [@BevenBinley1992], and
 critiques have shown that a measure not representing the sampling distribution of model errors
 need not deliver formally calibrated parameter or prediction uncertainty [@MantovanTodini2006;
-@Stedinger2008]. The controlled setting used here sidesteps that broader debate rather than
-resolving it. Because the synthetic observation model is known, the specific informal weighting
-previously applied to this system can be compared directly with the corresponding formal
-likelihood on identical observations and candidate draws.
+@Stedinger2008]. The controlled setting here sidesteps that broader debate rather than resolving it. Because the
+synthetic observation model is known, the informal weighting previously applied to this system
+can be compared directly with the corresponding formal likelihood on identical observations and
+candidate draws.
 
 Second, an identifiability result obtained under a favourable baseline does not establish that
-the same parameters remain recoverable once further uncertainty sources are admitted.
-Measurement precision, temporal dependence, systematic sensor error, bulk-decay uncertainty and
-within-group heterogeneity act in different ways, so loss of precision has to be separated from
-displacement of the estimate and both placed on a common scale.
+the same parameters remain recoverable once further uncertainty sources are admitted. These act
+in different ways, so loss of precision has to be separated from displacement of the estimate and
+both placed on a common scale.
 
 Third, parameter identification, predictive adequacy and decision robustness answer different
 questions. A held-out prediction error cannot establish that the parameter governing a physical
@@ -923,10 +928,10 @@ zones. The full amplitude sweep is reported in Table E4.
 
 ### 3.5.1 Leaving out one monitor
 
-Withholding each of the six monitors in turn and refitting gives held-out RMSEs
-between 0.092 and 0.103 mg L^-1^ against an observation noise standard deviation of 0.1, with
-90% predictive interval coverage between 0.90 and 0.94 (Table 5). Taken at face value, these
-diagnostics indicate good held-out predictive performance at all six monitors.
+Withholding each of the six monitors in turn and refitting gives held-out RMSEs between 0.092 and
+0.103 mg L^-1^ against an observation noise standard deviation of 0.1, with 90% predictive
+interval coverage between 0.90 and 0.94 (Table 5). Taken at face value that is good held-out
+performance at all six monitors.
 
 Two observations qualify that reading. Each zone retains its second monitor throughout, so the
 test establishes prediction at an unseen monitor while its zone remains locally observed. And the
