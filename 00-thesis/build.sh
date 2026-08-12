@@ -151,6 +151,19 @@ src = re.split(r'^#+\s*References\s*$', src, flags=re.M)[0]
 src = re.sub(r'\A---\n.*?\n---\n', '', src, flags=re.S)
 src = re.sub(r'^\*\*(Programme|CID|Module):\*\*.*?$', '', src, flags=re.M)
 
+# Acknowledgements and the generative-AI statement ARE in the built document, because the
+# submission specification requires the AI statement inside the paper. They are course
+# requirements rather than argument, and the rule that governs the 12,000 enumerates what
+# counts, the abstract, the body, the conclusions and the captions, without naming them. They
+# are therefore split out and reported separately rather than folded into the total, so the
+# exposure is visible if the school reads the rule the other way.
+MATTER = ('Acknowledgements', 'Statement on the use of generative AI')
+for h in MATTER:
+    m = re.search(r'^#+\s*%s\s*$(.*?)(?=^#\s|\Z)' % re.escape(h), src, flags=re.M | re.S)
+    if m:
+        excluded.append(m.group(0))
+        src = src.replace(m.group(0), '')
+
 def wc(t):
     t = re.sub(r'`[^`]*`', ' ', t)
     t = re.sub(r'\$\$.*?\$\$', ' EQ ', t, flags=re.S)   # display maths -> one word
@@ -182,10 +195,12 @@ lines.append('%s   (table rows excluded: %d)'
              % (('OVER the 12,000 limit by %s' % format(over, ',')) if over > 0
                 else ('remaining to 12,000: %s' % format(-over, ',')), rows))
 for t in excluded:
-    # one region can hold several sections, so name them all rather than the first
     hs = re.findall(r'^#+\s*(.+?)\s*$', t, flags=re.M)
-    lines.append('  held out of the build, not counted above -- %s: %s words'
+    lines.append('  in the document but counted separately -- %s: %s words'
                  % ('; '.join(hs) if hs else 'untitled section', format(wc(t), ',')))
+if excluded:
+    lines.append('  if the school counts those towards the 12,000, the total is %s'
+                 % format(b + c + sum(wc(t) for t in excluded), ','))
 report = '\n'.join(lines)
 print(report)
 # The count is evidence for a submission requirement, so it is written next to the document it
