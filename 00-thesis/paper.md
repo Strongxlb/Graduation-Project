@@ -1214,9 +1214,10 @@ material requiring citation, so the tool is cited above and the code it wrote is
 file below. The paragraphs that follow give the expanded description.
 
 **Where AI led and the author reviewed.** The restructuring of the paper into its present
-four-section layout; the whole of `Net3/paper_figs.py`, which produces the seven figures and the
-table bodies; and the colour-vision-deficiency check applied to the figure palette. Every output
-was read and accepted or rejected by the author.
+four-section layout, and the whole of `Net3/paper_figs.py`, which renders the seven figures and
+the table bodies from values already computed and stored in `Net3/baseline_cache/`. It reads
+those artifacts and plots them; it computes no result. Every output was read and accepted or
+rejected by the author.
 
 **Where AI executed and the author verified independently.** Numerical cross-checking of the
 manuscript against the stored artifacts, one registered comparison per quoted figure, run by
