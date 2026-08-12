@@ -553,6 +553,36 @@ def value_set(paths):
     return sorted(vals)
 
 
+# A short string that must appear in a document for it to be the one the claims were written
+# against. README.md is the case that needs it: the published repository ships its own README at
+# the same path, and without a fingerprint the six claims anchored in the project README are
+# reported as broken rather than as uncovered.
+DOC_FINGERPRINTS = {
+    "README.md": "分组一阶余氯壁衰减",
+    "README.en.md": "Uncertainty-aware calibration",
+    "RESULTS_LOG.md": "## Step 1",
+}
+
+
+def _missing_docs():
+    """Documents named in DOCS that are absent, or present but not the expected document.
+
+    The published repository ships the code, the artifacts and RESULTS_LOG.md, but not the
+    manuscript, the supervisor correspondence, or the project README. Rather than crash on the
+    first absent file, or fail a claim whose document simply is not here, the run reports which
+    checks it could not perform, so a passing result is never read as covering more than it did.
+    """
+    out = []
+    for name, path in DOCS.items():
+        if not os.path.exists(path):
+            out.append(name)
+            continue
+        mark = DOC_FINGERPRINTS.get(name)
+        if mark and mark not in open(path, encoding="utf8", errors="ignore").read():
+            out.append(name)
+    return sorted(out)
+
+
 def log_sections():
     """[(label, body, first_line_no)] for each Step heading in the log, in order."""
     text = open(LOG).read()
@@ -928,15 +958,23 @@ def json_at(data, path):
 
 def read_doc(name):
     p = DOCS[name]
-    return open(p).read() if os.path.exists(p) else None
+    if not os.path.exists(p):
+        return None
+    text = open(p, encoding="utf8", errors="ignore").read()
+    mark = DOC_FINGERPRINTS.get(name)
+    return None if (mark and mark not in text) else text
 
 
 def check_claims():
     """Every registered claim: the anchor must exist and the number must equal its JSON source."""
     problems, notes = [], []
     loaded, checked = {}, 0
+    uncovered = set()
     for doc, pattern, artifact, path, scale in CLAIMS:
         text = read_doc(doc)
+        if text is None and doc in _missing_docs():
+            uncovered.add(doc)
+            continue
         if text is not None:
             # Collapse whitespace before matching. An anchor is a sentence, and a sentence wraps
             # wherever the line happens to end, so a literal space in a pattern would otherwise
@@ -974,6 +1012,9 @@ def check_claims():
                 checked += 1
     notes.append(f"{checked} registered claim(s) verified against a named JSON path "
                  f"(of {len(CLAIMS)} registered)")
+    if uncovered:
+        notes.append("claims in these documents were not checked, the document is not in this "
+                     "checkout: " + ", ".join(sorted(uncovered)))
     return problems, notes
 
 
@@ -1073,7 +1114,8 @@ def check_paper_numbers(verbose=False):
     """
     doc = read_doc("paper.md")
     if doc is None:
-        return ["paper.md not found"], []
+        # not a failure in a checkout that does not ship the manuscript; say so and move on
+        return [], ["paper.md is not in this checkout, so its numbers were not checked"]
     mapping = _paper_section_artifacts()
     if not mapping:
         return ["Appendix I section-to-script table not found; paper numbers unchecked"], []
@@ -1190,7 +1232,12 @@ def check_paper_numbers(verbose=False):
 
 
 def main(verbose=False, release=False):
-    sections, text = log_sections()
+    absent = _missing_docs()
+    if "RESULTS_LOG.md" in absent:
+        print("RESULTS_LOG.md is not in this checkout; its section checks cannot run.")
+        sections, text = {}, ""
+    else:
+        sections, text = log_sections()
     checks = [
         ("artifacts exist", lambda: check_artifacts_exist()),
         ("cache manifest", lambda: check_manifest()),
@@ -1218,6 +1265,8 @@ def main(verbose=False, release=False):
             print(f"         note: {n}")
         failed += bool(problems)
     print(f"\n{len(checks) - failed}/{len(checks)} checks passed")
+    if absent:
+        print("Not covered, document not in this checkout: " + ", ".join(absent))
     print("Scope: this detects drift in the numbers it covers and the wordings it lists. It does not "
           "verify that the artifacts are correct, that unregistered numbers have a source, or that "
           "any two sections agree with each other. Read the docstring before quoting a pass.")
