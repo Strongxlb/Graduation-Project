@@ -1,5 +1,5 @@
 ---
-title: "Identifiability, Prediction and Decision Robustness in Grouped Chlorine Wall-Decay Calibration: A Controlled EPANET Net3 Study"
+title: "From Parameter Identifiability to Operational Risk: Uncertainty-Aware Calibration of Grouped Chlorine Wall Decay in EPANET Net3"
 author: "Ruixin Peng"
 date: "August 2026"
 lang: en-GB
