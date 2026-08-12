@@ -1219,8 +1219,8 @@ table bodies; and the colour-vision-deficiency check applied to the figure palet
 was read and accepted or rejected by the author.
 
 **Where AI executed and the author verified independently.** Numerical cross-checking of the
-manuscript against the stored artifacts (over forty comparisons), and an independent
-recomputation of the per-node risk metrics, which reproduced the `step10` values.
+manuscript against the stored artifacts, one registered comparison per quoted figure, run by
+`Net3/validate_artifacts.py`.
 
 **Where AI changed a conclusion.** Three cases in which a single noise realisation had been
 presented as a repeated result were identified by AI review: an incorrect posterior width in
