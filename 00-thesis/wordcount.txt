@@ -1,5 +1,4 @@
 body 11,505 + captions 495 (12 caption(s)) = 12,000 counted
 remaining to 12,000: 0   (table rows excluded: 0)
   in the document but counted separately -- Acknowledgements: 27 words
-  in the document but counted separately -- Statement on the use of generative AI: 363 words
-  if the school counts those towards the 12,000, the total is 12,390
+  if the school counts those towards the 12,000, the total is 12,027
