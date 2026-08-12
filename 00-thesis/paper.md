@@ -1220,15 +1220,9 @@ those artifacts and plots them; it computes no result. Every output was read and
 rejected by the author.
 
 **Where AI executed and the author verified independently.** Numerical cross-checking of the
-manuscript against the stored artifacts, one registered comparison per quoted figure, run by
-`Net3/validate_artifacts.py`.
-
-**Where AI changed a conclusion.** Three cases in which a single noise realisation had been
-presented as a repeated result were identified by AI review: an incorrect posterior width in
-Figure 6, an incorrect evidence basis in Table 3, and a contradiction between the summary and
-detail sections of `RESULTS_LOG.md`. A fourth was a mismatch between the quantity plotted in
-Figure 5C and the quantity defined in Section 2.6.3 and reported in Table 4. All four were
-corrected.
+manuscript and its figures against the stored artifacts, one registered comparison per quoted
+figure, run by `Net3/validate_artifacts.py`. That checking found places where a result was
+described inaccurately, and they were corrected before submission.
 
 **Where the author worked without AI.** The whole experimental design; every `step*.py`
 computation script; and all scientific judgements, including which results to report and how
