@@ -1,11 +1,14 @@
 {
-  "generated_utc": "2026-08-12T10:29:14+00:00",
+  "generated_utc": "2026-08-12T12:55:01+00:00",
   "git": {
-    "commit": "7a7e12893db8d01eadc765e6e9176e70e5e3b69e",
-    "dirty": false,
-    "dirty_files": [],
-    "tree_sha256": "3bb84ce11ab9a9f11c168f9544a97fc7fc4c039dd05648ce6078e2f63af7ae8d",
-    "uncommitted_diff_sha256": null
+    "commit": "75d7586ca6fa716a72cc8fa69ecb99244eb30908",
+    "dirty": true,
+    "dirty_files": [
+      "00-thesis/paper.docx",
+      "Net3/paper_figs.py"
+    ],
+    "tree_sha256": "87757fde047bfd30429a1ab7ca90cf1725c0448aaeb7ca282355d83ff3007501",
+    "uncommitted_diff_sha256": "8bf4476d1952e32ddd2d9e816a8dd397926984b2702a10136cd72958fba52411"
   },
   "net3_inp": "models/net3_frozen/Net3.inp",
   "net3_inp_sha256": "ea3e825c4fef0b5cba47fb06301bc85253f18b6364dc96c44d9fb492c40faa52",

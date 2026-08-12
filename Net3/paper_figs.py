@@ -4,18 +4,15 @@ Every number is read from baseline_cache/ (JSON artifacts and baseline.npz). Not
 recomputed from EPANET and nothing is copied from the superseded Word draft, so a figure
 can never drift from the artifact that produced it.
 
-Style is fixed here, once, for all figures (P0-8): one palette, one set of zone colours,
-one set of inference-scheme colours, one grid weight. The categorical palettes were
-checked with the six computable colour checks (OKLCH lightness band, chroma floor,
-Machado-Oliveira-Fernandes CVD separation, normal-vision floor, WCAG contrast):
+Style is fixed here, once, for all figures: one palette, one set of zone colours, one set
+of inference-scheme colours, one grid weight.
 
-    zones    #D55E00 old / #0072B2 average / #009E73 new      PASS, all pairs
-    schemes  #3F51B5 formal / #C25A00 informal@0.107
-             / #ED9B4A informal@0.120                          PASS, all pairs
+    zones    #D55E00 old      #0072B2 average   #009E73 new
+    schemes  #3F51B5 formal   #C25A00 informal@0.107   #ED9B4A informal@0.120
 
-The lightest informal step carries a contrast WARN against white (2.24 : 1). That is
-legal only with secondary encoding, so every panel that uses it also carries a legend
-and an in-panel direct label, and Table 3 reports the same numbers as text.
+#ED9B4A is the lightest of the six and reads faintly against white, so every panel that
+uses it also carries a legend and an in-panel direct label, and Table 3 gives the same
+numbers as text.
 
 Usage:
     python paper_figs.py all
