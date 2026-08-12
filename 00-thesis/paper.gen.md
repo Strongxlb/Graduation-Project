@@ -15,6 +15,10 @@ STILL TO CONFIRM BEFORE SUBMISSION (values not derivable from the repository):
   - CID, programme, and first supervisor's name in the title block below. The submission
     filename is ResearchPaper-CID-YourName-SurnameofFirstSupervisor, so the supervisor's
     surname is needed for the file as well as the page.
+  - The published repository is a squashed release snapshot with no development history, so the
+    statement must not promise one. The sentence that pointed at commit dates and per-commit
+    revision records has been removed. Those two items are "may include" in the Library
+    guidance, not required. Do not reinstate them unless the history is published.
   - The generative-AI statement satisfies both policies now in hand. Imperial Library Services
     requires five elements, the tool name and version, the publisher, the tool URL, a
     one-sentence description of use, and a confirmation that the work is the author's own; all
@@ -1284,10 +1288,7 @@ by AI has been presented as my own work.
 
 The departmental policy treats AI-generated text, ideas and computer code as third-party
 material requiring citation, so the tool is cited above and the code it wrote is identified by
-file below. The paragraphs give the expanded description. Use ran from 17 May to 12 August 2026 and is
-recorded commit by commit in the repository history, where 89 commits carry a Claude Opus 5
-co-author trailer; that history is the record of what was generated when, and of how each output
-was revised before it entered the paper.
+file below. The paragraphs that follow give the expanded description.
 
 **Where AI led and the author reviewed.** The restructuring of the paper into its present
 four-section layout; the whole of `Net3/paper_figs.py`, which produces the seven figures and the
